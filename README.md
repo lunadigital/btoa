@@ -1,29 +1,12 @@
-# README #
+# Arnold for Blender #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+BtoA is an unofficial Blender add-on for Autodesk's Arnold render engine.
 
-### What is this repository for? ###
+### Current functionality ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+There is no Arnold-specific functionality yet. We're in the early days of development, and will be updating code publicly as we make progress. We guarantee that the code you see here will always be up-to-date with what we're working on internally.
 
-### How do I get set up? ###
+The add-on is installable, and automatically detects the Arnold installation from the $ARNOLD_ROOT environment variable. If this variable is not set, you can manually set the installation location in the add-on preferences.
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+### Getting involved ###
+This add-on is developed and maintained by Aaron Powell at Luna Digital, Ltd. (aaron@lunadigital.tv). Feel free to reach out if you're interested in testing or contributing!
