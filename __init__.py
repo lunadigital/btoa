@@ -11,6 +11,13 @@ def register():
     from . import addon_preferences
     addon_preferences.register()
 
+    from . import engine
+    engine.register()
+
+
 def unregister():
     from . import addon_preferences
     addon_preferences.unregister()
+
+    from . import engine
+    engine.unregister()
