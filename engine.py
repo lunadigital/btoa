@@ -1,6 +1,6 @@
 import bpy
 import bgl
-import arnold
+from arnold import *
 
 # For more info, visit:
 # https://docs.blender.org/api/current/bpy.types.RenderEngine.html
@@ -13,63 +13,59 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.scene_data = None
         self.draw_data = None
 
+        AiBegin()
+
     def __del__(self):
-        pass
+        AiEnd()
+
+    def update(self, data, depsgraph):
+        scene = depsgraph.scene
+        self.set_render_size(scene)
+
+        sphere = AiNode("sphere")
+        AiNodeSetStr(sphere, "name", "mysphere")
+        AiNodeSetVec(sphere, "center", 0, 4, 0)
+        AiNodeSetFlt(sphere, "radius", 4)
+
+        shader = AiNode("standard_surface")
+        AiNodeSetStr(shader, "name", "redShader")
+        AiNodeSetRGB(shader, "base_color", 1, 0.02, 0.02)
+        AiNodeSetFlt(shader, "specular", 0.05)
+
+        AiNodeSetPtr(sphere, "shader", shader)
+
+        camera = AiNode("persp_camera")
+        AiNodeSetStr(camera, "name", "Camera")
+        AiNodeSetVec(camera, "position", 0, 10, 35)
+        AiNodeSetVec(camera, "look_at", 0, 3, 0)
+        AiNodeSetFlt(camera, "fov", 45)
+
+        light = AiNode("point_light")
+        AiNodeSetStr(light, "name", "pointLight")
+        AiNodeSetVec(light, "position", 15, 30, 15)
+        AiNodeSetFlt(light, "intensity", 4500)
+        AiNodeSetFlt(light, "radius", 4)
+
+        options = AiUniverseGetOptions()
+        AiNodeSetInt(options, "AA_samples", 8)
+        AiNodeSetInt(options, "xres", self.size_x)
+        AiNodeSetInt(options, "yres", self.size_y)
+        AiNodeSetInt(options, "GI_diffuse_depth", 4)
+        AiNodeSetPtr(options, "camera", camera)
+
+        driver = AiNode("driver_jpeg")
+        AiNodeSetStr(driver, "name", "jpegDriver")
+        AiNodeSetStr(driver, "filename", "myFirstRender.jpg")
+
+        filter = AiNode("gaussian_filter")
+        AiNodeSetStr(filter, "name", "gaussianFilter")
+
+        outputs = AiArrayAllocate(1, 1, AI_TYPE_STRING)
+        AiArraySetStr(outputs, 0, "RGBA RGBA gaussianFilter jpegDriver")
+        AiNodeSetArray(options, "outputs", outputs)
 
     def render(self, depsgraph):
-        scene = depsgraph.scene
-        
-        scale = scene.render.resolution_percentage / 100.0
-        self.size_x = int(scene.render.resolution_x * scale)
-        self.size_y = int(scene.render.resolution_y * scale)
-
-        arnold.AiBegin()
-
-        sphere = arnold.AiNode("sphere")
-        arnold.AiNodeSetStr(sphere, "name", "mysphere")
-        arnold.AiNodeSetVec(sphere, "center", 0, 4, 0)
-        arnold.AiNodeSetFlt(sphere, "radius", 4)
-
-        shader = arnold.AiNode("standard_surface")
-        arnold.AiNodeSetStr(shader, "name", "redShader")
-        arnold.AiNodeSetRGB(shader, "base_color", 1, 0.02, 0.02)
-        arnold.AiNodeSetFlt(shader, "specular", 0.05)
-
-        arnold.AiNodeSetPtr(sphere, "shader", shader)
-
-        camera = arnold.AiNode("persp_camera")
-        arnold.AiNodeSetStr(camera, "name", "Camera")
-        arnold.AiNodeSetVec(camera, "position", 0, 10, 35)
-        arnold.AiNodeSetVec(camera, "look_at", 0, 3, 0)
-        arnold.AiNodeSetFlt(camera, "fov", 45)
-
-        light = arnold.AiNode("point_light")
-        arnold.AiNodeSetStr(light, "name", "pointLight")
-        arnold.AiNodeSetVec(light, "position", 15, 30, 15)
-        arnold.AiNodeSetFlt(light, "intensity", 4500)
-        arnold.AiNodeSetFlt(light, "radius", 4)
-
-        options = arnold.AiUniverseGetOptions()
-        arnold.AiNodeSetInt(options, "AA_samples", 8)
-        arnold.AiNodeSetInt(options, "xres", self.size_x)
-        arnold.AiNodeSetInt(options, "yres", self.size_y)
-        arnold.AiNodeSetInt(options, "GI_diffuse_depth", 4)
-        arnold.AiNodeSetPtr(options, "camera", camera)
-
-        driver = arnold.AiNode("driver_jpeg")
-        arnold.AiNodeSetStr(driver, "name", "jpegDriver")
-        arnold.AiNodeSetStr(driver, "filename", "myFirstRender.jpg")
-
-        filter = arnold.AiNode("gaussian_filter")
-        arnold.AiNodeSetStr(filter, "name", "gaussianFilter")
-
-        outputs = arnold.AiArrayAllocate(1, 1, arnold.AI_TYPE_STRING)
-        arnold.AiArraySetStr(outputs, 0, "RGBA RGBA gaussianFilter jpegDriver")
-        arnold.AiNodeSetArray(options, "outputs", outputs)
-
-        arnold.AiRender(arnold.AI_RENDER_MODE_CAMERA)
-
-        arnold.AiEnd()
+        AiRender(AI_RENDER_MODE_CAMERA)
 
         # Fill the render result with a flat color for now.
         # This is where we will make all of our Arnold calls
@@ -133,6 +129,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         self.unbind_display_space_shader()
         bgl.glDisable(bgl.GL_BLEND)
+    
+    def set_render_size(self, scene):
+        scale = scene.render.resolution_percentage / 100.0
+        self.size_x = int(scene.render.resolution_x * scale)
+        self.size_y = int(scene.render.resolution_y * scale)
 
 class ArnoldDrawData:
     def __init__(self, dimensions):
