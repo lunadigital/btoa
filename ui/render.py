@@ -1,5 +1,5 @@
 import bpy
-from ... import engine
+from .. import engine
 
 class ARNOLD_PT_sampling(bpy.types.Panel):
     COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
