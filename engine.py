@@ -51,6 +51,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AiNodeSetInt(options, "indirect_sample_clamp", bl_options.indirect_sample_clamp)
         AiNodeSetFlt(options, "low_light_threshold", bl_options.low_light_threshold)
 
+        # Update ray depth settings
+        AiNodeSetInt(options, "GI_total_depth", bl_options.total_depth)
+        AiNodeSetInt(options, "GI_diffuse_depth", bl_options.diffuse_depth)
+        AiNodeSetInt(options, "GI_specular_depth", bl_options.specular_depth)
+        AiNodeSetInt(options, "GI_transmission_depth", bl_options.transmission_depth)
+        AiNodeSetInt(options, "GI_volume_depth", bl_options.volume_depth)
+        AiNodeSetInt(options, "GI_transparency_depth", bl_options.transparency_depth)
+
     def update(self, data, depsgraph):
         scene = depsgraph.scene
         self.set_render_size(scene)
