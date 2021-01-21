@@ -52,6 +52,8 @@ def generate_aipolymesh(mesh):
     vlist = AiArrayConvert(len(verts), 1, AI_TYPE_VECTOR, ctypes.c_void_p(a.ctypes.data))
 
     # Normals
+    mesh.data.calc_tangents()
+
     a = numpy.ndarray(len(loops) * 3, dtype=numpy.float32)
     loops.foreach_get("normal", a)
     nlist = AiArrayConvert(len(loops), 1, AI_TYPE_VECTOR, ctypes.c_void_p(a.ctypes.data))
