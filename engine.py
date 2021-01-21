@@ -1,6 +1,9 @@
 import bpy
 import bgl
+
 from arnold import *
+
+from . import btoa
 
 # For more info, visit:
 # https://docs.blender.org/api/current/bpy.types.RenderEngine.html
@@ -18,14 +21,46 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def __del__(self):
         AiEnd()
 
+    def update_arnold_options(self, scene):
+        options = AiUniverseGetOptions()
+        bl_options = scene.arnold_options
+
+        # Update render resolution
+        AiNodeSetInt(options, "xres", self.size_x)
+        AiNodeSetInt(options, "yres", self.size_y)
+
+        # Update camera node
+        camera_node = AiNodeLookUpByName(scene.camera.name)
+        if camera_node is None: 
+            camera_node = btoa.generate_aicamera(scene.camera)
+        else:
+            btoa.sync_cameras(camera_node, scene.camera)
+        
+        AiNodeSetPtr(options, "camera", camera_node)
+
+        # Update sampling settings
+        AiNodeSetInt(options, "AA_samples", bl_options.aa_samples)
+        AiNodeSetInt(options, "GI_diffuse_samples", bl_options.diffuse_samples)
+        AiNodeSetInt(options, "GI_specular_samples", bl_options.specular_samples)
+        AiNodeSetInt(options, "GI_transmission_samples", bl_options.transmission_samples)
+        AiNodeSetInt(options, "GI_sss_samples", bl_options.sss_samples)
+        AiNodeSetInt(options, "GI_volume_samples", bl_options.volume_samples)
+        AiNodeSetInt(options, "AA_seed", bl_options.aa_seed)
+        AiNodeSetInt(options, "AA_sample_clamp", bl_options.sample_clamp)
+        AiNodeSetBool(options, "AA_sample_clam_affects_aovs", bl_options.clamp_aovs)
+        AiNodeSetInt(options, "indirect_sample_clamp", bl_options.indirect_sample_clamp)
+        AiNodeSetFlt(options, "low_light_threshold", bl_options.low_light_threshold)
+
     def update(self, data, depsgraph):
         scene = depsgraph.scene
         self.set_render_size(scene)
 
+        self.update_arnold_options(scene)
+
         sphere = AiNode("sphere")
         AiNodeSetStr(sphere, "name", "mysphere")
-        AiNodeSetVec(sphere, "center", 0, 4, 0)
-        AiNodeSetFlt(sphere, "radius", 4)
+        AiNodeSetVec(sphere, "center", 0, 0, 0)
+        AiNodeSetFlt(sphere, "radius", 1)
 
         shader = AiNode("standard_surface")
         AiNodeSetStr(shader, "name", "redShader")
@@ -34,24 +69,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         AiNodeSetPtr(sphere, "shader", shader)
 
-        camera = AiNode("persp_camera")
-        AiNodeSetStr(camera, "name", "Camera")
-        AiNodeSetVec(camera, "position", 0, 10, 35)
-        AiNodeSetVec(camera, "look_at", 0, 3, 0)
-        AiNodeSetFlt(camera, "fov", 45)
-
         light = AiNode("point_light")
         AiNodeSetStr(light, "name", "pointLight")
         AiNodeSetVec(light, "position", 15, 30, 15)
         AiNodeSetFlt(light, "intensity", 4500)
         AiNodeSetFlt(light, "radius", 4)
-
-        options = AiUniverseGetOptions()
-        AiNodeSetInt(options, "AA_samples", 8)
-        AiNodeSetInt(options, "xres", self.size_x)
-        AiNodeSetInt(options, "yres", self.size_y)
-        AiNodeSetInt(options, "GI_diffuse_depth", 4)
-        AiNodeSetPtr(options, "camera", camera)
 
         driver = AiNode("driver_jpeg")
         AiNodeSetStr(driver, "name", "jpegDriver")
@@ -59,6 +81,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         filter = AiNode("gaussian_filter")
         AiNodeSetStr(filter, "name", "gaussianFilter")
+
+        options = AiUniverseGetOptions()
 
         outputs = AiArrayAllocate(1, 1, AI_TYPE_STRING)
         AiArraySetStr(outputs, 0, "RGBA RGBA gaussianFilter jpegDriver")
