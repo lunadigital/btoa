@@ -29,6 +29,7 @@ class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         options = context.scene.arnold_options
@@ -49,6 +50,7 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
         self.layout.prop(context.scene.arnold_options, "use_adaptive_sampling", text="")
@@ -86,14 +88,19 @@ class ARNOLD_PT_ray_depth(bpy.types.Panel):
         col.prop(options, "volume_depth")
         col.prop(options, "transparency_depth")
 
+classes = (
+    ARNOLD_PT_sampling,
+    ARNOLD_PT_advanced_sampling,
+    ARNOLD_PT_adaptive_sampling,
+    ARNOLD_PT_ray_depth
+)
+
 def register():
-    bpy.utils.register_class(ARNOLD_PT_sampling)
-    bpy.utils.register_class(ARNOLD_PT_advanced_sampling)
-    bpy.utils.register_class(ARNOLD_PT_adaptive_sampling)
-    bpy.utils.register_class(ARNOLD_PT_ray_depth)
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
 
 def unregister():
-    bpy.utils.unregister_class(ARNOLD_PT_sampling)
-    bpy.utils.unregister_class(ARNOLD_PT_advanced_sampling)
-    bpy.utils.unregister_class(ARNOLD_PT_adaptive_sampling)
-    bpy.utils.unregister_class(ARNOLD_PT_ray_depth)
+    from bpy.utils import unregister_class
+    for cls in classes:
+        unregister_class(cls)
