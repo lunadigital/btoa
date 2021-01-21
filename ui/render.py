@@ -64,12 +64,36 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
 
         self.layout.enabled = context.scene.arnold_options.use_adaptive_sampling
 
+class ARNOLD_PT_ray_depth(bpy.types.Panel):
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+    bl_idname = "ARNOLD_PT_ray_depth"
+    bl_label = "Ray Depth"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+
+    def draw(self, context):
+        layout = self.layout
+        options = context.scene.arnold_options
+
+        layout.use_property_split = True
+
+        col = layout.column()
+        col.prop(options, "total_depth")
+        col.prop(options, "diffuse_depth")
+        col.prop(options, "specular_depth")
+        col.prop(options, "transmission_depth")
+        col.prop(options, "volume_depth")
+        col.prop(options, "transparency_depth")
+
 def register():
     bpy.utils.register_class(ARNOLD_PT_sampling)
     bpy.utils.register_class(ARNOLD_PT_advanced_sampling)
     bpy.utils.register_class(ARNOLD_PT_adaptive_sampling)
+    bpy.utils.register_class(ARNOLD_PT_ray_depth)
 
 def unregister():
     bpy.utils.unregister_class(ARNOLD_PT_sampling)
     bpy.utils.unregister_class(ARNOLD_PT_advanced_sampling)
     bpy.utils.unregister_class(ARNOLD_PT_adaptive_sampling)
+    bpy.utils.unregister_class(ARNOLD_PT_ray_depth)

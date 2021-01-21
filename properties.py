@@ -3,6 +3,7 @@ from bpy.types import Scene, PropertyGroup, Camera
 from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty
 
 class ArnoldOptions(PropertyGroup):
+    # Sampling
     use_adaptive_sampling: BoolProperty()
     aa_samples: IntProperty(name="AA Samples", min=0, default=3)
     diffuse_samples: IntProperty(name="Diffuse Samples", min=0, default=2)
@@ -17,6 +18,14 @@ class ArnoldOptions(PropertyGroup):
     low_light_threshold: FloatProperty(name="Low Light Threshold", min=0, default=0.001)
     adaptive_aa_samples_max: IntProperty(name="AA Samples Max", min=0, default=0)
     adaptive_threshold: FloatProperty(name="Adaptive Threshold", min=0, default=0.05)
+
+    # Ray depth
+    total_depth: IntProperty(name="Total Depth", min=0, default=10)
+    diffuse_depth: IntProperty(name="Diffuse Depth", min=0, default=2)
+    specular_depth: IntProperty(name="Specular Depth", min=0, default=2)
+    transmission_depth: IntProperty(name="Transmission Depth", min=0, default=2)
+    volume_depth: IntProperty(name="Volume Depth", min=0)
+    transparency_depth: IntProperty(name="Transparency Depth", min=0, default=10)
 
 class ArnoldCamera(PropertyGroup):
     # Basic lens settings
