@@ -21,9 +21,9 @@ class ArnoldOptions(PropertyGroup):
 
     # Ray depth
     total_depth: IntProperty(name="Total Depth", min=0, default=10)
-    diffuse_depth: IntProperty(name="Diffuse Depth", min=0, default=2)
-    specular_depth: IntProperty(name="Specular Depth", min=0, default=2)
-    transmission_depth: IntProperty(name="Transmission Depth", min=0, default=2)
+    diffuse_depth: IntProperty(name="Diffuse Depth", min=0, default=1)
+    specular_depth: IntProperty(name="Specular Depth", min=0, default=1)
+    transmission_depth: IntProperty(name="Transmission Depth", min=0, default=10)
     volume_depth: IntProperty(name="Volume Depth", min=0)
     transparency_depth: IntProperty(name="Transparency Depth", min=0, default=10)
 
