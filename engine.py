@@ -57,17 +57,22 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         self.update_arnold_options(scene)
 
-        sphere = AiNode("sphere")
-        AiNodeSetStr(sphere, "name", "mysphere")
-        AiNodeSetVec(sphere, "center", 0, 0, 0)
-        AiNodeSetFlt(sphere, "radius", 1)
+        #sphere = AiNode("sphere")
+        #AiNodeSetStr(sphere, "name", "mysphere")
+        #AiNodeSetVec(sphere, "center", 0, 0, 0)
+        #AiNodeSetFlt(sphere, "radius", 1)
 
-        shader = AiNode("standard_surface")
+        shader = AiNode("standard_surface") 
         AiNodeSetStr(shader, "name", "redShader")
         AiNodeSetRGB(shader, "base_color", 1, 0.02, 0.02)
         AiNodeSetFlt(shader, "specular", 0.05)
 
-        AiNodeSetPtr(sphere, "shader", shader)
+        for ob in data.objects:
+            if ob.type == 'MESH':
+                node = AiNodeLookUpByName(ob.name)
+                if node is None:
+                    node = btoa.generate_aipolymesh(ob)
+                    AiNodeSetPtr(node, "shader", shader)
 
         light = AiNode("point_light")
         AiNodeSetStr(light, "name", "pointLight")

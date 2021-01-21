@@ -1,6 +1,7 @@
 import bpy
 import numpy
 import math
+import ctypes
 from contextlib import contextmanager
 from mathutils import geometry
 
@@ -40,8 +41,44 @@ def bake_geometry(depsgraph, bmesh):
 def generate_aimatrix(matrix):
     return AtMatrix(*numpy.reshape(matrix.transposed(), -1))
 
-def generate_aipolymesh(bmesh):
-    pass
+def generate_aipolymesh(mesh):
+    verts = mesh.data.vertices
+    loops = mesh.data.loops
+    polygons = mesh.data.polygons
+
+    # Vertices
+    a = numpy.ndarray(len(verts) * 3, dtype=numpy.float32)
+    verts.foreach_get("co", a)
+    vlist = AiArrayConvert(len(verts), 1, AI_TYPE_VECTOR, ctypes.c_void_p(a.ctypes.data))
+
+    # Normals
+    a = numpy.ndarray(len(loops) * 3, dtype=numpy.float32)
+    loops.foreach_get("normal", a)
+    nlist = AiArrayConvert(len(loops), 1, AI_TYPE_VECTOR, ctypes.c_void_p(a.ctypes.data))
+
+    # Polygons
+    a = numpy.ndarray(len(polygons), dtype=numpy.uint32)
+    polygons.foreach_get("loop_total", a)
+    nsides = AiArrayConvert(len(polygons), 1, AI_TYPE_UINT, ctypes.c_void_p(a.ctypes.data))
+
+    a = numpy.ndarray(len(loops), dtype=numpy.uint32)
+    polygons.foreach_get("vertices", a)
+    vidxs = AiArrayConvert(len(loops), 1, AI_TYPE_UINT, ctypes.c_void_p(a.ctypes.data))
+
+    a = numpy.arange(len(loops), dtype=numpy.uint32)
+    nidxs = AiArrayConvert(len(loops), 1, AI_TYPE_UINT, ctypes.c_void_p(a.ctypes.data))
+
+    # Create Arnold node
+    node = AiNode('polymesh')
+    AiNodeSetMatrix(node, "matrix", generate_aimatrix(mesh.matrix_world))
+    AiNodeSetBool(node, "smoothing", True) # THIS SHOULD PULL FROM BLENDER'S SETTINGS
+    AiNodeSetArray(node, "vlist", vlist)
+    AiNodeSetArray(node, "nlist", nlist)
+    AiNodeSetArray(node, "nsides", nsides)
+    AiNodeSetArray(node, "vidxs", vidxs)
+    AiNodeSetArray(node, "nidxs", nidxs)
+
+    return node
 
 def generate_aicamera(camera):
     node = AiNode("persp_camera")
