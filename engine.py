@@ -1,5 +1,7 @@
 import bpy
 import bgl
+import numpy
+from ctypes import *
 
 from arnold import *
 
@@ -88,20 +90,53 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AiNodeSetFlt(light, "intensity", 4500)
         AiNodeSetFlt(light, "radius", 4)
 
-        driver = AiNode("driver_jpeg")
-        AiNodeSetStr(driver, "name", "jpegDriver")
-        AiNodeSetStr(driver, "filename", "myFirstRender.jpg")
-
         filter = AiNode("gaussian_filter")
         AiNodeSetStr(filter, "name", "gaussianFilter")
 
         options = AiUniverseGetOptions()
 
         outputs = AiArrayAllocate(1, 1, AI_TYPE_STRING)
-        AiArraySetStr(outputs, 0, "RGBA RGBA gaussianFilter jpegDriver")
+        AiArraySetStr(outputs, 0, "RGBA RGBA gaussianFilter __display_driver")
         AiNodeSetArray(options, "outputs", outputs)
 
     def render(self, depsgraph):
+        engine = self
+        _htiles = {}
+        
+        def display_callback(x, y, width, height, buffer, data):
+            if buffer:
+                try:
+                    result = _htiles.pop((x, y), None)
+                    
+                    if result is None:
+                        result = engine.begin_result(x, engine.size_y - y - height, width, height)
+                    
+                    _buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+                    rect = numpy.ctypeslib.as_array(_buffer, shape=(width * height, 4))
+                    
+                    result.layers[0].passes["Combined"].rect = rect
+                    engine.end_result(result)
+                finally:
+                    AiFree(buffer)
+            else:
+                result = engine.begin_result(x, engine.size_y - y - height, width, height)
+                _htiles[(x, y)] = result
+            
+            if engine.test_break():
+                AiRenderAbort()
+                while _htiles:
+                    (x, y), result = _htiles.popitem()
+                    engine.end_result(result, cancel=True)
+
+        cb = btoa.AtDisplayCallback(display_callback)
+        
+        displayNode = AiNodeLookUpByName("__display_driver")
+        if displayNode is None:
+            displayNode = AiNode("driver_display_callback")
+            AiNodeSetStr(displayNode, "name", "__display_driver")
+        
+        AiNodeSetPtr(displayNode, "callback", cb)
+
         AiRender(AI_RENDER_MODE_CAMERA)
 
         # Fill the render result with a flat color for now.

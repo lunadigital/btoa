@@ -12,6 +12,33 @@ def arnold_env_exists():
 
     return False
 
+def configure_plugins():
+    addon_root = os.path.dirname(os.path.abspath(__file__))
+    drivers = os.path.join(addon_root, "drivers", "build")
+
+    if "ARNOLD_PLUGIN_PATH" in os.environ:
+        addon_root = os.path.dirname(os.path.abspath(__file__))
+        drivers = os.path.join(addon_root, "drivers", "build")
+        
+        plugins = os.getenv("ARNOLD_PLUGIN_PATH").split(os.pathsep)
+
+        if drivers not in plugins:
+            os.environ["ARNOLD_PLUGIN_PATH"] += os.pathsep + drivers
+    else:
+        os.environ["ARNOLD_PLUGIN_PATH"] = drivers
+
+def remove_plugins():
+    addon_root = os.path.dirname(os.path.abspath(__file__))
+    drivers = os.path.join(addon_root, "drivers", "build")
+
+    plugins = os.getenv("ARNOLD_PLUGIN_PATH").split(os.pathsep)
+
+    if len(plugins) > 1:
+        plugins.remove(drivers)
+        os.environ["ARNOLD_PLUGIN_PATH"] = os.pathsep.join(plugins)
+    else:
+        del os.environ["ARNOLD_PLUGIN_PATH"]
+
 def configure_arnold_environment():
     if arnold_env_exists():
         path = os.getenv("ARNOLD_ROOT")
@@ -28,6 +55,8 @@ def configure_arnold_environment():
 
     if path not in sys.path:
         sys.path.append(path)
+
+    configure_plugins()
 
 class ArnoldAddonPreferences(AddonPreferences):
     bl_idname = __package__
@@ -52,6 +81,7 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(ArnoldAddonPreferences)
+    remove_plugins()
 
 if __name__ == "__main__":
     register()
