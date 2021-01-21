@@ -4,7 +4,7 @@ BtoA is an unofficial Blender add-on for Autodesk's Arnold render engine.
 
 ### Current functionality ###
 
-![Blender scene rendered in Arnold](https://bitbucket.org/luna-digital/btoa/raw/f4e5d6c9932bfd0b63298debdb61eb0a18e0d590/examples/polygonal_geometry.jpg)
+![Blender scene rendered in Arnold](https://bitbucket.org/luna-digital/btoa/raw/9682a2886a11e27cdc810ea479c32f4cd4822860/examples/polygonal_geometry.jpg)
 
 * BtoA now reads in polygon objects from the Blender scene and syncs with Blender's camera. All objects are shaded with the same red shader, and there is no light support yet (the light you see in the render is hard-coded).
 * Images are rendered to your home directory and do not display in the Blender UI yet.
