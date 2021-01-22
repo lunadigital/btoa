@@ -47,11 +47,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AiNodeSetInt(options, "GI_transmission_samples", bl_options.transmission_samples)
         AiNodeSetInt(options, "GI_sss_samples", bl_options.sss_samples)
         AiNodeSetInt(options, "GI_volume_samples", bl_options.volume_samples)
-        AiNodeSetInt(options, "AA_seed", bl_options.aa_seed)
         AiNodeSetInt(options, "AA_sample_clamp", bl_options.sample_clamp)
         AiNodeSetBool(options, "AA_sample_clam_affects_aovs", bl_options.clamp_aovs)
         AiNodeSetInt(options, "indirect_sample_clamp", bl_options.indirect_sample_clamp)
         AiNodeSetFlt(options, "low_light_threshold", bl_options.low_light_threshold)
+
+        if bl_options.aa_seed > 0:
+            AiNodeSetInt(options, "AA_seed", bl_options.aa_seed)
 
         # Update ray depth settings
         AiNodeSetInt(options, "GI_total_depth", bl_options.total_depth)
