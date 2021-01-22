@@ -83,12 +83,41 @@ class ArnoldOptions(PropertyGroup):
         )
 
     # Ray depth
-    total_depth: IntProperty(name="Total Depth", min=0, default=10)
-    diffuse_depth: IntProperty(name="Diffuse Depth", min=0, default=1)
-    specular_depth: IntProperty(name="Specular Depth", min=0, default=1)
-    transmission_depth: IntProperty(name="Transmission Depth", min=0, default=10)
-    volume_depth: IntProperty(name="Volume Depth", min=0)
-    transparency_depth: IntProperty(name="Transparency Depth", min=0, default=10)
+    total_depth: IntProperty(
+        name="Total Depth",
+        description="Specifies the total maximum recursion depth of any ray in the scene (diffuse + transmission + specular <= Total)",
+        min=0,
+        default=10
+        )
+    diffuse_depth: IntProperty(
+        name="Diffuse Depth",
+        description="Defines the maximum ray diffuse depth bounces. Zero diffuse is equal to disabling diffuse illumination. Increasing the depth will add more bounced light to the scene, which can be especially noticeable in interiors",
+        min=0,
+        default=1
+        )
+    specular_depth: IntProperty(
+        name="Specular Depth",
+        description="Defines the maximum number of times a ray can be specularly reflected. Scenes with many specular surfaces may require higher values to look correct. A minimum value of 1 is necessary to get any specular reflections",
+        min=0,
+        default=1
+        )
+    transmission_depth: IntProperty(
+        name="Transmission Depth",
+        description="The maximum number of times a ray can be refracted. Scenes with many refractive surfaces may require higher values to look correct",
+        min=0,
+        default=10
+        )
+    volume_depth: IntProperty(
+        name="Volume Depth",
+        description="This parameter sets the number of multiple scattering bounces within a volume. This is useful when rendering volumes such as clouds for which multiple scattering has a large influence on their appearance",
+        min=0
+        )
+    transparency_depth: IntProperty(
+        name="Transparency Depth",
+        description="The number of allowed transparency hits. With 0 objects will be treated as opaque",
+        min=0,
+        default=10
+        )
 
     # Rendering
     bucket_size: IntProperty(
