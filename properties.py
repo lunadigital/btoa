@@ -27,6 +27,35 @@ class ArnoldOptions(PropertyGroup):
     volume_depth: IntProperty(name="Volume Depth", min=0)
     transparency_depth: IntProperty(name="Transparency Depth", min=0, default=10)
 
+    # Rendering
+    bucket_size: IntProperty(
+        name="Bucket Size", 
+        description="The size of the image buckets. Bigger buckets use more memory, while smaller buckets may perform redundant computations and filtering and thus render slower but give initial faster feedback",
+        min=2,
+        default=64
+        )
+    bucket_scanning: EnumProperty(
+        name="Bucket Scanning",
+        description="Specifies the spatial order in which the image buckets (i.e. threads) will be processed. By default, buckets start in the center of the image and proceed outwards in a spiral pattern",
+        items=[
+            ('top', "Top", "Top"),
+            ('left', "Left", "Left"),
+            ('random', "Random", "Random"),
+            ('spiral', "Spiral", "Spiral"),
+            ('hilbert', "Hilbert", "Hilbert"),
+        ],
+        default='spiral'
+        )
+    parallel_node_init: BoolProperty(
+        name="Parallel Node Init",
+        description="Enables parallel initialization of all scene nodes",
+        default=True
+        )
+    threads: IntProperty(
+        name="Threads",
+        description="The number of threads used for rendering. Set it to zero to autodetect and use as many threads as cores in the system. Negative values indicate how many cores not to use, so that -3, for instance, will use 29 threads on a 32 logical core machine. Negative values are useful when you want to reserve some of the CPU for non-Arnold tasks"
+        )
+
 class ArnoldCamera(PropertyGroup):
     # Basic lens settings
     camera_type: EnumProperty(

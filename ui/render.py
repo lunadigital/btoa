@@ -88,11 +88,33 @@ class ARNOLD_PT_ray_depth(bpy.types.Panel):
         col.prop(options, "volume_depth")
         col.prop(options, "transparency_depth")
 
+class ARNOLD_PT_rendering(bpy.types.Panel):
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+    bl_idname = "ARNOLD_PT_rendering"
+    bl_label = "Rendering"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        options = context.scene.arnold_options
+
+        layout.use_property_split = True
+
+        col = layout.column()
+        col.prop(options, "bucket_size")
+        col.prop(options, "bucket_scanning")
+        col.prop(options, "parallel_node_init")
+        col.prop(options, "threads")
+
 classes = (
     ARNOLD_PT_sampling,
     ARNOLD_PT_advanced_sampling,
     ARNOLD_PT_adaptive_sampling,
-    ARNOLD_PT_ray_depth
+    ARNOLD_PT_ray_depth,
+    ARNOLD_PT_rendering
 )
 
 def register():

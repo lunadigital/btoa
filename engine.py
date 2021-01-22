@@ -61,6 +61,12 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AiNodeSetInt(options, "GI_volume_depth", bl_options.volume_depth)
         AiNodeSetInt(options, "GI_transparency_depth", bl_options.transparency_depth)
 
+        # Render settings
+        AiNodeSetInt(options, "bucket_size", bl_options.bucket_size)
+        AiNodeSetStr(options, "bucket_scanning", bl_options.bucket_scanning)
+        AiNodeSetBool(options, "parallel_node_init", bl_options.parallel_node_init)
+        AiNodeSetInt(options, "threads", bl_options.threads)
+
     def update(self, data, depsgraph):
         scene = depsgraph.scene
         self.set_render_size(scene)
