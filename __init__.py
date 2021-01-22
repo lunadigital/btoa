@@ -11,20 +11,20 @@ def register():
     from . import addon_preferences
     addon_preferences.register()
 
-    from . import properties
+    from . import props
     from . import engine
     from . import ui
-    properties.register()
+    props.register()
     engine.register()
     ui.register()
 
 
 def unregister():
     from . import addon_preferences
-    from . import properties
+    from . import props
     from . import engine
     from . import ui
     addon_preferences.unregister()
-    properties.unregister()
+    props.unregister()
     engine.unregister()
     ui.unregister()
