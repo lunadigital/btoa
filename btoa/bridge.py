@@ -99,8 +99,6 @@ def sync_cameras(ainode, camera):
     AiNodeSetFlt(ainode, "exposure", data.arnold.exposure)
 
     # DOF
-    AiNodeSetBool(ainode, "enable_dof", data.arnold.enable_dof)
-
     if data.dof.focus_object:
         distance = geometry.distance_point_to_plane(
             camera.matrix_world.to_translation(),
@@ -111,7 +109,7 @@ def sync_cameras(ainode, camera):
         distance = data.dof.focus_distance
 
     AiNodeSetFlt(ainode, "aperture_size", data.arnold.aperture_size)
-    AiNodeSetFlt(ainode, "aperture_blades", data.arnold.aperture_blades)
+    AiNodeSetInt(ainode, "aperture_blades", data.arnold.aperture_blades)
     AiNodeSetFlt(ainode, "aperture_rotation", data.arnold.aperture_rotation)
     AiNodeSetFlt(ainode, "aperture_blade_curvature", data.arnold.aperture_blade_curvature)
     AiNodeSetFlt(ainode, "aperture_aspect_ratio", data.arnold.aperture_aspect_ratio)
@@ -136,6 +134,9 @@ def sync_light(ainode, light):
     data = light.data
     _type = types.AI_LIGHT_TYPE[data.type]
 
+    print("HEY AARON")
+    print(_type)
+
     # Common properties
     AiNodeSetStr(ainode, "name", light.name)
     AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
@@ -149,14 +150,6 @@ def sync_light(ainode, light):
     AiNodeSetBool(ainode, "cast_volumetric_shadows", data.arnold.cast_volumetric_shadows)
     AiNodeSetFlt(ainode, "shadow_density", data.arnold.shadow_density)
     # shadow_color
-
-    # Type-specific properties
-    if _type == 'point_light': 
-        pass
-
-    # Basic stuff
-    AiNodeSetStr(ainode, "name", light.name)
-    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
 
     # Light data
     if _type in ('point_light', 'spot_light'):
@@ -176,4 +169,9 @@ def sync_light(ainode, light):
         AiNodeSetFlt(ainode, "spread", data.arnold.spread)
         AiNodeSetInt(ainode, "resolution", data.arnold.resolution)
         AiNodeSetFlt(ainode, "soft_edge", data.arnold.soft_edge)
+
+    print(AiNodeGetFlt(ainode, "diffuse"))
+    print(AiNodeGetFlt(ainode, "specular"))
+    print(AiNodeGetFlt(ainode, "sss"))
+    print(AiNodeGetFlt(ainode, "indirect"))
         

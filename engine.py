@@ -47,9 +47,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AiNodeSetInt(options, "GI_transmission_samples", bl_options.transmission_samples)
         AiNodeSetInt(options, "GI_sss_samples", bl_options.sss_samples)
         AiNodeSetInt(options, "GI_volume_samples", bl_options.volume_samples)
-        AiNodeSetInt(options, "AA_sample_clamp", bl_options.sample_clamp)
-        AiNodeSetBool(options, "AA_sample_clam_affects_aovs", bl_options.clamp_aovs)
-        AiNodeSetInt(options, "indirect_sample_clamp", bl_options.indirect_sample_clamp)
+        AiNodeSetFlt(options, "AA_sample_clamp", bl_options.sample_clamp)
+        AiNodeSetBool(options, "AA_sample_clamp_affects_aovs", bl_options.clamp_aovs)
+        AiNodeSetFlt(options, "indirect_sample_clamp", bl_options.indirect_sample_clamp)
         AiNodeSetFlt(options, "low_light_threshold", bl_options.low_light_threshold)
 
         if bl_options.aa_seed > 0:
@@ -61,7 +61,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AiNodeSetInt(options, "GI_specular_depth", bl_options.specular_depth)
         AiNodeSetInt(options, "GI_transmission_depth", bl_options.transmission_depth)
         AiNodeSetInt(options, "GI_volume_depth", bl_options.volume_depth)
-        AiNodeSetInt(options, "GI_transparency_depth", bl_options.transparency_depth)
+        AiNodeSetInt(options, "auto_transparency_depth", bl_options.transparency_depth)
 
         # Render settings
         AiNodeSetInt(options, "bucket_size", bl_options.bucket_size)
@@ -109,13 +109,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 # If AiNode exists and same type, just update params
                 else:
                     btoa.sync_light(node, ob)
-                
-
-        #light = AiNode("point_light")
-        #AiNodeSetStr(light, "name", "pointLight")
-        #AiNodeSetVec(light, "position", 15, 30, 15)
-        #AiNodeSetFlt(light, "intensity", 4500)
-        #AiNodeSetFlt(light, "radius", 4)
 
         filter = AiNode("gaussian_filter")
         AiNodeSetStr(filter, "name", "gaussianFilter")
