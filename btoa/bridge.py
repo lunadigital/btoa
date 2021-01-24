@@ -127,3 +127,53 @@ def sync_cameras(ainode, camera):
     AiNodeSetStr(ainode, "rolling_shutter", data.arnold.rolling_shutter)
     AiNodeSetFlt(ainode, "rolling_shutter_duration", data.arnold.rolling_shutter_duration)
 
+def generate_ailight(light):
+    node = AiNode(types.AI_LIGHT_TYPE[light.data.type])
+    sync_light(node, light)
+    return node
+
+def sync_light(ainode, light):
+    data = light.data
+    _type = types.AI_LIGHT_TYPE[data.type]
+
+    # Common properties
+    AiNodeSetStr(ainode, "name", light.name)
+    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
+
+    AiNodeSetFlt(ainode, "intensity", data.arnold.intensity)
+    AiNodeSetFlt(ainode, "exposure", data.arnold.exposure)
+    AiNodeSetInt(ainode, "samples", data.arnold.samples)
+    AiNodeSetBool(ainode, "normalize", data.arnold.normalize)
+
+    AiNodeSetBool(ainode, "cast_shadows", data.arnold.cast_shadows)
+    AiNodeSetBool(ainode, "cast_volumetric_shadows", data.arnold.cast_volumetric_shadows)
+    AiNodeSetFlt(ainode, "shadow_density", data.arnold.shadow_density)
+    # shadow_color
+
+    # Type-specific properties
+    if _type == 'point_light': 
+        pass
+
+    # Basic stuff
+    AiNodeSetStr(ainode, "name", light.name)
+    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
+
+    # Light data
+    if _type in ('point_light', 'spot_light'):
+        AiNodeSetFlt(ainode, "radius", data.arnold.radius)
+
+    if _type in ('spot_light', 'area_light'):
+        AiNodeSetFlt(ainode, "roundness", data.arnold.lens_radius)
+    
+    if _type == 'distant_light':
+        AiNodeSetFlt(ainode, "angle", data.arnold.angle)
+
+    if _type == 'spot_light':
+        AiNodeSetFlt(ainode, "aspect_ratio", data.arnold.aspect_ratio)
+        AiNodeSetFlt(ainode, "lens_radius", data.arnold.lens_radius)
+
+    if _type == 'area_light':
+        AiNodeSetFlt(ainode, "spread", data.arnold.spread)
+        AiNodeSetInt(ainode, "resolution", data.arnold.resolution)
+        AiNodeSetFlt(ainode, "soft_edge", data.arnold.soft_edge)
+        

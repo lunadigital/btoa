@@ -2,8 +2,13 @@ AI_LIGHT_TYPE = {
     "POINT": "point_light",
     "SUN": "distant_light",
     "SPOT": "spot_light",
-    "HEMI": "skydome_light",
-    "AREA": "quad_light" # can also be disk_light, might have to come up with another solution here
+    "AREA": "area_light"
+}
+
+AI_AREALIGHT_TYPE = {
+    "SQUARE": "quad_light",
+    "DISK": "disk_light",
+    "RECTANGLE": "cylinder_light"
 }
 
 BL_CONVERTIBLE_TYPES = [

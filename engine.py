@@ -75,28 +75,47 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         self.update_arnold_options(scene)
 
-        #sphere = AiNode("sphere")
-        #AiNodeSetStr(sphere, "name", "mysphere")
-        #AiNodeSetVec(sphere, "center", 0, 0, 0)
-        #AiNodeSetFlt(sphere, "radius", 1)
-
         shader = AiNode("standard_surface") 
         AiNodeSetStr(shader, "name", "redShader")
         AiNodeSetRGB(shader, "base_color", 1, 0.02, 0.02)
         AiNodeSetFlt(shader, "specular", 0.05)
 
         for ob in data.objects:
+            # Update polygon meshes
             if ob.type == 'MESH':
                 node = AiNodeLookUpByName(ob.name)
                 if node is None:
                     node = btoa.generate_aipolymesh(ob)
                     AiNodeSetPtr(node, "shader", shader)
+            
+            # Update lights
+            if ob.type == 'LIGHT':
+                node = AiNodeLookUpByName(ob.name)
 
-        light = AiNode("point_light")
-        AiNodeSetStr(light, "name", "pointLight")
-        AiNodeSetVec(light, "position", 15, 30, 15)
-        AiNodeSetFlt(light, "intensity", 4500)
-        AiNodeSetFlt(light, "radius", 4)
+                if node is None:
+                    node = btoa.generate_ailight(ob)
+
+                # If existing AiNode is an area light, but doesn't match the type in Blender
+                elif AiNodeIs(node, "quad_light") or AiNodeIs(node, "disk_light") or AiNodeIs(node, "cylinder_light"):
+                    if not AiNodeIs(node, btoa.AI_AREALIGHT_TYPE[ob.data.type]):
+                        AiNodeDestroy(node)
+                        node = btoa.generate_ailight(ob)
+
+                # If existing AiNode is a non-area light type, but doesn't match the type in Blender
+                elif not AiNodeIs(node, btoa.AI_LIGHT_TYPE[ob.data.type]):
+                    AiNodeDestroy(node)
+                    node = btoa.generate_ailight(ob)
+
+                # If AiNode exists and same type, just update params
+                else:
+                    btoa.sync_light(node, ob)
+                
+
+        #light = AiNode("point_light")
+        #AiNodeSetStr(light, "name", "pointLight")
+        #AiNodeSetVec(light, "position", 15, 30, 15)
+        #AiNodeSetFlt(light, "intensity", 4500)
+        #AiNodeSetFlt(light, "radius", 4)
 
         filter = AiNode("gaussian_filter")
         AiNodeSetStr(filter, "name", "gaussianFilter")
