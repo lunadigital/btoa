@@ -2,8 +2,6 @@ import bpy
 from bpy.types import Scene, PropertyGroup, Camera
 from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty
 
-
-
 class ArnoldCamera(PropertyGroup):
     # Basic lens settings
     camera_type: EnumProperty(

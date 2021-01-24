@@ -3,7 +3,7 @@ from bl_ui.properties_data_camera import CameraButtonsPanel
 from .. import engine
 
 class DATA_PT_arnold_lens(CameraButtonsPanel, bpy.types.Panel):
-    bl_idname = "ARNOLD_PT_camera_lens"
+    bl_idname = "DATA_PT_arnold_lens"
     bl_label = "Lens"
     COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
@@ -30,7 +30,7 @@ class DATA_PT_arnold_lens(CameraButtonsPanel, bpy.types.Panel):
         col.prop(camera.arnold, "exposure")
 
 class DATA_PT_arnold_dof(CameraButtonsPanel, bpy.types.Panel):
-    bl_idname = "ARNOLD_PT_camera_dof"
+    bl_idname = "DATA_PT_arnold_dof"
     bl_label = "Depth of Field"
     COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
@@ -48,7 +48,7 @@ class DATA_PT_arnold_dof(CameraButtonsPanel, bpy.types.Panel):
 
 class DATA_PT_arnold_aperture(CameraButtonsPanel, bpy.types.Panel):
     bl_parent_id = DATA_PT_arnold_dof.bl_idname
-    bl_idname = "ARNOLD_PT_camera_aperture"
+    bl_idname = "DATA_PT_arnold_aperture"
     bl_label = "Aperture"
     COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
