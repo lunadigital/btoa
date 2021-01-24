@@ -170,11 +170,12 @@ class ArnoldLight(PropertyGroup):
         min=0,
         soft_max=2
         )
-    roundness: FloatProperty(
+    spot_roundness: FloatProperty(
         name="Roundness",
         description="",
         min=0,
-        max=1
+        max=1,
+        default=1
         )
     
     # Area light attributes
@@ -193,6 +194,12 @@ class ArnoldLight(PropertyGroup):
         )
     soft_edge: FloatProperty(
         name="Soft Edge",
+        description="",
+        min=0,
+        max=1
+        )
+    area_roundness: FloatProperty(
+        name="Roundness",
         description="",
         min=0,
         max=1

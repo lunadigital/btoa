@@ -48,7 +48,7 @@ class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
         col = layout.column()
 
         if light.type == 'SPOT':
-            col.prop(light.arnold, "roundness")
+            col.prop(light.arnold, "spot_roundness")
             col.prop(light.arnold, "aspect_ratio")
             col.prop(light.arnold, "lens_radius")
 
@@ -56,7 +56,7 @@ class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
             col.prop(light.arnold, "shape")
             col.prop(light.arnold, "spread")
             col.prop(light.arnold, "resolution")
-            col.prop(light.arnold, "roundness")
+            col.prop(light.arnold, "area_roundness")
             col.prop(light.arnold, "soft_edge")
 
 class DATA_PT_arnold_light_shadows(DataButtonsPanel, bpy.types.Panel):

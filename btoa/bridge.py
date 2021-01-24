@@ -154,18 +154,17 @@ def sync_light(ainode, light):
     # Light data
     if _type in ('point_light', 'spot_light'):
         AiNodeSetFlt(ainode, "radius", data.arnold.radius)
-
-    if _type in ('spot_light', 'area_light'):
-        AiNodeSetFlt(ainode, "roundness", data.arnold.lens_radius)
     
     if _type == 'distant_light':
         AiNodeSetFlt(ainode, "angle", data.arnold.angle)
 
     if _type == 'spot_light':
+        AiNodeSetFlt(ainode, "roundness", data.arnold.spot_roundness)
         AiNodeSetFlt(ainode, "aspect_ratio", data.arnold.aspect_ratio)
         AiNodeSetFlt(ainode, "lens_radius", data.arnold.lens_radius)
 
     if _type == 'area_light':
+        AiNodeSetFlt(ainode, "roundness", data.arnold.area_roundness)
         AiNodeSetFlt(ainode, "spread", data.arnold.spread)
         AiNodeSetInt(ainode, "resolution", data.arnold.resolution)
         AiNodeSetFlt(ainode, "soft_edge", data.arnold.soft_edge)
