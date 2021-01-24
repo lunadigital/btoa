@@ -26,4 +26,4 @@ The add-on automatically detects the Arnold installation from the $ARNOLD_ROOT e
 This add-on is developed and maintained by Aaron Powell at Luna Digital, Ltd. (aaron@lunadigital.tv). Feel free to reach out if you're interested in testing or contributing!
 
 ### Example renders ###
-![Blender scene rendered in Arnold](https://bitbucket.org/luna-digital/btoa/raw/9682a2886a11e27cdc810ea479c32f4cd4822860/examples/polygonal_geometry.jpg)
+![Arnold light types in Blender](https://bitbucket.org/luna-digital/btoa/raw/8ca83472a8ac33bc0f9b8238c0c882b7e4828925/examples/arnold_light_types.jpg)
