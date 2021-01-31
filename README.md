@@ -2,6 +2,10 @@
 
 BtoA is an unofficial Blender add-on for Autodesk's Arnold render engine.
 
+### Developer Update ###
+
+Hey all! I know it's been about a week since our last code push - there are a couple of reasons for that. We were wrapping up a handful of projects at Luna Digital, so I didn't have time to work on this throughout the week. On top of that, the next big dev focus is on materials, which is no small task in itself. I've been working through setting up the custom nodes system, plus implementing a basic UI to create and edit new materials. I should hopefully be able to push something functional by mid-week (first week of Feb). Thanks for the continued support!
+
 ### Current functionality ###
 
 ![Blender scene rendered in Arnold](https://bitbucket.org/luna-digital/btoa/raw/9682a2886a11e27cdc810ea479c32f4cd4822860/examples/polygonal_geometry.jpg)
