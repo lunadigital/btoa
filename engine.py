@@ -23,6 +23,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def __del__(self):
         AiEnd()
 
+    @classmethod
+    def is_active(cls, context):
+        return context.scene.render.engine == cls.bl_idname
+
     def update_arnold_options(self, scene):
         options = AiUniverseGetOptions()
         bl_options = scene.arnold_options

@@ -7,3 +7,5 @@ Like most things, BtoA wasn't created in a vacuum. Luna Digital picked up the pr
 * Jared Webber
 * Mel Massadian
 * nildar (Github user)
+
+Special thanks to the LuxCore team. We based our implementation of Arnold's node system on their own node implementation in the LuxCore Blender add-on.
