@@ -112,6 +112,22 @@ class ArnoldShaderTree(ShaderNodeTree):
     def poll(cls, context):
         return engine.ArnoldRenderEngine.is_active(context)
 
+    @classmethod
+    def get_from_context(cls,  context):
+        ''' Switches the displayed node tree when user selects object/material '''
+        ob = context.object
+
+        if ob and ob.type not in {'LIGHT', 'CAMERA'}:
+            mat = ob.active_material
+
+            if mat:
+                node_tree = mat.arnold.node_tree
+
+                if node_tree:
+                    return node_tree, mat, mat
+        
+        return None, None, None
+
 class ArnoldNode:
     @classmethod
     def poll(cls, ntree):
