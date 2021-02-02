@@ -1,0 +1,1 @@
+cl /LD src/driver_display_callback.cpp /I %ARNOLD_ROOT%/include %ARNOLD_ROOT%/lib/ai.lib /link /out:build/driver_display_callback.dll
