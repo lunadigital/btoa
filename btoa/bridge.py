@@ -9,6 +9,20 @@ from . import types
 
 from arnold import *
 
+AiNodeSet = {
+    "STRING": lambda n, i, v: arnold.AiNodeSetStr(n, i, v),
+    #'ARRAY': _AiNodeSetArray,
+    "BOOL": lambda n, i, v: arnold.AiNodeSetBool(n, i, v),
+    "BYTE": lambda n, i, v: arnold.AiNodeSetByte(n, i, v),
+    "INT": lambda n, i, v: arnold.AiNodeSetInt(n, i, v),
+    "FLOAT": lambda n, i, v: arnold.AiNodeSetFlt(n, i , v),
+    "VECTOR2": lambda n, i, v: arnold.AiNodeSetVec2(n, i, *v),
+    "RGB": lambda n, i, v: arnold.AiNodeSetRGB(n, i, *v),
+    "RGBA": lambda n, i, v: arnold.AiNodeSetRGBA(n, i, *v),
+    "VECTOR": lambda n, i, v: arnold.AiNodeSetVec(n, i, *v),
+    "MATRIX": lambda n, i, v: arnold.AiNodeSetMatrix(n, i, _AiMatrix(v))
+}
+
 def calc_sensor_size(camera):
     options = AiUniverseGetOptions()
 
@@ -73,7 +87,7 @@ def generate_aipolymesh(mesh):
     # Create Arnold node
     node = AiNode('polymesh')
     AiNodeSetMatrix(node, "matrix", generate_aimatrix(mesh.matrix_world))
-    AiNodeSetBool(node, "smoothing", True) # THIS SHOULD PULL FROM BLENDER'S SETTINGS
+    AiNodeSetBool(node, "smoothing", True)
     AiNodeSetArray(node, "vlist", vlist)
     AiNodeSetArray(node, "nlist", nlist)
     AiNodeSetArray(node, "nsides", nsides)
@@ -134,9 +148,6 @@ def sync_light(ainode, light):
     data = light.data
     _type = types.AI_LIGHT_TYPE[data.type]
 
-    print("HEY AARON")
-    print(_type)
-
     # Common properties
     AiNodeSetStr(ainode, "name", light.name)
     AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
@@ -168,9 +179,3 @@ def sync_light(ainode, light):
         AiNodeSetFlt(ainode, "spread", data.arnold.spread)
         AiNodeSetInt(ainode, "resolution", data.arnold.resolution)
         AiNodeSetFlt(ainode, "soft_edge", data.arnold.soft_edge)
-
-    print(AiNodeGetFlt(ainode, "diffuse"))
-    print(AiNodeGetFlt(ainode, "specular"))
-    print(AiNodeGetFlt(ainode, "sss"))
-    print(AiNodeGetFlt(ainode, "indirect"))
-        

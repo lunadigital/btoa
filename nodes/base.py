@@ -7,6 +7,8 @@ from nodeitems_utils import NodeCategory, NodeItem
 
 from .. import engine
 
+from arnold import *
+
 class ArnoldWorldTree(NodeTree):
     bl_idname = "ArnoldWorldTree"
     bl_label = "Arnold World"
@@ -128,10 +130,46 @@ class ArnoldShaderTree(ShaderNodeTree):
         
         return None, None, None
 
+    def get_output_node(self):
+        '''
+        This is supposed to be in ShaderNodeTree, but apparently 
+        doesn't get implemented in subclasses because it throws an error
+        '''
+        for node in self.nodes:
+            ntype = getattr(node, "bl_idname", None)
+            if ntype == 'AiShaderOutput':
+                return node
+        
+        return None
+
+    def export(self):
+        output = self.get_output_node()
+        return output.export()
+
 class ArnoldNode:
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == ArnoldShaderTree.bl_idname
+
+    def sub_export(self, node):
+        raise NotImplementedError("Subclasses have to implement this method!")
+
+    def export(self):
+        node = AiNode(self.ai_name)
+
+        self.sub_export(node)
+
+        # socket.export() can return an AiNode, default value, or none
+        for i in self.inputs:
+            if i.is_linked:
+                socket_value, value_type = i.export(name)
+                if socket_value is not None:
+                    if value_type == 'AINODE':
+                        AiNodeLink(node, i.identifier, socket_value)
+                    else:
+                        btoa.AiNodeSet[value_type](node, self.ai_name, socket_value)
+
+        return node, 'AINODE'
 
 class ArnoldNodeOutput:
     bl_label = "Output"
@@ -156,9 +194,6 @@ class ArnoldNodeOutput:
     
     def copy(self, node):
         self._set_active()
-    
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "is_active", icon='RADIOBUT_ON' if self.is_active else 'RADIOBUT_OFF')
 
 class ArnoldNodeCategory(NodeCategory):
     @classmethod
@@ -185,6 +220,13 @@ class ArnoldObjectNodeCategory(ArnoldNodeCategory):
         )
 
 node_categories = [
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_OUTPUTS',
+        "Output",
+        items=[
+            NodeItem("AiShaderOutput")
+        ]
+    ),
     ArnoldObjectNodeCategory(
         'ARNOLD_NODES_OBJECT_SHADERS',
         "Shader",

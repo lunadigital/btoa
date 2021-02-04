@@ -18,6 +18,7 @@ class ARNOLD_OT_material_new(Operator):
         mat = bpy.data.materials.new(name="Material")
         tree_name = utils.make_nodetree_name(mat.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
+        
         utils.init_mat_node_tree(node_tree)
         mat.arnold.node_tree = node_tree
 

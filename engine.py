@@ -79,18 +79,21 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         self.update_arnold_options(scene)
 
-        shader = AiNode("standard_surface") 
-        AiNodeSetStr(shader, "name", "redShader")
-        AiNodeSetRGB(shader, "base_color", 1, 0.02, 0.02)
-        AiNodeSetFlt(shader, "specular", 0.05)
-
+        for mat in data.materials:
+            if AiNodeLookUpByName(mat.name) is None and mat.name != "Dots Stroke":
+                snode, vnode, dnode = mat.arnold.node_tree.export()
+                AiNodeSetStr(snode[0], "name", mat.name)
+                
         for ob in data.objects:
             # Update polygon meshes
             if ob.type == 'MESH':
                 node = AiNodeLookUpByName(ob.name)
                 if node is None:
                     node = btoa.generate_aipolymesh(ob)
-                    AiNodeSetPtr(node, "shader", shader)
+
+                if len(ob.data.materials) > 0:
+                    mat_node = AiNodeLookUpByName(ob.data.materials[0].name)
+                    AiNodeSetPtr(node, "shader", mat_node)
             
             # Update lights
             if ob.type == 'LIGHT':
