@@ -1,5 +1,5 @@
 from bpy.types import NodeSocket
-from bpy.props import FloatVectorProperty
+from bpy.props import FloatProperty, FloatVectorProperty
 
 from . import utils
 
@@ -65,6 +65,8 @@ class ArnoldNodeSocketColor(NodeSocket, ArnoldNodeSocket):
 
     color = Color.color_texture
 
+    default_type = 'RGB'
+
     default_value: FloatVectorProperty(
         name="Color",
         subtype='COLOR',
@@ -82,9 +84,28 @@ class ArnoldNodeSocketColor(NodeSocket, ArnoldNodeSocket):
     def export_default(self):
         return list(self.default_value), self.default_type
 
+class ArnoldNodeSocketFloat(NodeSocket, ArnoldNodeSocket):
+    bl_label = "Float"
+
+    color = Color.float_texture
+
+    default_type = 'FLOAT'
+
+    default_value: FloatProperty(
+        name="Float"
+    )
+
+    def draw_prop(self, context, layout, node, text):
+        row = layout.row()
+        row.prop(self, "default_value", text=text)
+
+    def export_default(self):
+        return self.default_value, self.default_type
+
 classes = (
     ArnoldNodeSocketSurface,
-    ArnoldNodeSocketColor
+    ArnoldNodeSocketColor,
+    ArnoldNodeSocketFloat,
 )
 
 def register():

@@ -10,17 +10,17 @@ from . import types
 from arnold import *
 
 AiNodeSet = {
-    "STRING": lambda n, i, v: arnold.AiNodeSetStr(n, i, v),
+    "STRING": lambda n, i, v: AiNodeSetStr(n, i, v),
     #'ARRAY': _AiNodeSetArray,
-    "BOOL": lambda n, i, v: arnold.AiNodeSetBool(n, i, v),
-    "BYTE": lambda n, i, v: arnold.AiNodeSetByte(n, i, v),
-    "INT": lambda n, i, v: arnold.AiNodeSetInt(n, i, v),
-    "FLOAT": lambda n, i, v: arnold.AiNodeSetFlt(n, i , v),
-    "VECTOR2": lambda n, i, v: arnold.AiNodeSetVec2(n, i, *v),
-    "RGB": lambda n, i, v: arnold.AiNodeSetRGB(n, i, *v),
-    "RGBA": lambda n, i, v: arnold.AiNodeSetRGBA(n, i, *v),
-    "VECTOR": lambda n, i, v: arnold.AiNodeSetVec(n, i, *v),
-    "MATRIX": lambda n, i, v: arnold.AiNodeSetMatrix(n, i, _AiMatrix(v))
+    "BOOL": lambda n, i, v: AiNodeSetBool(n, i, v),
+    "BYTE": lambda n, i, v: AiNodeSetByte(n, i, v),
+    "INT": lambda n, i, v: AiNodeSetInt(n, i, v),
+    "FLOAT": lambda n, i, v: AiNodeSetFlt(n, i , v),
+    "VECTOR2": lambda n, i, v: AiNodeSetVec2(n, i, *v),
+    "RGB": lambda n, i, v: AiNodeSetRGB(n, i, *v),
+    "RGBA": lambda n, i, v: AiNodeSetRGBA(n, i, *v),
+    "VECTOR": lambda n, i, v: AiNodeSetVec(n, i, *v),
+    #"MATRIX": lambda n, i, v: AiNodeSetMatrix(n, i, _AiMatrix(v))
 }
 
 def calc_sensor_size(camera):
