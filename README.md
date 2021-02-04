@@ -2,17 +2,13 @@
 
 BtoA is an unofficial Blender add-on for Autodesk's Arnold render engine.
 
-### Developer Update ###
-
-Hey all! I know it's been about a week since our last code push - there are a couple of reasons for that. We were wrapping up a handful of projects at Luna Digital, so I didn't have time to work on this throughout the week. On top of that, the next big dev focus is on materials, which is no small task in itself. I've been working through setting up the custom nodes system, plus implementing a basic UI to create and edit new materials. I should hopefully be able to push something functional by mid-week (first week of Feb). Thanks for the continued support!
-
 ### Current functionality ###
 
-![Blender scene rendered in Arnold](https://bitbucket.org/luna-digital/btoa/raw/9682a2886a11e27cdc810ea479c32f4cd4822860/examples/polygonal_geometry.jpg)
+![Blender scene rendered in Arnold](https://bitbucket.org/luna-digital/btoa/raw/6531748064be792af98c537d1816d6841bf029e8/examples/lambert.png)
 
 * BtoA can only send polygon objects and camera data to Arnold at the moment - no support for curves, fonts, or other data.
 * There is basic support for lights, including point lights, distant lights, and spot lights. Area lights have been implemented but are buggy and need more work.
-* No material support yet - everything is rendered with a basic red plastic shader for now.
+* The add-on supports lambert shaders, but nothing else at the moment.
 * Renders show up in the Render Result view, but there is no viewport rendering yet.
 
 We're in the early days of development, and will be updating code publicly as we make progress. We guarantee that the code you see here will always be up-to-date with what we're working on internally.
