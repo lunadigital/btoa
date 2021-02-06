@@ -6,7 +6,7 @@ from ..base import ArnoldNode
 
 from arnold import *
 
-class AiStandardSurfaceShader(Node, ArnoldNode):
+class AiStandardSurface(Node, ArnoldNode):
     '''A physically-based shader. Outputs a simple color (RGB).'''
     bl_label = "Standard Surface"
     bl_icon = 'MATERIAL'
