@@ -4,8 +4,6 @@ from bpy.props import FloatProperty, FloatVectorProperty
 
 from ..base import ArnoldNode
 
-from arnold import *
-
 class AiLambertShader(Node, ArnoldNode):
     '''Simple Lambertian reflectance model. Outputs a simple color (RGB).'''
     bl_label = "Lambert"
@@ -15,7 +13,7 @@ class AiLambertShader(Node, ArnoldNode):
 
     def init(self, context):
         color = self.inputs.new('ArnoldNodeSocketColor', "Color", identifier="Kd_color")
-        weight = self.inputs.new('ArnoldNodeSocketFloat', "Weight", identifier="Kd").default_value = 0.8
+        weight = self.inputs.new('ArnoldNodeSocketFloatNormalized', "Weight", identifier="Kd").default_value = 0.8
         #normal = self.inputs.new('NodeSocketVector', "Normal")
 
         self.outputs.new('ArnoldNodeSocketSurface', name="RGB", identifier="output")
