@@ -12,11 +12,11 @@ class AiLambertShader(Node, ArnoldNode):
     ai_name = "lambert"
 
     def init(self, context):
-        color = self.inputs.new('ArnoldNodeSocketColor', "Color", identifier="Kd_color")
-        weight = self.inputs.new('ArnoldNodeSocketFloatNormalized', "Weight", identifier="Kd").default_value = 0.8
+        color = self.inputs.new('AiNodeSocketColor', "Color", identifier="Kd_color")
+        weight = self.inputs.new('AiNodeSocketFloatNormalized', "Weight", identifier="Kd").default_value = 0.8
         #normal = self.inputs.new('NodeSocketVector', "Normal")
 
-        self.outputs.new('ArnoldNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
 def register():
     bpy.utils.register_class(AiLambertShader)

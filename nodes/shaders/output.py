@@ -11,7 +11,7 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
     def init(self, context):
         super().init(context)
 
-        self.inputs.new(type="ArnoldNodeSocketSurface", name="Surface", identifier="surface")
+        self.inputs.new(type="AiNodeSocketSurface", name="Surface", identifier="surface")
         #self.inputs.new(type="NodeSocketShader", name="Volume", identifier="volume")
         #self.inputs.new(type="NodeSocketShader", name="Displacement", identifier="displacement")
 
