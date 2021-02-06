@@ -152,8 +152,17 @@ class ArnoldNode:
     def poll(cls, ntree):
         return ntree.bl_idname == ArnoldShaderTree.bl_idname
 
+    def sub_export(self, ainode):
+        '''
+        Used to set custom properties in a node if available
+        Must be implemented by subclasses
+        '''
+        pass
+
     def export(self):
         node = AiNode(self.ai_name)
+
+        self.sub_export(node)
 
         for i in self.inputs:
             socket_value, value_type = i.export()
@@ -226,7 +235,8 @@ node_categories = [
         'ARNOLD_NODES_OBJECT_SHADERS',
         "Shader",
         items=[
-            NodeItem("AiLambertShader")
+            NodeItem("AiLambertShader"),
+            NodeItem("AiStandardSurfaceShader")
         ]
         )
 ]

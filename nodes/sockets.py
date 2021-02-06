@@ -22,6 +22,8 @@ class ArnoldNodeSocket:
 
     default_type = None
 
+    slider = True
+
     def draw_prop(self, context, layout, node, text):
         ''' This method can be overridden by subclasses as-needed '''
         layout.prop(self, "default_value", text=text, slider=self.slider)
@@ -57,7 +59,7 @@ class ArnoldNodeSocketSurface(NodeSocket, ArnoldNodeSocket):
     default_value: None
 
     def draw_prop(self, context, layout, node, text):
-        row = layout.row()
+        row = layout.row(align=True)
         row.label(text=text)
 
 class ArnoldNodeSocketColor(NodeSocket, ArnoldNodeSocket):
@@ -76,7 +78,7 @@ class ArnoldNodeSocketColor(NodeSocket, ArnoldNodeSocket):
     )
 
     def draw_prop(self, context, layout, node, text):
-        row = layout.row()
+        row = layout.row(align=True)
         row.alignment = 'LEFT'
         row.label(text=text)
         row.prop(self, "default_value", text="")
@@ -84,28 +86,38 @@ class ArnoldNodeSocketColor(NodeSocket, ArnoldNodeSocket):
     def export_default(self):
         return list(self.default_value), self.default_type
 
-class ArnoldNodeSocketFloat(NodeSocket, ArnoldNodeSocket):
-    bl_label = "Float"
-
-    color = Color.float_texture
-
+class ArnoldNodeSocketFloat(ArnoldNodeSocket):
     default_type = 'FLOAT'
-
-    default_value: FloatProperty(
-        name="Float"
-    )
-
-    def draw_prop(self, context, layout, node, text):
-        row = layout.row()
-        row.prop(self, "default_value", text=text)
+    color = Color.float_texture
 
     def export_default(self):
         return self.default_value, self.default_type
 
+class ArnoldNodeSocketFloatUnbounded(NodeSocket, ArnoldNodeSocketFloat):
+    default_value = FloatProperty()
+
+class ArnoldNodeSocketFloatPositive(NodeSocket, ArnoldNodeSocketFloat):
+    default_value: FloatProperty(min=0)
+
+class ArnoldNodeSocketFloatAboveOne(NodeSocket, ArnoldNodeSocketFloat):
+    default_value: FloatProperty(min=1)
+
+class ArnoldNodeSocketFloatNormalized(NodeSocket, ArnoldNodeSocketFloat):
+    default_value: FloatProperty(min=0, max=1)
+
+# I need a better name for this
+# Covers the -1 to 1 range
+class ArnoldNodeSocketFloatNormalizedAlt(NodeSocket, ArnoldNodeSocket):
+    default_value: FloatProperty(min=-1, max=1)
+
 classes = (
     ArnoldNodeSocketSurface,
     ArnoldNodeSocketColor,
-    ArnoldNodeSocketFloat,
+    ArnoldNodeSocketFloatAboveOne,
+    ArnoldNodeSocketFloatNormalized,
+    ArnoldNodeSocketFloatNormalizedAlt,
+    ArnoldNodeSocketFloatPositive,
+    ArnoldNodeSocketFloatUnbounded
 )
 
 def register():
