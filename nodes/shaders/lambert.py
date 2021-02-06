@@ -4,7 +4,7 @@ from bpy.props import FloatProperty, FloatVectorProperty
 
 from ..base import ArnoldNode
 
-class AiLambertShader(Node, ArnoldNode):
+class AiLambert(Node, ArnoldNode):
     '''Simple Lambertian reflectance model. Outputs a simple color (RGB).'''
     bl_label = "Lambert"
     bl_icon = 'MATERIAL'
