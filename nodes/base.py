@@ -235,8 +235,9 @@ node_categories = [
         'ARNOLD_NODES_OBJECT_SHADERS',
         "Shader",
         items=[
-            NodeItem("AiLambertShader"),
-            NodeItem("AiStandardSurfaceShader")
+            NodeItem("AiAmbientOcclusion"),
+            NodeItem("AiLambert"),
+            NodeItem("AiStandardSurface")
         ]
         )
 ]
