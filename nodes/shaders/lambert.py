@@ -19,7 +19,7 @@ class AiLambert(Node, ArnoldNode):
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
 def register():
-    bpy.utils.register_class(AiLambertShader)
+    bpy.utils.register_class(AiLambert)
 
 def unregister():
-    bpy.utils.unregister_class(AiLambertShader)
+    bpy.utils.unregister_class(AiLambert)

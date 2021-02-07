@@ -21,31 +21,31 @@ class AiStandardSurface(Node, ArnoldNode):
 
     def init(self, context):
         # Initialize sockets
-        base = self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
-        base_color = self.inputs.new('AiNodeSocketColor', "Base Color", identifier="base_color")
-        diffuse_roughness = self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse Roughness", identifier="diffuse_roughness")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
+        self.inputs.new('AiNodeSocketColor', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse Roughness", identifier="diffuse_roughness")
 
-        metalness = self.inputs.new('AiNodeSocketFloatNormalized', "Metalness", identifier="metalness")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Metalness", identifier="metalness")
 
-        specular = self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
-        specular_color = self.inputs.new('AiNodeSocketColor', "Specular Color", identifier="specular_color")
-        specular_roughness = self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.2
-        specular_ior = self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_ior").default_value = 1.5
-        specular_anisotropy = self.inputs.new('AiNodeSocketFloatNormalized', "Specular Anisotropy", identifier="specular_anisotropy")
-        specular_rotation = self.inputs.new('AiNodeSocketFloatNormalized', "Specular Rotation", identifier="specular_rotation")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
+        self.inputs.new('AiNodeSocketColor', "Specular Color", identifier="specular_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.2
+        self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_ior").default_value = 1.5
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Anisotropy", identifier="specular_anisotropy")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Rotation", identifier="specular_rotation")
 
-        transmission = self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
-        transmission_color = self.inputs.new('AiNodeSocketColor', "Transmission Color", identifier="transmission_color")
-        transmission_scatter = self.inputs.new('AiNodeSocketColor', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
-        transmission_scatter_anisotropy = self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
-        transmission_dispersion = self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
-        transmission_extra_roughness = self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
+        self.inputs.new('AiNodeSocketColor', "Transmission Color", identifier="transmission_color")
+        self.inputs.new('AiNodeSocketColor', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
+        self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
+        #self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
 
-        subsurface = self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
-        subsurface_color = self.inputs.new('AiNodeSocketColor', "SSS Color", identifier="subsurface_color")
-        subsurface_radius = self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Radius", identifier="subsurface_radius")
-        subsurface_scale = self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
-        subsurface_anisotropy = self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
+        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
+        self.inputs.new('AiNodeSocketColor', "SSS Color", identifier="subsurface_color")
+        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Radius", identifier="subsurface_radius")
+        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
+        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
         # subsurface_type needs to be enum - is this even possible in a socket?
 
         # normal map
@@ -83,7 +83,7 @@ class AiStandardSurface(Node, ArnoldNode):
         AiNodeSetBool(ainode, "internal_reflections", self.internal_reflections)
 
 def register():
-    bpy.utils.register_class(AiStandardSurfaceShader)
+    bpy.utils.register_class(AiStandardSurface)
 
 def unregister():
-    bpy.utils.unregister_class(AiStandardSurfaceShader)
+    bpy.utils.unregister_class(AiStandardSurface)
