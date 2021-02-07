@@ -22,27 +22,27 @@ class AiStandardSurface(Node, ArnoldNode):
     def init(self, context):
         # Initialize sockets
         self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
-        self.inputs.new('AiNodeSocketColor', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketColorRGB', "Base Color", identifier="base_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse Roughness", identifier="diffuse_roughness")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Metalness", identifier="metalness")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
-        self.inputs.new('AiNodeSocketColor', "Specular Color", identifier="specular_color")
+        self.inputs.new('AiNodeSocketColorRGB', "Specular Color", identifier="specular_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.2
         self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Anisotropy", identifier="specular_anisotropy")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Rotation", identifier="specular_rotation")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
-        self.inputs.new('AiNodeSocketColor', "Transmission Color", identifier="transmission_color")
-        self.inputs.new('AiNodeSocketColor', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketColorRGB', "Transmission Color", identifier="transmission_color")
+        self.inputs.new('AiNodeSocketColorRGB', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
         self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
         #self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
 
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
-        self.inputs.new('AiNodeSocketColor', "SSS Color", identifier="subsurface_color")
+        self.inputs.new('AiNodeSocketColorRGB', "SSS Color", identifier="subsurface_color")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Radius", identifier="subsurface_radius")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
@@ -52,7 +52,7 @@ class AiStandardSurface(Node, ArnoldNode):
         # tangent map
 
         coat = self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
-        coat_color = self.inputs.new('AiNodeSocketColor', "Coat Color", identifier="coat_color")
+        coat_color = self.inputs.new('AiNodeSocketColorRGB', "Coat Color", identifier="coat_color")
         coat_roughness = self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness").default_value = 0.1
         coat_ior = self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
         coat_anisotropy = self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Anisotropy", identifier="coat_anisotropy")
@@ -62,7 +62,7 @@ class AiStandardSurface(Node, ArnoldNode):
         coat_affect_roughness = self.inputs.new('AiNodeSocketFloatNormalized', "Coat Affect Roughness", identifier="coat_affect_roughness")
 
         emission = self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
-        emission_color = self.inputs.new('AiNodeSocketColor', "Emission Color", identifier="emission_color")
+        emission_color = self.inputs.new('AiNodeSocketColorRGB', "Emission Color", identifier="emission_color")
 
         opacity = self.inputs.new('AiNodeSocketFloatNormalized', "Opacity", identifier="opacity").default_value = 1
 

@@ -4,18 +4,10 @@ from bpy.props import FloatVectorProperty
 from .ainodesocket import AiNodeSocket
 from .constants import Color
 
-class AiNodeSocketColor(NodeSocket, AiNodeSocket):
+class AiNodeSocketColor(AiNodeSocket):
     bl_label = "Color"
 
     color = Color.color_texture
-    default_type = 'RGB'
-    default_value: FloatVectorProperty(
-        name="Color",
-        subtype='COLOR',
-        default=(0.8, 0.8, 0.8),
-        min=0,
-        max=1
-    )
 
     def draw_prop(self, context, layout, node, text):
         row = layout.row(align=True)
@@ -25,6 +17,26 @@ class AiNodeSocketColor(NodeSocket, AiNodeSocket):
     
     def export_default(self):
         return list(self.default_value), self.default_type
+
+class AiNodeSocketColorRGB(NodeSocket, AiNodeSocketColor):
+    default_type = 'RGB'
+    default_value: FloatVectorProperty(
+        name="Color",
+        subtype='COLOR',
+        default=(0.8, 0.8, 0.8),
+        min=0,
+        max=1
+    )
+
+class AiNodeSocketColorRGBA(NodeSocket, AiNodeSocketColor):
+    default_type = 'RGBA'
+    default_value: FloatVectorProperty(
+        name="Color",
+        subtype='COLOR',
+        default=(0.8, 0.8, 0.8, 1.0),
+        min=0,
+        max=1
+    )
 
 def register():
     from bpy.utils import register_class
