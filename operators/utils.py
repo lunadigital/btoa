@@ -20,7 +20,7 @@ def init_mat_node_tree(node_tree):
     output.location = 300, 200
     output.select = False
 
-    shader = nodes.new("AiLambertShader")
+    shader = nodes.new("AiStandardSurface")
     shader.location = 50, 200
 
     node_tree.links.new(shader.outputs[0], output.inputs[0])
