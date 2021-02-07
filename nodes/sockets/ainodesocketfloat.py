@@ -12,7 +12,7 @@ class AiNodeSocketFloat(AiNodeSocket):
         return self.default_value, self.default_type
 
 class AiNodeSocketFloatUnbounded(NodeSocket, AiNodeSocketFloat):
-    default_value = FloatProperty()
+    default_value: FloatProperty()
 
 class AiNodeSocketFloatPositive(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(min=0)
