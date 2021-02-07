@@ -30,7 +30,7 @@ class AiStandardSurface(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
         self.inputs.new('AiNodeSocketColor', "Specular Color", identifier="specular_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.2
-        self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_ior").default_value = 1.5
+        self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Anisotropy", identifier="specular_anisotropy")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Rotation", identifier="specular_rotation")
 
@@ -54,7 +54,7 @@ class AiStandardSurface(Node, ArnoldNode):
         coat = self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
         coat_color = self.inputs.new('AiNodeSocketColor', "Coat Color", identifier="coat_color")
         coat_roughness = self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness").default_value = 0.1
-        coat_ior = self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR")
+        coat_ior = self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
         coat_anisotropy = self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Anisotropy", identifier="coat_anisotropy")
         coat_rotation = self.inputs.new('AiNodeSocketFloatNormalized', "Coat Rotation", identifier="coat_rotation")
         # coat_normal
