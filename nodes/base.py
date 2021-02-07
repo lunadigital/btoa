@@ -236,6 +236,7 @@ node_categories = [
         "Shader",
         items=[
             NodeItem("AiAmbientOcclusion"),
+            NodeItem("AiCarPaint"),
             NodeItem("AiLambert"),
             NodeItem("AiStandardSurface")
         ]
