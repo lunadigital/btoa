@@ -34,14 +34,22 @@ class AiNodeSocketColorRGBA(NodeSocket, AiNodeSocketColor):
         name="Color",
         subtype='COLOR',
         default=(0.8, 0.8, 0.8, 1.0),
+        size=4,
         min=0,
         max=1
     )
 
+classes = (
+    AiNodeSocketColorRGB,
+    AiNodeSocketColorRGBA
+)
+
 def register():
     from bpy.utils import register_class
-    register_class(AiNodeSocketColor)
+    for cls in classes:
+        register_class(cls)
 
 def unregister():
     from bpy.utils import unregister_class
-    unregister_class(AiNodeSocketColor)
+    for cls in classes:
+        unregister_class(cls)
