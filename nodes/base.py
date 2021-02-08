@@ -239,6 +239,7 @@ node_categories = [
             NodeItem("AiCarPaint"),
             NodeItem("AiFlat"),
             NodeItem("AiLambert"),
+            NodeItem("AiMatte"),
             NodeItem("AiStandardSurface")
         ]
         )
