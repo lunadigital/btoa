@@ -12,19 +12,11 @@ class AiMatte(Node, ArnoldNode):
 
     ai_name = "matte"
 
-    passthrough: BoolProperty(name="Passthrough", default=True)
-
     def init(self, context):
         self.inputs.new('AiNodeSocketColorRGBA', "Color", identifier="color")
         self.inputs.new('AiNodeSocketColorRGB', "Opacity", identifier="opacity")
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "passthrough")
-
-    def sub_export(self, ainode):
-        AiNodeSetBool(ainode, "passthrough", self.passthrough)
 
 def register():
     from bpy.utils import register_class
