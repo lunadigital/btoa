@@ -11,6 +11,7 @@ BtoA is an unofficial Blender add-on for Autodesk's Arnold render engine.
 | (No modifier stack support yet) | Spot light                                   | Ambient Occlusion  | No viewport rendering yet       |
 |                                 | Area lights (still buggy and need more work) | Car Paint          |                                 |
 |                                 |                                              | Flat               |                                 |
+|                                 |                                              | Matte              |                                 |
 
 We're in the early days of development, and will be updating code publicly as we make progress. We guarantee that the code you see here will always be up-to-date with what we're working on internally, give or a take a week for bigger development commits.
 
