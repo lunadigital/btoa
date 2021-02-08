@@ -43,7 +43,7 @@ class AiStandardSurface(Node, ArnoldNode):
 
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
         self.inputs.new('AiNodeSocketColorRGB', "SSS Color", identifier="subsurface_color")
-        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Radius", identifier="subsurface_radius")
+        self.inputs.new('AiNodeSocketColorRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
         # subsurface_type needs to be enum - is this even possible in a socket?
@@ -51,20 +51,20 @@ class AiStandardSurface(Node, ArnoldNode):
         # normal map
         # tangent map
 
-        coat = self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
-        coat_color = self.inputs.new('AiNodeSocketColorRGB', "Coat Color", identifier="coat_color")
-        coat_roughness = self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness").default_value = 0.1
-        coat_ior = self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
-        coat_anisotropy = self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Anisotropy", identifier="coat_anisotropy")
-        coat_rotation = self.inputs.new('AiNodeSocketFloatNormalized', "Coat Rotation", identifier="coat_rotation")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
+        self.inputs.new('AiNodeSocketColorRGB', "Coat Color", identifier="coat_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness").default_value = 0.1
+        self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
+        self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Anisotropy", identifier="coat_anisotropy")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Coat Rotation", identifier="coat_rotation")
         # coat_normal
-        coat_affect_color = self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Affect Color", identifier="coat_affect_color")
-        coat_affect_roughness = self.inputs.new('AiNodeSocketFloatNormalized', "Coat Affect Roughness", identifier="coat_affect_roughness")
+        self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Affect Color", identifier="coat_affect_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Coat Affect Roughness", identifier="coat_affect_roughness")
 
-        emission = self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
-        emission_color = self.inputs.new('AiNodeSocketColorRGB', "Emission Color", identifier="emission_color")
+        self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
+        self.inputs.new('AiNodeSocketColorRGB', "Emission Color", identifier="emission_color")
 
-        opacity = self.inputs.new('AiNodeSocketFloatNormalized', "Opacity", identifier="opacity").default_value = 1
+        self.inputs.new('AiNodeSocketColorRGB', "Opacity", identifier="opacity")
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
