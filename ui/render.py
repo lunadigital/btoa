@@ -2,12 +2,16 @@ import bpy
 from .. import engine
 
 class ARNOLD_PT_sampling(bpy.types.Panel):
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
     bl_idname = "ARNOLD_PT_sampling"
     bl_label = "Sampling"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in cls.COMPAT_ENGINES
 
     def draw(self, context):
         options = context.scene.arnold_options
@@ -67,12 +71,16 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
         self.layout.enabled = context.scene.arnold_options.use_adaptive_sampling
 
 class ARNOLD_PT_ray_depth(bpy.types.Panel):
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
     bl_idname = "ARNOLD_PT_ray_depth"
     bl_label = "Ray Depth"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in cls.COMPAT_ENGINES
 
     def draw(self, context):
         layout = self.layout
@@ -89,13 +97,17 @@ class ARNOLD_PT_ray_depth(bpy.types.Panel):
         col.prop(options, "transparency_depth")
 
 class ARNOLD_PT_rendering(bpy.types.Panel):
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
     bl_idname = "ARNOLD_PT_rendering"
     bl_label = "Rendering"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
     bl_options = {'DEFAULT_CLOSED'}
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in cls.COMPAT_ENGINES
 
     def draw(self, context):
         layout = self.layout
