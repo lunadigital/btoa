@@ -25,6 +25,9 @@ The add-on automatically detects the Arnold installation from the $ARNOLD_ROOT e
 3. Optionally, you can set the `ARNOLD_ROOT` environment variable to the root directory of your SDK installation. If you do, Blender will find Arnold automatically. If you don't, you just have to set the path in the add-on preferences.
 4. Install the BtoA add-on by downloading this repo as a zip and installing in the Blender preferences.
 
+### Common errors ###
+If you ever get the error `AttributeError: 'NodeSocket' object has no attribute 'export'` when rendering, you need to go through any materials you have and make sure there are no undefined node sockets. We're making a lot of changes to sockets as we refine the node system and Blender *does not* update these settings for nodes that already exist in the shader network. To fix, simply locate and delete any offending nodes and add a new one from the menu list.
+
 ### Getting involved ###
 This add-on is developed and maintained by Aaron Powell at Luna Digital, Ltd. (aaron@lunadigital.tv). Feel free to reach out if you're interested in testing or contributing!
 
