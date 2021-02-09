@@ -4,6 +4,7 @@ from . import flat
 from . import lambert
 from . import matte
 from . import output
+from . import shadow_matte
 from . import standard_surface
 
 def register():
@@ -13,6 +14,7 @@ def register():
     lambert.register()
     matte.register()
     output.register()
+    shadow_matte.register()
     standard_surface.register()
 
 def unregister():
@@ -22,4 +24,5 @@ def unregister():
     lambert.unregister()
     matte.unregister()
     output.unregister()
+    shadow_matte.unregister()
     standard_surface.unregister()
