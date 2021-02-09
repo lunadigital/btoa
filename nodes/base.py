@@ -241,7 +241,8 @@ node_categories = [
             NodeItem("AiLambert"),
             NodeItem("AiMatte"),
             NodeItem("AiShadowMatte"),
-            NodeItem("AiStandardSurface")
+            NodeItem("AiStandardSurface"),
+            NodeItem("AiWireframe")
         ]
         )
 ]

@@ -6,6 +6,7 @@ from . import matte
 from . import output
 from . import shadow_matte
 from . import standard_surface
+from . import wireframe
 
 def register():
     ambient_occlusion.register()
@@ -16,6 +17,7 @@ def register():
     output.register()
     shadow_matte.register()
     standard_surface.register()
+    wireframe.register()
 
 def unregister():
     ambient_occlusion.unregister()
@@ -26,3 +28,4 @@ def unregister():
     output.unregister()
     shadow_matte.unregister()
     standard_surface.unregister()
+    wireframe.unregister()
