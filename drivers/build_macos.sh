@@ -1,0 +1,1 @@
+c++ src/driver_display_callback.cpp -o build/driver_display_callback.dylib -Wall -O2 -shared -fPIC -I$ARNOLD_ROOT/include -L$ARNOLD_ROOT/bin -lai -std=gnu++11
