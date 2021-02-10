@@ -80,7 +80,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.update_arnold_options(scene)
 
         for mat in data.materials:
-            if AiNodeLookUpByName(mat.name) is None and mat.name != "Dots Stroke":
+            if (
+                AiNodeLookUpByName(mat.name) is None and
+                mat.name != "Dots Stroke" and
+                mat.arnold.node_tree is not None
+            ):
                 snode, vnode, dnode = mat.arnold.node_tree.export()
                 AiNodeSetStr(snode[0], "name", mat.name)
                 
@@ -91,7 +95,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 if node is None:
                     node = btoa.generate_aipolymesh(ob)
 
-                if len(ob.data.materials) > 0:
+                if len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
                     mat_node = AiNodeLookUpByName(ob.data.materials[0].name)
                     AiNodeSetPtr(node, "shader", mat_node)
             
