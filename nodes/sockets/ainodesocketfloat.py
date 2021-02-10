@@ -12,16 +12,28 @@ class AiNodeSocketFloat(AiNodeSocket):
         return self.default_value, self.default_type
 
 class AiNodeSocketFloatUnbounded(NodeSocket, AiNodeSocketFloat):
-    default_value: FloatProperty()
+    default_value: FloatProperty(
+        soft_min=-5,
+        soft_max=5
+        )
 
 class AiNodeSocketFloatPositive(NodeSocket, AiNodeSocketFloat):
-    default_value: FloatProperty(min=0)
+    default_value: FloatProperty(
+        min=0,
+        soft_max=5
+        )
 
 class AiNodeSocketFloatAboveOne(NodeSocket, AiNodeSocketFloat):
-    default_value: FloatProperty(min=1)
+    default_value: FloatProperty(
+        min=1,
+        soft_max=5
+        )
 
 class AiNodeSocketFloatNormalized(NodeSocket, AiNodeSocketFloat):
-    default_value: FloatProperty(min=0, max=1)
+    default_value: FloatProperty(
+        min=0,
+        max=1
+        )
 
 # I need a better name for this
 # Covers the -1 to 1 range
