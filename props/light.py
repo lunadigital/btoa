@@ -146,7 +146,7 @@ class ArnoldLight(PropertyGroup):
         description="",
         min=0,
         max=180
-    )
+        )
     
     # Point and spot light attributes
     radius: FloatProperty(
@@ -205,6 +205,14 @@ class ArnoldLight(PropertyGroup):
         max=1
         )
 
+    def get_shape_type(self):
+        light = self.id_data
+        return list(btoa.AI_AREALIGHT_TYPE).index(light.shape)
+
+    def set_shape_type(self, value):
+        light = self.id_data
+        light.shape = list(btoa.AI_AREALIGHT_TYPE)[value]
+
     shape: EnumProperty(
         name="Light Shape",
         description="",
@@ -212,7 +220,9 @@ class ArnoldLight(PropertyGroup):
             ('quad_light', "Quad", "Quad light"),
             ('disk_light', "Disk", "Disk light"),
             ('cylinder_light', "Cylinder", "Cylinder light"),
-        ]
+        ],
+        get=get_shape_type,
+        set=set_shape_type
         )
 
 def register():

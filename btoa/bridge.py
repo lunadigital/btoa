@@ -140,7 +140,11 @@ def sync_cameras(ainode, camera):
     AiNodeSetFlt(ainode, "rolling_shutter_duration", data.arnold.rolling_shutter_duration)
 
 def generate_ailight(light):
-    node = AiNode(types.AI_LIGHT_TYPE[light.data.type])
+    if light.data.type == 'AREA':
+        node = AiNode(types.AI_AREALIGHT_TYPE[light.data.shape])
+    else:
+        node = AiNode(types.AI_LIGHT_TYPE[light.data.type])
+    
     sync_light(node, light)
     return node
 
