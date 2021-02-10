@@ -21,7 +21,7 @@ class AiWireframe(Node, ArnoldNode):
         default='0'
         )
     raster_space: BoolProperty(
-        name="Raster Space"
+        name="Raster Space",
         default=True
         )
 
