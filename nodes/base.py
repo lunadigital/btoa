@@ -236,8 +236,13 @@ node_categories = [
         "Shader",
         items=[
             NodeItem("AiAmbientOcclusion"),
+            NodeItem("AiCarPaint"),
+            NodeItem("AiFlat"),
             NodeItem("AiLambert"),
-            NodeItem("AiStandardSurface")
+            NodeItem("AiMatte"),
+            NodeItem("AiShadowMatte"),
+            NodeItem("AiStandardSurface"),
+            NodeItem("AiWireframe")
         ]
         )
 ]
