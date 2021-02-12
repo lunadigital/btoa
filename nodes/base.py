@@ -169,7 +169,7 @@ class ArnoldNode:
             
             if socket_value is not None and value_type is not None:
                 if value_type == 'AINODE':
-                    AiNodeLink(node, i.identifier, socket_value)
+                    AiNodeLink(socket_value, i.identifier, node)
                 else:
                     btoa.AiNodeSet[value_type](node, i.identifier, socket_value)
 
@@ -244,7 +244,14 @@ node_categories = [
             NodeItem("AiStandardSurface"),
             NodeItem("AiWireframe")
         ]
-        )
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_TEXTURES',
+        "Texture",
+        items=[
+            NodeItem("AiImage")
+        ]
+    )
 ]
 
 classes = (

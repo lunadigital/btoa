@@ -59,6 +59,7 @@ def generate_aipolymesh(mesh):
     verts = mesh.data.vertices
     loops = mesh.data.loops
     polygons = mesh.data.polygons
+    uv_layers = mesh.data.uv_layers
 
     # Vertices
     a = numpy.ndarray(len(verts) * 3, dtype=numpy.float32)
@@ -93,6 +94,24 @@ def generate_aipolymesh(mesh):
     AiNodeSetArray(node, "nsides", nsides)
     AiNodeSetArray(node, "vidxs", vidxs)
     AiNodeSetArray(node, "nidxs", nidxs)
+
+    # UV's
+    for i, uvt in enumerate(uv_layers):
+        if uvt.active_render:
+            uvd = uv_layers[i].data
+            nuvs = len(uvd)
+
+            a = numpy.arange(nuvs, dtype=numpy.uint32)
+            uvidxs = AiArrayConvert(nuvs, 1, AI_TYPE_UINT, ctypes.c_void_p(a.ctypes.data))
+
+            a = numpy.ndarray(nuvs*2, dtype=numpy.float32)
+            uvd.foreach_get("uv", a)
+
+            uvlist = AiArrayConvert(nuvs, 1, AI_TYPE_VECTOR2, ctypes.c_void_p(a.ctypes.data))
+
+            AiNodeSetArray(node, "uvidxs", uvidxs)
+            AiNodeSetArray(node, "uvlist", uvlist)
+            break
 
     return node
 
