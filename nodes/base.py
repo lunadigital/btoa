@@ -251,6 +251,14 @@ node_categories = [
         items=[
             NodeItem("AiImage")
         ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_UTILITIES',
+        "Utility",
+        items=[
+            NodeItem("AiCoordSpace"),
+            NodeItem("AiUVProjection")
+        ]
     )
 ]
 
