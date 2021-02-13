@@ -6,16 +6,16 @@ We're in the early days of development, and will be updating code publicly as we
 
 ### Features ###
 
-| Geometry & Objects              | Lights              | Shaders            | Textures | UI Elements                     |
-| ------------------------------- | ------------------- | ------------------ | -------- | ------------------------------- |
-| Cameras                         | Spot light          | Lambert            | Image    | Material nodes                  | 
-| Polygon meshes                  | Distant (sun) light | Standard Surface   |          | Renders images to Render Result |
-| (No modifier stack support yet) | Spot light          | Ambient Occlusion  |          | No viewport rendering yet       |
-|                                 | Quad light          | Car Paint          |          |                                 |
-|                                 | Disk light          | Flat               |          |                                 |
-|                                 | Cylinder light      | Matte              |          |                                 |
-|                                 |                     | Shadow matte       |          |                                 |
-|                                 |                     | Wireframe          |          |                                 |
+| Geometry & Objects                 | Lights              | Shaders            | Textures | UI Elements                     |
+| ---------------------------------- | ------------------- | ------------------ | -------- | ------------------------------- |
+| Cameras                            | Spot light          | Lambert            | Image    | Material nodes                  | 
+| Polygon meshes (w/ modifier stack) | Distant (sun) light | Standard Surface   |          | Renders images to Render Result |
+|                                    | Spot light          | Ambient Occlusion  |          | No viewport rendering yet       |
+|                                    | Quad light          | Car Paint          |          |                                 |
+|                                    | Disk light          | Flat               |          |                                 |
+|                                    | Cylinder light      | Matte              |          |                                 |
+|                                    |                     | Shadow matte       |          |                                 |
+|                                    |                     | Wireframe          |          |                                 |
 
 ### Example renders ###
 ![Blender scene rendered in Arnold](https://bitbucket.org/luna-digital/btoa/raw/6531748064be792af98c537d1816d6841bf029e8/examples/lambert.png)
