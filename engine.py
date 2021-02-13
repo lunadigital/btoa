@@ -87,13 +87,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             ):
                 snode, vnode, dnode = mat.arnold.node_tree.export()
                 AiNodeSetStr(snode[0], "name", mat.name)
-                
+  
         for ob in data.objects:
             # Update polygon meshes
             if ob.type == 'MESH':
                 node = AiNodeLookUpByName(ob.name)
                 if node is None:
-                    node = btoa.generate_aipolymesh(ob)
+                    node = btoa.generate_aipolymesh(ob, depsgraph)
 
                 if len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
                     mat_node = AiNodeLookUpByName(ob.data.materials[0].name)

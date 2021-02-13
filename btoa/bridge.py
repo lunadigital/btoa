@@ -47,27 +47,36 @@ def calc_sensor_size(camera):
 
     return result 
 
-@contextmanager
-def bake_geometry(depsgraph, bmesh):
-    # Refer to _Mesh() in engine/__init__.py, line 630
-    pass
+def bake_geometry(ob, depsgraph):
+    ob_eval = ob.evaluated_get(depsgraph)
+    mesh = ob_eval.to_mesh()
+
+    if mesh.use_auto_smooth:
+        if not mesh.has_custom_normals:
+            mesh.calc_normals()
+            mesh.split_faces()
+
+    mesh.calc_loop_triangles()
+
+    if mesh.has_custom_normals:
+        mesh.calc_normals_split()
+                
+    return mesh
 
 def generate_aimatrix(matrix):
     return AtMatrix(*numpy.reshape(matrix.transposed(), -1))
 
-def generate_aipolymesh(mesh):
-    verts = mesh.data.vertices
-    loops = mesh.data.loops
-    polygons = mesh.data.polygons
-    uv_layers = mesh.data.uv_layers
+def generate_aipolymesh(ob, depsgraph):
+    mesh = bake_geometry(ob, depsgraph)
+    verts = mesh.vertices
+    loops = mesh.loops
+    polygons = mesh.polygons
+    uv_layers = mesh.uv_layers
 
     # Vertices
     a = numpy.ndarray(len(verts) * 3, dtype=numpy.float32)
     verts.foreach_get("co", a)
     vlist = AiArrayConvert(len(verts), 1, AI_TYPE_VECTOR, ctypes.c_void_p(a.ctypes.data))
-
-    # Normals
-    mesh.data.calc_tangents()
 
     a = numpy.ndarray(len(loops) * 3, dtype=numpy.float32)
     loops.foreach_get("normal", a)
@@ -87,7 +96,7 @@ def generate_aipolymesh(mesh):
 
     # Create Arnold node
     node = AiNode('polymesh')
-    AiNodeSetMatrix(node, "matrix", generate_aimatrix(mesh.matrix_world))
+    AiNodeSetMatrix(node, "matrix", generate_aimatrix(ob.matrix_world))
     AiNodeSetBool(node, "smoothing", True)
     AiNodeSetArray(node, "vlist", vlist)
     AiNodeSetArray(node, "nlist", nlist)
