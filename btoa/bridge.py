@@ -51,15 +51,7 @@ def bake_geometry(ob, depsgraph):
     ob_eval = ob.evaluated_get(depsgraph)
     mesh = ob_eval.to_mesh()
 
-    if mesh.use_auto_smooth:
-        if not mesh.has_custom_normals:
-            mesh.calc_normals()
-            mesh.split_faces()
-
-    mesh.calc_loop_triangles()
-
-    if mesh.has_custom_normals:
-        mesh.calc_normals_split()
+    mesh.calc_tangents()
                 
     return mesh
 
