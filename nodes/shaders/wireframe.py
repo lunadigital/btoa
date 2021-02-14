@@ -26,8 +26,8 @@ class AiWireframe(Node, ArnoldNode):
         )
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketColorRGB', "Fill Color", identifier="fill_color")
-        self.inputs.new('AiNodeSocketColorRGB', "Line Color", identifier="line_color").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketRGB', "Fill Color", identifier="fill_color")
+        self.inputs.new('AiNodeSocketRGB', "Line Color", identifier="line_color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatPositive', "Line Width", identifier="line_width").default_value = 1
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")

@@ -30,13 +30,13 @@ class AiShadowMatte(Node, ArnoldNode):
 
     def init(self, context):
         # background - Not sure how to implement this yet...
-        self.inputs.new('AiNodeSocketColorRGB', "Offscreen Color", identifier="offscreen_color").default_value = (0, 0, 0)
-        self.inputs.new('AiNodeSocketColorRGB', "Shadow Color", identifier="shadow_color").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketRGB', "Offscreen Color", identifier="offscreen_color").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketRGB', "Shadow Color", identifier="shadow_color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatNormalized', "Shadow Opacity", identifier="shadow_opacity").default_value = 1
-        self.inputs.new('AiNodeSocketColorRGB', "Diffuse Color", identifier="diffuse_color").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketRGB', "Diffuse Color", identifier="diffuse_color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatPositive', "Diffuse Intensity", identifier="diffuse_intensity").default_value = 1
         self.inputs.new('AiNodeSocketFloatNormalized', "Backlighting", identifier="backlighting")
-        self.inputs.new('AiNodeSocketColorRGB', "Specular Color", identifier="specular_color")
+        self.inputs.new('AiNodeSocketRGB', "Specular Color", identifier="specular_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Intensity", identifier="specular_intensity")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.1
         self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_IOR").default_value = 1.52

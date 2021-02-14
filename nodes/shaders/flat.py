@@ -9,7 +9,7 @@ class AiFlat(Node, ArnoldNode):
     ai_name = "flat"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketColorRGB', "Color", identifier="color")
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color")
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
 def register():

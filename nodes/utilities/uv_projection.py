@@ -30,10 +30,10 @@ class AiUVProjection(Node, ArnoldNode):
     )
 
     def init(self, context):
-        self.inputs.new("AiNodeSocketColorRGBA", "Color", identifier="projection_color")
+        self.inputs.new("AiNodeSocketRGBA", "Color", identifier="projection_color")
         self.inputs.new("AiNodeSocketCoord", "Coords", identifier="coord_space")
 
-        self.outputs.new("AiNodeSocketColorRGBA", "RGBA")
+        self.outputs.new("AiNodeSocketRGBA", "RGBA")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "projection_type")

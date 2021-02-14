@@ -13,8 +13,8 @@ class AiMatte(Node, ArnoldNode):
     ai_name = "matte"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketColorRGBA', "Color", identifier="color")
-        self.inputs.new('AiNodeSocketColorRGB', "Opacity", identifier="opacity")
+        self.inputs.new('AiNodeSocketRGBA', "Color", identifier="color")
+        self.inputs.new('AiNodeSocketRGB', "Opacity", identifier="opacity").default_value = (1, 1, 1)
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 

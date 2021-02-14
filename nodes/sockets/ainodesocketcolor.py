@@ -18,7 +18,7 @@ class AiNodeSocketColor(AiNodeSocket):
     def export_default(self):
         return list(self.default_value), self.default_type
 
-class AiNodeSocketColorRGB(NodeSocket, AiNodeSocketColor):
+class AiNodeSocketRGB(NodeSocket, AiNodeSocketColor):
     default_type = 'RGB'
     default_value: FloatVectorProperty(
         name="Color",
@@ -28,7 +28,7 @@ class AiNodeSocketColorRGB(NodeSocket, AiNodeSocketColor):
         max=1
     )
 
-class AiNodeSocketColorRGBA(NodeSocket, AiNodeSocketColor):
+class AiNodeSocketRGBA(NodeSocket, AiNodeSocketColor):
     default_type = 'RGBA'
     default_value: FloatVectorProperty(
         name="Color",
@@ -40,8 +40,8 @@ class AiNodeSocketColorRGBA(NodeSocket, AiNodeSocketColor):
     )
 
 classes = (
-    AiNodeSocketColorRGB,
-    AiNodeSocketColorRGBA
+    AiNodeSocketRGB,
+    AiNodeSocketRGBA
 )
 
 def register():

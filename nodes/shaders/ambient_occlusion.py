@@ -40,8 +40,8 @@ class AiAmbientOcclusion(Node, ArnoldNode):
     self_only: BoolProperty(name="Self Only")
 
     def init(self, context):
-        self.inputs.new("AiNodeSocketColorRGB", "Black Color", identifier="black").default_value = (0, 0, 0)
-        self.inputs.new("AiNodeSocketColorRGB", "White Color", identifier="white")
+        self.inputs.new("AiNodeSocketRGB", "Black Color", identifier="black").default_value = (0, 0, 0)
+        self.inputs.new("AiNodeSocketRGB", "White Color", identifier="white")
 
         self.inputs.new('AiNodeSocketFloatPositive', "Falloff", identifier="falloff").default_value = 1
 

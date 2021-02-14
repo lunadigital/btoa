@@ -22,28 +22,28 @@ class AiStandardSurface(Node, ArnoldNode):
     def init(self, context):
         # Initialize sockets
         self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
-        self.inputs.new('AiNodeSocketColorRGB', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse Roughness", identifier="diffuse_roughness")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Metalness", identifier="metalness")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
-        self.inputs.new('AiNodeSocketColorRGB', "Specular Color", identifier="specular_color")
+        self.inputs.new('AiNodeSocketRGB', "Specular Color", identifier="specular_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.2
         self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Anisotropy", identifier="specular_anisotropy")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Rotation", identifier="specular_rotation")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
-        self.inputs.new('AiNodeSocketColorRGB', "Transmission Color", identifier="transmission_color")
-        self.inputs.new('AiNodeSocketColorRGB', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color")
+        self.inputs.new('AiNodeSocketRGB', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
         self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
         #self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
 
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
-        self.inputs.new('AiNodeSocketColorRGB', "SSS Color", identifier="subsurface_color")
-        self.inputs.new('AiNodeSocketColorRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketRGB', "SSS Color", identifier="subsurface_color")
+        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
         # subsurface_type needs to be enum - is this even possible in a socket?
@@ -52,7 +52,7 @@ class AiStandardSurface(Node, ArnoldNode):
         # tangent map
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
-        self.inputs.new('AiNodeSocketColorRGB', "Coat Color", identifier="coat_color")
+        self.inputs.new('AiNodeSocketRGB', "Coat Color", identifier="coat_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness").default_value = 0.1
         self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Anisotropy", identifier="coat_anisotropy")
@@ -62,9 +62,9 @@ class AiStandardSurface(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Affect Roughness", identifier="coat_affect_roughness")
 
         self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
-        self.inputs.new('AiNodeSocketColorRGB', "Emission Color", identifier="emission_color")
+        self.inputs.new('AiNodeSocketRGB', "Emission Color", identifier="emission_color")
 
-        self.inputs.new('AiNodeSocketColorRGB', "Opacity", identifier="opacity")
+        self.inputs.new('AiNodeSocketRGB', "Opacity", identifier="opacity").default_value = (1, 1, 1)
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
