@@ -166,8 +166,6 @@ class ArnoldNode:
 
         for i in self.inputs:
             socket_value, value_type = i.export()
-
-            print("PROCESSING: " + i.identifier)
             
             if socket_value is not None and value_type is not None:
                 if value_type == 'AINODE':
