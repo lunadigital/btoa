@@ -125,7 +125,7 @@ driver_write_bucket
                 }
             }
 
-            AiColorManagerTransform(color_manager, display_space, false, false, NULL, (float*)&source.rgb());
+            AiColorManagerTransform(color_manager, display_space, true, false, NULL, (float*)&source.rgb());
 
             int i = bucket_xo + x;
             int j = bucket_yo + y;
