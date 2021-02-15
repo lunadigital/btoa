@@ -36,10 +36,6 @@ def configure_plugins():
     else:
         os.environ["ARNOLD_PLUGIN_PATH"] = drivers
 
-    if not "OCIO" in os.environ:
-        print("No custom OCIO config found, using default Filmic...")
-        os.environ["OCIO"] = get_default_ocio_config()
-
 def remove_plugins():
     addon_root = os.path.dirname(os.path.abspath(__file__))
     drivers = os.path.join(addon_root, "drivers", "build")
@@ -51,10 +47,6 @@ def remove_plugins():
         os.environ["ARNOLD_PLUGIN_PATH"] = os.pathsep.join(plugins)
     else:
         del os.environ["ARNOLD_PLUGIN_PATH"]
-
-    # Clear OCIO profile if set to Filmic
-    if os.getenv("OCIO") == get_default_ocio_config():
-        del os.environ["OCIO"]
 
 def configure_arnold_environment():
     if arnold_env_exists():
@@ -75,6 +67,16 @@ def configure_arnold_environment():
 
     configure_plugins()
 
+def toggle_ocio(self, context):
+    if self.use_color_management:
+        if not "OCIO" in os.environ:
+            print("No custom OCIO config found, using default Filmic...")
+            os.environ["OCIO"] = get_default_ocio_config()
+    else:
+        # Clear OCIO profile if set to Filmic
+        if os.getenv("OCIO") == get_default_ocio_config():
+            del os.environ["OCIO"]
+
 class ArnoldAddonPreferences(AddonPreferences):
     bl_idname = __package__
 
@@ -83,14 +85,36 @@ class ArnoldAddonPreferences(AddonPreferences):
         subtype="DIR_PATH"
     )
 
+    use_color_management: BoolProperty(
+        name="Use OCIO Color Management",
+        update=toggle_ocio
+    )
+
     def draw(self, context):
-        row = self.layout.row()
+        # Arnold SDK config
+        box = self.layout.box()
+        
+        row = box.row()
         row.prop(self, "arnold_path")
         row.enabled = not arnold_env_exists()
 
-        row = self.layout.row()
+        row = box.row()
         if arnold_env_exists():
             row.label(text="Path automatically set by $ARNOLD_ROOT")
+
+        # Color management
+        box = self.layout.box()
+
+        row = box.row()
+        row.prop(self, "use_color_management")
+
+        if not self.use_color_management:
+            row = box.row()
+            row.label(text="Using Arnold's built-in color manager.")
+        else:
+            row = box.row()
+            row.label(text="Using OCIO color management. If the OCIO environment variable is not set, Filmic will be used by default.")
+
 
 def register():
     bpy.utils.register_class(ArnoldAddonPreferences)

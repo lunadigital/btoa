@@ -1,6 +1,7 @@
 import bpy
 import bgl
 import numpy
+import os
 from ctypes import *
 
 from arnold import *
@@ -130,8 +131,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AiArraySetStr(outputs, 0, "RGBA RGBA gaussianFilter __display_driver")
         AiNodeSetArray(options, "outputs", outputs)
 
-        color_manager = AiNode("color_manager_ocio")
-        AiNodeSetPtr(options, "color_manager", color_manager)
+        prefs = bpy.context.preferences.addons[__package__].preferences
+        if prefs.use_color_management:
+            color_manager = AiNode("color_manager_ocio")
+            AiNodeSetStr(color_manager, "config", os.getenv("OCIO"))
+            AiNodeSetPtr(options, "color_manager", color_manager)
 
     def render(self, depsgraph):
         engine = self
