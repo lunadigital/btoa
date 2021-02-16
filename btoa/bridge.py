@@ -176,6 +176,7 @@ def sync_light(ainode, light):
     AiNodeSetStr(ainode, "name", light.name)
     AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
 
+    AiNodeSetRGB(ainode, "color", *data.color)
     AiNodeSetFlt(ainode, "intensity", data.arnold.intensity)
     AiNodeSetFlt(ainode, "exposure", data.arnold.exposure)
     AiNodeSetInt(ainode, "samples", data.arnold.samples)
