@@ -306,13 +306,31 @@ class ArnoldDrawData:
         bgl.glBindVertexArray(0)
         bgl.glBindTexture(bgl.GL_TEXTURE_2D, 0)
 
+def get_panels():
+    exclude_panels = {
+        
+    }
+
+    panels = []
+    for panel in bpy.types.Panel.__subclasses__():
+        if hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES:
+            if panel.__name__ not in exclude_panels:
+                panels.append(panel)
+
+    return panels
+
 def register():
     bpy.utils.register_class(ArnoldRenderEngine)
-    RENDER_PT_color_management.COMPAT_ENGINES.add(ArnoldRenderEngine.bl_idname)
+    
+    for panel in get_panels():
+        panel.COMPAT_ENGINES.add(ArnoldRenderEngine.bl_idname)
 
 def unregister():
     bpy.utils.unregister_class(ArnoldRenderEngine)
-    RENDER_PT_color_management.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)
+    
+    for panel in get_panels():
+        if 'CUSTOM' in panel.COMPAT_ENGINES:
+            panel.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)
 
 if __name__ == "__main__":
     register()
