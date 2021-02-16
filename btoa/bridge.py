@@ -51,6 +51,9 @@ def bake_geometry(ob, depsgraph):
     ob_eval = ob.evaluated_get(depsgraph)
     mesh = ob_eval.to_mesh()
 
+    if len(mesh.uv_layers) == 0:
+        mesh.uv_layers.new(name='UVMap')
+
     mesh.calc_tangents()
                 
     return mesh
@@ -96,7 +99,7 @@ def generate_aipolymesh(ob, depsgraph):
     AiNodeSetArray(node, "vidxs", vidxs)
     AiNodeSetArray(node, "nidxs", nidxs)
 
-    # UV's
+    # UV's    
     for i, uvt in enumerate(uv_layers):
         if uvt.active_render:
             uvd = uv_layers[i].data
