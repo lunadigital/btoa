@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Scene, PropertyGroup, Camera
-from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty
+from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty, StringProperty
 
 class ArnoldOptions(PropertyGroup):
     # Sampling
@@ -147,6 +147,12 @@ class ArnoldOptions(PropertyGroup):
         name="Threads",
         description="The number of threads used for rendering. Set it to zero to autodetect and use as many threads as cores in the system. Negative values indicate how many cores not to use, so that -3, for instance, will use 29 threads on a 32 logical core machine. Negative values are useful when you want to reserve some of the CPU for non-Arnold tasks"
         )
+
+    # To save default display device for color management
+    display_device_cache: StringProperty(
+        name="Display Device Cache",
+        default="sRGB"
+    )
 
 def register():
     bpy.utils.register_class(ArnoldOptions)

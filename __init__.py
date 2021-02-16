@@ -16,11 +16,13 @@ def register():
     from . import operators
     from . import nodes
     from . import ui
+    from . import handlers
     nodes.register()
     props.register()
     engine.register()
     operators.register()
     ui.register()
+    handlers.register()
 
 
 def unregister():
@@ -30,9 +32,11 @@ def unregister():
     from . import operators
     from . import nodes
     from . import ui
+    from . import handlers
     addon_preferences.unregister()
     nodes.unregister()
     props.unregister()
     engine.unregister()
     operators.unregister()
     ui.unregister()
+    handlers.unregister()
