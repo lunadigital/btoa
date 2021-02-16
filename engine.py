@@ -8,8 +8,6 @@ from arnold import *
 
 from . import btoa
 
-# For more info, visit:
-# https://docs.blender.org/api/current/bpy.types.RenderEngine.html
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
     bl_label = "Arnold"
