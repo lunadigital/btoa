@@ -30,7 +30,6 @@ def unregister():
     from . import operators
     from . import nodes
     from . import ui
-    from . import handlers
     addon_preferences.unregister()
     nodes.unregister()
     props.unregister()
