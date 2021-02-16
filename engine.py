@@ -91,7 +91,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
   
         for ob in data.objects:
             # Update polygon meshes
-            if ob.type == 'MESH':
+            if ob.type == 'MESH' and not ob.hide_render:
                 node = AiNodeLookUpByName(ob.name)
                 if node is None:
                     node = btoa.generate_aipolymesh(ob, depsgraph)
