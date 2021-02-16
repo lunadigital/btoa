@@ -2,6 +2,7 @@ import bpy
 import numpy
 import math
 import ctypes
+import bmesh
 from contextlib import contextmanager
 from mathutils import geometry
 
@@ -48,12 +49,24 @@ def calc_sensor_size(camera):
     return result 
 
 def bake_geometry(ob, depsgraph):
+    # Evaluate mesh
     ob_eval = ob.evaluated_get(depsgraph)
     mesh = ob_eval.to_mesh()
 
+    # Create a blank UV map if none exist
     if len(mesh.uv_layers) == 0:
         mesh.uv_layers.new(name='UVMap')
 
+    # Triangulate mesh to remove ngons
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+
+    bmesh.ops.triangulate(bm, faces=bm.faces[:])
+
+    bm.to_mesh(mesh)
+    bm.free()
+
+    # Calculate normals and return
     mesh.calc_tangents()
                 
     return mesh
