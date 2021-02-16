@@ -4,6 +4,8 @@ import numpy
 import os
 from ctypes import *
 
+from bl_ui.properties_render import RENDER_PT_color_management
+
 from arnold import *
 
 from . import btoa
@@ -308,9 +310,11 @@ class ArnoldDrawData:
 
 def register():
     bpy.utils.register_class(ArnoldRenderEngine)
+    RENDER_PT_color_management.COMPAT_ENGINES.add(ArnoldRenderEngine.bl_idname)
 
 def unregister():
     bpy.utils.unregister_class(ArnoldRenderEngine)
+    RENDER_PT_color_management.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)
 
 if __name__ == "__main__":
     register()
