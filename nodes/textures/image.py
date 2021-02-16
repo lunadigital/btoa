@@ -34,6 +34,11 @@ class AiImage(Node, ArnoldNode):
 
     image_user: PointerProperty(type=AiImageUser)
 
+    color_space: StringProperty(
+        name="Color Space",
+        default="auto"
+    )
+
     image_filter: EnumProperty(
         name="Filter",
         items=[
@@ -127,6 +132,7 @@ class AiImage(Node, ArnoldNode):
 
         layout.separator()
 
+        layout.prop(self, "color_space")
         layout.prop(self, "image_filter")
         layout.prop(self, "swrap")
         layout.prop(self, "twrap")
@@ -147,6 +153,7 @@ class AiImage(Node, ArnoldNode):
         if self.image is not None:
             AiNodeSetStr(ainode, "filename", bpy.path.abspath(self.image.filepath))
 
+        AiNodeSetStr(ainode, "color_space", self.color_space)
         AiNodeSetStr(ainode, "filter", self.image_filter)
         AiNodeSetInt(ainode, "swrap", int(self.swrap))
         AiNodeSetInt(ainode, "twrap", int(self.twrap))
