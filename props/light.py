@@ -148,14 +148,6 @@ class ArnoldLight(PropertyGroup):
         max=180
         )
     
-    # Point and spot light attributes
-    radius: FloatProperty(
-        name="Radius",
-        description="",
-        min=0,
-        soft_max=10
-        )
-    
     # Spot light attributes
     aspect_ratio: FloatProperty(
         name="Aspect Ratio",

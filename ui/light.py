@@ -24,7 +24,7 @@ class DATA_PT_arnold_light(DataButtonsPanel, bpy.types.Panel):
         col.separator()
 
         if light.type in ('POINT', 'SPOT'):
-            col.prop(light.arnold, "radius")
+            col.prop(light, "shadow_soft_size", text="Radius")
 
         if light.type == 'SUN':
             col.prop(light.arnold, "angle")

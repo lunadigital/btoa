@@ -195,7 +195,7 @@ def sync_light(ainode, light):
 
     # Light data
     if _type in ('point_light', 'spot_light'):
-        AiNodeSetFlt(ainode, "radius", data.arnold.radius)
+        AiNodeSetFlt(ainode, "radius", data.shadow_soft_size)
     
     if _type == 'distant_light':
         AiNodeSetFlt(ainode, "angle", data.arnold.angle)
