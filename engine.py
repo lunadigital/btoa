@@ -331,7 +331,21 @@ class ArnoldDrawData:
 
 def get_panels():
     exclude_panels = {
-        
+        'RENDER_PT_gpencil',
+        'RENDER_PT_simplify',
+        'RENDER_PT_freestyle',
+        'RENDER_PT_stereoscopy',
+        'DATA_PT_light',
+        'DATA_PT_preview',
+        'DATA_PT_EEVEE_light',
+        'DATA_PT_area',
+        'DATA_PT_spot',
+        'DATA_pt_context_light',
+        'DATA_PT_lens',
+        'DATA_PT_camera',
+        'DATA_PT_camera_safe_areas',
+        'DATA_PT_camera_background_image',
+        'DATA_PT_camera_display',
     }
 
     panels = []
@@ -342,17 +356,31 @@ def get_panels():
 
     return panels
 
+gpencil_poll = None
+
+@classmethod
+def gpencil_poll_override(cls, context):
+    return False
+
 def register():
     bpy.utils.register_class(ArnoldRenderEngine)
     
     for panel in get_panels():
         panel.COMPAT_ENGINES.add(ArnoldRenderEngine.bl_idname)
 
+    # For some reason, there are a handful of classes that get 'ARNOLD'
+    # added to COMPAT_ENGINES even though they're left out of the
+    # list returned from get_panels(). Need to file a bug report
+    # to Blender devs, but for now we'll brute-force remove it.
+    for panel in bpy.types.Panel.__subclasses__():
+        if panel.__name__ == 'DATA_PT_light':
+            panel.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)
+
 def unregister():
     bpy.utils.unregister_class(ArnoldRenderEngine)
     
     for panel in get_panels():
-        if 'CUSTOM' in panel.COMPAT_ENGINES:
+        if ArnoldRenderEngine.bl_idname in panel.COMPAT_ENGINES:
             panel.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)
 
 if __name__ == "__main__":
