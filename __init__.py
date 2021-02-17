@@ -2,7 +2,7 @@ bl_info = {
     "name": "Arnold Render Engine",
     "description": "Unofficial Arnold renderer integration",
     "author": "Luna Digital, Ltd.",
-    "version": (0, 0, 6),
+    "version": (0, 0, 7),
     "blender": (2, 83, 0),
     "category": "Render"
 }
