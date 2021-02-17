@@ -55,15 +55,20 @@ def bake_geometry(ob):
     bm.free()
 
     # Calculate normals and return
-    mesh.calc_tangents()
-                
-    return mesh
+    try:
+        mesh.calc_tangents()
+        return mesh
+    except:
+        return None
 
 def generate_aimatrix(matrix):
     return AtMatrix(*numpy.reshape(matrix.transposed(), -1))
 
 def generate_aipolymesh(ob):
     mesh = bake_geometry(ob)
+    if mesh is None:
+        return None
+        
     verts = mesh.vertices
     loops = mesh.loops
     polygons = mesh.polygons

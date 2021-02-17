@@ -118,7 +118,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 if node is None:
                     node = btoa.generate_aipolymesh(ob)
 
-                if len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
+                # Run as long as node is not None (ie, as long as it's a valid AiPolyMesh object)
+                if node is not None and len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
                     mat_node = AiNodeLookUpByName(ob.data.materials[0].name)
                     AiNodeSetPtr(node, "shader", mat_node)
             
