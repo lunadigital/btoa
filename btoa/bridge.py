@@ -122,13 +122,14 @@ def generate_aipolymesh(ob, depsgraph):
 
     return node
 
-def generate_aicamera(camera):
+def generate_aicamera(camera, depsgraph):
     node = AiNode("persp_camera")
-    sync_cameras(node, camera)    
+    sync_cameras(node, camera, depsgraph)    
     return node
 
-def sync_cameras(ainode, camera):
-    data = camera.data
+def sync_cameras(ainode, camera, depsgraph):
+    ob_eval = camera.evaluated_get(depsgraph)
+    data = ob_eval.data
 
     # Basic stuff
     AiNodeSetStr(ainode, "name", camera.name)

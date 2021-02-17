@@ -28,7 +28,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def is_active(cls, context):
         return context.scene.render.engine == cls.bl_idname
 
-    def update_arnold_options(self, scene):
+    def update_arnold_options(self, scene, depsgraph):
         options = AiUniverseGetOptions()
         bl_options = scene.arnold_options
 
@@ -39,9 +39,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # Update camera node
         camera_node = AiNodeLookUpByName(scene.camera.name)
         if camera_node is None: 
-            camera_node = btoa.generate_aicamera(scene.camera)
+            camera_node = btoa.generate_aicamera(scene.camera, depsgraph)
         else:
-            btoa.sync_cameras(camera_node, scene.camera)
+            btoa.sync_cameras(camera_node, scene.camera, depsgraph)
         
         AiNodeSetPtr(options, "camera", camera_node)
 
@@ -78,7 +78,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         scene = depsgraph.scene
         self.set_render_size(scene)
 
-        self.update_arnold_options(scene)
+        self.update_arnold_options(scene, depsgraph)
 
         for mat in data.materials:
             if (
