@@ -132,20 +132,20 @@ def sync_cameras(ainode, camera, depsgraph):
     data = ob_eval.data
 
     # Basic stuff
-    AiNodeSetStr(ainode, "name", camera.name)
-    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(camera.matrix_world))
+    AiNodeSetStr(ainode, "name", ob_eval.name)
+    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(ob_eval.matrix_world))
     
     # Lens data
-    fov = calc_horizontal_fov(camera)
+    fov = calc_horizontal_fov(ob_eval)
     AiNodeSetFlt(ainode, "fov", math.degrees(fov))
     AiNodeSetFlt(ainode, "exposure", data.arnold.exposure)
 
     # DOF
     if data.dof.focus_object:
         distance = geometry.distance_point_to_plane(
-            camera.matrix_world.to_translation(),
+            ob_eval.matrix_world.to_translation(),
             data.dof_object.matrix_world.to_translation(),
-            camera.matrix_world.col[2][:3]
+            ob_eval.matrix_world.col[2][:3]
         )
     else:
         distance = data.dof.focus_distance
