@@ -24,29 +24,19 @@ AiNodeSet = {
     #"MATRIX": lambda n, i, v: AiNodeSetMatrix(n, i, _AiMatrix(v))
 }
 
-def calc_sensor_size(camera):
+def calc_horizontal_fov(camera):
     options = AiUniverseGetOptions()
 
     xres = AiNodeGetInt(options, "xres")
     yres = AiNodeGetInt(options, "yres")
-    aspect_x = bpy.context.scene.render.pixel_aspect_x
-    aspect_y = bpy.context.scene.render.pixel_aspect_y
 
     data = camera.data
 
-    result = None
-
-    if data.sensor_fit == 'VERTICAL':
-        result = data.sensor_height * xres / yres * aspect_x / aspect_y
+    if data.sensor_fit == 'VERTICAL' or yres > xres:
+        # https://blender.stackexchange.com/questions/23431/how-to-set-camera-horizontal-and-vertical-fov
+        return 2 * math.atan((0.5 * xres) / (0.5 * yres / math.tan(data.angle / 2)))
     else:
-        result = data.sensor_width
-        if data.sensor_fit == 'AUTO':
-            x = xres * aspect_x
-            y = xres * aspect_y
-            if x < y:
-                result *= x / y
-
-    return result 
+        return data.angle
 
 def bake_geometry(ob, depsgraph):
     # Evaluate mesh
@@ -145,7 +135,8 @@ def sync_cameras(ainode, camera):
     AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(camera.matrix_world))
     
     # Lens data
-    AiNodeSetFlt(ainode, "fov", math.degrees(data.angle))
+    fov = calc_horizontal_fov(camera)
+    AiNodeSetFlt(ainode, "fov", math.degrees(fov))
     AiNodeSetFlt(ainode, "exposure", data.arnold.exposure)
 
     # DOF
