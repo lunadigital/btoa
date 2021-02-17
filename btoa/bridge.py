@@ -38,10 +38,8 @@ def calc_horizontal_fov(camera):
     else:
         return data.angle
 
-def bake_geometry(ob, depsgraph):
-    # Evaluate mesh
-    ob_eval = ob.evaluated_get(depsgraph)
-    mesh = ob_eval.to_mesh()
+def bake_geometry(ob):
+    mesh = ob.to_mesh()
 
     # Create a blank UV map if none exist
     if len(mesh.uv_layers) == 0:
@@ -64,8 +62,8 @@ def bake_geometry(ob, depsgraph):
 def generate_aimatrix(matrix):
     return AtMatrix(*numpy.reshape(matrix.transposed(), -1))
 
-def generate_aipolymesh(ob, depsgraph):
-    mesh = bake_geometry(ob, depsgraph)
+def generate_aipolymesh(ob):
+    mesh = bake_geometry(ob)
     verts = mesh.vertices
     loops = mesh.loops
     polygons = mesh.polygons

@@ -28,6 +28,23 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def is_active(cls, context):
         return context.scene.render.engine == cls.bl_idname
 
+    def is_visible(self, ob):
+        visible = False
+
+        # If object is in a visible collection, set
+        # visibility to true
+        for collection in ob.users_collection:
+            if not collection.hide_render:
+                visible = True
+                break
+        
+        # If in a visible collection, set visibility with
+        # object-level settings
+        if visible:
+            visible = not ob.hide_render
+
+        return visible
+
     def update_arnold_options(self, scene, depsgraph):
         options = AiUniverseGetOptions()
         bl_options = scene.arnold_options
@@ -89,12 +106,17 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 snode, vnode, dnode = mat.arnold.node_tree.export()
                 AiNodeSetStr(snode[0], "name", mat.name)
   
-        for ob in data.objects:
+        for dup in depsgraph.object_instances:
+            if dup.is_instance:
+                ob = dup.instance_object
+            else:
+                ob = dup.object
+
             # Update polygon meshes
-            if ob.type == 'MESH' and not ob.hide_render:
+            if ob.type == 'MESH':
                 node = AiNodeLookUpByName(ob.name)
                 if node is None:
-                    node = btoa.generate_aipolymesh(ob, depsgraph)
+                    node = btoa.generate_aipolymesh(ob)
 
                 if len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
                     mat_node = AiNodeLookUpByName(ob.data.materials[0].name)
