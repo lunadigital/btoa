@@ -69,52 +69,68 @@ class ArnoldLight(PropertyGroup):
     #    description="",
     #    default=True
     #    )
-    #diffuse: FloatProperty(
-    #    name="Diffuse",
-    #    description="",
-    #    soft_min=0,
-    #    soft_max=1,
-    #    default=1
-    #    )
-    #specular: FloatProperty(
-    #    name="Specular",
-    #    description="",
-    #    soft_min=0,
-    #    soft_max=1,
-    #    default=1
-    #    )
-    #sss: FloatProperty(
-    #    name="SSS",
-    #    description="",
-    #    soft_min=0,
-    #    soft_max=1,
-    #    default=1
-    #    )
-    #indirect: FloatProperty(
-    #    name="Indirect",
-    #    description="",
-    #    soft_min=0,
-    #    soft_max=1,
-    #    default=1
-    #    )
-    #max_bounces: IntProperty(
-    #    name="Max Bounces",
-    #    description="",
-    #    min=0,
-    #    default=999
-    #    )
+    camera: FloatProperty(
+        name="Camera",
+        description="",
+        min=0,
+        soft_max=1,
+        default=0
+        )
+    # camera multiplier for area lights
+    # default is different than other light types
+    camera_area: FloatProperty(
+        name="Camera",
+        description="",
+        min=0,
+        soft_max=1,
+        default=1
+        )
+    diffuse: FloatProperty(
+        name="Diffuse",
+        description="",
+        min=0,
+        soft_max=1,
+        default=1
+        )
+    specular: FloatProperty(
+        name="Specular",
+        description="",
+        min=0,
+        soft_max=1,
+        default=1
+        )
+    sss: FloatProperty(
+        name="SSS",
+        description="",
+        min=0,
+        soft_max=1,
+        default=1
+        )
+    indirect: FloatProperty(
+        name="Indirect",
+        description="",
+        min=0,
+        soft_max=1,
+        default=1
+        )
+    max_bounces: IntProperty(
+        name="Max Bounces",
+        description="",
+        min=0,
+        default=999
+        )
     #volume_samples: IntProperty(
     #    name="Volume Samples",
     #    subtype='UNSIGNED',
     #    min=0,
     #    default=2
     #    )
-    #volume: FloatProperty(
-    #   name="Volume",
-    #    soft_min=0,
-    #    soft_max=1,
-    #    default=1
-    #    )
+    volume: FloatProperty(
+       name="Volume",
+        min=0,
+        soft_max=1,
+        default=1
+        )
 
     def get_type(self):
         light = self.id_data

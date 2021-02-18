@@ -84,6 +84,7 @@ class DATA_PT_arnold_light_advanced(DataButtonsPanel, bpy.types.Panel):
     bl_idname = "DATA_PT_arnold_light_advanced"
     bl_label = "Advanced"
     COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         layout = self.layout
@@ -95,11 +96,36 @@ class DATA_PT_arnold_light_advanced(DataButtonsPanel, bpy.types.Panel):
         col.prop(light.arnold, "samples")
         col.prop(light.arnold, "normalize")
 
+class DATA_PT_arnold_light_visibility(DataButtonsPanel, bpy.types.Panel):
+    bl_idname = "DATA_PT_arnold_light_visibility"
+    bl_label = "Visibility"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        light = context.light
+
+        layout.use_property_split = True
+
+        col = layout.column()
+        if light.type == 'AREA':
+            col.prop(light.arnold, "camera_area")
+        else:
+            col.prop(light.arnold, "camera")
+        col.prop(light.arnold, "diffuse")
+        col.prop(light.arnold, "specular")
+        col.prop(light.arnold, "sss")
+        col.prop(light.arnold, "indirect")
+        col.prop(light.arnold, "volume")
+        col.prop(light.arnold, "max_bounces")
+
 classes = [
     DATA_PT_arnold_light,
     DATA_PT_arnold_light_shape,
     DATA_PT_arnold_light_shadows,
     DATA_PT_arnold_light_advanced,
+    DATA_PT_arnold_light_visibility
 ]
 
 def register():
