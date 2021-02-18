@@ -90,6 +90,12 @@ class ArnoldLight(PropertyGroup):
         soft_max=1,
         default=1
         )
+    transmission: FloatProperty(
+        name="Transmission",
+        description="",
+        min=0,
+        soft_max=1
+        )
     sss: FloatProperty(
         name="SSS",
         description="",

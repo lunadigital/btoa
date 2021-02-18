@@ -118,6 +118,7 @@ class DATA_PT_arnold_light_visibility(DataButtonsPanel, bpy.types.Panel):
         col.prop(light.arnold, "camera")
         col.prop(light.arnold, "diffuse")
         col.prop(light.arnold, "specular")
+        col.prop(light.arnold, "transmission")
         col.prop(light.arnold, "sss")
         col.prop(light.arnold, "indirect")
         col.prop(light.arnold, "volume")

@@ -200,6 +200,7 @@ def sync_light(ainode, light):
     AiNodeSetFlt(ainode, "camera", data.arnold.camera)
     AiNodeSetFlt(ainode, "diffuse", data.arnold.diffuse)
     AiNodeSetFlt(ainode, "specular", data.arnold.specular)
+    AiNodeSetFlt(ainode, "transmission", data.arnold.transmission)
     AiNodeSetFlt(ainode, "sss", data.arnold.sss)
     AiNodeSetFlt(ainode, "indirect", data.arnold.indirect)
     AiNodeSetFlt(ainode, "volume", data.arnold.volume)
