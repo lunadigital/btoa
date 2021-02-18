@@ -215,6 +215,8 @@ def sync_light(ainode, light):
         AiNodeSetFlt(ainode, "angle", data.arnold.angle)
 
     if _type == 'spot_light':
+        AiNodeSetFlt(ainode, "cone_angle", math.degrees(data.spot_size))
+        AiNodeSetFlt(ainode, "penumbra_angle", math.degrees(data.arnold.penumbra_angle))
         AiNodeSetFlt(ainode, "roundness", data.arnold.spot_roundness)
         AiNodeSetFlt(ainode, "aspect_ratio", data.arnold.aspect_ratio)
         AiNodeSetFlt(ainode, "lens_radius", data.arnold.lens_radius)

@@ -2,6 +2,8 @@ import bpy
 from bpy.types import Scene, PropertyGroup, Light
 from bpy.props import BoolProperty, IntProperty, FloatProperty, FloatVectorProperty, PointerProperty, EnumProperty
 
+import math
+
 from .. import btoa
 
 class ArnoldLight(PropertyGroup):
@@ -162,6 +164,20 @@ class ArnoldLight(PropertyGroup):
         )
     
     # Spot light attributes
+    def update_penumbra_angle(self, context):
+        cone_angle = math.degrees(context.object.data.spot_size)
+        penumbra = math.degrees(context.object.data.arnold.penumbra_angle)
+        context.object.data.spot_blend = 1 - (cone_angle - penumbra) / cone_angle
+
+    penumbra_angle: FloatProperty(
+        name="Penumbra Angle",
+        description="",
+        min=0,
+        max=math.pi,
+        default=0.1178097,
+        subtype='ANGLE',
+        update=update_penumbra_angle
+        )
     aspect_ratio: FloatProperty(
         name="Aspect Ratio",
         description="",
@@ -173,7 +189,8 @@ class ArnoldLight(PropertyGroup):
         name="Lens Radius",
         description="",
         min=0,
-        soft_max=2
+        soft_max=2,
+        subtype='DISTANCE'
         )
     spot_roundness: FloatProperty(
         name="Roundness",

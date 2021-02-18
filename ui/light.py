@@ -48,6 +48,12 @@ class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
         col = layout.column()
 
         if light.type == 'SPOT':
+            col.prop(light, "spot_size", text="Cone Angle")
+            col.prop(light.arnold, "penumbra_angle")
+            col.prop(light, "show_cone")
+
+            col.separator()
+            
             col.prop(light.arnold, "spot_roundness")
             col.prop(light.arnold, "aspect_ratio")
             col.prop(light.arnold, "lens_radius")
