@@ -185,16 +185,7 @@ def sync_light(ainode, light):
 
     # Common properties
     AiNodeSetStr(ainode, "name", light.name)
-
-    transform_matrix = light.matrix_world
-    if data.shape == 'SQUARE':
-        scale_matrix = Matrix.Diagonal((
-            data.size,
-            data.size,
-            data.size
-        )).to_4x4()
-        transform_matrix = light.matrix_world @ scale_matrix
-    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(transform_matrix))
+    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
 
     AiNodeSetRGB(ainode, "color", *data.color)
     AiNodeSetFlt(ainode, "intensity", data.arnold.intensity)
@@ -213,18 +204,11 @@ def sync_light(ainode, light):
     AiNodeSetFlt(ainode, "indirect", data.arnold.indirect)
     AiNodeSetFlt(ainode, "volume", data.arnold.volume)
     AiNodeSetInt(ainode, "max_bounces", data.arnold.max_bounces)
-
     # shadow_color
 
     # Light data
     if _type in ('point_light', 'spot_light'):
         AiNodeSetFlt(ainode, "radius", data.shadow_soft_size)
-    else:
-        # Get largest scale value (disk_light can't be an ellipse)
-        scale = light.scale.x
-        if light.scale.y > scale:
-            scale = light.scale.y
-        AiNodeSetFlt(ainode, "radius", data.size * scale)
     
     if _type == 'distant_light':
         AiNodeSetFlt(ainode, "angle", data.arnold.angle)
@@ -235,6 +219,26 @@ def sync_light(ainode, light):
         AiNodeSetFlt(ainode, "lens_radius", data.arnold.lens_radius)
 
     if _type == 'area_light':
+        # We need to update the scale of the area light to include size parameter
+        if data.shape == 'SQUARE':
+            smatrix = Matrix.Diagonal((
+                data.size,
+                data.size,
+                data.size
+            )).to_4x4()
+            
+            tmatrix = light.matrix_world @ smatrix
+        
+            AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(tmatrix))
+        elif data.shape == 'DISK':
+            # Get largest scale value (disk_light can't be an ellipse)
+            scale = light.scale.x
+            if light.scale.y > scale:
+                scale = light.scale.y
+
+            AiNodeSetFlt(ainode, "radius", data.size * scale)
+        
+
         AiNodeSetFlt(ainode, "roundness", data.arnold.area_roundness)
         AiNodeSetFlt(ainode, "spread", data.arnold.spread)
         AiNodeSetInt(ainode, "resolution", data.arnold.resolution)
