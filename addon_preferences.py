@@ -13,11 +13,15 @@ def arnold_env_exists():
     return False
 
 def get_default_ocio_config():
-    blender_root = os.path.dirname(bpy.app.binary_path)
     version = "{major}.{minor}".format(
         major=bpy.app.version[0],
         minor=bpy.app.version[1]
     )
+
+    if sys.platform == 'darwin':
+        blender_root = os.path.join("/", *bpy.app.binary_path.split("/")[:-2], "Resources")
+    else:
+        blender_root = os.path.dirname(bpy.app.binary_path)
 
     return os.path.join(blender_root, version, "datafiles", "colormanagement", "config.ocio")
 
