@@ -222,9 +222,9 @@ def sync_light(ainode, light):
         # We need to update the scale of the area light to include size parameter
         if data.shape == 'SQUARE':
             smatrix = Matrix.Diagonal((
-                data.size,
-                data.size,
-                data.size
+                data.size / 2,
+                data.size / 2,
+                data.size / 2
             )).to_4x4()
             
             tmatrix = light.matrix_world @ smatrix
@@ -236,7 +236,7 @@ def sync_light(ainode, light):
             if light.scale.y > scale:
                 scale = light.scale.y
 
-            AiNodeSetFlt(ainode, "radius", data.size * scale)
+            AiNodeSetFlt(ainode, "radius", 0.5 * data.size * scale)
         
 
         AiNodeSetFlt(ainode, "roundness", data.arnold.area_roundness)
