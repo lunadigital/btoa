@@ -4,7 +4,7 @@ import math
 import ctypes
 import bmesh
 from contextlib import contextmanager
-from mathutils import geometry
+from mathutils import geometry, Matrix
 
 from . import types
 
@@ -185,7 +185,16 @@ def sync_light(ainode, light):
 
     # Common properties
     AiNodeSetStr(ainode, "name", light.name)
-    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
+
+    transform_matrix = light.matrix_world
+    if data.shape == 'SQUARE':
+        scale_matrix = Matrix.Diagonal((
+            data.size,
+            data.size,
+            data.size
+        )).to_4x4()
+        transform_matrix = light.matrix_world @ scale_matrix
+    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(transform_matrix))
 
     AiNodeSetRGB(ainode, "color", *data.color)
     AiNodeSetFlt(ainode, "intensity", data.arnold.intensity)
@@ -197,22 +206,25 @@ def sync_light(ainode, light):
     AiNodeSetBool(ainode, "cast_volumetric_shadows", data.arnold.cast_volumetric_shadows)
     AiNodeSetFlt(ainode, "shadow_density", data.arnold.shadow_density)
 
-    if _type == 'area_light':
-        AiNodeSetFlt(ainode, "camera", data.arnold.camera_area)
-    else:
-        AiNodeSetFlt(ainode, "camera", data.arnold.camera)
+    AiNodeSetFlt(ainode, "camera", data.arnold.camera)
     AiNodeSetFlt(ainode, "diffuse", data.arnold.diffuse)
     AiNodeSetFlt(ainode, "specular", data.arnold.specular)
     AiNodeSetFlt(ainode, "sss", data.arnold.sss)
     AiNodeSetFlt(ainode, "indirect", data.arnold.indirect)
     AiNodeSetFlt(ainode, "volume", data.arnold.volume)
-    AiNodeSetFlt(ainode, "max_bounces", data.arnold.max_bounces)
+    AiNodeSetInt(ainode, "max_bounces", data.arnold.max_bounces)
 
     # shadow_color
 
     # Light data
     if _type in ('point_light', 'spot_light'):
         AiNodeSetFlt(ainode, "radius", data.shadow_soft_size)
+    else:
+        # Get largest scale value (disk_light can't be an ellipse)
+        scale = light.scale.x
+        if light.scale.y > scale:
+            scale = light.scale.y
+        AiNodeSetFlt(ainode, "radius", data.size * scale)
     
     if _type == 'distant_light':
         AiNodeSetFlt(ainode, "angle", data.arnold.angle)

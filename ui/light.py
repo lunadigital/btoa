@@ -54,6 +54,12 @@ class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
 
         if light.type == 'AREA':
             col.prop(light.arnold, "shape")
+
+            if light.shape == 'DISK':
+                col.prop(light, "size", text="Radius")
+            else:
+                col.prop(light, "size", text="Size")
+
             col.prop(light.arnold, "spread")
             col.prop(light.arnold, "resolution")
             if light.shape == 'SQUARE':
@@ -109,10 +115,7 @@ class DATA_PT_arnold_light_visibility(DataButtonsPanel, bpy.types.Panel):
         layout.use_property_split = True
 
         col = layout.column()
-        if light.type == 'AREA':
-            col.prop(light.arnold, "camera_area")
-        else:
-            col.prop(light.arnold, "camera")
+        col.prop(light.arnold, "camera")
         col.prop(light.arnold, "diffuse")
         col.prop(light.arnold, "specular")
         col.prop(light.arnold, "sss")

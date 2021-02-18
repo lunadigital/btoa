@@ -74,15 +74,6 @@ class ArnoldLight(PropertyGroup):
         description="",
         min=0,
         soft_max=1,
-        default=0
-        )
-    # camera multiplier for area lights
-    # default is different than other light types
-    camera_area: FloatProperty(
-        name="Camera",
-        description="",
-        min=0,
-        soft_max=1,
         default=1
         )
     diffuse: FloatProperty(
