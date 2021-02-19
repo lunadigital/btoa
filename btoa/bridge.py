@@ -210,7 +210,9 @@ def sync_light(ainode, light):
 
     # Common properties
     AiNodeSetStr(ainode, "name", light.name)
-    AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
+    if not hasattr(data, "shape") or light.data.shape != 'RECTANGLE':
+        # Set matrix for everything except cylinder lights
+        AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(light.matrix_world))
 
     AiNodeSetRGB(ainode, "color", *data.color)
     AiNodeSetFlt(ainode, "intensity", data.arnold.intensity)
@@ -247,7 +249,6 @@ def sync_light(ainode, light):
         AiNodeSetFlt(ainode, "lens_radius", data.arnold.lens_radius)
 
     if _type == 'area_light':
-        # We need to update the scale of the area light to include size parameter
         if data.shape == 'SQUARE':
             smatrix = Matrix.Diagonal((
                 data.size / 2,
@@ -260,22 +261,19 @@ def sync_light(ainode, light):
             AiNodeSetMatrix(ainode, "matrix", generate_aimatrix(tmatrix))
         elif data.shape == 'DISK':
             # Get largest scale value (disk_light can't be an ellipse)
-            scale = light.scale.x
-            if light.scale.y > scale:
-                scale = light.scale.y
-
-            AiNodeSetFlt(ainode, "radius", 0.5 * data.size * scale)
+            s = light.scale.x if light.scale.x > light.scale.y else light.scale.y
+            AiNodeSetFlt(ainode, "radius", 0.5 * data.size * s)
         elif data.shape == 'RECTANGLE':
             # Cylinder light
-            # radius
-            top = get_position_along_local_vector(light, data.size_y / 2, 'Y')
-            bottom = get_position_along_local_vector(light, -data.size_y / 2, 'Y')
-
-            print(top)
-            print(bottom)
+            d = 0.5 * data.size_y * light.scale.y
+            top = get_position_along_local_vector(light, d, 'Y')
+            bottom = get_position_along_local_vector(light, -d, 'Y')
 
             AiNodeSetVec(ainode, "top", *top)
             AiNodeSetVec(ainode, "bottom", *bottom)
+
+            s = light.scale.x if light.scale.x > light.scale.z else light.scale.z
+            AiNodeSetFlt(ainode, "radius", 0.5 * data.size * s)
         
         AiNodeSetFlt(ainode, "roundness", data.arnold.area_roundness)
         AiNodeSetFlt(ainode, "spread", data.arnold.spread)

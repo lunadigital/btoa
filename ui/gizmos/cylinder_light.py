@@ -105,7 +105,7 @@ class AiCylinderLightWidgetGroup(GizmoGroup):
     @classmethod
     def poll(cls, context):
         ob = context.object
-        return (ob and ob.type == 'LIGHT' and ob.data.shape and ob.data.shape == 'RECTANGLE')
+        return (ob and ob.data.type == 'AREA' and ob.data.shape and ob.data.shape == 'RECTANGLE' and context.engine == 'ARNOLD')
 
     def setup(self, context):
         ob = context.object

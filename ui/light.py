@@ -63,11 +63,15 @@ class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
 
             if light.shape == 'DISK':
                 col.prop(light, "size", text="Radius")
+            elif light.shape == 'RECTANGLE':
+                col.prop(light, "size", text="Radius")
+                col.prop(light, "size_y", text="Length")
             else:
                 col.prop(light, "size", text="Size")
 
             col.prop(light.arnold, "spread")
             col.prop(light.arnold, "resolution")
+
             if light.shape == 'SQUARE':
                 col.prop(light.arnold, "area_roundness")
                 col.prop(light.arnold, "soft_edge")
