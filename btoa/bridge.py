@@ -4,7 +4,7 @@ import math
 import ctypes
 import bmesh
 from contextlib import contextmanager
-from mathutils import geometry, Matrix
+from mathutils import geometry, Matrix, Vector
 
 from . import types
 
@@ -60,6 +60,31 @@ def bake_geometry(ob):
         return mesh
     except:
         return None
+
+def get_position_along_local_vector(ob, distance, axis):
+    # Determine movement vector
+    if axis == 'X':
+        mv = Vector([distance, 0, 0])
+    elif axis == 'Y':
+        mv = Vector([0, distance, 0])
+    elif axis == 'Z':
+        mv = Vector([0, 0, distance])
+    
+    # Construct rotation matrix
+    rot = ob.matrix_world.to_euler()
+    rx = Matrix.Rotation(rot.x, 4, 'X')
+    ry = Matrix.Rotation(rot.y, 4, 'Y')
+    rz = Matrix.Rotation(rot.z, 4, 'Z')
+    rot_matrix = rx @ ry @ rz
+
+    # Rotate movement vector by rotation matrix
+    rotated_vector = rot_matrix @ mv
+
+    # Create and apply transformation matrix
+    translation_matrix = Matrix.Translation(rotated_vector)
+
+    result = translation_matrix @ ob.matrix_world
+    return result.to_translation()
 
 def generate_aimatrix(matrix):
     return AtMatrix(*numpy.reshape(matrix.transposed(), -1))
@@ -240,8 +265,18 @@ def sync_light(ainode, light):
                 scale = light.scale.y
 
             AiNodeSetFlt(ainode, "radius", 0.5 * data.size * scale)
-        
+        elif data.shape == 'RECTANGLE':
+            # Cylinder light
+            # radius
+            top = get_position_along_local_vector(light, data.size_y / 2, 'Y')
+            bottom = get_position_along_local_vector(light, -data.size_y / 2, 'Y')
 
+            print(top)
+            print(bottom)
+
+            AiNodeSetVec(ainode, "top", *top)
+            AiNodeSetVec(ainode, "bottom", *bottom)
+        
         AiNodeSetFlt(ainode, "roundness", data.arnold.area_roundness)
         AiNodeSetFlt(ainode, "spread", data.arnold.spread)
         AiNodeSetInt(ainode, "resolution", data.arnold.resolution)
