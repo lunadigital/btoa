@@ -22,7 +22,7 @@ For installation instructions, [visit the project wiki](https://github.com/lunad
 Arnold for Blender (BtoA 0.1.0-alpha) is available for Windows, macOS, and Linux. [Go to the downloads page](https://github.com/lunadigital/btoa/releases).
 
 ## Support ##
-Arnold for Blender (BtoA) is not affiliated with or supported by Autodesk or Arnold. For bug reports, please [open a new issue](https://github.com/lunadigital/btoa/issues) on the issue tracker - do not open issues for support questions. Instead, we recommend [joining the discussion](https://blenderartists.org/t/arnold-for-blender-for-real/1284309) on the BlenderArtist forums.
+Arnold for Blender (BtoA) is not affiliated with or supported by Autodesk or Arnold. For bug reports, please [open a new issue](https://github.com/lunadigital/btoa/issues) on the issue tracker - do not open issues for support questions. Instead, we recommend [joining the discussion](https://blenderartists.org/t/arnold-for-blender-0-1-0-alpha-release/1284309) on the BlenderArtist forums.
 
 ## Community ##
 The best way to engage with the BtoA community is to [join the Arnold for Blender Discord server](https://discord.gg/MqZpKFtsNT).
