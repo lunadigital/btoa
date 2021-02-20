@@ -222,6 +222,7 @@ def sync_light(ainode, light):
 
     AiNodeSetBool(ainode, "cast_shadows", data.arnold.cast_shadows)
     AiNodeSetBool(ainode, "cast_volumetric_shadows", data.arnold.cast_volumetric_shadows)
+    AiNodeSetRGB(ainode, "shadow_color", *data.arnold.shadow_color)
     AiNodeSetFlt(ainode, "shadow_density", data.arnold.shadow_density)
 
     AiNodeSetFlt(ainode, "camera", data.arnold.camera)
@@ -232,7 +233,6 @@ def sync_light(ainode, light):
     AiNodeSetFlt(ainode, "indirect", data.arnold.indirect)
     AiNodeSetFlt(ainode, "volume", data.arnold.volume)
     AiNodeSetInt(ainode, "max_bounces", data.arnold.max_bounces)
-    # shadow_color
 
     # Light data
     if _type in ('point_light', 'spot_light'):
