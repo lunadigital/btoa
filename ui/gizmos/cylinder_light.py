@@ -1,10 +1,11 @@
 import bpy
 from bpy.types import Gizmo, GizmoGroup
+from mathutils import Matrix
 
 cylinder_light_shape = (
     # Horizontal lines
-    (-1, -1, 0), (-1, 1, 0),
-    (1, -1, 0), (1, 1, 0),
+    (0, -1, 1), (0, 1, 1),
+    (0, -1, -1), (0, 1, -1),
     # Back-left arc
     (-1, -1, 0), (-0.980785, -1, 0.195091),
     (-0.980785, -1, 0.195091), (-0.923879, -1, 0.382684),
@@ -81,9 +82,18 @@ cylinder_light_shape = (
 
 class AiCylinderLightWidget(Gizmo):
     bl_idname = "VIEW3D_GT_auto_facemap"
+    
+    def update_gizmo_matrix(self, context):
+        light = context.object
+        data = light.data
+
+        r = data.size
+        s = light.scale.y * data.size_y
+        smatrix = Matrix.Diagonal([r, s, r]).to_4x4()
+        self.matrix_offset = smatrix
 
     def draw(self, context):
-        #self._update_offset_matrix()
+        self.update_gizmo_matrix(context)
         self.draw_custom_shape(self.custom_shape)
 
     def setup(self):
@@ -114,7 +124,7 @@ class AiCylinderLightWidgetGroup(GizmoGroup):
         mpr.color = 0.0, 0.0, 0.0
         mpr.alpha = 0.95
 
-        mpr.scale_basis = 0.1
+        mpr.scale_basis = 0.33333
         mpr.use_draw_modal = True
 
         self.energy_widget = mpr
