@@ -89,8 +89,7 @@ class AiCylinderLightWidget(Gizmo):
 
         r = data.size
         s = light.scale.y * data.size_y
-        smatrix = Matrix.Diagonal([r, s, r]).to_4x4()
-        self.matrix_offset = smatrix
+        self.matrix_offset = Matrix.Diagonal([r, s, r]).to_4x4()
 
     def draw(self, context):
         self.update_gizmo_matrix(context)

@@ -128,6 +128,3 @@ def unregister():
     bpy.utils.unregister_class(ArnoldAddonPreferences)
     remove_plugins()
     reset_ocio()
-
-if __name__ == "__main__":
-    register()
