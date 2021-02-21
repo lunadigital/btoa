@@ -172,12 +172,13 @@ def sync_cameras(ainode, camera, depsgraph):
     if data.dof.focus_object:
         distance = geometry.distance_point_to_plane(
             ob_eval.matrix_world.to_translation(),
-            data.dof_object.matrix_world.to_translation(),
+            data.dof.focus_object.matrix_world.to_translation(),
             ob_eval.matrix_world.col[2][:3]
         )
     else:
         distance = data.dof.focus_distance
 
+    AiNodeSetFlt(ainode, "focus_distance", distance)
     AiNodeSetFlt(ainode, "aperture_size", data.arnold.aperture_size)
     AiNodeSetInt(ainode, "aperture_blades", data.arnold.aperture_blades)
     AiNodeSetFlt(ainode, "aperture_rotation", data.arnold.aperture_rotation)

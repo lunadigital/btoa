@@ -37,8 +37,11 @@ class AiNodeSocketFloatNormalized(NodeSocket, AiNodeSocketFloat):
 
 # I need a better name for this
 # Covers the -1 to 1 range
-class AiNodeSocketFloatNormalizedAlt(NodeSocket, AiNodeSocket):
-    default_value: FloatProperty(min=-1, max=1)
+class AiNodeSocketFloatNormalizedAlt(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(
+        min=-1,
+        max=1
+        )
 
 classes = (
     AiNodeSocketFloatUnbounded,

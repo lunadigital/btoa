@@ -1,5 +1,5 @@
 import bpy
-from bl_ui.properties_data_camera import CameraButtonsPanel
+from bl_ui.properties_data_camera import CameraButtonsPanel, CAMERA_PT_presets
 from .. import engine
 
 class DATA_PT_arnold_lens(CameraButtonsPanel, bpy.types.Panel):
@@ -44,8 +44,12 @@ class DATA_PT_arnold_dof(CameraButtonsPanel, bpy.types.Panel):
         self.layout.use_property_split = True
 
         col = self.layout.column()
-        col.prop(camera.arnold, "focus_distance")
         col.enabled = camera.arnold.enable_dof
+        col.prop(camera.dof, "focus_object", text="Focus on Object")
+
+        sub = col.column()
+        sub.active = (camera.dof.focus_object is None)
+        sub.prop(camera.arnold, "focus_distance")
 
 # This is a hacky way to get more control over where Blender
 # panels appear in relation to Arnold panels
