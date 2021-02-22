@@ -202,10 +202,7 @@ class ArnoldNodeOutput:
 class ArnoldNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
-        return {
-            engine.ArnoldRenderEngine.is_active(context) and
-            context.space_data.tree_type == 'ShaderNodeTree'
-        }
+        return engine.ArnoldRenderEngine.is_active(context)
 
 class ArnoldWorldNodeCategory(ArnoldNodeCategory):
     @classmethod
@@ -218,10 +215,7 @@ class ArnoldWorldNodeCategory(ArnoldNodeCategory):
 class ArnoldObjectNodeCategory(ArnoldNodeCategory):
     @classmethod
     def poll(cls, context):
-        return (
-            super().poll(context) and
-            context.view_layer.objects.active.type != 'LIGHT'
-        )
+        return super().poll(context) and context.space_data.tree_type == 'ArnoldShaderTree' and context.object.type != 'LIGHT'
 
 node_categories = [
     ArnoldObjectNodeCategory(
