@@ -253,6 +253,13 @@ node_categories = [
         ]
     ),
     ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_COLOR',
+        "Color",
+        items=[
+            NodeItem("AiColorCorrect")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
         'ARNOLD_NODES_OBJECT_UTILITIES',
         "Utility",
         items=[
