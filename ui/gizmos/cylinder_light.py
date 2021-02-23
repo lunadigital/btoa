@@ -87,9 +87,13 @@ class AiCylinderLightWidget(Gizmo):
         light = context.object
         data = light.data
 
-        r = data.size
-        s = light.scale.y * data.size_y
-        self.matrix_offset = Matrix.Diagonal([r, s, r]).to_4x4()
+        # Gizmo scale is dependent on UI scale
+        ui_scale = context.preferences.system.ui_scale
+        r = data.size / ui_scale * 0.5
+        s = (light.scale.y * data.size_y) / ui_scale * 0.5
+        
+        smatrix = Matrix.Diagonal([r, s, r]).to_4x4()
+        self.matrix_offset = smatrix
 
     def draw(self, context):
         self.update_gizmo_matrix(context)
@@ -121,10 +125,7 @@ class AiCylinderLightWidgetGroup(GizmoGroup):
         mpr = self.gizmos.new(AiCylinderLightWidget.bl_idname)
 
         mpr.color = 0.0, 0.0, 0.0
-        mpr.alpha = 0.95
-
-        mpr.scale_basis = 0.33333
-        mpr.use_draw_modal = True
+        mpr.alpha = 1
 
         self.energy_widget = mpr
 
