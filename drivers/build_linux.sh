@@ -1,1 +1,5 @@
-c++ src/driver_display_callback.cpp -o build/driver_display_callback.so -Wall -O2 -shared -fPIC -I$ARNOLD_ROOT/include -L$ARNOLD_ROOT/bin -lai -std=gnu++11
+ARNOLD_SDK=/path/to/Arnold-6.0.1.0-linux
+c++ src/driver_display_callback.cpp -o build/driver_display_callback_v6.0.1.so -Wall -O2 -shared -fPIC -I$ARNOLD_SDK/include -L$ARNOLD_SDK/bin -lai -std=gnu++11
+
+ARNOLD_SDK=/path/to/Arnold-6.2.0.0-linux
+c++ src/driver_display_callback.cpp -o build/driver_display_callback_v6.2.so -Wall -O2 -shared -fPIC -I$ARNOLD_SDK/include -L$ARNOLD_SDK/bin -lai -std=gnu++11
