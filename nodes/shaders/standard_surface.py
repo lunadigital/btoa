@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Node
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 
 from ..base import ArnoldNode
 
@@ -18,6 +18,15 @@ class AiStandardSurface(Node, ArnoldNode):
     caustics: BoolProperty(name="Caustics")
     internal_reflections: BoolProperty(name="Internal Reflections", default=True)
     exit_to_background: BoolProperty(name="Exit to Background")
+    subsurface_type: EnumProperty(
+        name="Subsurface Type",
+        items=[
+            ("0", "Diffusion", "Diffusion"),
+            ("1", "Randomwalk", "Randomwalk"),
+            ("2", "Randomwalk v2", "Randomwalk v2"),
+        ],
+        default="1"
+    )
 
     def init(self, context):
         self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
@@ -46,7 +55,6 @@ class AiStandardSurface(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
-        # subsurface_type needs to be enum - is this even possible in a socket?
 
         # normal map
         # tangent map
@@ -74,6 +82,7 @@ class AiStandardSurface(Node, ArnoldNode):
         layout.prop(self, "caustics")
         layout.prop(self, "internal_reflections")
         layout.prop(self, "exit_to_background")
+        layout.prop(self, "subsurface_type")
 
     def sub_export(self, ainode):
         AiNodeSetBool(ainode, "transmit_aovs", self.transmit_aovs)
@@ -81,6 +90,7 @@ class AiStandardSurface(Node, ArnoldNode):
         AiNodeSetBool(ainode, "caustics", self.caustics)
         AiNodeSetBool(ainode, "internal_reflections", self.internal_reflections)
         AiNodeSetBool(ainode, "exit_to_background", self.exit_to_background)
+        AiNodeSetInt(ainode, "subsurface_type", int(self.subsurface_type))
 
 def register():
     bpy.utils.register_class(AiStandardSurface)
