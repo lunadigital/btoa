@@ -18,9 +18,9 @@ class AiStandardSurface(Node, ArnoldNode):
     thin_walled_translucency: BoolProperty(name="Thin Walled Translucency")
     caustics: BoolProperty(name="Caustics")
     internal_reflections: BoolProperty(name="Internal Reflections", default=True)
+    exit_to_background: BoolProperty(name="Exit to Background")
 
     def init(self, context):
-        # Initialize sockets
         self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
         self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse Roughness", identifier="diffuse_roughness")
@@ -36,6 +36,7 @@ class AiStandardSurface(Node, ArnoldNode):
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
         self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color")
+        self.inputs.new('AiNodeSocketFloatPositive', "Transmission Depth", identifier="transmission_depth")
         self.inputs.new('AiNodeSocketRGB', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
         self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
@@ -74,6 +75,7 @@ class AiStandardSurface(Node, ArnoldNode):
         layout.prop(self, "thin_walled_translucency")
         layout.prop(self, "caustics")
         layout.prop(self, "internal_reflections")
+        layout.prop(self, "exit_to_background")
 
     def sub_export(self, ainode):
         AiNodeSetBool(ainode, "transmit_aovs", self.transmit_aovs)
@@ -81,6 +83,7 @@ class AiStandardSurface(Node, ArnoldNode):
         AiNodeSetBool(ainode, "thin_walled_translucency", self.thin_walled_translucency)
         AiNodeSetBool(ainode, "caustics", self.caustics)
         AiNodeSetBool(ainode, "internal_reflections", self.internal_reflections)
+        AiNodeSetBool(ainode, "exit_to_background", self.exit_to_background)
 
 def register():
     bpy.utils.register_class(AiStandardSurface)
