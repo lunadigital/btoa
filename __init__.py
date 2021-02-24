@@ -50,7 +50,6 @@ def unregister():
         ui.unregister()
 
         aienv.remove_plugins()
-        aienv.reset_arnold_bin()
     else:
         prefs.full_unregister = False
           

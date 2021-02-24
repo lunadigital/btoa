@@ -37,12 +37,6 @@ def configure_arnold_environment():
         if python_path not in sys.path:
             sys.path.append(python_path)
 
-        bin_path = os.path.join(prefs.arnold_path, "bin")
-        if os.getenv("LD_LIBRARY_PATH") is None:
-            os.environ["LD_LIBRARY_PATH"] = bin_path
-        elif bin_path not in os.getenv("LD_LIBRARY_PATH"):
-            os.environ["LD_LIBRARY_PATH"] += os.pathsep + bin_path
-
 def configure_plugins():
     addon_root = os.path.dirname(os.path.abspath(__file__))
     drivers = os.path.join(addon_root, "drivers", "build")
@@ -69,18 +63,6 @@ def remove_plugins():
         os.environ["ARNOLD_PLUGIN_PATH"] = os.pathsep.join(plugins)
     else:
         del os.environ["ARNOLD_PLUGIN_PATH"]
-
-def reset_arnold_bin():
-    prefs = bpy.context.preferences.addons[__package__].preferences
-
-    library_path = os.getenv("LD_LIBRARY_PATH").split(os.pathsep)
-    bin_path = os.path.join(prefs.arnold_path, "bin")
-
-    if len(library_path) > 1:
-        library_path.remove(bin_path)
-        os.environ["LD_LIBRARY_PATH"] = os.pathsep.join(library_path)
-    else:
-        del os.environ["LD_LIBRARY_PATH"]
 
 def get_default_ocio_config():
     version = "{major}.{minor}".format(
