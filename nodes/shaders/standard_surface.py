@@ -15,7 +15,6 @@ class AiStandardSurface(Node, ArnoldNode):
 
     transmit_aovs: BoolProperty(name="Transmit AOVs")
     thin_walled: BoolProperty(name="Thin Walled")
-    thin_walled_translucency: BoolProperty(name="Thin Walled Translucency")
     caustics: BoolProperty(name="Caustics")
     internal_reflections: BoolProperty(name="Internal Reflections", default=True)
     exit_to_background: BoolProperty(name="Exit to Background")
@@ -72,7 +71,6 @@ class AiStandardSurface(Node, ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "transmit_aovs")
         layout.prop(self, "thin_walled")
-        layout.prop(self, "thin_walled_translucency")
         layout.prop(self, "caustics")
         layout.prop(self, "internal_reflections")
         layout.prop(self, "exit_to_background")
@@ -80,7 +78,6 @@ class AiStandardSurface(Node, ArnoldNode):
     def sub_export(self, ainode):
         AiNodeSetBool(ainode, "transmit_aovs", self.transmit_aovs)
         AiNodeSetBool(ainode, "thin_walled", self.thin_walled)
-        AiNodeSetBool(ainode, "thin_walled_translucency", self.thin_walled_translucency)
         AiNodeSetBool(ainode, "caustics", self.caustics)
         AiNodeSetBool(ainode, "internal_reflections", self.internal_reflections)
         AiNodeSetBool(ainode, "exit_to_background", self.exit_to_background)
