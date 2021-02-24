@@ -243,6 +243,7 @@ node_categories = [
         'ARNOLD_NODES_OBJECT_TEXTURES',
         "Texture",
         items=[
+            NodeItem("AiCellNoise"),
             NodeItem("AiImage")
         ]
     ),

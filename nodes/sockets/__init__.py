@@ -1,16 +1,23 @@
 from . import ainodesocketcolor
 from . import ainodesocketcoord
 from . import ainodesocketfloat
+from . import ainodesocketint
 from . import ainodesocketsurface
+from . import ainodesocketvector
+
+modules = (
+    ainodesocketcolor,
+    ainodesocketcoord,
+    ainodesocketfloat,
+    ainodesocketint,
+    ainodesocketsurface,
+    ainodesocketvector
+)
 
 def register():
-    ainodesocketcolor.register()
-    ainodesocketcoord.register()
-    ainodesocketfloat.register()
-    ainodesocketsurface.register()
+    for m in modules:
+        m.register()
 
 def unregister():
-    ainodesocketcolor.unregister()
-    ainodesocketcoord.unregister()
-    ainodesocketfloat.unregister()
-    ainodesocketsurface.unregister()
+    for m in reversed(modules):
+        m.unregister()
