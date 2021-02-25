@@ -65,17 +65,8 @@ def remove_plugins():
         del os.environ["ARNOLD_PLUGIN_PATH"]
 
 def get_default_ocio_config():
-    version = "{major}.{minor}".format(
-        major=bpy.app.version[0],
-        minor=bpy.app.version[1]
-    )
-
-    if sys.platform == 'darwin':
-        blender_root = os.path.join("/", *bpy.app.binary_path.split("/")[:-2], "Resources")
-    else:
-        blender_root = os.path.dirname(bpy.app.binary_path)
-
-    return os.path.join(blender_root, version, "datafiles", "colormanagement", "config.ocio")
+    addon_root = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(addon_root, "config", "colormanagement", "config.ocio")
 
 def configure_ocio():
     if not "OCIO" in os.environ:
