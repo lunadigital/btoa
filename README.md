@@ -4,16 +4,16 @@ Arnold for Blender (or BtoA) provides a bridge to the Arnold renderer from withi
 
 ## Features ##
 
-| Geometry & Objects                 | Lights              | Shaders            | Textures | UI Elements                     |
-| ---------------------------------- | ------------------- | ------------------ | -------- | ------------------------------- |
-| Cameras                            | Spot light          | Lambert            | Image    | Material nodes                  | 
-| Polygon meshes (w/ modifier stack) | Distant (sun) light | Standard Surface   |          | Renders images to Render Result |
-|                                    | Spot light          | Ambient Occlusion  |          | No viewport rendering yet       |
-|                                    | Quad light          | Car Paint          |          |                                 |
-|                                    | Disk light          | Flat               |          |                                 |
-|                                    | Cylinder light      | Matte              |          |                                 |
-|                                    |                     | Shadow matte       |          |                                 |
-|                                    |                     | Wireframe          |          |                                 |
+| Geometry & Objects | Lights              | Shaders            | Textures     | UI Elements                     |
+| ------------------ | ------------------- | ------------------ | ------------ | ------------------------------- |
+| Cameras            | Spot light          | Lambert            | Cell noise   | Material nodes                  | 
+| Mesh objects       | Distant (sun) light | Standard Surface   | Checkerboard | Renders images to Render Result |
+| Curves             | Spot light          | Ambient Occlusion  | Image        | No viewport rendering yet       |
+| Fonts              | Quad light          | Car Paint          |              |                                 |
+|                    | Disk light          | Flat               |              |                                 |
+|                    | Cylinder light      | Matte              |              |                                 |
+|                    |                     | Shadow matte       |              |                                 |
+|                    |                     | Wireframe          |              |                                 |
 
 ## Documentation ##
 For installation instructions, [visit the project wiki](https://github.com/lunadigital/btoa/wiki). Whether or not you're new to Arnold, the [Arnold documentation](https://www.arnoldrenderer.com/arnold/documentation/) should answer most of your Arnold-specific questions. We're working on documentation for BtoA, including additional wiki pages and YouTube tutorials.
