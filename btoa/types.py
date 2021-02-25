@@ -13,8 +13,8 @@ AI_AREALIGHT_TYPE = {
 
 BL_CONVERTIBLE_TYPES = [
     'MESH',
-    # 'CURVE',
+    'FONT',
+    'CURVE',
     # 'SURFACE',
     # 'META',
-    # 'FONT',
 ]

@@ -112,8 +112,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             else:
                 ob = dup.object
 
-            # Update polygon meshes
-            if ob.type == 'MESH':
+            if ob.type in btoa.BL_CONVERTIBLE_TYPES:
                 node = AiNodeLookUpByName(ob.name)
                 if node is None:
                     node = btoa.generate_aipolymesh(ob)
