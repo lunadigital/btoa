@@ -244,6 +244,7 @@ node_categories = [
         "Texture",
         items=[
             NodeItem("AiCellNoise"),
+            NodeItem("AiCheckerboard"),
             NodeItem("AiImage")
         ]
     ),

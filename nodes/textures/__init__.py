@@ -1,10 +1,19 @@
-from . import cell_noise
-from . import image
+from . import (
+    cell_noise,
+    checkerboard,
+    image
+)
+
+modules = (
+    cell_noise,
+    checkerboard,
+    image
+)
 
 def register():
-    cell_noise.register()
-    image.register()
+    for m in modules:
+        m.register()
 
 def unregister():
-    cell_noise.unregister()
-    image.unregister()
+    for m in reversed(modules):
+        m.unregister()
