@@ -6,8 +6,6 @@ from ctypes import *
 
 from bl_ui.properties_render import RENDER_PT_color_management
 
-from arnold import *
-
 from . import btoa
 
 class ArnoldRenderEngine(bpy.types.RenderEngine):
@@ -19,10 +17,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.scene_data = None
         self.draw_data = None
 
-        AiBegin()
+        btoa.start_session()
 
     def __del__(self):
-        AiEnd()
+        btoa.end_session()
 
     @classmethod
     def is_active(cls, context):
@@ -46,36 +44,38 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         return visible
 
     def update_arnold_options(self, scene, depsgraph):
-        options = AiUniverseGetOptions()
+        options = btoa.Options()
         bl_options = scene.arnold_options
 
         # Update render resolution
-        AiNodeSetInt(options, "xres", self.size_x)
-        AiNodeSetInt(options, "yres", self.size_y)
+        options.set_int("xres", self.size_x)
+        options.set_int("yres", self.size_y)
 
         # Update camera node
-        camera_node = AiNodeLookUpByName(scene.camera.name)
+        camera_node = btoa.get_node_by_name(scene.camera.name)
         if camera_node is None: 
+            # TODO: Replace with btoa equivalent
             camera_node = btoa.generate_aicamera(scene.camera, depsgraph)
         else:
+            # TODO: Replace with btoa equivalent
             btoa.sync_cameras(camera_node, scene.camera, depsgraph)
         
-        AiNodeSetPtr(options, "camera", camera_node)
+        options.set_pointer("camera", camera_node)
 
         # Update sampling settings
-        AiNodeSetInt(options, "AA_samples", bl_options.aa_samples)
-        AiNodeSetInt(options, "GI_diffuse_samples", bl_options.diffuse_samples)
-        AiNodeSetInt(options, "GI_specular_samples", bl_options.specular_samples)
-        AiNodeSetInt(options, "GI_transmission_samples", bl_options.transmission_samples)
-        AiNodeSetInt(options, "GI_sss_samples", bl_options.sss_samples)
-        AiNodeSetInt(options, "GI_volume_samples", bl_options.volume_samples)
-        AiNodeSetFlt(options, "AA_sample_clamp", bl_options.sample_clamp)
-        AiNodeSetBool(options, "AA_sample_clamp_affects_aovs", bl_options.clamp_aovs)
-        AiNodeSetFlt(options, "indirect_sample_clamp", bl_options.indirect_sample_clamp)
-        AiNodeSetFlt(options, "low_light_threshold", bl_options.low_light_threshold)
+        options.set_int("AA_samples", bl_options.aa_samples)
+        options.set_int("GI_diffuse_samples", bl_options.diffuse_samples)
+        options.set_int("GI_specular_samples", bl_options.specular_samples)
+        options.set_int("GI_transmission_samples", bl_options.transmission_samples)
+        options.set_int("GI_sss_samples", bl_options.sss_samples)
+        options.set_int("GI_volume_samples", bl_options.volume_samples)
+        options.set_float("AA_sample_clamp", bl_options.sample_clamp)
+        options.set_bool("AA_sample_clamp_affects_aovs", bl_options.clamp_aovs)
+        options.set_float("indirect_sample_clamp", bl_options.indirect_sample_clamp)
+        options.set_float("low_light_threshold", bl_options.low_light_threshold)
 
         if bl_options.aa_seed > 0:
-            AiNodeSetInt(options, "AA_seed", bl_options.aa_seed)
+            options.set_int("AA_seed", bl_options.aa_seed)
 
         # Update ray depth settings
         AiNodeSetInt(options, "GI_total_depth", bl_options.total_depth)
