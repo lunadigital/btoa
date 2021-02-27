@@ -3,8 +3,6 @@ from bpy.props import FloatProperty, BoolProperty, IntProperty
 
 from ..base import ArnoldNode
 
-from arnold import AiNodeSetUInt, AiNodeSetFlt, AiNodeSetBool
-
 class AiAmbientOcclusion(Node, ArnoldNode):
     '''Ambient occlusion shader. Outputs RGB.'''
     bl_label = "Ambient Occlusion"
@@ -55,13 +53,13 @@ class AiAmbientOcclusion(Node, ArnoldNode):
         layout.prop(self, "invert_normals")
         layout.prop(self, "self_only")
 
-    def sub_export(self, ainode):
-        AiNodeSetUInt(ainode, "samples", self.samples)
-        AiNodeSetFlt(ainode, "spread", self.spread)
-        AiNodeSetFlt(ainode, "near_clip", self.near_clip)
-        AiNodeSetFlt(ainode, "far_clip", self.far_clip)
-        AiNodeSetBool(ainode, "invert_normals", self.invert_normals)
-        AiNodeSetBool(ainode, "self_only", self.self_only)
+    def sub_export(self, node):
+        node.set_uint("samples", self.samples)
+        node.set_float("spread", self.spread)
+        node.set_float("near_clip", self.near_clip)
+        node.set_float("far_clip", self.far_clip)
+        node.set_bool("invert_normals", self.invert_normals)
+        node.set_bool("self_only", self.self_only)
 
 def register():
     from bpy.utils import register_class

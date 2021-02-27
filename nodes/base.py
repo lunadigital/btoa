@@ -8,8 +8,6 @@ from nodeitems_utils import NodeCategory, NodeItem
 from .. import engine
 from .. import btoa
 
-from arnold import *
-
 class ArnoldWorldTree(NodeTree):
     bl_idname = "ArnoldWorldTree"
     bl_label = "Arnold World"
@@ -160,7 +158,7 @@ class ArnoldNode:
         pass
 
     def export(self):
-        node = AiNode(self.ai_name)
+        node = btoa.BtNode(self.ai_name)
 
         self.sub_export(node)
 
@@ -168,12 +166,12 @@ class ArnoldNode:
             socket_value, value_type = i.export()
             
             if socket_value is not None and value_type is not None:
-                if value_type == 'AINODE':
-                    AiNodeLink(socket_value, i.identifier, node)
+                if value_type == 'BTNODE':
+                    socket_value.link(i.identifier, node)
                 else:
-                    btoa.AiNodeSet[value_type](node, i.identifier, socket_value)
+                    btoa.BT_SET_LAMBDA[value_type](node, i.identifier, socket_value)
 
-        return node, 'AINODE'
+        return node, 'BTNODE'
 
 class ArnoldNodeOutput:
     bl_label = "Output"

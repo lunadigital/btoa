@@ -3,8 +3,6 @@ from bpy.props import EnumProperty, BoolProperty
 
 from ..base import ArnoldNode
 
-from arnold import AiNodeSetInt, AiNodeSetBool
-
 class AiWireframe(Node, ArnoldNode):
     ''' Color shader which produces a wire-frame style output (as RGB). '''
     bl_label = "Wireframe"
@@ -36,9 +34,9 @@ class AiWireframe(Node, ArnoldNode):
         layout.prop(self, "edge_type")
         layout.prop(self, "raster_space")
 
-    def sub_export(self, ainode):
-        AiNodeSetInt(ainode, "edge_type", int(self.edge_type))
-        AiNodeSetBool(ainode, "raster_space", self.raster_space)
+    def sub_export(self, node):
+        node.set_int("edge_type", int(self.edge_type))
+        node.set_bool("raster_space", self.raster_space)
 
 def register():
     from bpy.utils import register_class

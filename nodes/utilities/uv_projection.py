@@ -4,8 +4,6 @@ from bpy.props import EnumProperty
 
 from ..base import ArnoldNode
 
-from arnold import *
-
 class AiUVProjection(Node, ArnoldNode):
     '''
     Turns any 2D texture into a 3D texture that you can place on the
@@ -38,8 +36,8 @@ class AiUVProjection(Node, ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "projection_type")
 
-    def sub_export(self, ainode):
-        AiNodeSetStr(ainode, "projection_type", self.projection_type)
+    def sub_export(self, node):
+        node.set_string("projection_type", self.projection_type)
 
 def register():
     from bpy.utils import register_class

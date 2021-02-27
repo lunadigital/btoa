@@ -4,8 +4,6 @@ from bpy.props import BoolProperty, EnumProperty
 
 from ..base import ArnoldNode
 
-from arnold import *
-
 class AiStandardSurface(Node, ArnoldNode):
     '''A physically-based shader. Outputs a simple color (RGB).'''
     bl_label = "Standard Surface"
@@ -84,13 +82,13 @@ class AiStandardSurface(Node, ArnoldNode):
         layout.prop(self, "exit_to_background")
         layout.prop(self, "subsurface_type")
 
-    def sub_export(self, ainode):
-        AiNodeSetBool(ainode, "transmit_aovs", self.transmit_aovs)
-        AiNodeSetBool(ainode, "thin_walled", self.thin_walled)
-        AiNodeSetBool(ainode, "caustics", self.caustics)
-        AiNodeSetBool(ainode, "internal_reflections", self.internal_reflections)
-        AiNodeSetBool(ainode, "exit_to_background", self.exit_to_background)
-        AiNodeSetInt(ainode, "subsurface_type", int(self.subsurface_type))
+    def sub_export(self, node):
+        node.set_bool("transmit_aovs", self.transmit_aovs)
+        node.set_bool("thin_walled", self.thin_walled)
+        node.set_bool("caustics", self.caustics)
+        node.set_bool("internal_reflections", self.internal_reflections)
+        node.set_bool("exit_to_background", self.exit_to_background)
+        node.set_int("subsurface_type", int(self.subsurface_type))
 
 def register():
     bpy.utils.register_class(AiStandardSurface)

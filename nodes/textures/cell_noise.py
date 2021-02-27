@@ -4,8 +4,6 @@ from bpy.props import EnumProperty, BoolProperty
 
 from ..base import ArnoldNode
 
-from arnold import *
-
 class AiCellNoise(Node, ArnoldNode):
     ''' A cell noise pattern generator. '''
     bl_label = "Cell Noise"
@@ -46,9 +44,9 @@ class AiCellNoise(Node, ArnoldNode):
         layout.prop(self, "pattern")
         layout.prop(self, "additive")
     
-    def sub_export(self, ainode):
-        AiNodeSetInt(ainode, "pattern", int(self.pattern))
-        AiNodeSetBool(ainode, "additive", self.additive)
+    def sub_export(self, node):
+        node.set_int("pattern", int(self.pattern))
+        node.set_bool("additive", self.additive)
 
 classes = (
     AiCellNoise,

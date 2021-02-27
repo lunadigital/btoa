@@ -3,8 +3,6 @@ from bpy.props import BoolProperty
 
 from ..base import ArnoldNode
 
-from arnold import AiNodeSetBool
-
 class AiMatte(Node, ArnoldNode):
     ''' Enables you to create holdout effects by rendering the alpha as zero. '''
     bl_label = "Matte"

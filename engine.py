@@ -2,11 +2,12 @@ import bpy
 import bgl
 import numpy
 import os
-from ctypes import *
+import ctypes
 
 from bl_ui.properties_render import RENDER_PT_color_management
 
 from . import btoa
+from .utils import btoa_utils
 
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
@@ -43,24 +44,17 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         return visible
 
-    def update_arnold_options(self, scene, depsgraph):
-        options = btoa.Options()
+    def update(self, data, depsgraph):
+        scene = depsgraph.scene
         bl_options = scene.arnold_options
 
+        self.set_render_size(scene)
+
+        options = btoa.BtOptions()
+        
         # Update render resolution
         options.set_int("xres", self.size_x)
         options.set_int("yres", self.size_y)
-
-        # Update camera node
-        camera_node = btoa.get_node_by_name(scene.camera.name)
-        if camera_node is None: 
-            # TODO: Replace with btoa equivalent
-            camera_node = btoa.generate_aicamera(scene.camera, depsgraph)
-        else:
-            # TODO: Replace with btoa equivalent
-            btoa.sync_cameras(camera_node, scene.camera, depsgraph)
-        
-        options.set_pointer("camera", camera_node)
 
         # Update sampling settings
         options.set_int("AA_samples", bl_options.aa_samples)
@@ -78,33 +72,27 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             options.set_int("AA_seed", bl_options.aa_seed)
 
         # Update ray depth settings
-        AiNodeSetInt(options, "GI_total_depth", bl_options.total_depth)
-        AiNodeSetInt(options, "GI_diffuse_depth", bl_options.diffuse_depth)
-        AiNodeSetInt(options, "GI_specular_depth", bl_options.specular_depth)
-        AiNodeSetInt(options, "GI_transmission_depth", bl_options.transmission_depth)
-        AiNodeSetInt(options, "GI_volume_depth", bl_options.volume_depth)
-        AiNodeSetInt(options, "auto_transparency_depth", bl_options.transparency_depth)
+        options.set_int("GI_total_depth", bl_options.total_depth)
+        options.set_int("GI_diffuse_depth", bl_options.diffuse_depth)
+        options.set_int("GI_specular_depth", bl_options.specular_depth)
+        options.set_int("GI_transmission_depth", bl_options.transmission_depth)
+        options.set_int("GI_volume_depth", bl_options.volume_depth)
+        options.set_int("auto_transparency_depth", bl_options.transparency_depth)
 
         # Render settings
-        AiNodeSetInt(options, "bucket_size", bl_options.bucket_size)
-        AiNodeSetStr(options, "bucket_scanning", bl_options.bucket_scanning)
-        AiNodeSetBool(options, "parallel_node_init", bl_options.parallel_node_init)
-        AiNodeSetInt(options, "threads", bl_options.threads)
-
-    def update(self, data, depsgraph):
-        scene = depsgraph.scene
-        self.set_render_size(scene)
-
-        self.update_arnold_options(scene, depsgraph)
+        options.set_int("bucket_size", bl_options.bucket_size)
+        options.set_string("bucket_scanning", bl_options.bucket_scanning)
+        options.set_bool("parallel_node_init", bl_options.parallel_node_init)
+        options.set_int("threads", bl_options.threads)
 
         for mat in data.materials:
             if (
-                AiNodeLookUpByName(mat.name) is None and
+                not btoa.get_node_by_name(mat.name).is_valid() and
                 mat.name != "Dots Stroke" and
                 mat.arnold.node_tree is not None
             ):
                 snode, vnode, dnode = mat.arnold.node_tree.export()
-                AiNodeSetStr(snode[0], "name", mat.name)
+                snode[0].set_string("name", mat.name)
   
         for dup in depsgraph.object_instances:
             if dup.is_instance:
@@ -112,50 +100,58 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             else:
                 ob = dup.object
 
-            if ob.type in btoa.BL_CONVERTIBLE_TYPES:
-                node = AiNodeLookUpByName(ob.name)
-                if node is None:
-                    node = btoa.generate_aipolymesh(ob)
+            if ob.type in btoa.BT_CONVERTIBLE_TYPES:
+                node = btoa.get_node_by_name(ob.name)
+                if not node.is_valid():
+                    node = btoa_utils.create_polymesh(ob)
 
-                # Run as long as node is not None (ie, as long as it's a valid AiPolyMesh object)
                 if node is not None and len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
-                    mat_node = AiNodeLookUpByName(ob.data.materials[0].name)
-                    AiNodeSetPtr(node, "shader", mat_node)
+                    mat_node = btoa.get_node_by_name(ob.data.materials[0].name)
+                    node.set_pointer("shader", mat_node)
+            elif ob.type == 'CAMERA' and ob.name == scene.camera.name:
+                camera_node = btoa.get_node_by_name(ob.name)
+                if not camera_node.is_valid(): 
+                    camera_node = btoa_utils.create_camera(ob)
+                else:
+                    btoa_utils.sync_camera(camera_node, ob)
+                
+                options.set_pointer("camera", camera_node)
             
             # Update lights
             if ob.type == 'LIGHT':
-                node = AiNodeLookUpByName(ob.name)
+                node = btoa.get_node_by_name(ob.name)
 
-                if node is None:
-                    node = btoa.generate_ailight(ob)
+                if not node.is_valid():
+                    node = btoa_utils.create_light(ob)
 
                 # If existing AiNode is an area light, but doesn't match the type in Blender
-                elif AiNodeIs(node, "quad_light") or AiNodeIs(node, "disk_light") or AiNodeIs(node, "cylinder_light"):
-                    if not AiNodeIs(node, btoa.AI_AREALIGHT_TYPE[ob.data.type]):
+                elif node.type_is("quad_light") or node.type_is("disk_light") or node.type_is("cylinder_light"):
+                    if not node.type_is(btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape]):
                         AiNodeDestroy(node)
-                        node = btoa.generate_ailight(ob)
+                        node = btoa_utils.create_light(ob)
 
                 # If existing AiNode is a non-area light type, but doesn't match the type in Blender
-                elif not AiNodeIs(node, btoa.AI_LIGHT_TYPE[ob.data.type]):
+                elif not node.type_is(btoa.BT_LIGHT_CONVERSIONS[ob.data.type]):
                     AiNodeDestroy(node)
-                    node = btoa.generate_ailight(ob)
+                    node = btoa_utils.create_light(ob)
 
                 # If AiNode exists and same type, just update params
                 else:
-                    btoa.sync_light(node, ob)
+                    btoa_utils.sync_light(node, ob)
 
-        filter = AiNode("gaussian_filter")
-        AiNodeSetStr(filter, "name", "gaussianFilter")
+        gaussian_filter = btoa.BtNode("gaussian_filter")
+        gaussian_filter.set_string("name", "gaussianFilter")
 
-        options = AiUniverseGetOptions()
+        options = btoa.BtOptions()
 
-        outputs = AiArrayAllocate(1, 1, AI_TYPE_STRING)
-        AiArraySetStr(outputs, 0, "RGBA RGBA gaussianFilter __display_driver")
-        AiNodeSetArray(options, "outputs", outputs)
+        outputs = btoa.BtArray()
+        outputs.allocate(1, 1, 'STRING')
+        outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
+        options.set_array("outputs", outputs)
 
-        color_manager = AiNode("color_manager_ocio")
-        AiNodeSetStr(color_manager, "config", os.getenv("OCIO"))
-        AiNodeSetPtr(options, "color_manager", color_manager)
+        color_manager = btoa.BtColorManager()
+        color_manager.set_string("config", os.getenv("OCIO"))
+        options.set_pointer("color_manager", color_manager)
 
     def render(self, depsgraph):
         engine = self
@@ -175,44 +171,27 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     result.layers[0].passes["Combined"].rect = rect
                     engine.end_result(result)
                 finally:
-                    AiFree(buffer)
+                    btoa.free(buffer)
             else:
                 result = engine.begin_result(x, engine.size_y - y - height, width, height)
                 _htiles[(x, y)] = result
             
             if engine.test_break():
-                AiRenderAbort()
+                btoa.abort()
                 while _htiles:
                     (x, y), result = _htiles.popitem()
                     engine.end_result(result, cancel=True)
 
         cb = btoa.AtDisplayCallback(display_callback)
         
-        displayNode = AiNodeLookUpByName("__display_driver")
-        if displayNode is None:
-            displayNode = AiNode("driver_display_callback")
-            AiNodeSetStr(displayNode, "name", "__display_driver")
+        display_node = btoa.get_node_by_name("__display_driver")
+        if not display_node.is_valid():
+            display_node = btoa.BtNode("driver_display_callback")
+            display_node.set_string("name", "__display_driver")
         
-        AiNodeSetPtr(displayNode, "callback", cb)
+        display_node.set_pointer("callback", cb)
 
-        AiRender(AI_RENDER_MODE_CAMERA)
-
-        # Fill the render result with a flat color for now.
-        # This is where we will make all of our Arnold calls
-        # in the future.
-        '''if self.is_preview:
-            color = [0.1, 0.2, 0.1, 1.0]
-        else:
-            color = [0.2, 0.1, 0.1, 1.0]
-
-        pixel_count = self.size_x * self.size_y
-        rect = [color] * pixel_count
-
-        # Write pixels to RenderResult
-        result = self.begin_result(0, 0, self.size_x, self.size_y)
-        layer = result.layers[0].passes["Combined"]
-        layer.rect = rect
-        self.end_result(result)'''
+        btoa.render()
 
     def view_update(self, context, depsgraph):
         region = context.region

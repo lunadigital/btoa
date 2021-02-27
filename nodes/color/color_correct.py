@@ -4,8 +4,6 @@ from bpy.props import BoolProperty
 
 from ..base import ArnoldNode
 
-from arnold import *
-
 class AiColorCorrect(Node, ArnoldNode):
     '''
     Allows you to adjust the gamma, hue, saturation, contrast, and exposure of
@@ -51,10 +49,10 @@ class AiColorCorrect(Node, ArnoldNode):
         layout.prop(self, "invert")
         layout.prop(self, "invert_alpha")
 
-    def sub_export(self, ainode):
-        AiNodeSetBool(ainode, "alpha_is_luminance", self.alpha_is_luminance)
-        AiNodeSetBool(ainode, "invert", self.invert)
-        AiNodeSetBool(ainode, "invert_alpha", self.invert_alpha)
+    def sub_export(self, node):
+        node.set_bool("alpha_is_luminance", self.alpha_is_luminance)
+        node.set_bool("invert", self.invert)
+        node.set_bool("invert_alpha", self.invert_alpha)
 
 classes = (
     AiColorCorrect,

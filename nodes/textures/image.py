@@ -4,8 +4,6 @@ from bpy.props import PointerProperty, EnumProperty, FloatProperty, BoolProperty
 
 from ..base import ArnoldNode
 
-from arnold import *
-
 class AiImageUser(PropertyGroup):
     image: PointerProperty(type=bpy.types.Image)
 
@@ -149,26 +147,26 @@ class AiImage(Node, ArnoldNode):
         layout.prop(self, "toffset")
         layout.prop(self, "ignore_missing_textures")
 
-    def sub_export(self, ainode):
+    def sub_export(self, node):
         if self.image is not None:
-            AiNodeSetStr(ainode, "filename", bpy.path.abspath(self.image.filepath))
+            node.set_string("filename", bpy.path.abspath(self.image.filepath))
 
-        AiNodeSetStr(ainode, "color_space", self.color_space)
-        AiNodeSetStr(ainode, "filter", self.image_filter)
-        AiNodeSetInt(ainode, "swrap", int(self.swrap))
-        AiNodeSetInt(ainode, "twrap", int(self.twrap))
-        AiNodeSetFlt(ainode, "sscale", self.sscale)
-        AiNodeSetFlt(ainode, "tscale", self.tscale)
-        AiNodeSetBool(ainode, "sflip", self.sflip)
-        AiNodeSetBool(ainode, "tflip", self.tflip)
-        AiNodeSetBool(ainode, "swap_st", self.swap_st)
-        AiNodeSetBool(ainode, "single_channel", self.single_channel)
-        AiNodeSetInt(ainode, "start_channel", self.start_channel)
-        AiNodeSetInt(ainode, "mipmap_bias", self.mipmap_bias)
-        AiNodeSetStr(ainode, "uvset", self.uvset)
-        AiNodeSetFlt(ainode, "soffset", self.soffset)
-        AiNodeSetFlt(ainode, "toffset", self.toffset)
-        AiNodeSetBool(ainode, "ignore_missing_textures", self.ignore_missing_textures)
+        node.set_string("color_space", self.color_space)
+        node.set_string("filter", self.image_filter)
+        node.set_int("swrap", int(self.swrap))
+        node.set_int("twrap", int(self.twrap))
+        node.set_float("sscale", self.sscale)
+        node.set_float("tscale", self.tscale)
+        node.set_bool("sflip", self.sflip)
+        node.set_bool("tflip", self.tflip)
+        node.set_bool("swap_st", self.swap_st)
+        node.set_bool("single_channel", self.single_channel)
+        node.set_int("start_channel", self.start_channel)
+        node.set_int("mipmap_bias", self.mipmap_bias)
+        node.set_string("uvset", self.uvset)
+        node.set_float("soffset", self.soffset)
+        node.set_float("toffset", self.toffset)
+        node.set_bool("ignore_missing_textures", self.ignore_missing_textures)
 
 classes = (
     AiImageUser,

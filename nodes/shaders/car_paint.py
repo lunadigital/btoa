@@ -3,8 +3,6 @@ from bpy.props import IntProperty
 
 from ..base import ArnoldNode
 
-from arnold import AiNodeSetInt, AiNodeSetFlt, AiNodeSetBool
-
 class AiCarPaint(Node, ArnoldNode):
     '''A simple-to-use car paint shader. Outputs RGB.'''
     bl_label = "Car Paint"
@@ -55,8 +53,8 @@ class AiCarPaint(Node, ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "flake_layers")
 
-    def sub_export(self, ainode):
-        AiNodeSetInt(ainode, "flake_layers", self.flake_layers)
+    def sub_export(self, node):
+        node.set_int("flake_layers", self.flake_layers)
 
 def register():
     from bpy.utils import register_class

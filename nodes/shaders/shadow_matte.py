@@ -3,8 +3,6 @@ from bpy.props import BoolProperty
 
 from ..base import ArnoldNode
 
-from arnold import AiNodeSetBool
-
 class AiShadowMatte(Node, ArnoldNode):
     '''
     Typically used on floor planes to 'catch' shadows from lighting within the scene.
@@ -53,11 +51,11 @@ class AiShadowMatte(Node, ArnoldNode):
         layout.prop(self, "indirect_specular_enable")
         layout.prop(self, "alpha_mask")
 
-    def sub_export(self, ainode):
-        AiNodeSetBool(ainode, "diffuse_use_background", self.diffuse_use_background)
-        AiNodeSetBool(ainode, "indirect_diffuse_enable", self.indirect_diffuse_enable)
-        AiNodeSetBool(ainode, "indirect_specular_enable", self.indirect_specular_enable)
-        AiNodeSetBool(ainode, "alpha_mask", self.alpha_mask)
+    def sub_export(self, node):
+        node.set_bool("diffuse_use_background", self.diffuse_use_background)
+        node.set_bool("indirect_diffuse_enable", self.indirect_diffuse_enable)
+        node.set_bool("indirect_specular_enable", self.indirect_specular_enable)
+        node.set_bool("alpha_mask", self.alpha_mask)
 
 def register():
     from bpy.utils import register_class
