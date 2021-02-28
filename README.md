@@ -6,78 +6,78 @@ Arnold for Blender (or BtoA) provides a bridge to the Arnold renderer from withi
 
 <table style="width: 100%; margin-bottom: 25px;">
   <tr>
-    <th style="width: 30%;">Geometry & Objects</th>
+    <th>Geometry & Objects</th>
     <td>
-        <ul style="list-style: none;">
-            <li>Cameras</li>
-            <li>Mesh objects</li>
-            <li>Curves</li>
-            <li>Fonts</li>
-        </ul>
+        <br />
+        Cameras<br />
+        Mesh objects<br />
+        Curves<br />
+        Fonts<br />
+        <br />
     </td>
   </tr>
   <tr>
-    <th style="width: 30%;">Lights</th>
+    <th>Lights</th>
     <td>
-        <ul style="list-style: none;">
-            <li>Point light</li>
-            <li>Distant light</li>
-            <li>Spot light</li>
-            <li>Quad light</li>
-            <li>Disk light</li>
-            <li>Cylinder light</li>
-        </ul>
+        <br />
+        Point light<br />
+        Distant light<br />
+        Spot light<br />
+        Quad light<br />
+        Disk light<br />
+        Cylinder light<br />
+        <br />
     </td>
   </tr>
   <tr>
-    <th style="width: 30%;">Surface Shaders</th>
+    <th>Surface Shaders</th>
     <td>
-        <ul style="list-style: none;">
-            <li>Ambient occlusion<li>
-            <li>Car paint</li>
-            <li>Flat</li>
-            <li>Lambert</li>
-            <li>Matte<li>
-            <li>Shadow matte</li>
-            <li>Standard surface<li>
-            <li>Wireframe<li>
-        </ul>
+        <br />
+        Ambient occlusion<br />
+        Car paint<br />
+        Flat<br />
+        Lambert<br />
+        Matte<br />
+        Shadow matte<br />
+        Standard surface<br />
+        Wireframe<br />
+        <br />
     </td>
   </tr>
   <tr>
-    <th style="width: 30%;">Texture Shaders</th>
+    <th>Texture Shaders</th>
     <td>
-        <ul style="list-style: none;">
-            <li>Cell noise</li>
-            <li>Checkerboard</li>
-            <li>Image</li>
-        </ul>
+        <br />
+        Cell noise<br />
+        Checkerboard<br />
+        Image<br />
+        <br />
     </td>
   </tr>
   <tr>
-    <th style="width: 30%;">Color Shaders</th>
+    <th>Color Shaders</th>
     <td>
-        <ul style="list-style: none;">
-            <li>Color correct</li>
-        </ul>
+        <br />
+        Color correct<br />
+        <br />
     </td>
   </tr>
   <tr>
-    <th style="width: 30%;">Utility Shaders</th>
+    <th>Utility Shaders</th>
     <td>
-        <ul style="list-style: none;">
-            <li>UV projection</li>
-            <li>Coordinate space (convenience node)</li>
-        </ul>
+        <br />
+        UV projection<br />
+        Coordinate space (convenience node)<br />
+        <br />
     </td>
   </tr>
   <tr>
-    <th style="width: 30%;">UI Elements</th>
+    <th>UI Elements</th>
     <td>
-        <ul style="list-style: none;">
-            <li>Arnold-dedicated material node editor</li>
-            <li>Render images to Render Result window (but no viewport rendering yet)</li>
-        </ul>
+        <br />
+        Arnold-dedicated material node editor<br />
+        Render images to Render Result window (but no viewport rendering yet)<br />
+        <br />
     </td>
   </tr>
 </table>
