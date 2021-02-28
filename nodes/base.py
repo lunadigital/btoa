@@ -243,7 +243,8 @@ node_categories = [
         items=[
             NodeItem("AiCellNoise"),
             NodeItem("AiCheckerboard"),
-            NodeItem("AiImage")
+            NodeItem("AiImage"),
+            NodeItem("AiNoise")
         ]
     ),
     ArnoldObjectNodeCategory(

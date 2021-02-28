@@ -1,13 +1,15 @@
 from . import (
     cell_noise,
     checkerboard,
-    image
+    image,
+    noise
 )
 
 modules = (
     cell_noise,
     checkerboard,
-    image
+    image,
+    noise
 )
 
 def register():
