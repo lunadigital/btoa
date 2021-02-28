@@ -132,12 +132,14 @@ class ArnoldLight(PropertyGroup):
         )
 
     def get_type(self):
+        LIGHT_OPTIONS = ['POINT', 'SUN', 'SPOT', 'AREA']
+
         light = self.id_data
-        return list(btoa.AI_LIGHT_TYPE).index(light.type)
+        return LIGHT_OPTIONS.index(light.type)
 
     def set_type(self, value):
         light = self.id_data
-        light.type = list(btoa.AI_LIGHT_TYPE)[value]
+        light.type = LIGHT_OPTIONS[value]
     
     #('skydome_light', "Skydome", "Skydome light", 3),
     #('mesh_light', "Mesh", "Mesh light", 6),
@@ -229,11 +231,11 @@ class ArnoldLight(PropertyGroup):
 
     def get_shape_type(self):
         light = self.id_data
-        return list(btoa.AI_AREALIGHT_TYPE).index(light.shape)
+        return list(btoa.BT_LIGHT_SHAPE_CONVERSIONS).index(light.shape)
 
     def set_shape_type(self, value):
         light = self.id_data
-        light.shape = list(btoa.AI_AREALIGHT_TYPE)[value]
+        light.shape = list(btoa.BT_LIGHT_SHAPE_CONVERSIONS)[value]
 
     shape: EnumProperty(
         name="Light Shape",
