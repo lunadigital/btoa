@@ -1,5 +1,6 @@
 import ctypes
 import math
+import mathutils
 import numpy
 
 from .. import btoa
@@ -139,7 +140,7 @@ def sync_light(btnode, ob):
     btnode.set_string("name", ob.name)
 
     # Set matrix for everything except cylinder lights
-    if not hasattr(data, "shape") or light.data.shape != 'RECTANGLE':
+    if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
         btnode.set_matrix(
             "matrix",
             matrix_utils.flatten_matrix(ob.matrix_world)
@@ -181,27 +182,27 @@ def sync_light(btnode, ob):
     if data.type == 'AREA':
         btnode.set_float("roundness", arnold.area_roundness)
         btnode.set_float("spread", arnold.spread)
-        btnode.set_float("resolution", arnold.resolution)
+        btnode.set_int("resolution", arnold.resolution)
         btnode.set_float("soft_edge", arnold.soft_edge)
         
         if data.shape == 'SQUARE':
-            smatrix = Matrix.Diagonal((
+            smatrix = mathutils.Matrix.Diagonal((
                 data.size / 2,
                 data.size / 2,
                 data.size / 2
             )).to_4x4()
             
-            tmatrix = light.matrix_world @ smatrix
+            tmatrix = ob.matrix_world @ smatrix
         
             btnode.set_matrix(
                 "matrix",
-                btoa.flatten_matrix(tmatrix)
+                matrix_utils.flatten_matrix(tmatrix)
             )
         elif data.shape == 'DISK':
             s = ob.scale.x if ob.scale.x > ob.scale.y else ob.scale.y
             btnode.set_float("radius", 0.5 * data.size * s)
         elif data.shape == 'RECTANGLE':
-            d = 0.5 * data.size_y * light.scale.y
+            d = 0.5 * data.size_y * ob.scale.y
             top = matrix_utils.get_position_along_local_vector(data, d, 'Y')
             bottom = matrix_utils.get_position_along_local_vector(data, -d, 'Y')
 
@@ -231,7 +232,7 @@ def sync_camera(btnode, ob):
     btnode.set_float("exposure", arnold.exposure)
 
     if data.dof.focus_object:
-        distance = geometry.distance_point_to_plane(
+        distance = mathutils.geometry.distance_point_to_plane(
             ob.matrix_world.to_translation(),
             data.dof.focus_object.matrix_world.to_translation(),
             ob.matrix_world.col[2][:3]
