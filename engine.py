@@ -7,7 +7,7 @@ import ctypes
 from bl_ui.properties_render import RENDER_PT_color_management
 
 from . import btoa
-from .utils import btoa_utils
+from .utils import btoa_utils, depsgraph_utils
 
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
@@ -85,6 +85,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         options.set_bool("parallel_node_init", bl_options.parallel_node_init)
         options.set_int("threads", bl_options.threads)
 
+        '''
         for mat in data.materials:
             if (
                 not btoa.get_node_by_name(mat.name).is_valid() and
@@ -93,51 +94,53 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             ):
                 snode, vnode, dnode = mat.arnold.node_tree.export()
                 snode[0].set_string("name", mat.name)
+        '''
   
-        for dup in depsgraph.object_instances:
-            if dup.is_instance:
-                ob = dup.instance_object
-            else:
-                ob = dup.object
+        for object_instance in depsgraph.object_instances:
+            ob = depsgraph_utils.get_object_data_from_instance(object_instance)
+            btoa_unique_name = depsgraph_utils.get_unique_name(object_instance)
 
+            print("Processing {}".format(btoa_unique_name))
+        
             if ob.type in btoa.BT_CONVERTIBLE_TYPES:
-                node = btoa.get_node_by_name(ob.name)
+                node = btoa.get_node_by_name(btoa_unique_name)
                 if not node.is_valid():
-                    node = btoa_utils.create_polymesh(ob)
+                    node = btoa_utils.create_polymesh(object_instance)
 
+                '''
                 if node is not None and len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
                     mat_node = btoa.get_node_by_name(ob.data.materials[0].name)
                     node.set_pointer("shader", mat_node)
+                    '''
             elif ob.type == 'CAMERA' and ob.name == scene.camera.name:
-                camera_node = btoa.get_node_by_name(ob.name)
+                camera_node = btoa.get_node_by_name(btoa_unique_name)
                 if not camera_node.is_valid(): 
-                    camera_node = btoa_utils.create_camera(ob)
+                    camera_node = btoa_utils.create_camera(object_instance)
                 else:
-                    btoa_utils.sync_camera(camera_node, ob)
+                    btoa_utils.sync_camera(camera_node, object_instance)
                 
                 options.set_pointer("camera", camera_node)
             
             # Update lights
             if ob.type == 'LIGHT':
-                node = btoa.get_node_by_name(ob.name)
-
+                node = btoa.get_node_by_name(btoa_unique_name)
                 if not node.is_valid():
-                    node = btoa_utils.create_light(ob)
+                    node = btoa_utils.create_light(object_instance)
 
                 # If existing AiNode is an area light, but doesn't match the type in Blender
                 elif node.type_is("quad_light") or node.type_is("disk_light") or node.type_is("cylinder_light"):
                     if not node.type_is(btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape]):
                         AiNodeDestroy(node)
-                        node = btoa_utils.create_light(ob)
+                        node = btoa_utils.create_light(object_instance)
 
                 # If existing AiNode is a non-area light type, but doesn't match the type in Blender
                 elif not node.type_is(btoa.BT_LIGHT_CONVERSIONS[ob.data.type]):
-                    AiNodeDestroy(node)
-                    node = btoa_utils.create_light(ob)
+                    node.destroy()
+                    node = btoa_utils.create_light(object_instance)
 
                 # If AiNode exists and same type, just update params
                 else:
-                    btoa_utils.sync_light(node, ob)
+                    btoa_utils.sync_light(node, object_instance)
 
         gaussian_filter = btoa.BtNode("gaussian_filter")
         gaussian_filter.set_string("name", "gaussianFilter")

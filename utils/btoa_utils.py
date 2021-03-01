@@ -4,11 +4,10 @@ import mathutils
 import numpy
 
 from .. import btoa
-from . import camera_utils
-from . import matrix_utils
-from . import mesh_utils
+from . import camera_utils, matrix_utils, mesh_utils, depsgraph_utils
 
-def create_polymesh(ob):
+def create_polymesh(object_instance):
+    ob = depsgraph_utils.get_object_data_from_instance(object_instance)
     mesh = mesh_utils.bake_mesh(ob)
 
     if mesh is None:
@@ -82,11 +81,13 @@ def create_polymesh(ob):
     )
 
     # Create polymesh object
-    node = btoa.BtPolymesh(ob.name)
+    name = depsgraph_utils.get_unique_name(object_instance)
+    node = btoa.BtPolymesh(name)
     node.set_matrix(
         "matrix",
-        matrix_utils.flatten_matrix(ob.matrix_world)
+        matrix_utils.flatten_matrix(object_instance.matrix_world)
     )
+    print(matrix_utils.flatten_matrix(ob.matrix_world))
     node.set_bool("smoothing", True)
     node.set_array("vlist", vlist)
     node.set_array("nlist", nlist)
@@ -127,17 +128,22 @@ def create_polymesh(ob):
     
     return node
 
-def create_light(ob):
+def create_light(object_instance):
+    ob = depsgraph_utils.get_object_data_from_instance(object_instance)
+
     ntype = btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape] if ob.data.type == 'AREA' else btoa.BT_LIGHT_CONVERSIONS[ob.data.type]
     node = btoa.BtNode(ntype)
-    sync_light(node, ob)
+    sync_light(node, object_instance)
+
     return node
 
-def sync_light(btnode, ob):
+def sync_light(btnode, object_instance):
+    ob = depsgraph_utils.get_object_data_from_instance(object_instance)
+
     data = ob.data
     arnold = data.arnold
 
-    btnode.set_string("name", ob.name)
+    btnode.set_string("name", depsgraph_utils.get_unique_name(object_instance))
 
     # Set matrix for everything except cylinder lights
     if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
@@ -212,16 +218,18 @@ def sync_light(btnode, ob):
             s = ob.scale.x if ob.scale.x > ob.scale.z else ob.scale.z
             btnode.set_float("radius", 0.5 * data.size * s)
 
-def create_camera(ob):
+def create_camera(object_instance):
     node = btoa.BtNode("persp_camera")
-    sync_camera(node, ob)
+    sync_camera(node, object_instance)
     return node
 
-def sync_camera(btnode, ob):
+def sync_camera(btnode, object_instance):
+    ob = depsgraph_utils.get_object_data_from_instance(object_instance)
+
     data = ob.data
     arnold = data.arnold
 
-    btnode.set_string("name", ob.name)
+    btnode.set_string("name", depsgraph_utils.get_unique_name(object_instance))
     btnode.set_matrix(
         "matrix",
         matrix_utils.flatten_matrix(ob.matrix_world)

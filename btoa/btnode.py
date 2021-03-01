@@ -15,6 +15,11 @@ class BtNode(BtTemplate):
     def link(self, param, val):
         if self.is_valid():
             arnold.AiNodeLink(self._data, param, val._get_data())
+
+    def destroy(self):
+        if self.is_valid():
+            arnold.AiNodeDestroy(self._data)
+            self._data = None
     
     def set_byte(self, param, val):
         if self.is_valid():
