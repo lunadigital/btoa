@@ -33,23 +33,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         return x, y
 
-    def is_visible(self, ob):
-        visible = False
-
-        # If object is in a visible collection, set
-        # visibility to true
-        for collection in ob.users_collection:
-            if not collection.hide_render:
-                visible = True
-                break
-        
-        # If in a visible collection, set visibility with
-        # object-level settings
-        if visible:
-            visible = not ob.hide_render
-
-        return visible
-
     def update(self, data, depsgraph):
         scene = depsgraph.scene
 
