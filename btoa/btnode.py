@@ -73,4 +73,4 @@ class BtNode(BtTemplate):
         if not self.is_valid():
             return None
             
-        return arnold.AiNodeGetInt(self._data, "xres")
+        return arnold.AiNodeGetInt(self._data, param)
