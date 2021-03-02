@@ -17,8 +17,10 @@ def load_cached_arnold_path():
 
 def save_cached_arnold_path(path):
     path_to_cache = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prefs")
+    sdk_path = os.path.abspath(bpy.path.abspath(path))
+
     with open(path_to_cache, "w") as f:
-        f.write(path)
+        f.write(sdk_path)
 
 def configure_arnold_environment():
     prefs = bpy.context.preferences.addons[__package__].preferences
