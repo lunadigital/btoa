@@ -87,7 +87,6 @@ def create_polymesh(object_instance):
         "matrix",
         matrix_utils.flatten_matrix(object_instance.matrix_world)
     )
-    print(matrix_utils.flatten_matrix(ob.matrix_world))
     node.set_bool("smoothing", True)
     node.set_array("vlist", vlist)
     node.set_array("nlist", nlist)
@@ -125,6 +124,34 @@ def create_polymesh(object_instance):
             node.set_array("uvlist", uvlist)
 
             break
+
+    # Materials
+    # This should really be in a for loop, but for now we're only
+    # looking for the material in the first slot.
+    # for material in ob.data.materials:
+    if len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
+        material = ob.data.materials[0]
+        mat_unique_name = depsgraph_utils.get_unique_name(material)
+
+        print("Processing: {}".format(mat_unique_name))
+
+        if (
+            not btoa.get_node_by_name(mat_unique_name).is_valid() and
+            material.name != "Dots Stroke" and
+            material.arnold.node_tree is not None
+        ):
+            print("Can be processed")
+            shader_node = btoa.get_node_by_name(mat_unique_name)
+
+            if not shader_node.is_valid():
+                print("Creating shader node")
+                surface, volume, displacement = material.arnold.node_tree.export()
+                surface[0].set_string("name", material.name)
+
+                node.set_pointer("shader", surface[0])
+            else:
+                print("Setting existing shader")
+                node.set_pointer("shader", shader_node)
     
     return node
 

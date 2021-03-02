@@ -5,6 +5,7 @@ import os
 import ctypes
 
 from bl_ui.properties_render import RENDER_PT_color_management
+from mathutils import Vector
 
 from . import btoa
 from .utils import btoa_utils, depsgraph_utils
@@ -15,9 +16,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_use_preview = True
 
     def __init__(self):
-        self.scene_data = None
-        self.draw_data = None
-
+        self.resolution = Vector((0, 0))
         btoa.start_session()
 
     def __del__(self):
@@ -26,6 +25,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     @classmethod
     def is_active(cls, context):
         return context.scene.render.engine == cls.bl_idname
+
+    def __get_render_resolution(self, scene):
+        scale = scene.render.resolution_percentage / 100
+        x = int(scene.render.resolution_x * scale)
+        y = int(scene.render.resolution_y * scale)
+
+        return x, y
 
     def is_visible(self, ob):
         visible = False
@@ -46,72 +52,56 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
     def update(self, data, depsgraph):
         scene = depsgraph.scene
-        bl_options = scene.arnold_options
 
-        self.set_render_size(scene)
-
-        options = btoa.BtOptions()
+        ai_options = scene.arnold_options
+        bt_options = btoa.BtOptions()
         
-        # Update render resolution
-        options.set_int("xres", self.size_x)
-        options.set_int("yres", self.size_y)
+        # Render resolution
+        x, y = self.__get_render_resolution(scene)
+        self.resolution.x = x
+        self.resolution.y = y
+        bt_options.set_int("xres", x)
+        bt_options.set_int("yres", y)
 
-        # Update sampling settings
-        options.set_int("AA_samples", bl_options.aa_samples)
-        options.set_int("GI_diffuse_samples", bl_options.diffuse_samples)
-        options.set_int("GI_specular_samples", bl_options.specular_samples)
-        options.set_int("GI_transmission_samples", bl_options.transmission_samples)
-        options.set_int("GI_sss_samples", bl_options.sss_samples)
-        options.set_int("GI_volume_samples", bl_options.volume_samples)
-        options.set_float("AA_sample_clamp", bl_options.sample_clamp)
-        options.set_bool("AA_sample_clamp_affects_aovs", bl_options.clamp_aovs)
-        options.set_float("indirect_sample_clamp", bl_options.indirect_sample_clamp)
-        options.set_float("low_light_threshold", bl_options.low_light_threshold)
+        # Sampling settings
+        bt_options.set_int("AA_samples", ai_options.aa_samples)
+        bt_options.set_int("GI_diffuse_samples", ai_options.diffuse_samples)
+        bt_options.set_int("GI_specular_samples", ai_options.specular_samples)
+        bt_options.set_int("GI_transmission_samples", ai_options.transmission_samples)
+        bt_options.set_int("GI_sss_samples", ai_options.sss_samples)
+        bt_options.set_int("GI_volume_samples", ai_options.volume_samples)
+        bt_options.set_float("AA_sample_clamp", ai_options.sample_clamp)
+        bt_options.set_bool("AA_sample_clamp_affects_aovs", ai_options.clamp_aovs)
+        bt_options.set_float("indirect_sample_clamp", ai_options.indirect_sample_clamp)
+        bt_options.set_float("low_light_threshold", ai_options.low_light_threshold)
 
-        if bl_options.aa_seed > 0:
-            options.set_int("AA_seed", bl_options.aa_seed)
+        if ai_options.aa_seed > 0:
+            bt_options.set_int("AA_seed", ai_options.aa_seed)
 
-        # Update ray depth settings
-        options.set_int("GI_total_depth", bl_options.total_depth)
-        options.set_int("GI_diffuse_depth", bl_options.diffuse_depth)
-        options.set_int("GI_specular_depth", bl_options.specular_depth)
-        options.set_int("GI_transmission_depth", bl_options.transmission_depth)
-        options.set_int("GI_volume_depth", bl_options.volume_depth)
-        options.set_int("auto_transparency_depth", bl_options.transparency_depth)
+        # Ray depth settings
+        bt_options.set_int("GI_total_depth", ai_options.total_depth)
+        bt_options.set_int("GI_diffuse_depth", ai_options.diffuse_depth)
+        bt_options.set_int("GI_specular_depth", ai_options.specular_depth)
+        bt_options.set_int("GI_transmission_depth", ai_options.transmission_depth)
+        bt_options.set_int("GI_volume_depth", ai_options.volume_depth)
+        bt_options.set_int("auto_transparency_depth", ai_options.transparency_depth)
 
         # Render settings
-        options.set_int("bucket_size", bl_options.bucket_size)
-        options.set_string("bucket_scanning", bl_options.bucket_scanning)
-        options.set_bool("parallel_node_init", bl_options.parallel_node_init)
-        options.set_int("threads", bl_options.threads)
-
-        '''
-        for mat in data.materials:
-            if (
-                not btoa.get_node_by_name(mat.name).is_valid() and
-                mat.name != "Dots Stroke" and
-                mat.arnold.node_tree is not None
-            ):
-                snode, vnode, dnode = mat.arnold.node_tree.export()
-                snode[0].set_string("name", mat.name)
-        '''
+        bt_options.set_int("bucket_size", ai_options.bucket_size)
+        bt_options.set_string("bucket_scanning", ai_options.bucket_scanning)
+        bt_options.set_bool("parallel_node_init", ai_options.parallel_node_init)
+        bt_options.set_int("threads", ai_options.threads)
   
         for object_instance in depsgraph.object_instances:
             ob = depsgraph_utils.get_object_data_from_instance(object_instance)
             btoa_unique_name = depsgraph_utils.get_unique_name(object_instance)
 
-            print("Processing {}".format(btoa_unique_name))
-        
+            # Geometry & objects
             if ob.type in btoa.BT_CONVERTIBLE_TYPES:
                 node = btoa.get_node_by_name(btoa_unique_name)
                 if not node.is_valid():
                     node = btoa_utils.create_polymesh(object_instance)
-
-                '''
-                if node is not None and len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
-                    mat_node = btoa.get_node_by_name(ob.data.materials[0].name)
-                    node.set_pointer("shader", mat_node)
-                    '''
+                    
             elif ob.type == 'CAMERA' and ob.name == scene.camera.name:
                 camera_node = btoa.get_node_by_name(btoa_unique_name)
                 if not camera_node.is_valid(): 
@@ -119,9 +109,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 else:
                     btoa_utils.sync_camera(camera_node, object_instance)
                 
-                options.set_pointer("camera", camera_node)
+                bt_options.set_pointer("camera", camera_node)
             
-            # Update lights
+            # Lights
             if ob.type == 'LIGHT':
                 node = btoa.get_node_by_name(btoa_unique_name)
                 if not node.is_valid():
@@ -130,7 +120,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 # If existing AiNode is an area light, but doesn't match the type in Blender
                 elif node.type_is("quad_light") or node.type_is("disk_light") or node.type_is("cylinder_light"):
                     if not node.type_is(btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape]):
-                        AiNodeDestroy(node)
+                        node.destroy()
                         node = btoa_utils.create_light(object_instance)
 
                 # If existing AiNode is a non-area light type, but doesn't match the type in Blender
@@ -145,16 +135,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         gaussian_filter = btoa.BtNode("gaussian_filter")
         gaussian_filter.set_string("name", "gaussianFilter")
 
-        options = btoa.BtOptions()
-
         outputs = btoa.BtArray()
         outputs.allocate(1, 1, 'STRING')
         outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
-        options.set_array("outputs", outputs)
+        bt_options.set_array("outputs", outputs)
 
         color_manager = btoa.BtColorManager()
         color_manager.set_string("config", os.getenv("OCIO"))
-        options.set_pointer("color_manager", color_manager)
+        bt_options.set_pointer("color_manager", color_manager)
 
     def render(self, depsgraph):
         engine = self
@@ -166,7 +154,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     result = _htiles.pop((x, y), None)
                     
                     if result is None:
-                        result = engine.begin_result(x, engine.size_y - y - height, width, height)
+                        result = engine.begin_result(x, engine.resolution.y - y - height, width, height)
                     
                     _buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
                     rect = numpy.ctypeslib.as_array(_buffer, shape=(width * height, 4))
@@ -176,7 +164,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 finally:
                     btoa.free(buffer)
             else:
-                result = engine.begin_result(x, engine.size_y - y - height, width, height)
+                result = engine.begin_result(x, engine.resolution.y - y - height, width, height)
                 _htiles[(x, y)] = result
             
             if engine.test_break():
@@ -241,11 +229,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         self.unbind_display_space_shader()
         bgl.glDisable(bgl.GL_BLEND)
-    
-    def set_render_size(self, scene):
-        scale = scene.render.resolution_percentage / 100.0
-        self.size_x = int(scene.render.resolution_x * scale)
-        self.size_y = int(scene.render.resolution_y * scale)
 
 class ArnoldDrawData:
     def __init__(self, dimensions):
