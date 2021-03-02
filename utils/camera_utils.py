@@ -1,3 +1,4 @@
+import math
 from .. import btoa
 
 def calc_horizontal_fov(ob):
