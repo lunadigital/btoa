@@ -149,7 +149,10 @@ class AiImage(Node, ArnoldNode):
 
     def sub_export(self, node):
         if self.image is not None:
-            node.set_string("filename", bpy.path.abspath(self.image.filepath))
+            if self.image.library:
+                node.set_string("filename", bpy.path.abspath(self.image.filepath, library=self.image.library))
+            else:
+                node.set_string("filename", bpy.path.abspath(self.image.filepath))
 
         node.set_string("color_space", self.color_space)
         node.set_string("filter", self.image_filter)
