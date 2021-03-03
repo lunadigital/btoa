@@ -2,6 +2,7 @@ import bpy
 import bgl
 import numpy
 import os
+import math
 import ctypes
 
 from bl_ui.properties_render import RENDER_PT_color_management
@@ -17,6 +18,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
     def __init__(self):
         self.resolution = Vector((0, 0))
+        self.progress = 0
+        self._progress_increment = 0
         btoa.start_session()
 
     def __del__(self):
@@ -144,6 +147,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     
                     result.layers[0].passes["Combined"].rect = rect
                     engine.end_result(result)
+
+                    engine.progress += engine._progress_increment
+                    engine.update_progress(engine.progress)
                 finally:
                     btoa.free(buffer)
             else:
@@ -156,6 +162,20 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     (x, y), result = _htiles.popitem()
                     engine.end_result(result, cancel=True)
 
+        # Calculate progress increment
+        bt_options = btoa.BtOptions()
+        width = bt_options.get_int("xres")
+        height = bt_options.get_int("yres")
+        bucket_size = bt_options.get_int("bucket_size")
+
+        h_buckets = math.ceil(width / bucket_size)
+        v_buckets = math.ceil(height / bucket_size)
+        total_buckets = h_buckets * v_buckets
+        
+        self.progress = 0
+        self._progress_increment = 1 / total_buckets
+
+        # Set callback
         cb = btoa.AtDisplayCallback(display_callback)
         
         display_node = btoa.get_node_by_name("__display_driver")
