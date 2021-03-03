@@ -24,7 +24,7 @@ class ArnoldCamera(PropertyGroup):
     enable_dof: BoolProperty(name="Enable DOF")
     aperture_size: FloatProperty(name="Size", min=0, soft_max=0.1, unit='LENGTH')
     aperture_blades: IntProperty(name="Blades", min=0)
-    aperture_rotation: FloatProperty(name="Rotation")
+    aperture_rotation: FloatProperty(name="Rotation", unit='ROTATION')
     aperture_blade_curvature: FloatProperty(name="Curvature", min=-1, max=1)
     aperture_aspect_ratio: FloatProperty(name="Aspect Ratio", min=0, default=1)
     flat_field_focus: BoolProperty(name="Flat Field Focus")
