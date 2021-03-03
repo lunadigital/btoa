@@ -49,7 +49,7 @@ class DATA_PT_arnold_dof(CameraButtonsPanel, bpy.types.Panel):
 
         sub = col.column()
         sub.active = (camera.dof.focus_object is None)
-        sub.prop(camera.arnold, "focus_distance")
+        sub.prop(camera.dof, "focus_distance")
 
 # This is a hacky way to get more control over where Blender
 # panels appear in relation to Arnold panels
