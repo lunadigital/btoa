@@ -266,8 +266,10 @@ def sync_camera(btnode, object_instance):
     else:
         distance = data.dof.focus_distance
 
+    aperture_size = arnold.aperture_size if arnold.enable_dof else 0
+
     btnode.set_float("focus_distance", distance)
-    btnode.set_float("aperture_size", arnold.aperture_size)
+    btnode.set_float("aperture_size", aperture_size)
     btnode.set_int("aperture_blades", arnold.aperture_blades)
     btnode.set_float("aperture_rotation", arnold.aperture_rotation)
     btnode.set_float("aperture_blade_curvature", arnold.aperture_blade_curvature)
