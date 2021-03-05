@@ -1,4 +1,5 @@
 import numpy
+from mathutils import Vector, Matrix
 
 def flatten_matrix(matrix):
     return numpy.reshape(matrix.transposed(), -1)

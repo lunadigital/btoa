@@ -227,8 +227,8 @@ def sync_light(btnode, object_instance):
             btnode.set_float("radius", 0.5 * data.size * s)
         elif data.shape == 'RECTANGLE':
             d = 0.5 * data.size_y * ob.scale.y
-            top = matrix_utils.get_position_along_local_vector(data, d, 'Y')
-            bottom = matrix_utils.get_position_along_local_vector(data, -d, 'Y')
+            top = matrix_utils.get_position_along_local_vector(ob, d, 'Y')
+            bottom = matrix_utils.get_position_along_local_vector(ob, -d, 'Y')
 
             btnode.set_vector("top", *top)
             btnode.set_vector("bottom", *bottom)
