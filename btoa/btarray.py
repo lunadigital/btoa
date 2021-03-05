@@ -22,3 +22,7 @@ class BtArray(BtTemplate):
     def set_string(self, param, val):
         if self.is_valid():
             arnold.AiArraySetStr(self._data, param, val)
+
+    def set_matrix(self, i, val):
+        if self.is_valid():
+            arnold.AiArraySetMtx(self._data, i, arnold.AtMatrix(*val))

@@ -236,22 +236,18 @@ def sync_light(btnode, object_instance):
             s = ob.scale.x if ob.scale.x > ob.scale.z else ob.scale.z
             btnode.set_float("radius", 0.5 * data.size * s)
 
-def create_camera(object_instance):
+def create_camera(object_instance, options):
     node = btoa.BtNode("persp_camera")
-    sync_camera(node, object_instance)
+    sync_camera(node, object_instance, options)
     return node
 
-def sync_camera(btnode, object_instance):
+def sync_camera(btnode, object_instance, options):
     ob = depsgraph_utils.get_object_data_from_instance(object_instance)
 
     data = ob.data
     arnold = data.arnold
 
     btnode.set_string("name", depsgraph_utils.get_unique_name(object_instance))
-    btnode.set_matrix(
-        "matrix",
-        matrix_utils.flatten_matrix(ob.matrix_world)
-    )
 
     fov = camera_utils.calc_horizontal_fov(ob)
     btnode.set_float("fov", math.degrees(fov))
@@ -278,8 +274,9 @@ def sync_camera(btnode, object_instance):
     btnode.set_float("near_clip", data.clip_start)
     btnode.set_float("far_clip", data.clip_end)
 
-    btnode.set_float("shutter_start", arnold.shutter_start)
-    btnode.set_float("shutter_end", arnold.shutter_end)
-    btnode.set_string("shutter_type", arnold.shutter_type)
-    btnode.set_string("rolling_shutter", arnold.rolling_shutter)
-    btnode.set_float("rolling_shutter_duration", arnold.rolling_shutter_duration)
+    if options.enable_motion_blur and options.camera_motion_blur:
+        btnode.set_float("shutter_start", options.shutter_start)
+        btnode.set_float("shutter_end", options.shutter_end)
+        #btnode.set_string("shutter_type", arnold.shutter_type)
+        #btnode.set_string("rolling_shutter", arnold.rolling_shutter)
+        #btnode.set_float("rolling_shutter_duration", arnold.rolling_shutter_duration)

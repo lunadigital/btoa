@@ -9,7 +9,7 @@ from bl_ui.properties_render import RENDER_PT_color_management
 from mathutils import Vector
 
 from . import btoa
-from .utils import btoa_utils, depsgraph_utils
+from .utils import btoa_utils, depsgraph_utils, matrix_utils
 
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
@@ -35,6 +35,25 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         y = int(scene.render.resolution_y * scale)
 
         return x, y
+
+    def __set_motion_keys(self, frame, start, end, keys, object_instance, btnode):
+        motion_steps = numpy.linspace(start, end, keys)
+
+        matrices = btoa.BtArray()
+        matrices.allocate(1, keys, "MATRIX")
+        
+        for i in range(0, motion_steps.size):
+            frame_as_flt = frame - motion_steps[i]
+            frame_as_int = math.floor(frame_as_flt)
+            subframe = frame_as_flt - frame_as_int
+
+            self.frame_set(frame_as_int, subframe=subframe)
+            
+            m = matrix_utils.flatten_matrix(object_instance.matrix_world)
+            matrices.set_matrix(i, m)
+
+        btnode.set_array("matrix", matrices)
+        self.frame_set(frame, subframe=0)
 
     def update(self, data, depsgraph):
         scene = depsgraph.scene
@@ -91,10 +110,19 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             elif ob.type == 'CAMERA' and ob.name == scene.camera.name:
                 camera_node = btoa.get_node_by_name(btoa_unique_name)
                 if not camera_node.is_valid(): 
-                    camera_node = btoa_utils.create_camera(object_instance)
+                    camera_node = btoa_utils.create_camera(object_instance, ai_options)
                 else:
-                    btoa_utils.sync_camera(camera_node, object_instance)
-                
+                    btoa_utils.sync_camera(camera_node, object_instance, ai_options)
+
+                self.__set_motion_keys(
+                    scene.frame_current,
+                    ai_options.shutter_start,
+                    ai_options.shutter_end,
+                    ai_options.motion_keys,
+                    object_instance,
+                    camera_node
+                )
+
                 bt_options.set_pointer("camera", camera_node)
             
             # Lights

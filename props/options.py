@@ -1,7 +1,7 @@
 import bpy
 from bpy.types import Scene, PropertyGroup, Camera
 from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty, StringProperty
-
+   
 class ArnoldOptions(PropertyGroup):
     # Sampling
     aa_samples: IntProperty(
@@ -146,6 +146,50 @@ class ArnoldOptions(PropertyGroup):
     threads: IntProperty(
         name="Threads",
         description="The number of threads used for rendering. Set it to zero to autodetect and use as many threads as cores in the system. Negative values indicate how many cores not to use, so that -3, for instance, will use 29 threads on a 32 logical core machine. Negative values are useful when you want to reserve some of the CPU for non-Arnold tasks"
+        )
+
+    # Motion blur
+    # Assumes motion blur is centered on frame
+    def update_shutter_limits(self, context):
+        options = context.scene.arnold_options
+        options.shutter_start = -options.shutter_length / 2
+        options.shutter_end = options.shutter_length / 2
+        
+    enable_motion_blur: BoolProperty(
+        name="Enable Motion Blur",
+        description=""
+        )
+    # instantaneous_shutter
+    # deformation_motion_blur
+    camera_motion_blur: BoolProperty(
+        name="Camera",
+        description="",
+        default=True
+        )
+    # shaders_motion_blur
+    motion_keys: IntProperty(
+        name="Keys",
+        description="",
+        min=2,
+        default=2
+        )
+    shutter_length: FloatProperty(
+        name="Length",
+        description="",
+        min=0,
+        max=1,
+        default=0.5,
+        update=update_shutter_limits
+        )
+    shutter_start: FloatProperty(
+        name="Start",
+        description="",
+        default=-0.25
+        )
+    shutter_end: FloatProperty(
+        name="End",
+        description="",
+        default=0.25
         )
 
     # To save default display device for color management

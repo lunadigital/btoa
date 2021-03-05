@@ -29,33 +29,6 @@ class ArnoldCamera(PropertyGroup):
     aperture_aspect_ratio: FloatProperty(name="Aspect Ratio", min=0, default=1)
     flat_field_focus: BoolProperty(name="Flat Field Focus")
 
-    # Shutter
-    shutter_start: FloatProperty(name="Shutter: Start")
-    shutter_end: FloatProperty(name="Shutter: Stop")
-
-    shutter_type: EnumProperty(
-        name="Shutter Type",
-        items=[
-            ('box', "Box", "Box"),
-            ('triangle', "Triangle", "Triangle"),
-            #('curve', "Curve", "Curve")
-        ],
-        default='box'
-    )
-
-    rolling_shutter: EnumProperty(
-        name="Rolling Shutter",
-        items=[
-            ('off', "Off", "Off"),
-            ('top', "Top", "Top"),
-            ('bottom', "Bottom", "Bottom"),
-            ('left', "Left", "Left"),
-            ('right', "Right", "Right")
-        ],
-        default='off'
-    )
-    rolling_shutter_duration: FloatProperty(name="Rolling Shutter: Duration")
-
 def register():
     bpy.utils.register_class(ArnoldCamera)
     Camera.arnold = PointerProperty(type=ArnoldCamera)

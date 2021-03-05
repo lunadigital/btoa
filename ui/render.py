@@ -121,11 +121,62 @@ class ARNOLD_PT_rendering(bpy.types.Panel):
         col.prop(options, "parallel_node_init")
         col.prop(options, "threads")
 
+class ARNOLD_PT_motion_blur(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_motion_blur"
+    bl_label = "Motion Blur"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in cls.COMPAT_ENGINES
+
+    def draw_header(self, context):
+        self.layout.prop(context.scene.arnold_options, "enable_motion_blur", text="")
+
+    def draw(self, context):
+        layout = self.layout
+        options = context.scene.arnold_options
+
+        layout.use_property_split = True
+
+        col = layout.column()
+        col.enabled = options.enable_motion_blur
+        col.prop(options, "camera_motion_blur")
+        col.prop(options, "motion_keys")
+
+class ARNOLD_PT_motion_blur_shutter(bpy.types.Panel):
+    bl_parent_id = ARNOLD_PT_motion_blur.bl_idname
+    bl_idname = "ARNOLD_PT_motion_blur_shutter"
+    bl_label = "Shutter"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+
+    def draw(self, context):
+        options = context.scene.arnold_options
+
+        self.layout.use_property_split = True
+
+        col = self.layout.column()
+        col.enabled = options.enable_motion_blur
+        col.prop(options, "shutter_length")
+        
+        col = self.layout.column()
+        col.enabled = False
+        col.prop(options, "shutter_start")
+        col.prop(options, "shutter_end")
+
 classes = (
     ARNOLD_PT_sampling,
     ARNOLD_PT_advanced_sampling,
     ARNOLD_PT_adaptive_sampling,
     ARNOLD_PT_ray_depth,
+    ARNOLD_PT_motion_blur,
+    ARNOLD_PT_motion_blur_shutter,
     ARNOLD_PT_rendering
 )
 
