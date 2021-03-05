@@ -131,15 +131,15 @@ class ArnoldLight(PropertyGroup):
         default=1
         )
 
-    def get_type(self):
-        LIGHT_OPTIONS = ['POINT', 'SUN', 'SPOT', 'AREA']
+    LIGHT_OPTIONS = ['POINT', 'SUN', 'SPOT', 'AREA']
 
+    def get_type(self):
         light = self.id_data
-        return LIGHT_OPTIONS.index(light.type)
+        return self.LIGHT_OPTIONS.index(light.type)
 
     def set_type(self, value):
         light = self.id_data
-        light.type = LIGHT_OPTIONS[value]
+        light.type = self.LIGHT_OPTIONS[value]
     
     #('skydome_light', "Skydome", "Skydome light", 3),
     #('mesh_light', "Mesh", "Mesh light", 6),
