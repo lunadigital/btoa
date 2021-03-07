@@ -4,6 +4,7 @@ BT_TYPE_CONSTANTS = {
     "UINT": arnold.AI_TYPE_UINT,
     "STRING": arnold.AI_TYPE_STRING,
     "MATRIX": arnold.AI_TYPE_MATRIX,
+    "ARRAY": arnold.AI_TYPE_ARRAY,
     "VECTOR": arnold.AI_TYPE_VECTOR,
     "VECTOR2": arnold.AI_TYPE_VECTOR2
 }

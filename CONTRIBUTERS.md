@@ -8,6 +8,6 @@ Like most things, BtoA wasn't created in a vacuum. It was built from the ground 
 * Tyler Furby
 * Jared Webber
 * Mel Massadian
-* nildar (Github user)
+* Ildar Nikolaev
 
 Special thanks to Simon Wendsche and the LuxCoreRender team. We based our implementation of BtoA's node system on the implementation in the LuxCoreRender Blender add-on.

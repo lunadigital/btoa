@@ -145,6 +145,7 @@ class ARNOLD_PT_motion_blur(bpy.types.Panel):
 
         col = layout.column()
         col.enabled = options.enable_motion_blur
+        col.prop(options, "deformation_motion_blur")
         col.prop(options, "camera_motion_blur")
         col.prop(options, "motion_keys")
 

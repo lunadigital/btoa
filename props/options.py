@@ -160,7 +160,10 @@ class ArnoldOptions(PropertyGroup):
         description=""
         )
     # instantaneous_shutter
-    # deformation_motion_blur
+    deformation_motion_blur: BoolProperty(
+        name="Deformation",
+        description=""
+    )
     camera_motion_blur: BoolProperty(
         name="Camera",
         description="",
