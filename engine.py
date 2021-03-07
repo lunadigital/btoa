@@ -78,8 +78,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 frame_as_int = math.floor(frame_as_flt)
                 subframe = frame_as_flt - frame_as_int
 
-                print(frame_as_flt, frame_as_int, subframe)
-
                 self.frame_set(frame_as_int, subframe=subframe)
                 mesh = utils.bake_mesh(ob)
 
@@ -439,7 +437,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         resolution = self.session["resolution"]
         settings = self.session["render_settings"]
 
-        print(resolution)
         options.set_int("xres", int(resolution.x))
         options.set_int("yres", int(resolution.y))
 
