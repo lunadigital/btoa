@@ -243,21 +243,24 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # Materials
         # This should really be in a for loop, but for now we're only
         # looking for the material in the first slot.
-        # for material in ob.data.materials:
-        if len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
-            material = ob.data.materials[0]
-            mat_unique_name = utils.get_unique_name(material)
+        # for slot in ob.material_slots:
+        try:
+            slot = ob.material_slots[0]
+            if slot.material is not None:
+                unique_name = utils.get_unique_name(slot.material)
 
-            if material.arnold.node_tree is not None:
-                shader_node = btoa.get_node_by_name(mat_unique_name)
+                if slot.material.arnold.node_tree is not None:
+                    shader = btoa.get_node_by_name(unique_name)
 
-                if shader_node.is_valid():
-                    node.set_pointer("shader", shader_node)
-                else:
-                    surface, volume, displacement = material.arnold.node_tree.export()
-                    surface[0].set_string("name", material.name)
+                    if shader.is_valid():
+                        node.set_pointer("shader", shader)
+                    else:
+                        surface, volume, displacement = slot.material.arnold.node_tree.export()
+                        surface[0].set_string("name", unique_name)
+                        node.set_pointer("shader", surface[0])
 
-                    node.set_pointer("shader", surface[0])
+        except:
+            print("WARNING: {} has no material slots assigned!".format(ob.name))
 
         return node
 
