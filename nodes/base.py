@@ -7,107 +7,14 @@ from nodeitems_utils import NodeCategory, NodeItem
 
 from .. import engine
 from .. import btoa
-
-class ArnoldWorldTree(NodeTree):
-    bl_idname = "ArnoldWorldTree"
-    bl_label = "Arnold World"
-    bl_icon = 'WORLD'
-
-    _draw_header = None
-
-    @classmethod
-    def poll(cls, context):
-        return engine.ArnoldRenderEngine.is_active(context)
-
-    @classmethod
-    def get_from_context(cls, context):
-        scene = context.scene
-        world = scene.world
-
-        if scene and world:
-            return (world.node_tree, world, world)
-        
-        return (None, None, None)
-    
-    @classmethod
-    def register(cls):
-        # Hack to show our own header UI for world nodes
-        if cls._draw_header is None:
-            
-            def draw(self, context):
-                if engine.ArnoldRenderEngine.is_active(context):
-                    snode = context.space_data
-                    if snode.tree_type == ArnoldWorldTree.bl_idname:
-                        ########################################
-                        # copied from space_node.py:36
-
-                        layout = self.layout
-
-                        row = layout.row(align=True)
-                        row.template_header()
-
-                        NODE_MT_editor_menus.draw_collapsible(context, layout)
-
-                        layout.prop(snode, "tree_type", text="", expand=True)
-
-                        # end copy
-                        ########################################
-
-                        ########################################
-                        # copied from space_node.py:72
-
-                        row = layout.row()
-                        row.enabled = not snode.pin
-                        row.template_ID(context.scene, "world", new="world.new")
-                        if snode.id:
-                            row.prop(snode.id, "use_nodes")
-
-                        # end copy
-                        ########################################
-
-                        ########################################
-                        # copied from space_node.py:113
-
-                        layout.prop(snode, "pin", text="")
-                        layout.operator("node.tree_path_parent", text="", icon="FILE_PARENT")
-
-                        layout.separator()
-
-                        # Auto-offset nodes
-                        layout.prop(snode, "use_insert_offset", text="")
-
-                        # Snap
-                        row = layout.row(align=True)
-                        row.prop(context.tool_settings, "use_snap", text="")
-                        row.prop(context.tool_settings, "snap_node_element", icon_only=True)
-                        if context.tool_settings.snap_node_element != 'GRID':
-                            row.prop(context.tool_settings, "snap_target", text="")
-
-                        row = layout.row(align=True)
-                        row.operator("node.clipboard_copy", text="", icon='COPYDOWN')
-                        row.operator("node.clipboard_paste", text="", icon='PASTEDOWN')
-
-                        layout.template_running_jobs()
-
-                        # end copy
-                        ########################################
-
-                        return
-                cls._draw_header(self, context)
-
-            cls._draw_header = NODE_HT_header.draw
-            NODE_HT_header.draw = draw
-    
-    @classmethod
-    def unregister_draw_cb(cls):
-        if cls._draw_header is not None:
-            NODE_HT_header.draw = cls._draw_header
-            cls._draw_header = None
+from ..ui import utils
 
 class ArnoldShaderTree(ShaderNodeTree):
     bl_idname = "ArnoldShaderTree"
     bl_label = "Arnold Shader Editor"
     bl_icon = 'MATERIAL'
+
+    _draw_header_func = None
 
     @classmethod
     def poll(cls, context):
@@ -115,19 +22,163 @@ class ArnoldShaderTree(ShaderNodeTree):
 
     @classmethod
     def get_from_context(cls,  context):
-        ''' Switches the displayed node tree when user selects object/material '''
-        ob = context.object
+        space_data = context.scene.arnold_options.space_data
+        if space_data.shader_type == 'OBJECT':    
+            ob = context.object
 
-        if ob and ob.type not in {'LIGHT', 'CAMERA'}:
-            mat = ob.active_material
+            if ob and ob.type not in {'LIGHT', 'CAMERA'}:
+                mat = ob.active_material
 
-            if mat:
-                node_tree = mat.arnold.node_tree
-
-                if node_tree:
-                    return node_tree, mat, mat
+                if ob.active_material is not None and ob.active_material.arnold.node_tree is not None:
+                    return ob.active_material.arnold.node_tree, ob.active_material, ob.active_material
+        
+        elif space_data.shader_type == 'WORLD':
+            return context.scene.world.node_tree, context.scene.world, context.scene.world
         
         return None, None, None
+
+    @classmethod
+    def register(cls):
+        if cls._draw_header_func is None:
+            '''
+            This is a modified version of NODE_HT_header.draw()
+            We want to match Blender's default UI as closely as possible but
+            tailor it to Arnold instead.
+            '''
+            def draw(self, context):
+                if engine.ArnoldRenderEngine.is_active(context):
+                    layout = self.layout
+
+                    scene = context.scene
+                    snode = context.space_data
+                    arnold_space_data = scene.arnold_options.space_data
+                    snode_id = snode.id
+                    id_from = snode.id_from
+                    tool_settings = context.tool_settings
+                    is_compositor = snode.tree_type == 'CompositorNodeTree'
+
+                    layout.template_header()
+
+                    if snode.tree_type == 'ArnoldShaderTree':
+                        layout.prop(arnold_space_data, "shader_type", text="")
+                
+                        ob = context.object
+                        if arnold_space_data.shader_type == 'OBJECT' and ob:
+                            ob_type = ob.type
+
+                            NODE_MT_editor_menus.draw_collapsible(context, layout)
+
+                            layout.separator_spacer()
+
+                            types_that_support_material = {'MESH', 'CURVE', 'SURFACE', 'FONT', 'META',
+                                                        'GPENCIL', 'VOLUME', 'HAIR', 'POINTCLOUD'}
+                            # disable material slot buttons when pinned, cannot find correct slot within id_from (#36589)
+                            # disable also when the selected object does not support materials
+                            has_material_slots = not snode.pin and ob_type in types_that_support_material
+
+                            if ob_type != 'LIGHT':
+                                row = layout.row()
+                                row.enabled = has_material_slots
+                                row.ui_units_x = 4
+                                row.popover(panel="NODE_PT_material_slots")
+
+                            row = layout.row()
+                            row.enabled = has_material_slots
+
+                            # Show material.new when no active ID/slot exists
+                            #if not id_from and ob_type in types_that_support_material:
+                            #    row.template_ID(ob, "active_material", new="material.new")
+                            # Material ID, but not for Lights
+                            #if id_from and ob_type != 'LIGHT':
+                            #    row.template_ID(id_from, "active_material", new="material.new")
+
+                            row = utils.aishader_template_ID(layout, ob.active_material)
+
+                        if arnold_space_data.shader_type == 'WORLD':
+                            NODE_MT_editor_menus.draw_collapsible(context, layout)
+
+                            layout.separator_spacer()
+
+                            row = layout.row()
+                            row.enabled = not snode.pin
+                            row.template_ID(scene, "world", new="world.new")
+
+                    elif snode.tree_type == 'TextureNodeTree':
+                        layout.prop(snode, "texture_type", text="")
+
+                        NODE_MT_editor_menus.draw_collapsible(context, layout)
+
+                        if snode_id:
+                            layout.prop(snode_id, "use_nodes")
+
+                        layout.separator_spacer()
+
+                        if id_from:
+                            if snode.texture_type == 'BRUSH':
+                                layout.template_ID(id_from, "texture", new="texture.new")
+                            else:
+                                layout.template_ID(id_from, "active_texture", new="texture.new")
+
+                    elif snode.tree_type == 'CompositorNodeTree':
+
+                        NODE_MT_editor_menus.draw_collapsible(context, layout)
+
+                        if snode_id:
+                            layout.prop(snode_id, "use_nodes")
+
+                    elif snode.tree_type == 'SimulationNodeTree':
+                        row = layout.row(align=True)
+                        row.prop(snode, "simulation", text="")
+                        row.operator("simulation.new", text="", icon='ADD')
+                        simulation = snode.simulation
+                        if simulation:
+                            row.prop(snode.simulation, "use_fake_user", text="")
+
+                    else:
+                        # Custom node tree is edited as independent ID block
+                        NODE_MT_editor_menus.draw_collapsible(context, layout)
+
+                        layout.separator_spacer()
+
+                        layout.template_ID(snode, "node_tree", new="node.new_node_tree")
+
+                    # Put pin next to ID block
+                    if not is_compositor:
+                        layout.prop(snode, "pin", text="", emboss=False)
+
+                    layout.separator_spacer()
+
+                    # Put pin on the right for Compositing
+                    if is_compositor:
+                        layout.prop(snode, "pin", text="", emboss=False)
+
+                    layout.operator("node.tree_path_parent", text="", icon='FILE_PARENT')
+
+                    # Backdrop
+                    if is_compositor:
+                        row = layout.row(align=True)
+                        row.prop(snode, "show_backdrop", toggle=True)
+                        sub = row.row(align=True)
+                        sub.active = snode.show_backdrop
+                        sub.prop(snode, "backdrop_channels", icon_only=True, text="", expand=True)
+
+                    # Snap
+                    row = layout.row(align=True)
+                    row.prop(tool_settings, "use_snap", text="")
+                    row.prop(tool_settings, "snap_node_element", icon_only=True)
+                    if tool_settings.snap_node_element != 'GRID':
+                        row.prop(tool_settings, "snap_target", text="")
+                else:
+                    cls._draw_header_func(self, context)
+
+            cls._draw_header_func = NODE_HT_header.draw
+            NODE_HT_header.draw = draw
+    
+    @classmethod
+    def unregister_draw_cb(cls):
+        if cls._draw_header_func is not None:
+            NODE_HT_header.draw = cls._draw_header_func
+            cls._draw_header_func = None
 
     def get_output_node(self):
         '''
@@ -265,8 +316,7 @@ node_categories = [
 ]
 
 classes = (
-    ArnoldWorldTree,
-    ArnoldShaderTree
+    ArnoldShaderTree,
 )
 
 def register():
@@ -280,6 +330,9 @@ def register():
 def unregister():
     from bpy.utils import unregister_class
     from nodeitems_utils import unregister_node_categories
+
+    ArnoldShaderTree.unregister_draw_cb()
+
     for cls in classes:
         unregister_class(cls)
 

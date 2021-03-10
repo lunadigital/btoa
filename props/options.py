@@ -1,6 +1,15 @@
 import bpy
 from bpy.types import Scene, PropertyGroup, Camera
 from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty, StringProperty
+
+class AiSpaceDataProperties(PropertyGroup):
+    shader_type: EnumProperty(
+        name="Shaderl Type",
+        items=[
+            ('OBJECT', "Object", "Object shaders", "OBJECT_DATA", 0),
+            ('WORLD', "World", "World shaders", "WORLD_DATA", 1),
+        ]
+    )
    
 class ArnoldOptions(PropertyGroup):
     # Sampling
@@ -201,10 +210,23 @@ class ArnoldOptions(PropertyGroup):
         default="sRGB"
     )
 
+    space_data: PointerProperty(type=AiSpaceDataProperties)
+
+classes = (
+    AiSpaceDataProperties,
+    ArnoldOptions,
+)
+
 def register():
-    bpy.utils.register_class(ArnoldOptions)
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+
     Scene.arnold_options = PointerProperty(type=ArnoldOptions)
 
 def unregister():
-    bpy.utils.unregister_class(ArnoldOptions)
     del Scene.arnold_options
+
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)

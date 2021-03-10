@@ -509,6 +509,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 #else:
                 #    btoa_utils.sync_light(node, object_instance)
 
+        # Export world settings
+
+        #if context.world.arnold.node_tree is not None:
+        #    pass
+
+
+        # Add final required nodeds
+
         default_filter = btoa.BtNode("gaussian_filter")
         default_filter.set_string("name", "gaussianFilter")
 
