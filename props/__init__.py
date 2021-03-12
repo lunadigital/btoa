@@ -1,16 +1,23 @@
-from . import camera
-from . import light
-from . import material
-from . import options
+from . import (
+    camera,
+    light,
+    material,
+    options,
+    world
+)
+
+modules = (
+    camera,
+    light,
+    material,
+    options,
+    world
+)
 
 def register():
-    camera.register()
-    light.register()
-    material.register()
-    options.register()
+    for m in modules:
+        m.register()
 
 def unregister():
-    camera.unregister()
-    light.unregister()
-    material.unregister()
-    options.unregister()
+    for m in reversed(modules):
+        m.unregister()

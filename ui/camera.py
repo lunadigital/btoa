@@ -49,7 +49,7 @@ class DATA_PT_arnold_dof(CameraButtonsPanel, bpy.types.Panel):
 
         sub = col.column()
         sub.active = (camera.dof.focus_object is None)
-        sub.prop(camera.arnold, "focus_distance")
+        sub.prop(camera.dof, "focus_distance")
 
 # This is a hacky way to get more control over where Blender
 # panels appear in relation to Arnold panels
@@ -229,22 +229,52 @@ class DATA_PT_arnold_camera_display(CameraButtonsPanel, bpy.types.Panel):
 
         col = layout.column(align=True)
 
-        col.separator()
-
         col.prop(cam, "display_size", text="Size")
 
-        col.separator()
-
-        flow = layout.grid_flow(row_major=False, columns=0, even_columns=False, even_rows=False, align=False)
-
-        col = flow.column()
+        col = layout.column(heading="Show")
         col.prop(cam, "show_limits", text="Limits")
-        col = flow.column()
         col.prop(cam, "show_mist", text="Mist")
-        col = flow.column()
         col.prop(cam, "show_sensor", text="Sensor")
-        col = flow.column()
         col.prop(cam, "show_name", text="Name")
+
+        col = layout.column(align=False, heading="Passepartout")
+        col.use_property_decorate = False
+        row = col.row(align=True)
+        sub = row.row(align=True)
+        sub.prop(cam, "show_passepartout", text="")
+        sub = sub.row(align=True)
+        sub.active = cam.show_passepartout
+        sub.prop(cam, "passepartout_alpha", text="")
+        row.prop_decorator(cam, "passepartout_alpha")
+
+
+class DATA_PT_arnold_camera_display_composition_guides(CameraButtonsPanel, bpy.types.Panel):
+    bl_label = "Composition Guides"
+    bl_parent_id = "DATA_PT_arnold_camera_display"
+    bl_options = {'DEFAULT_CLOSED'}
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+
+        cam = context.camera
+
+        layout.prop(cam, "show_composition_thirds")
+
+        col = layout.column(heading="Center", align=True)
+        col.prop(cam, "show_composition_center")
+        col.prop(cam, "show_composition_center_diagonal", text="Diagonal")
+
+        col = layout.column(heading="Golden", align=True)
+        col.prop(cam, "show_composition_golden", text="Ratio")
+        col.prop(cam, "show_composition_golden_tria_a", text="Triangle A")
+        col.prop(cam, "show_composition_golden_tria_b", text="Triangle B")
+
+        col = layout.column(heading="Harmony", align=True)
+        col.prop(cam, "show_composition_harmony_tri_a", text="Triangle A")
+        col.prop(cam, "show_composition_harmony_tri_b", text="Triangle B")
+
 
 classes = (
     DATA_PT_arnold_lens,
@@ -253,6 +283,7 @@ classes = (
     DATA_PT_arnold_aperture,
     DATA_PT_arnold_camera_background_image,
     DATA_PT_arnold_camera_display,
+    DATA_PT_arnold_camera_display_composition_guides,
 )
 
 def register():

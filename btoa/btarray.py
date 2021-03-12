@@ -11,10 +11,10 @@ class BtArray(BtTemplate):
             constants.BT_TYPE_CONSTANTS[type_string]
         )
 
-    def convert_from_buffer(self, length, type_string, data):
+    def convert_from_buffer(self, length, keys, type_string, data):
         self._data = arnold.AiArrayConvert(
             length,
-            1,
+            keys,
             constants.BT_TYPE_CONSTANTS[type_string],
             data
         )
@@ -22,3 +22,15 @@ class BtArray(BtTemplate):
     def set_string(self, param, val):
         if self.is_valid():
             arnold.AiArraySetStr(self._data, param, val)
+
+    def set_array(self, i, btarray):
+        if self.is_valid():
+            arnold.AiArraySetArray(self._data, i, btarray._data)
+
+    def set_matrix(self, i, val):
+        if self.is_valid():
+            arnold.AiArraySetMtx(self._data, i, arnold.AtMatrix(*val))
+
+    def set_vector(self, i, btarray):
+        if self.is_valid():
+            arnold.AiArraySetVec(self._data, i, btarray._data)

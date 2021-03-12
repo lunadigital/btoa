@@ -134,13 +134,13 @@ class DATA_PT_arnold_light_visibility(DataButtonsPanel, bpy.types.Panel):
         col.prop(light.arnold, "volume")
         col.prop(light.arnold, "max_bounces")
 
-classes = [
+classes = (
     DATA_PT_arnold_light,
     DATA_PT_arnold_light_shape,
     DATA_PT_arnold_light_shadows,
     DATA_PT_arnold_light_advanced,
     DATA_PT_arnold_light_visibility
-]
+)
 
 def register():
     from bpy.utils import register_class

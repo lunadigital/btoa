@@ -2,12 +2,14 @@ import bpy
 import bgl
 import numpy
 import os
+import math
 import ctypes
 
 from bl_ui.properties_render import RENDER_PT_color_management
+import mathutils
 
 from . import btoa
-from .utils import btoa_utils
+from . import utils
 
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
@@ -15,9 +17,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_use_preview = True
 
     def __init__(self):
-        self.scene_data = None
-        self.draw_data = None
+        self.session = {}
 
+        self.progress = 0
+        self._progress_increment = 0
+        
         btoa.start_session()
 
     def __del__(self):
@@ -27,122 +31,523 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def is_active(cls, context):
         return context.scene.render.engine == cls.bl_idname
 
-    def is_visible(self, ob):
-        visible = False
-
-        # If object is in a visible collection, set
-        # visibility to true
-        for collection in ob.users_collection:
-            if not collection.hide_render:
-                visible = True
-                break
+    def create_camera(self, object_instance):
+        node = btoa.BtNode("persp_camera")
+        self.sync_camera(node, object_instance)
         
-        # If in a visible collection, set visibility with
-        # object-level settings
-        if visible:
-            visible = not ob.hide_render
+        return node
 
-        return visible
+    def create_light(self, object_instance):
+        ob = utils.get_object_data_from_instance(object_instance)
+
+        ntype = btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape] if ob.data.type == 'AREA' else btoa.BT_LIGHT_CONVERSIONS[ob.data.type]
+        node = btoa.BtNode(ntype)
+        self.sync_light(node, object_instance)
+
+        return node
+
+    def create_polymesh(self, object_instance):
+        ob = utils.get_object_data_from_instance(object_instance)
+        mesh = utils.bake_mesh(ob)
+
+        if mesh is None:
+            return None
+
+        settings = self.session["render_settings"]
+
+        if settings.enable_motion_blur and settings.camera_motion_blur:
+            transform_matrix = self.get_transform_blur_matrix(object_instance)
+            mesh = utils.bake_mesh(ob)
+        else:
+            transform_matrix = utils.flatten_matrix(object_instance.matrix_world)
+
+        if settings.enable_motion_blur and settings.deformation_motion_blur:
+            motion_steps = numpy.linspace(
+                settings.shutter_start,
+                settings.shutter_end,
+                settings.motion_keys
+            )
+
+            frame_current = self.session["scene"].frame_current
+
+            vlist_data = None
+            nlist_data = None
+
+            for i in range(0, motion_steps.size):
+                frame_as_flt = frame_current + motion_steps[i]
+                frame_as_int = math.floor(frame_as_flt)
+                subframe = frame_as_flt - frame_as_int
+
+                self.frame_set(frame_as_int, subframe=subframe)
+                mesh = utils.bake_mesh(ob)
+
+                a = numpy.ndarray(
+                    len(mesh.vertices) * 3,
+                    dtype=numpy.float32
+                )
+                mesh.vertices.foreach_get("co", a)
+                
+                vlist_data = a if vlist_data is None else numpy.concatenate((vlist_data, a))
+
+                a = numpy.ndarray(
+                    len(mesh.loops) * 3,
+                    dtype=numpy.float32
+                )
+                mesh.loops.foreach_get("normal", a)
+
+                nlist_data = a if nlist_data is None else numpy.concatenate((nlist_data, a))
+
+            self.frame_set(frame_current, subframe=0)
+            mesh = utils.bake_mesh(ob)
+
+            vlist = btoa.BtArray()
+            vlist.convert_from_buffer(
+                len(mesh.vertices),
+                settings.motion_keys,
+                'VECTOR',
+                ctypes.c_void_p(vlist_data.ctypes.data)
+            )
+
+            nlist = btoa.BtArray()
+            nlist.convert_from_buffer(
+                len(mesh.loops),
+                settings.motion_keys,
+                'VECTOR',
+                ctypes.c_void_p(nlist_data.ctypes.data)
+            )
+
+        else:
+            a = numpy.ndarray(
+                len(mesh.vertices) * 3,
+                dtype=numpy.float32
+            )
+            mesh.vertices.foreach_get("co", a)
+
+            vlist = btoa.BtArray()
+            vlist.convert_from_buffer(
+                len(mesh.vertices),
+                1,
+                'VECTOR',
+                ctypes.c_void_p(a.ctypes.data)
+            )
+
+            a = numpy.ndarray(
+                len(mesh.loops) * 3,
+                dtype=numpy.float32
+            )
+            mesh.loops.foreach_get("normal", a)
+
+            nlist = btoa.BtArray()
+            nlist.convert_from_buffer(
+                len(mesh.loops),
+                1,
+                'VECTOR',
+                ctypes.c_void_p(a.ctypes.data)
+            )
+
+        # Polygons
+        a = numpy.ndarray(
+            len(mesh.polygons),
+            dtype=numpy.uint32
+        )
+        mesh.polygons.foreach_get("loop_total", a)
+
+        nsides = btoa.BtArray()
+        nsides.convert_from_buffer(
+            len(mesh.polygons),
+            1,
+            'UINT',
+            ctypes.c_void_p(a.ctypes.data)
+        )
+
+        a = numpy.ndarray(
+            len(mesh.loops),
+            dtype=numpy.uint32
+        )
+        mesh.polygons.foreach_get("vertices", a)
+
+        vidxs = btoa.BtArray()
+        vidxs.convert_from_buffer(
+            len(mesh.loops),
+            1,
+            'UINT',
+            ctypes.c_void_p(a.ctypes.data)
+        )
+
+        a = numpy.arange(
+            len(mesh.loops),
+            dtype=numpy.uint32
+        )
+        
+        nidxs = btoa.BtArray()
+        nidxs.convert_from_buffer(
+            len(mesh.loops),
+            1,
+            'UINT',
+            ctypes.c_void_p(a.ctypes.data)
+        )
+
+        # Create polymesh object
+        name = utils.get_unique_name(object_instance)
+        node = btoa.BtPolymesh(name)
+
+        if settings.enable_motion_blur and settings.camera_motion_blur:
+            node.set_array("matrix", transform_matrix)
+        else:
+            node.set_matrix("matrix", transform_matrix)
+        
+        node.set_bool("smoothing", True)
+        node.set_array("vlist", vlist)
+        node.set_array("nlist", nlist)
+        node.set_array("nsides", nsides)
+        node.set_array("vidxs", vidxs)
+        node.set_array("nidxs", nidxs)
+        node.set_float("motion_start", settings.shutter_start)
+        node.set_float("motion_end", settings.shutter_end)
+
+        # UV's
+        for i, uvt in enumerate(mesh.uv_layers):
+            if uvt.active_render:
+                data = mesh.uv_layers[i].data
+                
+                a = numpy.arange(len(data), dtype=numpy.uint32)
+                uvidxs = btoa.BtArray()
+                uvidxs.convert_from_buffer(
+                    len(data),
+                    1,
+                    'UINT',
+                    ctypes.c_void_p(a.ctypes.data)
+                )
+
+                a = numpy.ndarray(
+                    len(data) * 2,
+                    dtype=numpy.float32
+                )
+                data.foreach_get("uv", a)
+
+                uvlist = btoa.BtArray()
+                uvlist.convert_from_buffer(
+                    len(data),
+                    1,
+                    'VECTOR2',
+                    ctypes.c_void_p(a.ctypes.data)
+                )
+
+                node.set_array("uvidxs", uvidxs)
+                node.set_array("uvlist", uvlist)
+
+                break
+
+        # Materials
+        # This should really be in a for loop, but for now we're only
+        # looking for the material in the first slot.
+        # for slot in ob.material_slots:
+        try:
+            slot = ob.material_slots[0]
+            if slot.material is not None:
+                unique_name = utils.get_unique_name(slot.material)
+
+                if slot.material.arnold.node_tree is not None:
+                    shader = btoa.get_node_by_name(unique_name)
+
+                    if shader.is_valid():
+                        node.set_pointer("shader", shader)
+                    else:
+                        surface, volume, displacement = slot.material.arnold.node_tree.export()
+                        surface[0].set_string("name", unique_name)
+                        node.set_pointer("shader", surface[0])
+
+        except:
+            print("WARNING: {} has no material slots assigned!".format(ob.name))
+
+        return node
+
+    def create_world(self):
+        world = self.session["scene"].world
+        arnold = world.arnold.data
+
+        unique_name = utils.get_unique_name(world)
+
+        surface, volume, displacement = world.arnold.node_tree.export()
+        btnode = surface[0]
+        
+        btnode.set_string("name", unique_name)
+        
+        btnode.set_int("samples", arnold.samples)
+        btnode.set_bool("normalize", arnold.normalize)
+
+        btnode.set_bool("cast_shadows", arnold.cast_shadows)
+        btnode.set_bool("cast_volumetric_shadows", arnold.cast_volumetric_shadows)
+        btnode.set_rgb("shadow_color", *arnold.shadow_color)
+        btnode.set_float("shadow_density", arnold.shadow_density)
+
+        btnode.set_float("camera", arnold.camera)
+        btnode.set_float("diffuse", arnold.diffuse)
+        btnode.set_float("specular", arnold.specular)
+        btnode.set_float("transmission", arnold.transmission)
+        btnode.set_float("sss", arnold.sss)
+        btnode.set_float("indirect", arnold.indirect)
+        btnode.set_float("volume", arnold.volume)
+        btnode.set_int("max_bounces", arnold.max_bounces)
+
+        return btnode
+
+    def get_transform_blur_matrix(self, object_instance):
+        settings = self.session["render_settings"]
+        
+        motion_steps = numpy.linspace(
+            settings.shutter_start,
+            settings.shutter_end,
+            settings.motion_keys
+        )
+
+        frame_current = self.session["scene"].frame_current
+
+        transform_matrix = btoa.BtArray()
+        transform_matrix.allocate(1, settings.motion_keys, 'MATRIX')
+        
+        for i in range(0, motion_steps.size):
+            frame_as_flt = frame_current + motion_steps[i]
+            frame_as_int = math.floor(frame_as_flt)
+            subframe = frame_as_flt - frame_as_int
+
+            self.frame_set(frame_as_int, subframe=subframe)
+            
+            m = utils.flatten_matrix(object_instance.matrix_world)
+            transform_matrix.set_matrix(i, m)
+
+        self.frame_set(frame_current, subframe=0)
+
+        return transform_matrix
+
+    def get_render_resolution(self, scene):
+        scale = scene.render.resolution_percentage / 100
+        x = int(scene.render.resolution_x * scale)
+        y = int(scene.render.resolution_y * scale)
+
+        return mathutils.Vector((x, y))
+
+    def sync_camera(self, btnode, object_instance):
+        ob = utils.get_object_data_from_instance(object_instance)
+        data = ob.data
+        arnold = data.arnold
+        settings = self.session["render_settings"]
+
+        btnode.set_string("name", utils.get_unique_name(object_instance))
+
+        if settings.enable_motion_blur and settings.camera_motion_blur:
+            matrix = self.get_transform_blur_matrix(object_instance)
+            btnode.set_array("matrix", matrix)
+        else:
+            matrix = utils.flatten_matrix(object_instance.matrix_world)
+            btnode.set_matrix("matrix", matrix)
+
+        fov = utils.calc_horizontal_fov(ob)
+        btnode.set_float("fov", math.degrees(fov))
+        btnode.set_float("exposure", arnold.exposure)
+
+        if data.dof.focus_object:
+            distance = mathutils.geometry.distance_point_to_plane(
+                ob.matrix_world.to_translation(),
+                data.dof.focus_object.matrix_world.to_translation(),
+                ob.matrix_world.col[2][:3]
+            )
+        else:
+            distance = data.dof.focus_distance
+
+        aperture_size = arnold.aperture_size if arnold.enable_dof else 0
+
+        btnode.set_float("focus_distance", distance)
+        btnode.set_float("aperture_size", aperture_size)
+        btnode.set_int("aperture_blades", arnold.aperture_blades)
+        btnode.set_float("aperture_rotation", arnold.aperture_rotation)
+        btnode.set_float("aperture_blade_curvature", arnold.aperture_blade_curvature)
+        btnode.set_float("aperture_aspect_ratio", arnold.aperture_aspect_ratio)
+
+        btnode.set_float("near_clip", data.clip_start)
+        btnode.set_float("far_clip", data.clip_end)
+
+        if settings.enable_motion_blur:
+            btnode.set_float("shutter_start", settings.shutter_start)
+            btnode.set_float("shutter_end", settings.shutter_end)
+            #btnode.set_string("shutter_type", arnold.shutter_type)
+            #btnode.set_string("rolling_shutter", arnold.rolling_shutter)
+            #btnode.set_float("rolling_shutter_duration", arnold.rolling_shutter_duration)
+
+    def sync_light(self, btnode, object_instance):    
+        ob = utils.get_object_data_from_instance(object_instance)
+
+        data = ob.data
+        arnold = data.arnold
+
+        btnode.set_string("name", utils.get_unique_name(object_instance))
+
+        # Set matrix for everything except cylinder lights
+        if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
+            btnode.set_matrix(
+                "matrix",
+                utils.flatten_matrix(ob.matrix_world)
+            )
+        
+        btnode.set_rgb("color", *data.color)
+        btnode.set_float("intensity", arnold.intensity)
+        btnode.set_float("exposure", arnold.exposure)
+        btnode.set_int("samples", arnold.samples)
+        btnode.set_bool("normalize", arnold.normalize)
+
+        btnode.set_bool("cast_shadows", arnold.cast_shadows)
+        btnode.set_bool("cast_volumetric_shadows", arnold.cast_volumetric_shadows)
+        btnode.set_rgb("shadow_color", *arnold.shadow_color)
+        btnode.set_float("shadow_density", arnold.shadow_density)
+
+        btnode.set_float("camera", arnold.camera)
+        btnode.set_float("diffuse", arnold.diffuse)
+        btnode.set_float("specular", arnold.specular)
+        btnode.set_float("transmission", arnold.transmission)
+        btnode.set_float("sss", arnold.sss)
+        btnode.set_float("indirect", arnold.indirect)
+        btnode.set_float("volume", arnold.volume)
+        btnode.set_int("max_bounces", arnold.max_bounces)
+
+        if data.type in ('POINT', 'SPOT'):
+            btnode.set_float("radius", data.shadow_soft_size)
+
+        if data.type == 'SUN':
+            btnode.set_float("angle", arnold.angle)
+
+        if data.type == 'SPOT':
+            btnode.set_float("cone_angle", math.degrees(data.spot_size))
+            btnode.set_float("penumbra_angle", math.degrees(arnold.penumbra_angle))
+            btnode.set_float("roundness", arnold.spot_roundness)
+            btnode.set_float("aspect_ratio", arnold.aspect_ratio)
+            btnode.set_float("lens_radius", arnold.lens_radius)
+
+        if data.type == 'AREA':
+            btnode.set_float("roundness", arnold.area_roundness)
+            btnode.set_float("spread", arnold.spread)
+            btnode.set_int("resolution", arnold.resolution)
+            btnode.set_float("soft_edge", arnold.soft_edge)
+            
+            if data.shape == 'SQUARE':
+                smatrix = mathutils.Matrix.Diagonal((
+                    data.size / 2,
+                    data.size / 2,
+                    data.size / 2
+                )).to_4x4()
+                
+                tmatrix = ob.matrix_world @ smatrix
+            
+                btnode.set_matrix(
+                    "matrix",
+                    utils.flatten_matrix(tmatrix)
+                )
+            elif data.shape == 'DISK':
+                s = ob.scale.x if ob.scale.x > ob.scale.y else ob.scale.y
+                btnode.set_float("radius", 0.5 * data.size * s)
+            elif data.shape == 'RECTANGLE':
+                d = 0.5 * data.size_y * ob.scale.y
+                top = utils.get_position_along_local_vector(ob, d, 'Y')
+                bottom = utils.get_position_along_local_vector(ob, -d, 'Y')
+
+                btnode.set_vector("top", *top)
+                btnode.set_vector("bottom", *bottom)
+
+                s = ob.scale.x if ob.scale.x > ob.scale.z else ob.scale.z
+                btnode.set_float("radius", 0.5 * data.size * s)
 
     def update(self, data, depsgraph):
-        scene = depsgraph.scene
-        bl_options = scene.arnold_options
+        self.session["depsgraph"] = depsgraph
+        self.session["scene"] = depsgraph.scene
+        self.session["render_settings"] = depsgraph.scene.arnold_options
+        self.session["options"] = btoa.BtOptions()
+        self.session["resolution"] = self.get_render_resolution(depsgraph.scene)
 
-        self.set_render_size(scene)
+        # Global render options
+        options = self.session["options"]
+        resolution = self.session["resolution"]
+        settings = self.session["render_settings"]
 
-        options = btoa.BtOptions()
-        
-        # Update render resolution
-        options.set_int("xres", self.size_x)
-        options.set_int("yres", self.size_y)
+        options.set_int("xres", int(resolution.x))
+        options.set_int("yres", int(resolution.y))
 
-        # Update sampling settings
-        options.set_int("AA_samples", bl_options.aa_samples)
-        options.set_int("GI_diffuse_samples", bl_options.diffuse_samples)
-        options.set_int("GI_specular_samples", bl_options.specular_samples)
-        options.set_int("GI_transmission_samples", bl_options.transmission_samples)
-        options.set_int("GI_sss_samples", bl_options.sss_samples)
-        options.set_int("GI_volume_samples", bl_options.volume_samples)
-        options.set_float("AA_sample_clamp", bl_options.sample_clamp)
-        options.set_bool("AA_sample_clamp_affects_aovs", bl_options.clamp_aovs)
-        options.set_float("indirect_sample_clamp", bl_options.indirect_sample_clamp)
-        options.set_float("low_light_threshold", bl_options.low_light_threshold)
+        options.set_int("AA_samples", settings.aa_samples)
+        options.set_int("GI_diffuse_samples", settings.diffuse_samples)
+        options.set_int("GI_specular_samples", settings.specular_samples)
+        options.set_int("GI_transmission_samples", settings.transmission_samples)
+        options.set_int("GI_sss_samples", settings.sss_samples)
+        options.set_int("GI_volume_samples", settings.volume_samples)
+        options.set_float("AA_sample_clamp", settings.sample_clamp)
+        options.set_bool("AA_sample_clamp_affects_aovs", settings.clamp_aovs)
+        options.set_float("indirect_sample_clamp", settings.indirect_sample_clamp)
+        options.set_float("low_light_threshold", settings.low_light_threshold)
 
-        if bl_options.aa_seed > 0:
-            options.set_int("AA_seed", bl_options.aa_seed)
+        if settings.aa_seed > 0:
+            options.set_int("AA_seed", settings.aa_seed)
 
-        # Update ray depth settings
-        options.set_int("GI_total_depth", bl_options.total_depth)
-        options.set_int("GI_diffuse_depth", bl_options.diffuse_depth)
-        options.set_int("GI_specular_depth", bl_options.specular_depth)
-        options.set_int("GI_transmission_depth", bl_options.transmission_depth)
-        options.set_int("GI_volume_depth", bl_options.volume_depth)
-        options.set_int("auto_transparency_depth", bl_options.transparency_depth)
+        options.set_int("GI_total_depth", settings.total_depth)
+        options.set_int("GI_diffuse_depth", settings.diffuse_depth)
+        options.set_int("GI_specular_depth", settings.specular_depth)
+        options.set_int("GI_transmission_depth", settings.transmission_depth)
+        options.set_int("GI_volume_depth", settings.volume_depth)
+        options.set_int("auto_transparency_depth", settings.transparency_depth)
 
-        # Render settings
-        options.set_int("bucket_size", bl_options.bucket_size)
-        options.set_string("bucket_scanning", bl_options.bucket_scanning)
-        options.set_bool("parallel_node_init", bl_options.parallel_node_init)
-        options.set_int("threads", bl_options.threads)
-
-        for mat in data.materials:
-            if (
-                not btoa.get_node_by_name(mat.name).is_valid() and
-                mat.name != "Dots Stroke" and
-                mat.arnold.node_tree is not None
-            ):
-                snode, vnode, dnode = mat.arnold.node_tree.export()
-                snode[0].set_string("name", mat.name)
+        options.set_int("bucket_size", settings.bucket_size)
+        options.set_string("bucket_scanning", settings.bucket_scanning)
+        options.set_bool("parallel_node_init", settings.parallel_node_init)
+        options.set_int("threads", settings.threads)
   
-        for dup in depsgraph.object_instances:
-            if dup.is_instance:
-                ob = dup.instance_object
-            else:
-                ob = dup.object
+        # Export scene objects
+        
+        for object_instance in depsgraph.object_instances:
+            ob = utils.get_object_data_from_instance(object_instance)
+            ob_unique_name = utils.get_unique_name(object_instance)
 
             if ob.type in btoa.BT_CONVERTIBLE_TYPES:
-                node = btoa.get_node_by_name(ob.name)
-                if not node.is_valid():
-                    node = btoa_utils.create_polymesh(ob)
+                node = btoa.get_node_by_name(ob_unique_name)
 
-                if node is not None and len(ob.data.materials) > 0 and ob.data.materials[0] is not None:
-                    mat_node = btoa.get_node_by_name(ob.data.materials[0].name)
-                    node.set_pointer("shader", mat_node)
-            elif ob.type == 'CAMERA' and ob.name == scene.camera.name:
-                camera_node = btoa.get_node_by_name(ob.name)
-                if not camera_node.is_valid(): 
-                    camera_node = btoa_utils.create_camera(ob)
-                else:
-                    btoa_utils.sync_camera(camera_node, ob)
+                if not node.is_valid():
+                    node = self.create_polymesh(object_instance)
+                    
+            elif ob.type == 'CAMERA' and ob.name == self.session["scene"].camera.name:
+                node = btoa.get_node_by_name(ob_unique_name)
                 
-                options.set_pointer("camera", camera_node)
-            
-            # Update lights
-            if ob.type == 'LIGHT':
-                node = btoa.get_node_by_name(ob.name)
+                if not node.is_valid(): 
+                    node = self.create_camera(object_instance)
+                #else:
+                #    self.sync_camera(node, object_instance)
 
+                options.set_pointer("camera", node)
+            
+            if ob.type == 'LIGHT':
+                node = btoa.get_node_by_name(ob_unique_name)
+                
                 if not node.is_valid():
-                    node = btoa_utils.create_light(ob)
+                    node = self.create_light(object_instance)
 
                 # If existing AiNode is an area light, but doesn't match the type in Blender
-                elif node.type_is("quad_light") or node.type_is("disk_light") or node.type_is("cylinder_light"):
-                    if not node.type_is(btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape]):
-                        AiNodeDestroy(node)
-                        node = btoa_utils.create_light(ob)
+                #elif node.type_is("quad_light") or node.type_is("disk_light") or node.type_is("cylinder_light"):
+                #    if not node.type_is(btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape]):
+                #        node.destroy()
+                #        node = self.create_light(object_instance)
 
                 # If existing AiNode is a non-area light type, but doesn't match the type in Blender
-                elif not node.type_is(btoa.BT_LIGHT_CONVERSIONS[ob.data.type]):
-                    AiNodeDestroy(node)
-                    node = btoa_utils.create_light(ob)
+                #elif not node.type_is(btoa.BT_LIGHT_CONVERSIONS[ob.data.type]):
+                #    node.destroy()
+                #    node = btoa_utils.create_light(object_instance)
 
                 # If AiNode exists and same type, just update params
-                else:
-                    btoa_utils.sync_light(node, ob)
+                #else:
+                #    btoa_utils.sync_light(node, object_instance)
 
-        gaussian_filter = btoa.BtNode("gaussian_filter")
-        gaussian_filter.set_string("name", "gaussianFilter")
+        # Export world settings
 
-        options = btoa.BtOptions()
+        if self.session["scene"].world.arnold.node_tree is not None:
+            self.create_world()
+
+        # Add final required nodeds
+
+        default_filter = btoa.BtNode("gaussian_filter")
+        default_filter.set_string("name", "gaussianFilter")
 
         outputs = btoa.BtArray()
         outputs.allocate(1, 1, 'STRING')
@@ -158,22 +563,27 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         _htiles = {}
         
         def display_callback(x, y, width, height, buffer, data):
+            resolution = engine.session["resolution"]
+
             if buffer:
                 try:
                     result = _htiles.pop((x, y), None)
                     
                     if result is None:
-                        result = engine.begin_result(x, engine.size_y - y - height, width, height)
+                        result = engine.begin_result(x, resolution.y - y - height, width, height)
                     
                     _buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
                     rect = numpy.ctypeslib.as_array(_buffer, shape=(width * height, 4))
                     
                     result.layers[0].passes["Combined"].rect = rect
                     engine.end_result(result)
+
+                    engine.progress += engine._progress_increment
+                    engine.update_progress(engine.progress)
                 finally:
                     btoa.free(buffer)
             else:
-                result = engine.begin_result(x, engine.size_y - y - height, width, height)
+                result = engine.begin_result(x, resolution.y - y - height, width, height)
                 _htiles[(x, y)] = result
             
             if engine.test_break():
@@ -182,9 +592,25 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     (x, y), result = _htiles.popitem()
                     engine.end_result(result, cancel=True)
 
+        # Calculate progress increment
+        options = self.session["options"]
+        
+        width = options.get_int("xres")
+        height = options.get_int("yres")
+        bucket_size = options.get_int("bucket_size")
+
+        h_buckets = math.ceil(width / bucket_size)
+        v_buckets = math.ceil(height / bucket_size)
+        total_buckets = h_buckets * v_buckets
+        
+        self.progress = 0
+        self._progress_increment = 1 / total_buckets
+
+        # Set callback
         cb = btoa.AtDisplayCallback(display_callback)
         
         display_node = btoa.get_node_by_name("__display_driver")
+        
         if not display_node.is_valid():
             display_node = btoa.BtNode("driver_display_callback")
             display_node.set_string("name", "__display_driver")
@@ -238,11 +664,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         self.unbind_display_space_shader()
         bgl.glDisable(bgl.GL_BLEND)
-    
-    def set_render_size(self, scene):
-        scale = scene.render.resolution_percentage / 100.0
-        self.size_x = int(scene.render.resolution_x * scale)
-        self.size_y = int(scene.render.resolution_y * scale)
 
 class ArnoldDrawData:
     def __init__(self, dimensions):
@@ -324,6 +745,7 @@ def get_panels():
         'DATA_PT_camera_safe_areas',
         'DATA_PT_camera_background_image',
         'DATA_PT_camera_display',
+        'WORLD_PT_context_world',
     }
 
     panels = []

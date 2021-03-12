@@ -47,6 +47,7 @@ class AiStandardSurface(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
         self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
         self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
+        self.inputs.new('AiNodeSocketIntUnbounded', "Dielectric Priority", identifier="dielectric_priority")
 
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
         self.inputs.new('AiNodeSocketRGB', "SSS Color", identifier="subsurface_color")
