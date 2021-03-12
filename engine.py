@@ -273,6 +273,15 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         
         btnode.set_string("name", unique_name)
         
+        identity_matrix = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]
+        btnode.set_matrix("matrix", identity_matrix)
+
+        # Flip image textures in the U direction
+        image = btnode.get_link("color")
+        if image.is_valid() and image.type_is("image"):
+            sflip = image.get_bool("sflip")
+            image.set_bool("sflip", not sflip)
+
         btnode.set_int("samples", arnold.samples)
         btnode.set_bool("normalize", arnold.normalize)
 
