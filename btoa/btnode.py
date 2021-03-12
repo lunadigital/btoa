@@ -79,3 +79,17 @@ class BtNode(BtTemplate):
             return None
             
         return arnold.AiNodeGetInt(self._data, param)
+
+    def get_bool(self, param):
+        if not self.is_valid():
+            return None
+        
+        return arnold.AiNodeGetBool(self._data, param)
+
+    def get_link(self, param, comp=None):
+        if not self.is_valid():
+            return None
+
+        node = BtNode()
+        node._data = arnold.AiNodeGetLink(self._data, param, comp)
+        return node
