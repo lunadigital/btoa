@@ -33,7 +33,7 @@ class ArnoldShaderTree(ShaderNodeTree):
                     return ob.active_material.arnold.node_tree, ob.active_material, ob.active_material
         
         elif space_data.shader_type == 'WORLD':
-            return context.scene.world.node_tree, context.scene.world, context.scene.world
+            return context.scene.world.arnold.node_tree, context.scene.world, context.scene.world
         
         return None, None, None
 
@@ -256,17 +256,57 @@ class ArnoldNodeCategory(NodeCategory):
 class ArnoldWorldNodeCategory(ArnoldNodeCategory):
     @classmethod
     def poll(cls, context):
-        return {
-            engine.ArnoldRenderEngine.is_active(context) and
-            context.space_data.tree_type == ArnoldWorldTree.bl_idname
-        }
+        return (
+            super().poll(context) and
+            context.space_data.tree_type == 'ArnoldShaderTree' and
+            context.scene.arnold_options.space_data.shader_type == 'WORLD'
+        )
 
 class ArnoldObjectNodeCategory(ArnoldNodeCategory):
     @classmethod
     def poll(cls, context):
-        return super().poll(context) and context.space_data.tree_type == 'ArnoldShaderTree' and context.object.type != 'LIGHT'
+        return (
+            super().poll(context) and
+            context.space_data.tree_type == 'ArnoldShaderTree' and
+            context.scene.arnold_options.space_data.shader_type == 'OBJECT' and
+            context.object.type != 'LIGHT'
+        )
 
-node_categories = [
+world_node_categories = [
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_OUTPUTS',
+        "Output",
+        items=[
+            NodeItem("AiShaderOutput")
+        ]
+    ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_SHADERS',
+        "Shader",
+        items=[
+            NodeItem("AiSkydome"),
+        ]
+    ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_TEXTURES',
+        "Texture",
+        items=[
+            NodeItem("AiCellNoise"),
+            NodeItem("AiCheckerboard"),
+            NodeItem("AiImage"),
+            NodeItem("AiNoise")
+        ]
+    ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_COLOR',
+        "Color",
+        items=[
+            NodeItem("AiColorCorrect")
+        ]
+    ),
+]
+
+object_node_categories = [
     ArnoldObjectNodeCategory(
         'ARNOLD_NODES_OBJECT_OUTPUTS',
         "Output",
@@ -325,7 +365,8 @@ def register():
     for cls in classes:
         register_class(cls)
 
-    register_node_categories('ARNOLD_NODES', node_categories)
+    register_node_categories('ARNOLD_WORLD_NODES', world_node_categories)
+    register_node_categories('ARNOLD_OBJECT_NODES', object_node_categories)
 
 def unregister():
     from bpy.utils import unregister_class
@@ -336,4 +377,5 @@ def unregister():
     for cls in classes:
         unregister_class(cls)
 
-    unregister_node_categories('ARNOLD_NODES')
+    unregister_node_categories('ARNOLD_WORLD_NODES')
+    unregister_node_categories('ARNOLD_OBJECT_NODES')

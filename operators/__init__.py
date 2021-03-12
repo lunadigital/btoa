@@ -1,7 +1,17 @@
-from . import material
+from . import (
+    material,
+    world
+)
+
+modules = (
+    material,
+    world
+)
 
 def register():
-    material.register()
+    for m in modules:
+        m.register()
 
 def unregister():
-    material.unregister()
+    for m in reversed(modules):
+        m.unregister()

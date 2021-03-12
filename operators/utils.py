@@ -25,6 +25,20 @@ def init_mat_node_tree(node_tree):
 
     node_tree.links.new(shader.outputs[0], output.inputs[0])
 
+def init_world_node_tree(node_tree):
+    node_tree.use_fake_user = True
+
+    nodes = node_tree.nodes
+
+    output = nodes.new("AiShaderOutput")
+    output.location = 300, 200
+    output.select = False
+
+    shader = nodes.new("AiSkydome")
+    shader.location = 50, 200
+
+    node_tree.links.new(shader.outputs[0], output.inputs[0])
+
 def get_name_with_lib(datablock):
     '''
     Format the name for display similar to Blender,

@@ -262,6 +262,15 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         return node
 
+    def create_world(self):
+        world = self.session["scene"].world
+        unique_name = utils.get_unique_name(world)
+
+        surface, volume, displacement = world.arnold.node_tree.export()
+        surface[0].set_string("name", unique_name)
+
+        return surface[0]
+
     def get_transform_blur_matrix(self, object_instance):
         settings = self.session["render_settings"]
         
@@ -511,9 +520,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         # Export world settings
 
-        #if context.world.arnold.node_tree is not None:
-        #    pass
-
+        if self.session["scene"].world.arnold.node_tree is not None:
+            self.create_world()
 
         # Add final required nodeds
 
@@ -716,6 +724,7 @@ def get_panels():
         'DATA_PT_camera_safe_areas',
         'DATA_PT_camera_background_image',
         'DATA_PT_camera_display',
+        'WORLD_PT_context_world',
     }
 
     panels = []
