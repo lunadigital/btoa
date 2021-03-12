@@ -13,10 +13,11 @@ class AiSkydome(Node, ArnoldNode):
     image_format: EnumProperty(
         name="Format",
         items=[
-            ("0", "Lat-long", "Lat-long"),
+            ("0", "Angular", "Angular"),
             ("1", "Mirrored Ball", "Mirrored Ball"),
-            ("2", "Angular", "Angular"),
-        ]
+            ("2", "Lat-long", "Lat-long"),
+        ],
+        default="2"
     )
 
     portal_mode: EnumProperty(
