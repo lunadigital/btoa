@@ -1,3 +1,4 @@
+import bpy
 from bl_ui.properties_world import WorldButtonsPanel
 from bpy.types import Panel
 
@@ -28,8 +29,73 @@ class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
         if world.arnold.node_tree is None:
             layout.operator("arnold.world_init")
 
+class ARNOLD_WORLD_PT_shadows(WorldButtonsPanel, bpy.types.Panel):
+    bl_idname = "ARNOLD_WORLD_PT_shadows"
+    bl_label = "Shadows"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    def draw(self, context):
+        layout = self.layout
+        world = context.scene.world
+        data = world.arnold.data
+
+        layout.use_property_split = True
+
+        if world.arnold.node_tree is not None:
+            col = layout.column()
+            col.prop(data, "shadow_color")
+            col.prop(data, "shadow_density")
+
+            col.separator()
+
+            col.prop(data, "cast_shadows")
+            col.prop(data, "cast_volumetric_shadows")
+
+class ARNOLD_WORLD_PT_advanced(WorldButtonsPanel, bpy.types.Panel):
+    bl_idname = "ARNOLD_WORLD_PT_advanced"
+    bl_label = "Advanced"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    def draw(self, context):
+        layout = self.layout
+        world = context.scene.world
+        data = world.arnold.data
+
+        layout.use_property_split = True
+
+        if world.arnold.node_tree is not None:
+            col = layout.column()
+            col.prop(data, "samples")
+            col.prop(data, "normalize")
+
+class ARNOLD_WORLD_PT_visibility(WorldButtonsPanel, bpy.types.Panel):
+    bl_idname = "ARNOLD_WORLD_PT_visibility"
+    bl_label = "Visibility"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+
+    def draw(self, context):
+        layout = self.layout
+        world = context.scene.world
+        data = world.arnold.data
+
+        layout.use_property_split = True
+
+        if world.arnold.node_tree is not None:
+            col = layout.column()
+            col.prop(data, "camera")
+            col.prop(data, "diffuse")
+            col.prop(data, "specular")
+            col.prop(data, "transmission")
+            col.prop(data, "sss")
+            col.prop(data, "indirect")
+            col.prop(data, "volume")
+            col.prop(data, "max_bounces")
+
 classes = (
     ARNOLD_WORLD_PT_context_world,
+    ARNOLD_WORLD_PT_shadows,
+    ARNOLD_WORLD_PT_advanced,
+    ARNOLD_WORLD_PT_visibility
 )
 
 def register():

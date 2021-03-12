@@ -264,12 +264,33 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
     def create_world(self):
         world = self.session["scene"].world
+        arnold = world.arnold.data
+
         unique_name = utils.get_unique_name(world)
 
         surface, volume, displacement = world.arnold.node_tree.export()
-        surface[0].set_string("name", unique_name)
+        btnode = surface[0]
+        
+        btnode.set_string("name", unique_name)
+        
+        btnode.set_int("samples", arnold.samples)
+        btnode.set_bool("normalize", arnold.normalize)
 
-        return surface[0]
+        btnode.set_bool("cast_shadows", arnold.cast_shadows)
+        btnode.set_bool("cast_volumetric_shadows", arnold.cast_volumetric_shadows)
+        btnode.set_rgb("shadow_color", *arnold.shadow_color)
+        btnode.set_float("shadow_density", arnold.shadow_density)
+
+        btnode.set_float("camera", arnold.camera)
+        btnode.set_float("diffuse", arnold.diffuse)
+        btnode.set_float("specular", arnold.specular)
+        btnode.set_float("transmission", arnold.transmission)
+        btnode.set_float("sss", arnold.sss)
+        btnode.set_float("indirect", arnold.indirect)
+        btnode.set_float("volume", arnold.volume)
+        btnode.set_int("max_bounces", arnold.max_bounces)
+
+        return btnode
 
     def get_transform_blur_matrix(self, object_instance):
         settings = self.session["render_settings"]

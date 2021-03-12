@@ -2,14 +2,16 @@ from . import (
     camera,
     light,
     material,
-    options
+    options,
+    world
 )
 
 modules = (
     camera,
     light,
     material,
-    options
+    options,
+    world
 )
 
 def register():

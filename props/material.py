@@ -1,5 +1,5 @@
-from bpy.types import Material, World, PropertyGroup
-from bpy.props import PointerProperty, EnumProperty
+from bpy.types import Material, PropertyGroup
+from bpy.props import PointerProperty
 
 from ..nodes.base import ArnoldShaderTree
 
@@ -14,13 +14,7 @@ def register():
         name="Arnold Shader Settings",
         description="Arnold shader settings",
         type=ArnoldShader
-        )
-    
-    World.arnold = PointerProperty(
-        name="Arnold World Settings",
-        description="Arnold World settings",
-        type=ArnoldShader
-        )
+    )
 
 def unregister():
     from bpy.utils import unregister_class
