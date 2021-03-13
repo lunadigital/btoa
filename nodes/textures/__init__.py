@@ -1,6 +1,7 @@
 from . import (
     cell_noise,
     checkerboard,
+    flakes,
     image,
     noise
 )
@@ -8,6 +9,7 @@ from . import (
 modules = (
     cell_noise,
     checkerboard,
+    flakes,
     image,
     noise
 )

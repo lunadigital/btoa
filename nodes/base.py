@@ -334,6 +334,7 @@ object_node_categories = [
         items=[
             NodeItem("AiCellNoise"),
             NodeItem("AiCheckerboard"),
+            NodeItem("AiFlakes"),
             NodeItem("AiImage"),
             NodeItem("AiNoise")
         ]
