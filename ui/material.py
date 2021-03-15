@@ -23,15 +23,17 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
 
         if ob:
             is_sortable = len(ob.material_slots) > 1
-            rows = 1 if is_sortable else 4
+            rows = 4 if is_sortable else 1
 
-            layout.template_list('MATERIAL_UL_matslots', "", ob, "material_slots", ob, "active_material_index", rows=rows)
+            row = layout.row()
 
-            col = layout.column(align=True)
+            row.template_list('MATERIAL_UL_matslots', "", ob, "material_slots", ob, "active_material_index", rows=rows)
+
+            col = row.column(align=True)
             col.operator('object.material_slot_add', icon='ADD', text="")
             col.operator('object.material_slot_remove', icon='REMOVE', text="")
 
-            #col.menu('MATERIAL_MT_specials', icon='DOWNARROW_HLT', text="")
+            col.menu('MATERIAL_MT_context_menu', icon='DOWNARROW_HLT', text="")
 
             if is_sortable:
                 col.separator()
@@ -44,14 +46,15 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
                 row.operator('object.material_slot_assign', text="Assign")
                 row.operator('object.material_slot_select', text="Select")
                 row.operator('object.material_slot_deselect', text="Deselect")
-            
-        #split = layout.split(percentage=0.68)
+
+        split = layout.split(factor=0.65)
 
         if ob:
             # Note that we don't use layout.template_ID() because we can't
             # control the copy operator in that template.
             # So we mimic our own template_ID.
-            row = utils.aishader_template_ID(layout, ob.active_material)
+            split = utils.aishader_template_ID(layout, ob.active_material)
+            row = split.row()
 
             if slot:
                 row = row.row()
@@ -59,11 +62,28 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
             else:
                 row.label()
         elif mat:
-            layout.template_ID(space, "pin_id")
-            layout.separator()
+            split.template_ID(space, "pin_id")
+            split.separator()
+
+class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
+    bl_label = "Surface"
+
+    @classmethod
+    def poll(cls, context):
+        return (context.material or context.object) and engine.ArnoldRenderEngine.is_active(context)
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.use_property_split = True
+
+        mat = context.material
+        if not utils.panel_node_draw(layout, mat.arnold, 'OUTPUT_MATERIAL', 'Surface'):
+            layout.prop(mat, "diffuse_color")
 
 classes = (
     ARNOLD_MATERIAL_PT_context_material,
+    ARNOLD_MATERIAL_PT_surface,
 )
 
 def register():
