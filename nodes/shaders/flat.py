@@ -1,9 +1,12 @@
 from bpy.types import Node
+
 from ..base import ArnoldNode
+from .. import constants
 
 class AiFlat(Node, ArnoldNode):
     '''A simple color shader node which just allows a color with no other effects.'''
     bl_label = "Flat"
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
     bl_icon = 'MATERIAL'
 
     ai_name = "flat"

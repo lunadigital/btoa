@@ -3,10 +3,12 @@ from bpy.types import Node
 from bpy.props import BoolProperty, EnumProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiStandardSurface(Node, ArnoldNode):
     '''A physically-based shader. Outputs a simple color (RGB).'''
     bl_label = "Standard Surface"
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
     bl_icon = 'MATERIAL'
 
     ai_name = "standard_surface"

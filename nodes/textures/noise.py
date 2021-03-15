@@ -3,10 +3,13 @@ from bpy.types import Node
 from bpy.props import EnumProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiNoise(Node, ArnoldNode):
     ''' Evaluates a coherent noise function. '''
     bl_label = "Noise"
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
+
     ai_name = "noise"
 
     mode: EnumProperty(

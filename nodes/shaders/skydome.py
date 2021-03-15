@@ -2,10 +2,12 @@ from bpy.types import Node
 from bpy.props import EnumProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiSkydome(Node, ArnoldNode):
     ''' Returns a skydome light for World rendering '''
     bl_label = "Skydome"
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
     bl_icon = 'MATERIAL'
 
     ai_name = "skydome_light"

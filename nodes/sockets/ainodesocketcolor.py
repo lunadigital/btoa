@@ -11,7 +11,6 @@ class AiNodeSocketColor(AiNodeSocket):
 
     def draw_prop(self, context, layout, node, text):
         row = layout.row(align=True)
-        row.alignment = 'LEFT'
         row.label(text=text)
         row.prop(self, "default_value", text="")
     

@@ -3,10 +3,13 @@ from bpy.types import Node, PropertyGroup
 from bpy.props import EnumProperty, BoolProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiCellNoise(Node, ArnoldNode):
     ''' A cell noise pattern generator. '''
     bl_label = "Cell Noise"
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
+
     ai_name = "cell_noise"
 
     pattern: EnumProperty(

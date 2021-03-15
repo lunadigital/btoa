@@ -2,10 +2,12 @@ from bpy.types import Node
 from bpy.props import IntProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiCarPaint(Node, ArnoldNode):
     '''A simple-to-use car paint shader. Outputs RGB.'''
     bl_label = "Car Paint"
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
     bl_icon = 'MATERIAL'
 
     ai_name = "car_paint"

@@ -2,10 +2,12 @@ from bpy.types import Node
 from bpy.props import BoolProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiMatte(Node, ArnoldNode):
     ''' Enables you to create holdout effects by rendering the alpha as zero. '''
     bl_label = "Matte"
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
     bl_icon = 'MATERIAL'
 
     ai_name = "matte"
