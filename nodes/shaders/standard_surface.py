@@ -60,6 +60,10 @@ class AiStandardSurface(Node, ArnoldNode):
         # normal map
         # tangent map
 
+        self.inputs.new('AiNodeSocketFloatPositive', "Sheen", identifier="sheen")
+        self.inputs.new('AiNodeSocketRGB', "Sheen Color", identifier="sheen_color").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketFloatNormalized', "Sheen Roughness", identifier="sheen_roughness").default_value = 0.3
+
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
         self.inputs.new('AiNodeSocketRGB', "Coat Color", identifier="coat_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness").default_value = 0.1
