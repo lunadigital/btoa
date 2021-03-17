@@ -12,6 +12,10 @@ class AiNodeSocketVector(NodeSocket, AiNodeSocket):
 
     default_value: FloatVectorProperty()
 
+    def draw_prop(self, context, layout, node, text):
+        row = layout.row(align=True)
+        row.label(text=text)
+
     def export_default(self):
         return self.default_value, self.default_type
 
