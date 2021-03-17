@@ -1,5 +1,6 @@
 from . import (
     ambient_occlusion,
+    bump2d,
     car_paint,
     flat,
     lambert,
@@ -13,6 +14,7 @@ from . import (
 
 modules = (
     ambient_occlusion,
+    bump2d,
     car_paint,
     flat,
     lambert,

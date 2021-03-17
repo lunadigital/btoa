@@ -319,6 +319,7 @@ object_node_categories = [
         "Shader",
         items=[
             NodeItem("AiAmbientOcclusion"),
+            NodeItem("AiBump2d"),
             NodeItem("AiCarPaint"),
             NodeItem("AiFlat"),
             NodeItem("AiLambert"),
