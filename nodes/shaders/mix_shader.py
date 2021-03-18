@@ -33,7 +33,7 @@ class AiMixShader(Node, ArnoldNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "mode")
-        layout.prop(self, add_transparency)
+        layout.prop(self, "add_transparency")
         
     def sub_export(self, node):
         node.set_int("mode", int(self.mode))
