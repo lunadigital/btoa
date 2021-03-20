@@ -74,6 +74,9 @@ class AiStandardSurface(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Affect Color", identifier="coat_affect_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Affect Roughness", identifier="coat_affect_roughness")
 
+        self.inputs.new('AiNodeSocketFloatPositive', "Thin Film Thickness", identifier="thin_film_thickness")
+        self.inputs.new('AiNodeSocketFloatAboveOne', "Thin Film IOR", identifier="thin_film_IOR").default_value = 1.5
+
         self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
         self.inputs.new('AiNodeSocketRGB', "Emission Color", identifier="emission_color")
 
