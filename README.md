@@ -26,6 +26,7 @@ Arnold for Blender (or BtoA) provides a bridge to the Arnold renderer from withi
         Quad light<br />
         Disk light<br />
         Cylinder light<br />
+        Skydome light (as node in world editor)<br />
         <br />
     </td>
   </tr>
@@ -34,9 +35,11 @@ Arnold for Blender (or BtoA) provides a bridge to the Arnold renderer from withi
     <td>
         <br />
         Ambient occlusion<br />
+        Bump2d<br />
         Car paint<br />
         Flat<br />
         Lambert<br />
+        Mix shader<br />
         Matte<br />
         Shadow matte<br />
         Standard surface<br />
@@ -50,7 +53,9 @@ Arnold for Blender (or BtoA) provides a bridge to the Arnold renderer from withi
         <br />
         Cell noise<br />
         Checkerboard<br />
+        Flakes<br />
         Image<br />
+        Noise<br/>
         <br />
     </td>
   </tr>
@@ -86,7 +91,7 @@ Arnold for Blender (or BtoA) provides a bridge to the Arnold renderer from withi
 For installation instructions, [visit the project wiki](https://github.com/lunadigital/btoa/wiki). Whether or not you're new to Arnold, the [Arnold documentation](https://www.arnoldrenderer.com/arnold/documentation/) should answer most of your Arnold-specific questions. We're working on documentation for BtoA, including additional wiki pages and YouTube tutorials.
 
 ## Downloads ##
-Arnold for Blender (BtoA 0.2.0-alpha) is available for Windows, macOS, and Linux. [Go to the downloads page](https://github.com/lunadigital/btoa/releases).
+Arnold for Blender (BtoA 0.3.0-alpha) is available for Windows, macOS, and Linux. [Go to the downloads page](https://github.com/lunadigital/btoa/releases).
 
 ## Support ##
 Arnold for Blender (BtoA) is not affiliated with or supported by Autodesk or Arnold. For bug reports, please [open a new issue](https://github.com/lunadigital/btoa/issues) on the issue tracker - do not open issues for support questions. Instead, we recommend [joining the discussion](https://blenderartists.org/t/arnold-for-blender-0-1-0-alpha-release/1284309) on the BlenderArtist forums.
