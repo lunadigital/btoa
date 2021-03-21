@@ -4,8 +4,8 @@ from ..base import ArnoldNode
 class AiFlat(Node, ArnoldNode):
     '''A simple color shader node which just allows a color with no other effects.'''
     bl_label = "Flat"
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "flat"
 
     def init(self, context):

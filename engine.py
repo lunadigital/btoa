@@ -272,9 +272,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         btnode = surface[0]
         
         btnode.set_string("name", unique_name)
-        
-        identity_matrix = [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1]
-        btnode.set_matrix("matrix", identity_matrix)
 
         # Flip image textures in the U direction
         image = btnode.get_link("color")

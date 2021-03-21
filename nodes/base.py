@@ -319,10 +319,12 @@ object_node_categories = [
         "Shader",
         items=[
             NodeItem("AiAmbientOcclusion"),
+            NodeItem("AiBump2d"),
             NodeItem("AiCarPaint"),
             NodeItem("AiFlat"),
             NodeItem("AiLambert"),
             NodeItem("AiMatte"),
+            NodeItem("AiMixShader"),
             NodeItem("AiShadowMatte"),
             NodeItem("AiStandardSurface"),
             NodeItem("AiWireframe")
@@ -334,6 +336,7 @@ object_node_categories = [
         items=[
             NodeItem("AiCellNoise"),
             NodeItem("AiCheckerboard"),
+            NodeItem("AiFlakes"),
             NodeItem("AiImage"),
             NodeItem("AiNoise")
         ]

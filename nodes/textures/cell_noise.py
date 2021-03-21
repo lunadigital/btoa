@@ -7,6 +7,8 @@ from ..base import ArnoldNode
 class AiCellNoise(Node, ArnoldNode):
     ''' A cell noise pattern generator. '''
     bl_label = "Cell Noise"
+    bl_icon = 'NONE'
+    
     ai_name = "cell_noise"
 
     pattern: EnumProperty(
@@ -41,7 +43,7 @@ class AiCellNoise(Node, ArnoldNode):
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "pattern")
+        layout.prop(self, "pattern", text="")
         layout.prop(self, "additive")
     
     def sub_export(self, node):

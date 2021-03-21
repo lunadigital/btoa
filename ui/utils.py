@@ -1,4 +1,5 @@
 import bpy
+from bpy_extras.node_utils import find_node_input
 
 ''' Utility functions for UI components '''
 
@@ -30,3 +31,22 @@ def aiworld_template_ID(layout, world):
     else:
         row.operator('arnold.world_new', text="New", icon='ADD')
     return row
+
+def panel_node_draw(layout, id_data, output_type, input_name):
+    #if not id_data.use_nodes:
+    #    layout.operator("cycles.use_shading_nodes", icon='NODETREE')
+    #    return False
+
+    ntree = id_data.node_tree
+
+    node = ntree.get_output_node()
+    if node:
+        input = find_node_input(node, input_name)
+        if input:
+            layout.template_node_view(ntree, node, input)
+        else:
+            layout.label(text="Incompatible output node")
+    else:
+        layout.label(text="No output node")
+
+    return True

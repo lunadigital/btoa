@@ -3,11 +3,13 @@ from bpy.types import Node
 from bpy.props import BoolProperty, EnumProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiStandardSurface(Node, ArnoldNode):
     '''A physically-based shader. Outputs a simple color (RGB).'''
     bl_label = "Standard Surface"
-    bl_icon = 'MATERIAL'
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
+    bl_icon = 'NONE'
 
     ai_name = "standard_surface"
 
@@ -55,8 +57,12 @@ class AiStandardSurface(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
 
-        # normal map
-        # tangent map
+        self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
+        self.inputs.new('AiNodeSocketVector', "Tangent", identifier="tangent")
+
+        self.inputs.new('AiNodeSocketFloatPositive', "Sheen", identifier="sheen")
+        self.inputs.new('AiNodeSocketRGB', "Sheen Color", identifier="sheen_color").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketFloatNormalized', "Sheen Roughness", identifier="sheen_roughness").default_value = 0.3
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
         self.inputs.new('AiNodeSocketRGB', "Coat Color", identifier="coat_color")
@@ -64,9 +70,12 @@ class AiStandardSurface(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Anisotropy", identifier="coat_anisotropy")
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Rotation", identifier="coat_rotation")
-        # coat_normal
+        self.inputs.new('AiNodeSocketVector', "Coat Normal", identifier="coat_normal")
         self.inputs.new('AiNodeSocketFloatUnbounded', "Coat Affect Color", identifier="coat_affect_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Affect Roughness", identifier="coat_affect_roughness")
+
+        self.inputs.new('AiNodeSocketFloatPositive', "Thin Film Thickness", identifier="thin_film_thickness")
+        self.inputs.new('AiNodeSocketFloatAboveOne', "Thin Film IOR", identifier="thin_film_IOR").default_value = 1.5
 
         self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
         self.inputs.new('AiNodeSocketRGB', "Emission Color", identifier="emission_color")

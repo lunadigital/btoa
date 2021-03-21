@@ -6,8 +6,8 @@ from ..base import ArnoldNode
 class AiMatte(Node, ArnoldNode):
     ''' Enables you to create holdout effects by rendering the alpha as zero. '''
     bl_label = "Matte"
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "matte"
 
     def init(self, context):

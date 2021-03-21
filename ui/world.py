@@ -29,6 +29,23 @@ class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
         if world.arnold.node_tree is None:
             layout.operator("arnold.world_init")
 
+class ARNOLD_WORLD_PT_surface(WorldButtonsPanel, Panel):
+    bl_label = "Surface"
+
+    @classmethod
+    def poll(cls, context):
+        return engine.ArnoldRenderEngine.is_active(context)
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.use_property_split = True
+
+        world = context.world
+
+        if not utils.panel_node_draw(layout, world.arnold, 'OUTPUT_WORLD', 'Surface'):
+            layout.prop(world, "color")
+
 class ARNOLD_WORLD_PT_shadows(WorldButtonsPanel, bpy.types.Panel):
     bl_idname = "ARNOLD_WORLD_PT_shadows"
     bl_label = "Shadows"
@@ -93,6 +110,7 @@ class ARNOLD_WORLD_PT_visibility(WorldButtonsPanel, bpy.types.Panel):
 
 classes = (
     ARNOLD_WORLD_PT_context_world,
+    ARNOLD_WORLD_PT_surface,
     ARNOLD_WORLD_PT_shadows,
     ARNOLD_WORLD_PT_advanced,
     ARNOLD_WORLD_PT_visibility

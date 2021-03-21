@@ -6,8 +6,8 @@ from ..base import ArnoldNode
 class AiWireframe(Node, ArnoldNode):
     ''' Color shader which produces a wire-frame style output (as RGB). '''
     bl_label = "Wireframe"
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "wireframe"
 
     edge_type: EnumProperty(

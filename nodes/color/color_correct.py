@@ -11,6 +11,8 @@ class AiColorCorrect(Node, ArnoldNode):
     the same order as the parameters.
     '''
     bl_label = "Color Correct"
+    bl_icon = 'NONE'
+    
     ai_name = "color_correct"
 
     alpha_is_luminance: BoolProperty(

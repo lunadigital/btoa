@@ -1,9 +1,11 @@
 from . import (
     ambient_occlusion,
+    bump2d,
     car_paint,
     flat,
     lambert,
     matte,
+    mix_shader,
     output,
     shadow_matte,
     skydome,
@@ -13,10 +15,12 @@ from . import (
 
 modules = (
     ambient_occlusion,
+    bump2d,
     car_paint,
     flat,
     lambert,
     matte,
+    mix_shader,
     output,
     shadow_matte,
     skydome,

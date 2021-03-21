@@ -2,11 +2,13 @@ from bpy.types import Node
 from bpy.props import IntProperty
 
 from ..base import ArnoldNode
+from .. import constants
 
 class AiCarPaint(Node, ArnoldNode):
     '''A simple-to-use car paint shader. Outputs RGB.'''
     bl_label = "Car Paint"
-    bl_icon = 'MATERIAL'
+    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
+    bl_icon = 'NONE'
 
     ai_name = "car_paint"
 
@@ -41,12 +43,13 @@ class AiCarPaint(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Flake Scale", identifier="flake_scale").default_value = 0.001
         self.inputs.new('AiNodeSocketFloatNormalized', "Flake Density", identifier="flake_density")
         self.inputs.new('AiNodeSocketFloatNormalized', "Flake Normal Randomize", identifier="flake_normal_randomize").default_value = 0.2
+        self.inputs.new("AiNodeSocketCoord", "Flake Coords", identifier="flake_coord_space")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
         self.inputs.new('AiNodeSocketRGB', "Coat Color", identifier="coat_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness")
         self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
-        # coat normal
+        self.inputs.new('AiNodeSocketVector', name="Coat Normal", identifier="coat_normal")
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 

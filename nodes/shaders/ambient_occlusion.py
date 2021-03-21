@@ -6,8 +6,8 @@ from ..base import ArnoldNode
 class AiAmbientOcclusion(Node, ArnoldNode):
     '''Ambient occlusion shader. Outputs RGB.'''
     bl_label = "Ambient Occlusion"
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "ambient_occlusion"
 
     samples: IntProperty(
@@ -40,8 +40,8 @@ class AiAmbientOcclusion(Node, ArnoldNode):
     def init(self, context):
         self.inputs.new("AiNodeSocketRGB", "Black Color", identifier="black").default_value = (0, 0, 0)
         self.inputs.new("AiNodeSocketRGB", "White Color", identifier="white")
-
         self.inputs.new('AiNodeSocketFloatPositive', "Falloff", identifier="falloff").default_value = 1
+        self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 

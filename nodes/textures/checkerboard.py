@@ -6,6 +6,8 @@ from ..base import ArnoldNode
 class AiCheckerboard(Node, ArnoldNode):
     ''' Represents a checkerboard pattern. '''
     bl_label = "Checkerboard"
+    bl_icon = 'NONE'
+    
     ai_name = "checkerboard"
 
     def init(self, context):
