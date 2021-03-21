@@ -7,8 +7,8 @@ from ..base import ArnoldNode
 class AiLambert(Node, ArnoldNode):
     '''Simple Lambertian reflectance model. Outputs a simple color (RGB).'''
     bl_label = "Lambert"
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "lambert"
 
     def init(self, context):

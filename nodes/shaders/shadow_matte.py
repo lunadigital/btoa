@@ -11,7 +11,7 @@ class AiShadowMatte(Node, ArnoldNode):
     '''
     bl_label = "Shadow Matte"
     bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-    bl_icon = 'MATERIAL'
+    bl_icon = 'NONE'
 
     ai_name = "shadow_matte"
 

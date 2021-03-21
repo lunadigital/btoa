@@ -5,8 +5,8 @@ from ..base import ArnoldNodeOutput
 
 class AiShaderOutput(Node, ArnoldNodeOutput):
     '''Output node for Arnold shaders.'''
-    bl_icon = 'MATERIAL'
     bl_label = "Shader Output"
+    bl_icon = 'NONE'
 
     def init(self, context):
         super().init(context)

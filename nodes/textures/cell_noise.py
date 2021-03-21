@@ -3,13 +3,12 @@ from bpy.types import Node, PropertyGroup
 from bpy.props import EnumProperty, BoolProperty
 
 from ..base import ArnoldNode
-from .. import constants
 
 class AiCellNoise(Node, ArnoldNode):
     ''' A cell noise pattern generator. '''
     bl_label = "Cell Noise"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-
+    bl_icon = 'NONE'
+    
     ai_name = "cell_noise"
 
     pattern: EnumProperty(
@@ -44,7 +43,7 @@ class AiCellNoise(Node, ArnoldNode):
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "pattern")
+        layout.prop(self, "pattern", text="")
         layout.prop(self, "additive")
     
     def sub_export(self, node):

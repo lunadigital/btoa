@@ -5,16 +5,13 @@ import math
 import mathutils
 
 from ..base import ArnoldNode
-from .. import constants
-
 from ... import utils
 
 class AiSkydome(Node, ArnoldNode):
     ''' Returns a skydome light for World rendering '''
     bl_label = "Skydome"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "skydome_light"
 
     image_format: EnumProperty(
@@ -52,8 +49,8 @@ class AiSkydome(Node, ArnoldNode):
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "image_format")
-        layout.prop(self, "portal_mode")
+        layout.prop(self, "image_format", text="")
+        layout.prop(self, "portal_mode", text="")
 
         col = layout.column()
         col.prop(self, "rotation")

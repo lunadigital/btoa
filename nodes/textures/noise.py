@@ -3,13 +3,12 @@ from bpy.types import Node
 from bpy.props import EnumProperty
 
 from ..base import ArnoldNode
-from .. import constants
 
 class AiNoise(Node, ArnoldNode):
     ''' Evaluates a coherent noise function. '''
     bl_label = "Noise"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-
+    bl_icon = 'NONE'
+    
     ai_name = "noise"
 
     mode: EnumProperty(
@@ -37,7 +36,7 @@ class AiNoise(Node, ArnoldNode):
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "mode")
+        layout.prop(self, "mode", text="")
     
     def sub_export(self, node):
         node.set_int("mode", int(self.mode))

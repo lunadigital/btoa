@@ -6,8 +6,8 @@ from ..base import ArnoldNode
 class AiMixShader(Node, ArnoldNode):
     ''' Used to blend two shaders together. '''
     bl_label = "Mix Shader"
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "mix_shader"
 
     mode: EnumProperty(

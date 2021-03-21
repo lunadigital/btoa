@@ -21,7 +21,7 @@ def init_mat_node_tree(node_tree):
     output.select = False
 
     shader = nodes.new("AiStandardSurface")
-    shader.location = 50, 200
+    shader.location = 0, 200
 
     node_tree.links.new(shader.outputs[0], output.inputs[0])
 
@@ -35,7 +35,7 @@ def init_world_node_tree(node_tree):
     output.select = False
 
     shader = nodes.new("AiSkydome")
-    shader.location = 50, 200
+    shader.location = 0, 200
 
     node_tree.links.new(shader.outputs[0], output.inputs[0])
 

@@ -3,7 +3,6 @@ from bpy.types import Node
 from bpy.props import EnumProperty
 
 from ..base import ArnoldNode
-from .. import constants
 
 class AiFlakes(Node, ArnoldNode):
     '''
@@ -11,8 +10,8 @@ class AiFlakes(Node, ArnoldNode):
     such as car paint.
     '''
     bl_label = "Flakes"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-
+    bl_icon = 'NONE'
+    
     ai_name = "flakes"
 
     output_space: EnumProperty(
@@ -37,7 +36,7 @@ class AiFlakes(Node, ArnoldNode):
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "output_space")
+        layout.prop(self, "output_space", text="")
     
     def sub_export(self, node):
         node.set_int("pattern", int(self.output_space))

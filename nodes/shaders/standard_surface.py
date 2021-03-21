@@ -9,7 +9,7 @@ class AiStandardSurface(Node, ArnoldNode):
     '''A physically-based shader. Outputs a simple color (RGB).'''
     bl_label = "Standard Surface"
     bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-    bl_icon = 'MATERIAL'
+    bl_icon = 'NONE'
 
     ai_name = "standard_surface"
 

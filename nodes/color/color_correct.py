@@ -3,7 +3,6 @@ from bpy.types import Node
 from bpy.props import BoolProperty
 
 from ..base import ArnoldNode
-from .. import constants
 
 class AiColorCorrect(Node, ArnoldNode):
     '''
@@ -12,8 +11,8 @@ class AiColorCorrect(Node, ArnoldNode):
     the same order as the parameters.
     '''
     bl_label = "Color Correct"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-
+    bl_icon = 'NONE'
+    
     ai_name = "color_correct"
 
     alpha_is_luminance: BoolProperty(

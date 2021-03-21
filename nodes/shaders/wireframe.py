@@ -2,14 +2,12 @@ from bpy.types import Node
 from bpy.props import EnumProperty, BoolProperty
 
 from ..base import ArnoldNode
-from .. import constants
 
 class AiWireframe(Node, ArnoldNode):
     ''' Color shader which produces a wire-frame style output (as RGB). '''
     bl_label = "Wireframe"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "wireframe"
 
     edge_type: EnumProperty(

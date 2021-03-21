@@ -3,6 +3,7 @@ from ..base import ArnoldNode
 
 class AiCoordSpace(Node, ArnoldNode):
     bl_label = "Coordinate Space"
+    bl_icon = 'NONE'
 
     def init(self, context):
         self.outputs.new("AiNodeSocketCoord", "Object")

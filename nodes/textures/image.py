@@ -15,6 +15,7 @@ class AiImage(Node, ArnoldNode):
     ''' Performs texture mapping using a specified image file. '''
     bl_label = "Image"
     bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
+    bl_icon = 'NONE'
 
     ai_name = "image"
 

@@ -4,8 +4,8 @@ from ..base import ArnoldNode
 class AiBump2d(Node, ArnoldNode):
     ''' Provides bump mapping based on a 2d texture map '''
     bl_label = "Bump 2D"
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "bump2d"
 
     def init(self, context):

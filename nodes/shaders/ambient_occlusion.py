@@ -2,14 +2,12 @@ from bpy.types import Node
 from bpy.props import FloatProperty, BoolProperty, IntProperty
 
 from ..base import ArnoldNode
-from .. import constants
 
 class AiAmbientOcclusion(Node, ArnoldNode):
     '''Ambient occlusion shader. Outputs RGB.'''
     bl_label = "Ambient Occlusion"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-    bl_icon = 'MATERIAL'
-
+    bl_icon = 'NONE'
+    
     ai_name = "ambient_occlusion"
 
     samples: IntProperty(

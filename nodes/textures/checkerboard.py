@@ -2,13 +2,12 @@ import bpy
 from bpy.types import Node
 
 from ..base import ArnoldNode
-from .. import constants
 
 class AiCheckerboard(Node, ArnoldNode):
     ''' Represents a checkerboard pattern. '''
     bl_label = "Checkerboard"
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-
+    bl_icon = 'NONE'
+    
     ai_name = "checkerboard"
 
     def init(self, context):

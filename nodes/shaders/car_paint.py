@@ -8,7 +8,7 @@ class AiCarPaint(Node, ArnoldNode):
     '''A simple-to-use car paint shader. Outputs RGB.'''
     bl_label = "Car Paint"
     bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
-    bl_icon = 'MATERIAL'
+    bl_icon = 'NONE'
 
     ai_name = "car_paint"
 

@@ -11,6 +11,7 @@ class AiUVProjection(Node, ArnoldNode):
     the texture placement on the surface.
     '''
     bl_label = "UV Projection"
+    bl_icon = 'NONE'
 
     ai_name = "uv_projection"
 
