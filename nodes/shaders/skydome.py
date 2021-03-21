@@ -1,8 +1,13 @@
 from bpy.types import Node
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, FloatVectorProperty
+
+import math
+import mathutils
 
 from ..base import ArnoldNode
 from .. import constants
+
+from ... import utils
 
 class AiSkydome(Node, ArnoldNode):
     ''' Returns a skydome light for World rendering '''
@@ -32,6 +37,12 @@ class AiSkydome(Node, ArnoldNode):
         default="1"
     )
 
+    rotation: FloatVectorProperty(
+        name="Rotation",
+        description="",
+        unit='ROTATION'
+    )
+
     def init(self, context):
         self.inputs.new('AiNodeSocketRGB', "Color", identifier="color")
         self.inputs.new('AiNodeSocketFloatPositive', "Intensity", identifier="intensity").default_value = 1
@@ -44,9 +55,25 @@ class AiSkydome(Node, ArnoldNode):
         layout.prop(self, "image_format")
         layout.prop(self, "portal_mode")
 
+        col = layout.column()
+        col.prop(self, "rotation")
+
     def sub_export(self, node):
         node.set_int("format", int(self.image_format))
         node.set_int("portal_mode", int(self.portal_mode))
+
+        # Set skydome orientation
+        rx = mathutils.Matrix.Rotation(self.rotation[0] + (math.pi / 2), 4, 'X')
+        ry = mathutils.Matrix.Rotation(self.rotation[1], 4, 'Y')
+        rz = mathutils.Matrix.Rotation(self.rotation[2], 4, 'Z')
+        rot_matrix = rx @ ry @ rz
+
+        scale_matrix = mathutils.Matrix.Scale(-1, 4, (0, 0, 1))
+
+        matrix = mathutils.Matrix.Identity(4)
+        matrix = matrix @ rot_matrix @ scale_matrix
+
+        node.set_matrix("matrix", utils.flatten_matrix(matrix))
 
 def register():
     from bpy.utils import register_class
