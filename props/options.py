@@ -204,6 +204,16 @@ class ArnoldOptions(PropertyGroup):
         default=0.25
         )
 
+    # Render device
+    render_device: EnumProperty(
+        name="Render Device",
+        description="",
+        items=[
+            ("0", "CPU", "CPU"),
+            ("1", "GPU", "GPU"),
+        ]
+    )
+
     # To save default display device for color management
     display_device_cache: StringProperty(
         name="Display Device Cache",

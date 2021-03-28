@@ -476,6 +476,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         options.set_int("xres", int(resolution.x))
         options.set_int("yres", int(resolution.y))
 
+        options.set_int("render_device", int(settings.render_device))
+
         options.set_int("AA_samples", settings.aa_samples)
         options.set_int("GI_diffuse_samples", settings.diffuse_samples)
         options.set_int("GI_specular_samples", settings.specular_samples)

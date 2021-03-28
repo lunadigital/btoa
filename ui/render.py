@@ -14,9 +14,13 @@ class ARNOLD_PT_sampling(bpy.types.Panel):
         return context.engine in cls.COMPAT_ENGINES
 
     def draw(self, context):
+        layout = self.layout
         options = context.scene.arnold_options
 
-        self.layout.use_property_split = True
+        layout.use_property_split = True
+
+        layout.prop(options, "render_device")
+        layout.separator()
 
         col = self.layout.column()
         col.prop(options, "aa_samples")
