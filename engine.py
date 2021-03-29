@@ -489,6 +489,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         options.set_float("indirect_sample_clamp", settings.indirect_sample_clamp)
         options.set_float("low_light_threshold", settings.low_light_threshold)
 
+        options.set_bool("enable_adaptive_sampling", settings.use_adaptive_sampling)
+        options.set_int("AA_samples_max", settings.adaptive_aa_samples_max)
+        options.set_float("adaptive_threshold", settings.adaptive_threshold)
+
         if settings.aa_seed > 0:
             options.set_int("AA_seed", settings.aa_seed)
 
