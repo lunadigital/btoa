@@ -472,9 +472,34 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         options = self.session["options"]
         resolution = self.session["resolution"]
         settings = self.session["render_settings"]
+        scene = self.session["scene"]
 
-        options.set_int("xres", int(resolution.x))
-        options.set_int("yres", int(resolution.y))
+        xres = int(resolution.x)
+        yres = int(resolution.y)
+
+        # Blender puts the image origin point (0, 0) in the bottom-left corner
+        # Arnold puts the image origin point (0, 0) in the top-left corner
+        # We need to do a little math to flip the coordinates in the y-axis
+        if scene.render.use_border:
+            region_xmin = int(xres * scene.render.border_min_x)
+            region_ymin = int(yres * (1 - scene.render.border_max_y))
+            region_xmax = int(xres * scene.render.border_max_x)
+            region_ymax = int(yres * (1 - scene.render.border_min_y))
+        else:
+            region_xmin = 0
+            region_ymin = 0
+            region_xmax = xres - 1
+            region_ymax = yres - 1
+
+        self.session["render_region"] = region_xmin, region_ymin, region_xmax, region_ymax
+
+        options.set_int("xres", xres)
+        options.set_int("yres", yres)
+
+        options.set_int("region_min_x", region_xmin)
+        options.set_int("region_min_y", region_ymin)
+        options.set_int("region_max_x", region_xmax)
+        options.set_int("region_max_y", region_ymax)
 
         options.set_int("render_device", int(settings.render_device))
 
@@ -575,14 +600,20 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         _htiles = {}
         
         def display_callback(x, y, width, height, buffer, data):
-            resolution = engine.session["resolution"]
+            region_xmin, region_ymin, region_xmax, region_ymax = self.session["render_region"]
+
+            _x = x - region_xmin
+            _y = y - region_ymin
+
+            # Calculate y resolution with render region crop
+            yres = region_ymax - region_ymin
 
             if buffer:
                 try:
-                    result = _htiles.pop((x, y), None)
+                    result = _htiles.pop((_x, _y), None)
                     
                     if result is None:
-                        result = engine.begin_result(x, resolution.y - y - height, width, height)
+                        result = engine.begin_result(_x, yres - _y - height, width, height)
                     
                     _buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
                     rect = numpy.ctypeslib.as_array(_buffer, shape=(width * height, 4))
@@ -595,13 +626,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 finally:
                     btoa.free(buffer)
             else:
-                result = engine.begin_result(x, resolution.y - y - height, width, height)
-                _htiles[(x, y)] = result
+                result = engine.begin_result(_x, yres - _y - height, width, height)
+                _htiles[(_x, _y)] = result
             
             if engine.test_break():
                 btoa.abort()
                 while _htiles:
-                    (x, y), result = _htiles.popitem()
+                    (_x, _y), result = _htiles.popitem()
                     engine.end_result(result, cancel=True)
 
         # Calculate progress increment
