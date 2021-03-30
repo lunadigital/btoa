@@ -1,15 +1,19 @@
 import bpy
 import bgl
+import ctypes
+import math
+import mathutils
 import numpy
 import os
-import math
-import ctypes
+
+from .. import (
+    btoa,
+    utils,
+)
+
+from .session import Session
 
 from bl_ui.properties_render import RENDER_PT_color_management
-import mathutils
-
-from . import btoa
-from . import utils
 
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
@@ -17,7 +21,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_use_preview = True
 
     def __init__(self):
-        self.session = {}
+        self.session = None
 
         self.progress = 0
         self._progress_increment = 0
@@ -53,7 +57,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         if mesh is None:
             return None
 
-        settings = self.session["render_settings"]
+        settings = self.session.settings
 
         if settings.enable_motion_blur and settings.camera_motion_blur:
             transform_matrix = self.get_transform_blur_matrix(object_instance)
@@ -68,7 +72,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 settings.motion_keys
             )
 
-            frame_current = self.session["scene"].frame_current
+            frame_current = self.session.scene.frame_current
 
             vlist_data = None
             nlist_data = None
@@ -263,7 +267,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         return node
 
     def create_world(self):
-        world = self.session["scene"].world
+        world = self.session.scene.world
         arnold = world.arnold.data
 
         unique_name = utils.get_unique_name(world)
@@ -299,7 +303,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         return btnode
 
     def get_transform_blur_matrix(self, object_instance):
-        settings = self.session["render_settings"]
+        settings = self.session.settings
         
         motion_steps = numpy.linspace(
             settings.shutter_start,
@@ -307,7 +311,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             settings.motion_keys
         )
 
-        frame_current = self.session["scene"].frame_current
+        frame_current = self.session.scene.frame_current
 
         transform_matrix = btoa.BtArray()
         transform_matrix.allocate(1, settings.motion_keys, 'MATRIX')
@@ -326,18 +330,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         return transform_matrix
 
-    def get_render_resolution(self, scene):
-        scale = scene.render.resolution_percentage / 100
-        x = int(scene.render.resolution_x * scale)
-        y = int(scene.render.resolution_y * scale)
-
-        return mathutils.Vector((x, y))
-
     def sync_camera(self, btnode, object_instance):
         ob = utils.get_object_data_from_instance(object_instance)
         data = ob.data
         arnold = data.arnold
-        settings = self.session["render_settings"]
+        settings = self.session.settings
 
         btnode.set_string("name", utils.get_unique_name(object_instance))
 
@@ -462,45 +459,25 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 btnode.set_float("radius", 0.5 * data.size * s)
 
     def update(self, data, depsgraph):
-        self.session["depsgraph"] = depsgraph
-        self.session["scene"] = depsgraph.scene
-        self.session["render_settings"] = depsgraph.scene.arnold_options
-        self.session["options"] = btoa.BtOptions()
-        self.session["resolution"] = self.get_render_resolution(depsgraph.scene)
+        self.session = Session(depsgraph)
+        
+        # Helper variables
+        options = self.session.options
+        settings = self.session.settings
 
-        # Global render options
-        options = self.session["options"]
-        resolution = self.session["resolution"]
-        settings = self.session["render_settings"]
-        scene = self.session["scene"]
+        # Resolution/crop
+        x, y = self.session.resolution
+        min_x, min_y, max_x, max_y = self.session.region
 
-        xres = int(resolution.x)
-        yres = int(resolution.y)
+        options.set_int("xres", x)
+        options.set_int("yres", y)
 
-        # Blender puts the image origin point (0, 0) in the bottom-left corner
-        # Arnold puts the image origin point (0, 0) in the top-left corner
-        # We need to do a little math to flip the coordinates in the y-axis
-        if scene.render.use_border:
-            region_xmin = int(xres * scene.render.border_min_x)
-            region_ymin = int(yres * (1 - scene.render.border_max_y))
-            region_xmax = int(xres * scene.render.border_max_x)
-            region_ymax = int(yres * (1 - scene.render.border_min_y))
-        else:
-            region_xmin = 0
-            region_ymin = 0
-            region_xmax = xres - 1
-            region_ymax = yres - 1
+        options.set_int("region_min_x", min_x)
+        options.set_int("region_min_y", min_y)
+        options.set_int("region_max_x", max_x)
+        options.set_int("region_max_y", max_y)
 
-        self.session["render_region"] = region_xmin, region_ymin, region_xmax, region_ymax
-
-        options.set_int("xres", xres)
-        options.set_int("yres", yres)
-
-        options.set_int("region_min_x", region_xmin)
-        options.set_int("region_min_y", region_ymin)
-        options.set_int("region_max_x", region_xmax)
-        options.set_int("region_max_y", region_ymax)
-
+        # Global render settings
         options.set_int("render_device", int(settings.render_device))
 
         options.set_int("AA_samples", settings.aa_samples)
@@ -534,7 +511,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         options.set_int("threads", settings.threads)
   
         # Export scene objects
-        
         for object_instance in depsgraph.object_instances:
             ob = utils.get_object_data_from_instance(object_instance)
             ob_unique_name = utils.get_unique_name(object_instance)
@@ -545,7 +521,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 if not node.is_valid():
                     node = self.create_polymesh(object_instance)
                     
-            elif ob.type == 'CAMERA' and ob.name == self.session["scene"].camera.name:
+            elif ob.type == 'CAMERA' and ob.name == self.session.scene.camera.name:
                 node = btoa.get_node_by_name(ob_unique_name)
                 
                 if not node.is_valid(): 
@@ -578,7 +554,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         # Export world settings
 
-        if self.session["scene"].world.arnold.node_tree is not None:
+        if self.session.scene.world.arnold.node_tree is not None:
             self.create_world()
 
         # Add final required nodeds
@@ -600,13 +576,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         _htiles = {}
         
         def display_callback(x, y, width, height, buffer, data):
-            region_xmin, region_ymin, region_xmax, region_ymax = self.session["render_region"]
+            min_x, min_y, max_x, max_y = self.session.region
 
-            _x = x - region_xmin
-            _y = y - region_ymin
+            _x = x - min_x
+            _y = y - min_y
 
             # Calculate y resolution with render region crop
-            yres = region_ymax - region_ymin
+            yres = max_y - min_y
 
             if buffer:
                 try:
@@ -636,7 +612,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     engine.end_result(result, cancel=True)
 
         # Calculate progress increment
-        options = self.session["options"]
+        options = self.session.options
         
         width = options.get_int("xres")
         height = options.get_int("yres")
