@@ -325,6 +325,7 @@ object_node_categories = [
             NodeItem("AiLambert"),
             NodeItem("AiMatte"),
             NodeItem("AiMixShader"),
+            NodeItem("AiNormalMap"),
             NodeItem("AiShadowMatte"),
             NodeItem("AiStandardSurface"),
             NodeItem("AiWireframe")
