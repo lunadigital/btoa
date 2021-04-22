@@ -53,7 +53,7 @@ class AiStandardSurface(Node, ArnoldNode):
 
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
         self.inputs.new('AiNodeSocketRGB', "SSS Color", identifier="subsurface_color")
-        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
 
