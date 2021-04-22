@@ -23,8 +23,8 @@ class Session:
             max_y = int(y * (1 - render.border_min_y))
         else:
             min_x, min_y = 0, 0
-            max_x = x - 1
-            max_y = y - 1
+            max_x = x
+            max_y = y
 
         self.region = min_x, min_y, max_x, max_y
 
