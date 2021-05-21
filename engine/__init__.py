@@ -38,7 +38,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def create_camera(self, object_instance):
         node = btoa.BtNode("persp_camera")
         self.sync_camera(node, object_instance)
-        
+
         return node
 
     def create_light(self, object_instance):
@@ -472,10 +472,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         options.set_int("xres", x)
         options.set_int("yres", y)
 
-        options.set_int("region_min_x", min_x)
-        options.set_int("region_min_y", min_y)
-        options.set_int("region_max_x", max_x)
-        options.set_int("region_max_y", max_y)
+        if self.session.scene.render.use_border:
+            options.set_int("region_min_x", min_x)
+            options.set_int("region_min_y", min_y)
+            options.set_int("region_max_x", max_x)
+            options.set_int("region_max_y", max_y)
 
         # Global render settings
         options.set_int("render_device", int(settings.render_device))
@@ -573,42 +574,37 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
     def render(self, depsgraph):
         engine = self
-        _htiles = {}
+        buckets = {}
         
         def display_callback(x, y, width, height, buffer, data):
-            min_x, min_y, max_x, max_y = self.session.region
+            session = engine.session
+            min_x, min_y, max_x, max_y = session.region
 
-            _x = x - min_x
-            _y = y - min_y
-
-            # Calculate y resolution with render region crop
-            yres = max_y - min_y
-
+            x = x - min_x
+            y = max_y - y - height
+    
             if buffer:
                 try:
-                    result = _htiles.pop((_x, _y), None)
-                    
+                    result = buckets.pop((x, y), None)
+
                     if result is None:
-                        result = engine.begin_result(_x, yres - _y - height, width, height)
-                    
-                    _buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-                    rect = numpy.ctypeslib.as_array(_buffer, shape=(width * height, 4))
-                    
+                        result = engine.begin_result(x, y, width, height)
+
+                    b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+                    rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
+
                     result.layers[0].passes["Combined"].rect = rect
                     engine.end_result(result)
-
-                    engine.progress += engine._progress_increment
-                    engine.update_progress(engine.progress)
+                
                 finally:
                     btoa.free(buffer)
             else:
-                result = engine.begin_result(_x, yres - _y - height, width, height)
-                _htiles[(_x, _y)] = result
-            
+                buckets[(x, y)] = engine.begin_result(x, y, width, height)
+
             if engine.test_break():
                 btoa.abort()
-                while _htiles:
-                    (_x, _y), result = _htiles.popitem()
+                while buckets:
+                    (x, y), result = buckets.popitem()
                     engine.end_result(result, cancel=True)
 
         # Calculate progress increment

@@ -1,3 +1,4 @@
+import math
 from . import btoa
 
 class Session:
@@ -18,13 +19,12 @@ class Session:
 
         if render.use_border:
             min_x = int(x * render.border_min_x)
-            min_y = int(y * (1 - render.border_max_y))
-            max_x = int(x * render.border_max_x)
-            max_y = int(y * (1 - render.border_min_y))
+            min_y = int(math.ceil(y * (1 - render.border_max_y)))
+            max_x = int(x * render.border_max_x) - 1 # I don't know why, but subtracting 1px here avoids weird render artifacts
+            max_y = int(math.ceil(y * (1 - render.border_min_y)))
         else:
             min_x, min_y = 0, 0
-            max_x = x
-            max_y = y
+            max_x, max_y = x, y
 
         self.region = min_x, min_y, max_x, max_y
 
