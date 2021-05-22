@@ -1,5 +1,5 @@
 from bpy.types import Node
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 
 from ..base import ArnoldNode
 from .. import constants
@@ -15,6 +15,14 @@ class AiShadowMatte(Node, ArnoldNode):
 
     ai_name = "shadow_matte"
 
+    background: EnumProperty(
+        name="Background",
+        items=[
+            ("0", "Scene Background", "Scene Background"),
+            ("1", "Background Color", "Background Color"),
+        ]
+    )
+
     diffuse_use_background: BoolProperty(
         name="Diffuse Use Background",
         default=True
@@ -29,7 +37,7 @@ class AiShadowMatte(Node, ArnoldNode):
     )
 
     def init(self, context):
-        # background - Not sure how to implement this yet...
+        self.inputs.new('AiNodeSocketRGB', "Background Color", identifier="background_color")
         self.inputs.new('AiNodeSocketRGB', "Offscreen Color", identifier="offscreen_color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketRGB', "Shadow Color", identifier="shadow_color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatNormalized', "Shadow Opacity", identifier="shadow_opacity").default_value = 1
@@ -48,12 +56,14 @@ class AiShadowMatte(Node, ArnoldNode):
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
     def draw_buttons(self, context, layout):
+        layout.prop(self, "background")
         layout.prop(self, "diffuse_use_background")
         layout.prop(self, "indirect_diffuse_enable")
         layout.prop(self, "indirect_specular_enable")
         layout.prop(self, "alpha_mask")
 
     def sub_export(self, node):
+        node.set_int("background", int(self.background))
         node.set_bool("diffuse_use_background", self.diffuse_use_background)
         node.set_bool("indirect_diffuse_enable", self.indirect_diffuse_enable)
         node.set_bool("indirect_specular_enable", self.indirect_specular_enable)
