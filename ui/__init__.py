@@ -2,6 +2,7 @@ from . import (
     camera,
     light,
     material,
+    presets,
     render,
     gizmos,
     world
@@ -11,6 +12,7 @@ modules = (
     camera,
     light,
     material,
+    presets,
     render,
     gizmos,
     world

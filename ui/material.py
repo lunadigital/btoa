@@ -2,6 +2,7 @@ from bl_ui.properties_material import MaterialButtonsPanel
 from bpy.types import Panel
 
 from . import utils
+from . import presets
 from .. import engine
 
 class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
@@ -71,6 +72,12 @@ class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
     @classmethod
     def poll(cls, context):
         return (context.material or context.object) and engine.ArnoldRenderEngine.is_active(context)
+
+    def draw_header_preset(self, context):
+        node = context.object.active_material.arnold.node_tree.get_output_node().inputs["Surface"].links[0].from_node
+
+        if len(node.inputs) == 42: # If AiStandardSurface, or the meaning of life and everything 
+            presets.ARNOLD_PT_MaterialPresets.draw_panel_header(self.layout)
 
     def draw(self, context):
         layout = self.layout
