@@ -1,6 +1,7 @@
 import bpy
 import os
 import sys
+import shutil
 
 def is_preconfigured():
     if "ARNOLD_ROOT" in os.environ:
@@ -53,6 +54,22 @@ def configure_plugins():
             os.environ["ARNOLD_PLUGIN_PATH"] += os.pathsep + drivers
     else:
         os.environ["ARNOLD_PLUGIN_PATH"] = drivers
+
+    # Configure material presets
+    presets_root = bpy.utils.user_resource('SCRIPTS', "presets")
+    presets_path = os.path.join(presets_root, "btoa", "materials")
+    bundled_presets_path = os.path.join(addon_root, "presets", "materials")
+
+    if not os.path.isdir(presets_path):
+        os.makedirs(presets_path)
+        
+        files = os.listdir(bundled_presets_path)
+
+        for f in files:
+            shutil.copy2(
+                os.path.join(bundled_presets_path, f),
+                presets_path
+            )
 
 def remove_plugins():
     addon_root = os.path.dirname(os.path.abspath(__file__))
