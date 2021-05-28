@@ -3,7 +3,8 @@ from . import (
     checkerboard,
     flakes,
     image,
-    noise
+    noise,
+    round_corners
 )
 
 modules = (
@@ -11,7 +12,8 @@ modules = (
     checkerboard,
     flakes,
     image,
-    noise
+    noise,
+    round_corners
 )
 
 def register():

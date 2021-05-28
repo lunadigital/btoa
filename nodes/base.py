@@ -339,7 +339,8 @@ object_node_categories = [
             NodeItem("AiCheckerboard"),
             NodeItem("AiFlakes"),
             NodeItem("AiImage"),
-            NodeItem("AiNoise")
+            NodeItem("AiNoise"),
+            NodeItem("AiRoundCorners")
         ]
     ),
     ArnoldObjectNodeCategory(
