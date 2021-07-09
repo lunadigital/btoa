@@ -10,9 +10,7 @@ from . import environ as aienv
 def refresh_addon(self, context):
     prefs = bpy.context.preferences.addons[__package__].preferences
     aienv.save_cached_arnold_path(prefs.arnold_path)
-
-    bpy.ops.preferences.addon_disable(module="btoa")
-    bpy.ops.preferences.addon_enable(module="btoa")
+    bpy.ops.script.reload()
 
 class ArnoldAddonPreferences(AddonPreferences):
     bl_idname = __package__
