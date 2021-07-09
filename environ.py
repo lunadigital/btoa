@@ -37,8 +37,13 @@ def configure_arnold_environment():
 
     if path != "":
         python_path = os.path.join(prefs.arnold_path, "python")
+        lib_path = os.path.join(prefs.arnold_path, "bin")
+
         if python_path not in sys.path:
             sys.path.append(python_path)
+
+        if lib_path not in sys.path:
+            os.environ['PATH'] = lib_path + os.pathsep + os.environ['PATH']
 
 def configure_plugins():
     addon_root = os.path.dirname(os.path.abspath(__file__))
