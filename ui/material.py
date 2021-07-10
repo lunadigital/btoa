@@ -59,7 +59,8 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
 
             if slot:
                 row = row.row()
-                row.prop(slot, "link", text="")
+                icon_link = 'MESH_DATA' if slot.link == 'DATA' else 'OBJECT_DATA'
+                row.prop(slot, "link", icon=icon_link, icon_only=True)
             else:
                 row.label()
         elif mat:
