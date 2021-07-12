@@ -527,8 +527,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 
                 if not node.is_valid(): 
                     node = self.create_camera(object_instance)
-                #else:
-                #    self.sync_camera(node, object_instance)
 
                 options.set_pointer("camera", node)
             
@@ -538,27 +536,12 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 if not node.is_valid():
                     node = self.create_light(object_instance)
 
-                # If existing AiNode is an area light, but doesn't match the type in Blender
-                #elif node.type_is("quad_light") or node.type_is("disk_light") or node.type_is("cylinder_light"):
-                #    if not node.type_is(btoa.BT_LIGHT_SHAPE_CONVERSIONS[ob.data.shape]):
-                #        node.destroy()
-                #        node = self.create_light(object_instance)
-
-                # If existing AiNode is a non-area light type, but doesn't match the type in Blender
-                #elif not node.type_is(btoa.BT_LIGHT_CONVERSIONS[ob.data.type]):
-                #    node.destroy()
-                #    node = btoa_utils.create_light(object_instance)
-
-                # If AiNode exists and same type, just update params
-                #else:
-                #    btoa_utils.sync_light(node, object_instance)
-
         # Export world settings
 
         if self.session.scene.world.arnold.node_tree is not None:
             self.create_world()
 
-        # Add final required nodeds
+        # Add final required nodes
 
         default_filter = btoa.BtNode("gaussian_filter")
         default_filter.set_string("name", "gaussianFilter")
