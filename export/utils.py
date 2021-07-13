@@ -4,7 +4,7 @@ import numpy
 
 from mathutils import Vector, Matrix
 
-from . import export
+from .universe_options import UniverseOptions
 
 def bake_mesh(ob):
     mesh = ob.to_mesh()
@@ -32,7 +32,7 @@ def bake_mesh(ob):
 def calc_horizontal_fov(ob):
     data = ob.data
 
-    options = export.UniverseOptions()
+    options = UniverseOptions()
     xres = options.get_int("xres")
     yres = options.get_int("yres")
 
@@ -90,3 +90,12 @@ def get_unique_name(object_instance):
         name = object_instance.name + "_MATERIAL"
 
     return prefix + name
+
+def get_render_resolution(scene):
+    render = scene.render
+    scale = render.resolution_percentage / 100
+
+    x = int(render.resolution_x * scale)
+    y = int(render.resolution_y * scale)
+
+    return x, y

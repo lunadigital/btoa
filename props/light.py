@@ -4,7 +4,7 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty, FloatVectorPrope
 
 import math
 
-from .. import btoa
+from .. import export
 
 class ArnoldLight(PropertyGroup):
     # Common properties
@@ -231,11 +231,11 @@ class ArnoldLight(PropertyGroup):
 
     def get_shape_type(self):
         light = self.id_data
-        return list(btoa.BT_LIGHT_SHAPE_CONVERSIONS).index(light.shape)
+        return list(export.BTOA_LIGHT_SHAPE_CONVERSIONS).index(light.shape)
 
     def set_shape_type(self, value):
         light = self.id_data
-        light.shape = list(btoa.BT_LIGHT_SHAPE_CONVERSIONS)[value]
+        light.shape = list(export.BTOA_LIGHT_SHAPE_CONVERSIONS)[value]
 
     shape: EnumProperty(
         name="Light Shape",

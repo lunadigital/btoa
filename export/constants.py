@@ -1,6 +1,6 @@
 import arnold
 
-BT_TYPE_CONSTANTS = {
+BTOA_TYPE_CONSTANTS = {
     "UINT": arnold.AI_TYPE_UINT,
     "STRING": arnold.AI_TYPE_STRING,
     "MATRIX": arnold.AI_TYPE_MATRIX,
@@ -9,25 +9,25 @@ BT_TYPE_CONSTANTS = {
     "VECTOR2": arnold.AI_TYPE_VECTOR2
 }
 
-BT_LIGHT_CONVERSIONS = {
+BTOA_LIGHT_CONVERSIONS = {
     "POINT": "point_light",
     "SUN": "distant_light",
     "SPOT": "spot_light"
 }
 
-BT_LIGHT_SHAPE_CONVERSIONS = {
+BTOA_LIGHT_SHAPE_CONVERSIONS = {
     "SQUARE": "quad_light",
     "DISK": "disk_light",
     "RECTANGLE": "cylinder_light"
 }
 
-BT_CONVERTIBLE_TYPES = [
+BTOA_CONVERTIBLE_TYPES = [
     'MESH',
     'FONT',
     'CURVE'
 ]
 
-BT_SET_LAMBDA = {
+BTOA_SET_LAMBDA = {
     "STRING": lambda n, i, v: n.set_string(i, v),
     #'ARRAY': _AiNodeSetArray,
     "BOOL": lambda n, i, v: n.set_bool(i, v),

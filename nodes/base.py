@@ -6,7 +6,7 @@ from bl_ui.space_node import NODE_HT_header, NODE_MT_editor_menus
 from nodeitems_utils import NodeCategory, NodeItem
 
 from .. import engine
-from .. import btoa
+from .. import export
 from ..ui import utils
 
 class ArnoldShaderTree(ShaderNodeTree):
@@ -209,7 +209,7 @@ class ArnoldNode:
         pass
 
     def export(self):
-        node = btoa.BtNode(self.ai_name)
+        node = export.ArnoldNode(self.ai_name)
 
         self.sub_export(node)
 
@@ -220,7 +220,7 @@ class ArnoldNode:
                 if value_type == 'BTNODE':
                     socket_value.link(i.identifier, node)
                 else:
-                    btoa.BT_SET_LAMBDA[value_type](node, i.identifier, socket_value)
+                    export.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
 
         return node, 'BTNODE'
 
