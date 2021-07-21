@@ -13,7 +13,7 @@ class ArnoldNode(AiTemplateClass):
 
     def link(self, param, val):
         if self.is_valid():
-            arnold.AiNodeLink(self.data, param, val._getdata())
+            arnold.AiNodeLink(self.data, param, val.data)
 
     def destroy(self):
         if self.is_valid():
@@ -42,12 +42,12 @@ class ArnoldNode(AiTemplateClass):
 
     def set_pointer(self, param, val):
         if self.is_valid():
-            ptr = val._getdata() if hasattr(val, "_getdata") else val
+            ptr = val.data if hasattr(val, "data") else val
             arnold.AiNodeSetPtr(self.data, param, ptr)
 
-    def set_array(self, param, btarray):
+    def set_array(self, param, val):
         if self.is_valid():
-            arnold.AiNodeSetArray(self.data, param, btarray._getdata())
+            arnold.AiNodeSetArray(self.data, param, val.data)
 
     def set_matrix(self, param, val):
         if self.is_valid():

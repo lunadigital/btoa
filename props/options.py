@@ -160,7 +160,7 @@ class ArnoldOptions(PropertyGroup):
     # Motion blur
     # Assumes motion blur is centered on frame
     def update_shutter_limits(self, context):
-        options = context.scene.arnold_options
+        options = context.scene.arnold
         options.shutter_start = -options.shutter_length / 2
         options.shutter_end = options.shutter_length / 2
         
@@ -232,10 +232,10 @@ def register():
     for cls in classes:
         register_class(cls)
 
-    Scene.arnold_options = PointerProperty(type=ArnoldOptions)
+    Scene.arnold = PointerProperty(type=ArnoldOptions)
 
 def unregister():
-    del Scene.arnold_options
+    del Scene.arnold
 
     from bpy.utils import unregister_class
     for cls in reversed(classes):

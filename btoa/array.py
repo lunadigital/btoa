@@ -8,14 +8,14 @@ class ArnoldArray(AiTemplateClass):
         self.data = arnold.AiArrayAllocate(
             nelements,
             nkeys,
-            constants.BT_TYPE_CONSTANTS[type_string]
+            BTOA_TYPE_CONSTANTS[type_string]
         )
 
     def convert_from_buffer(self, length, keys, type_string, data):
         self.data = arnold.AiArrayConvert(
             length,
             keys,
-            constants.BT_TYPE_CONSTANTS[type_string],
+            BTOA_TYPE_CONSTANTS[type_string],
             data
         )
 

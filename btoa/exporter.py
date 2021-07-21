@@ -1,9 +1,14 @@
 from .array import ArnoldArray
 from .colormanager import ArnoldColorManager
+from .drivers import ArnoldDisplayCallback
 from .node import ArnoldNode
 from .polymesh import ArnoldPolymesh
+from .universe_options import UniverseOptions
 from .constants import BTOA_CONVERTIBLE_TYPES, BTOA_LIGHT_SHAPE_CONVERSIONS
 from . import utils as export_utils
+
+import os
+import math
 
 class Exporter:
     def __init__(self, session):
@@ -34,10 +39,10 @@ class Exporter:
 
         # Evaluate geometry at current frame
 
-        ob = utils.get_object_data_from_instance(object_instance)
+        ob = export_utils.get_object_data_from_instance(object_instance)
         mesh = self.__evaluate_mesh(ob)
 
-        if mesh is None:
+        if not mesh:
             return None
 
         # Calculate matrix data
@@ -52,18 +57,7 @@ class Exporter:
             # TODO: I think this needs to be `transform_motion_blur`
 
             if data.camera_motion_blur:
-                matrix = ArnoldArray()
-                matrix.allocate(1, data.motion_keys, 'MATRIX')
-                
-                for i in range(0, motion_steps.size):
-                    frame, subframe = self.__get_target_frame(motion_step[i])
-
-                    self.session.engine.frame_set(frame, subframe=subframe)
-                    
-                    m = utils.flatten_matrix(object_instance.matrix_world)
-                    matrix.set_matrix(i, m)
-
-                self.session.engine.frame_set(frame_current, subframe=0)
+                matrix = self.get_transform_blur_matrix(object_instance)
             else:
                 matrix = utils.flatten_matrix(object_instance.matrix_world)
 
@@ -288,106 +282,105 @@ class Exporter:
 
         return node
 
-    def sync_camera(self, btnode, object_instance):
-        ob = utils.get_object_data_from_instance(object_instance)
-        data = ob.data
-        arnold = data.arnold
-        settings = self.session.settings
+    def sync_camera(self, node, object_instance):
+        ob = export_utils.get_object_data_from_instance(object_instance)
+        scene_data = self.session.depsgraph.scene.arnold
+        camera_data = ob.data
 
-        btnode.set_string("name", utils.get_unique_name(object_instance))
+        node.set_string("name", export_utils.get_unique_name(object_instance))
 
-        if settings.enable_motion_blur and settings.camera_motion_blur:
+        if scene_data.enable_motion_blur and scene_data.camera_motion_blur:
             matrix = self.get_transform_blur_matrix(object_instance)
-            btnode.set_array("matrix", matrix)
+            node.set_array("matrix", matrix)
         else:
-            matrix = utils.flatten_matrix(object_instance.matrix_world)
-            btnode.set_matrix("matrix", matrix)
+            matrix = export_utils.flatten_matrix(object_instance.matrix_world)
+            node.set_matrix("matrix", matrix)
 
-        fov = utils.calc_horizontal_fov(ob)
-        btnode.set_float("fov", math.degrees(fov))
-        btnode.set_float("exposure", arnold.exposure)
+        fov = export_utils.calc_horizontal_fov(ob)
+        node.set_float("fov", math.degrees(fov))
+        node.set_float("exposure", camera_data.arnold.exposure)
 
-        if data.dof.focus_object:
+        if camera_data.dof.focus_object:
             distance = mathutils.geometry.distance_point_to_plane(
                 ob.matrix_world.to_translation(),
-                data.dof.focus_object.matrix_world.to_translation(),
+                camera_data.dof.focus_object.matrix_world.to_translation(),
                 ob.matrix_world.col[2][:3]
             )
         else:
-            distance = data.dof.focus_distance
+            distance = camera_data.dof.focus_distance
 
-        aperture_size = arnold.aperture_size if arnold.enable_dof else 0
+        aperture_size = camera_data.arnold.aperture_size if camera_data.arnold.enable_dof else 0
 
-        btnode.set_float("focus_distance", distance)
-        btnode.set_float("aperture_size", aperture_size)
-        btnode.set_int("aperture_blades", arnold.aperture_blades)
-        btnode.set_float("aperture_rotation", arnold.aperture_rotation)
-        btnode.set_float("aperture_blade_curvature", arnold.aperture_blade_curvature)
-        btnode.set_float("aperture_aspect_ratio", arnold.aperture_aspect_ratio)
+        node.set_float("focus_distance", distance)
+        node.set_float("aperture_size", aperture_size)
+        node.set_int("aperture_blades", camera_data.arnold.aperture_blades)
+        node.set_float("aperture_rotation", camera_data.arnold.aperture_rotation)
+        node.set_float("aperture_blade_curvature", camera_data.arnold.aperture_blade_curvature)
+        node.set_float("aperture_aspect_ratio", camera_data.arnold.aperture_aspect_ratio)
 
-        btnode.set_float("near_clip", data.clip_start)
-        btnode.set_float("far_clip", data.clip_end)
+        node.set_float("near_clip", camera_data.clip_start)
+        node.set_float("far_clip", camera_data.clip_end)
 
-        if settings.enable_motion_blur:
-            btnode.set_float("shutter_start", settings.shutter_start)
-            btnode.set_float("shutter_end", settings.shutter_end)
-            #btnode.set_string("shutter_type", arnold.shutter_type)
-            #btnode.set_string("rolling_shutter", arnold.rolling_shutter)
-            #btnode.set_float("rolling_shutter_duration", arnold.rolling_shutter_duration)
+        if scene_data.enable_motion_blur:
+            node.set_float("shutter_start", scene_data.shutter_start)
+            node.set_float("shutter_end", scene_data.shutter_end)
+            #node.set_string("shutter_type", scene_data.shutter_type)
+            #node.set_string("rolling_shutter", scene_data.rolling_shutter)
+            #node.set_float("rolling_shutter_duration", scene_data.rolling_shutter_duration)
 
-    def sync_light(self, btnode, object_instance):    
+    def sync_light(self, node, object_instance):    
         ob = utils.get_object_data_from_instance(object_instance)
 
         data = ob.data
         arnold = data.arnold
 
-        btnode.set_string("name", utils.get_unique_name(object_instance))
+        node.set_string("name", utils.get_unique_name(object_instance))
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
-            btnode.set_matrix(
+            node.set_matrix(
                 "matrix",
                 utils.flatten_matrix(ob.matrix_world)
             )
         
-        btnode.set_rgb("color", *data.color)
-        btnode.set_float("intensity", arnold.intensity)
-        btnode.set_float("exposure", arnold.exposure)
-        btnode.set_int("samples", arnold.samples)
-        btnode.set_bool("normalize", arnold.normalize)
+        node.set_rgb("color", *data.color)
+        node.set_float("intensity", arnold.intensity)
+        node.set_float("exposure", arnold.exposure)
+        node.set_int("samples", arnold.samples)
+        node.set_bool("normalize", arnold.normalize)
 
-        btnode.set_bool("cast_shadows", arnold.cast_shadows)
-        btnode.set_bool("cast_volumetric_shadows", arnold.cast_volumetric_shadows)
-        btnode.set_rgb("shadow_color", *arnold.shadow_color)
-        btnode.set_float("shadow_density", arnold.shadow_density)
+        node.set_bool("cast_shadows", arnold.cast_shadows)
+        node.set_bool("cast_volumetric_shadows", arnold.cast_volumetric_shadows)
+        node.set_rgb("shadow_color", *arnold.shadow_color)
+        node.set_float("shadow_density", arnold.shadow_density)
 
-        btnode.set_float("camera", arnold.camera)
-        btnode.set_float("diffuse", arnold.diffuse)
-        btnode.set_float("specular", arnold.specular)
-        btnode.set_float("transmission", arnold.transmission)
-        btnode.set_float("sss", arnold.sss)
-        btnode.set_float("indirect", arnold.indirect)
-        btnode.set_float("volume", arnold.volume)
-        btnode.set_int("max_bounces", arnold.max_bounces)
+        node.set_float("camera", arnold.camera)
+        node.set_float("diffuse", arnold.diffuse)
+        node.set_float("specular", arnold.specular)
+        node.set_float("transmission", arnold.transmission)
+        node.set_float("sss", arnold.sss)
+        node.set_float("indirect", arnold.indirect)
+        node.set_float("volume", arnold.volume)
+        node.set_int("max_bounces", arnold.max_bounces)
 
         if data.type in ('POINT', 'SPOT'):
-            btnode.set_float("radius", data.shadow_soft_size)
+            node.set_float("radius", data.shadow_soft_size)
 
         if data.type == 'SUN':
-            btnode.set_float("angle", arnold.angle)
+            node.set_float("angle", arnold.angle)
 
         if data.type == 'SPOT':
-            btnode.set_float("cone_angle", math.degrees(data.spot_size))
-            btnode.set_float("penumbra_angle", math.degrees(arnold.penumbra_angle))
-            btnode.set_float("roundness", arnold.spot_roundness)
-            btnode.set_float("aspect_ratio", arnold.aspect_ratio)
-            btnode.set_float("lens_radius", arnold.lens_radius)
+            node.set_float("cone_angle", math.degrees(data.spot_size))
+            node.set_float("penumbra_angle", math.degrees(arnold.penumbra_angle))
+            node.set_float("roundness", arnold.spot_roundness)
+            node.set_float("aspect_ratio", arnold.aspect_ratio)
+            node.set_float("lens_radius", arnold.lens_radius)
 
         if data.type == 'AREA':
-            btnode.set_float("roundness", arnold.area_roundness)
-            btnode.set_float("spread", arnold.spread)
-            btnode.set_int("resolution", arnold.resolution)
-            btnode.set_float("soft_edge", arnold.soft_edge)
+            node.set_float("roundness", arnold.area_roundness)
+            node.set_float("spread", arnold.spread)
+            node.set_int("resolution", arnold.resolution)
+            node.set_float("soft_edge", arnold.soft_edge)
             
             if data.shape == 'SQUARE':
                 smatrix = mathutils.Matrix.Diagonal((
@@ -398,34 +391,31 @@ class Exporter:
                 
                 tmatrix = ob.matrix_world @ smatrix
             
-                btnode.set_matrix(
+                node.set_matrix(
                     "matrix",
                     utils.flatten_matrix(tmatrix)
                 )
             elif data.shape == 'DISK':
                 s = ob.scale.x if ob.scale.x > ob.scale.y else ob.scale.y
-                btnode.set_float("radius", 0.5 * data.size * s)
+                node.set_float("radius", 0.5 * data.size * s)
             elif data.shape == 'RECTANGLE':
                 d = 0.5 * data.size_y * ob.scale.y
                 top = utils.get_position_along_local_vector(ob, d, 'Y')
                 bottom = utils.get_position_along_local_vector(ob, -d, 'Y')
 
-                btnode.set_vector("top", *top)
-                btnode.set_vector("bottom", *bottom)
+                node.set_vector("top", *top)
+                node.set_vector("bottom", *bottom)
 
                 s = ob.scale.x if ob.scale.x > ob.scale.z else ob.scale.z
-                btnode.set_float("radius", 0.5 * data.size * s)
+                node.set_float("radius", 0.5 * data.size * s)
 
-    def run(self, engine, depsgraph):
-        self.engine = engine
-        self.depsgraph = depsgraph
-
-        scene = depsgraph.scene
-        options = engine.session.options
+    def export(self):
+        scene = self.session.depsgraph.scene
+        options = UniverseOptions()
 
         # Set resolution settings
 
-        options.set_render_resolution(*utils.get_render_resolution(scene))
+        options.set_render_resolution(*export_utils.get_render_resolution(scene))
 
         if scene.render.use_border:
             min_x = int(x * render.border_min_x)
@@ -437,52 +427,53 @@ class Exporter:
         
         # Set global render settings
 
-        self.options.set_int("render_device", int(scene.arnold.render_device))
+        options.set_int("render_device", int(scene.arnold.render_device))
 
-        self.options.set_int("AA_samples", scene.arnold.aa_samples)
-        self.options.set_int("GI_diffuse_samples", scene.arnold.diffuse_samples)
-        self.options.set_int("GI_specular_samples", scene.arnold.specular_samples)
-        self.options.set_int("GI_transmission_samples", scene.arnold.transmission_samples)
-        self.options.set_int("GI_sss_samples", scene.arnold.sss_samples)
-        self.options.set_int("GI_volume_samples", scene.arnold.volume_samples)
-        self.options.set_float("AA_sample_clamp", scene.arnold.sample_clamp)
-        self.options.set_bool("AA_sample_clamp_affects_aovs", scene.arnold.clamp_aovs)
-        self.options.set_float("indirect_sample_clamp", scene.arnold.indirect_sample_clamp)
-        self.options.set_float("low_light_threshold", scene.arnold.low_light_threshold)
+        options.set_int("AA_samples", scene.arnold.aa_samples)
+        options.set_int("GI_diffuse_samples", scene.arnold.diffuse_samples)
+        options.set_int("GI_specular_samples", scene.arnold.specular_samples)
+        options.set_int("GI_transmission_samples", scene.arnold.transmission_samples)
+        options.set_int("GI_sss_samples", scene.arnold.sss_samples)
+        options.set_int("GI_volume_samples", scene.arnold.volume_samples)
+        options.set_float("AA_sample_clamp", scene.arnold.sample_clamp)
+        options.set_bool("AA_sample_clamp_affects_aovs", scene.arnold.clamp_aovs)
+        options.set_float("indirect_sample_clamp", scene.arnold.indirect_sample_clamp)
+        options.set_float("low_light_threshold", scene.arnold.low_light_threshold)
 
-        self.options.set_bool("enable_adaptive_sampling", scene.arnold.use_adaptive_sampling)
-        self.options.set_int("AA_samples_max", scene.arnold.adaptive_aa_samples_max)
-        self.options.set_float("adaptive_threshold", scene.arnold.adaptive_threshold)
+        options.set_bool("enable_adaptive_sampling", scene.arnold.use_adaptive_sampling)
+        options.set_int("AA_samples_max", scene.arnold.adaptive_aa_samples_max)
+        options.set_float("adaptive_threshold", scene.arnold.adaptive_threshold)
 
         if scene.arnold.aa_seed > 0:
-            self.options.set_int("AA_seed", scene.arnold.aa_seed)
+            options.set_int("AA_seed", scene.arnold.aa_seed)
 
-        self.options.set_int("GI_total_depth", scene.arnold.total_depth)
-        self.options.set_int("GI_diffuse_depth", scene.arnold.diffuse_depth)
-        self.options.set_int("GI_specular_depth", scene.arnold.specular_depth)
-        self.options.set_int("GI_transmission_depth", scene.arnold.transmission_depth)
-        self.options.set_int("GI_volume_depth", scene.arnold.volume_depth)
-        self.options.set_int("auto_transparency_depth", scene.arnold.transparency_depth)
+        options.set_int("GI_total_depth", scene.arnold.total_depth)
+        options.set_int("GI_diffuse_depth", scene.arnold.diffuse_depth)
+        options.set_int("GI_specular_depth", scene.arnold.specular_depth)
+        options.set_int("GI_transmission_depth", scene.arnold.transmission_depth)
+        options.set_int("GI_volume_depth", scene.arnold.volume_depth)
+        options.set_int("auto_transparency_depth", scene.arnold.transparency_depth)
 
-        self.options.set_int("bucket_size", scene.arnold.bucket_size)
-        self.options.set_string("bucket_scanning", scene.arnold.bucket_scanning)
-        self.options.set_bool("parallel_node_init", scene.arnold.parallel_node_init)
-        self.options.set_int("threads", scene.arnold.threads)
+        options.set_int("bucket_size", scene.arnold.bucket_size)
+        options.set_string("bucket_scanning", scene.arnold.bucket_scanning)
+        options.set_bool("parallel_node_init", scene.arnold.parallel_node_init)
+        options.set_int("threads", scene.arnold.threads)
 
         # Export scene objects
 
-        for object_instance in self.depsgraph.object_instances:
-            ob = utils.get_object_data_from_instance(object_instance)
-            ob_unique_name = utils.get_unique_name(object_instance)
+        for object_instance in self.session.depsgraph.object_instances:
+            ob = export_utils.get_object_data_from_instance(object_instance)
+            ob_unique_name = export_utils.get_unique_name(object_instance)
 
-            node = self.get_node_by_name(ob_unique_name)
+            node = self.session.get_node_by_name(ob_unique_name)
 
             if not node.is_valid():
                 if ob.type in BTOA_CONVERTIBLE_TYPES:
-                    node = self.create_polymesh(engine, depsgraph, object_instance)
+                    node = self.create_polymesh(object_instance)
+                    print("Polymesh created: ", node)
                 elif ob.name == scene.camera.name:
                     node = self.create_camera(object_instance)
-                    self.options.set_pointer("camera", node)
+                    options.set_pointer("camera", node)
                 
                 #if ob.type == 'LIGHT':
                 #    node = self.create_light(object_instance)
@@ -499,50 +490,78 @@ class Exporter:
 
         outputs = ArnoldArray()
         outputs.allocate(1, 1, 'STRING')
-        outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
+        outputs.set_string(0, "RGBA RGBA gaussianFilter jpegDriver")
         options.set_array("outputs", outputs)
 
         color_manager = ArnoldColorManager()
         color_manager.set_string("config", os.getenv("OCIO"))
         options.set_pointer("color_manager", color_manager)
 
-        cb = btoa.AtDisplayCallback(display_callback)
+        # Configure display callback
+
+        _session = self.session
+        _buckets = {}
+
+        def update_render_result(x, y, width, height, buffer, data):
+            #min_x, min_y, max_x, max_y = options.get_render_region()
+
+            #x = x - min_x
+            #y = max_y - y - height
+
+            pass
+
+            '''
+            if buffer:
+                try:
+                    result = _buckets.pop((x, y), None)
+
+                    if result is None:
+                        result = _session.engine.begin_result(x, y, width, height)
+
+                    b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+                    rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
+
+                    result.layers[0].passes["Combined"].rect = rect
+                    _session.engine.end_result(result)
+                
+                finally:
+                    _session.free_buffer(buffer)
+            else:
+                _buckets[(x, y)] = _session.engine.begin_result(x, y, width, height)
+
+            if _session.engine.test_break():
+                _session.abort()
+                while _buckets:
+                    (x, y), result = _buckets.popitem()
+                    _session.engine.end_result(result, cancel=True)
+            '''
+
+        cb = ArnoldDisplayCallback(update_render_result)
         
-        display_node = session.get_node_by_name("__display_driver")
+        '''display_node = self.session.get_node_by_name("__display_driver")
         
         if not display_node.is_valid():
             display_node = ArnoldNode("driver_display_callback")
             display_node.set_string("name", "__display_driver")
         
-        display_node.set_pointer("callback", cb)
-    
-    def update_render_result(self, x, y, width, height, buffer, data):
-        session = self.engine.session
-        min_x, min_y, max_x, max_y = session.options.get_render_region()
+        display_node.set_pointer("callback", cb)'''
 
-        x = x - min_x
-        y = max_y - y - height
+        driver = ArnoldNode("driver_jpeg")
+        driver.set_string("name", "jpegDriver")
+        driver.set_string("filename", "C:\\Users\\Shadow\\Desktop\\scene.jpg")
 
-        if buffer:
-            try:
-                result = self.buckets.pop((x, y), None)
+    def get_transform_blur_matrix(self, object_instance):
+        matrix = ArnoldArray()
+        matrix.allocate(1, data.motion_keys, 'MATRIX')
+        
+        for i in range(0, motion_steps.size):
+            frame, subframe = self.__get_target_frame(motion_step[i])
 
-                if result is None:
-                    result = engine.begin_result(x, y, width, height)
-
-                b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-                rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
-
-                result.layers[0].passes["Combined"].rect = rect
-                engine.end_result(result)
+            self.session.engine.frame_set(frame, subframe=subframe)
             
-            finally:
-                session.free_buffer(buffer)
-        else:
-            self.buckets[(x, y)] = engine.begin_result(x, y, width, height)
+            m = utils.flatten_matrix(object_instance.matrix_world)
+            matrix.set_matrix(i, m)
 
-        if engine.test_break():
-            session.abort()
-            while self.buckets:
-                (x, y), result = self.buckets.popitem()
-                engine.end_result(result, cancel=True)
+        self.session.engine.frame_set(frame_current, subframe=0)
+
+        return matrix

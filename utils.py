@@ -4,7 +4,7 @@ import numpy
 
 from mathutils import Vector, Matrix
 
-from . import export
+from . import btoa
 
 def bake_mesh(ob):
     mesh = ob.to_mesh()
@@ -32,7 +32,7 @@ def bake_mesh(ob):
 def calc_horizontal_fov(ob):
     data = ob.data
 
-    options = export.UniverseOptions()
+    options = btoa.UniverseOptions()
     xres = options.get_int("xres")
     yres = options.get_int("yres")
 

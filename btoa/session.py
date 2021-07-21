@@ -22,7 +22,7 @@ class Session:
         self.depsgraph = depsgraph
         self.exporter = Exporter(self)
 
-        self.exporter.run()
+        self.exporter.export()
 
     def free_buffer(self, buffer):
         arnold.AiFree(buffer)
@@ -33,7 +33,7 @@ class Session:
         node = ArnoldNode()
         node.set_data(ainode)
 
-        return btnode
+        return node
 
     def render(self):
         arnold.AiRender(arnold.AI_RENDER_MODE_CAMERA)

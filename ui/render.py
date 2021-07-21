@@ -15,7 +15,7 @@ class ARNOLD_PT_sampling(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         layout.use_property_split = True
 
@@ -40,7 +40,7 @@ class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         self.layout.use_property_split = True
 
@@ -61,10 +61,10 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
-        self.layout.prop(context.scene.arnold_options, "use_adaptive_sampling", text="")
+        self.layout.prop(context.scene.arnold, "use_adaptive_sampling", text="")
 
     def draw(self, context):
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         self.layout.use_property_split = True
 
@@ -72,7 +72,7 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
         col.prop(options, "adaptive_aa_samples_max")
         col.prop(options, "adaptive_threshold")
 
-        self.layout.enabled = context.scene.arnold_options.use_adaptive_sampling
+        self.layout.enabled = context.scene.arnold.use_adaptive_sampling
 
 class ARNOLD_PT_ray_depth(bpy.types.Panel):
     bl_idname = "ARNOLD_PT_ray_depth"
@@ -88,7 +88,7 @@ class ARNOLD_PT_ray_depth(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         layout.use_property_split = True
 
@@ -115,7 +115,7 @@ class ARNOLD_PT_rendering(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         layout.use_property_split = True
 
@@ -139,11 +139,11 @@ class ARNOLD_PT_motion_blur(bpy.types.Panel):
         return context.engine in cls.COMPAT_ENGINES
 
     def draw_header(self, context):
-        self.layout.prop(context.scene.arnold_options, "enable_motion_blur", text="")
+        self.layout.prop(context.scene.arnold, "enable_motion_blur", text="")
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         layout.use_property_split = True
 
@@ -162,7 +162,7 @@ class ARNOLD_PT_motion_blur_shutter(bpy.types.Panel):
     bl_context = "render"
 
     def draw(self, context):
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         self.layout.use_property_split = True
 

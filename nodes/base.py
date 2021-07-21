@@ -6,7 +6,7 @@ from bl_ui.space_node import NODE_HT_header, NODE_MT_editor_menus
 from nodeitems_utils import NodeCategory, NodeItem
 
 from .. import engine
-from .. import export
+from .. import btoa
 from ..ui import utils
 
 class ArnoldShaderTree(ShaderNodeTree):
@@ -22,7 +22,7 @@ class ArnoldShaderTree(ShaderNodeTree):
 
     @classmethod
     def get_from_context(cls,  context):
-        space_data = context.scene.arnold_options.space_data
+        space_data = context.scene.arnold.space_data
         if space_data.shader_type == 'OBJECT':    
             ob = context.object
 
@@ -51,7 +51,7 @@ class ArnoldShaderTree(ShaderNodeTree):
 
                     scene = context.scene
                     snode = context.space_data
-                    arnold_space_data = scene.arnold_options.space_data
+                    arnold_space_data = scene.arnold.space_data
                     snode_id = snode.id
                     id_from = snode.id_from
                     tool_settings = context.tool_settings
@@ -209,7 +209,7 @@ class ArnoldNode:
         pass
 
     def export(self):
-        node = export.ArnoldNode(self.ai_name)
+        node = btoa.ArnoldNode(self.ai_name)
 
         self.sub_export(node)
 
@@ -220,7 +220,7 @@ class ArnoldNode:
                 if value_type == 'BTNODE':
                     socket_value.link(i.identifier, node)
                 else:
-                    export.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
+                    btoa.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
 
         return node, 'BTNODE'
 
@@ -259,7 +259,7 @@ class ArnoldWorldNodeCategory(ArnoldNodeCategory):
         return (
             super().poll(context) and
             context.space_data.tree_type == 'ArnoldShaderTree' and
-            context.scene.arnold_options.space_data.shader_type == 'WORLD'
+            context.scene.arnold.space_data.shader_type == 'WORLD'
         )
 
 class ArnoldObjectNodeCategory(ArnoldNodeCategory):
@@ -268,7 +268,7 @@ class ArnoldObjectNodeCategory(ArnoldNodeCategory):
         return (
             super().poll(context) and
             context.space_data.tree_type == 'ArnoldShaderTree' and
-            context.scene.arnold_options.space_data.shader_type == 'OBJECT' and
+            context.scene.arnold.space_data.shader_type == 'OBJECT' and
             context.object.type != 'LIGHT'
         )
 

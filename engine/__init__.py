@@ -6,7 +6,7 @@ import mathutils
 import numpy
 import os
 
-from .. import export
+from .. import btoa
 
 from bl_ui.properties_render import RENDER_PT_color_management
 
@@ -19,7 +19,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.progress = 0
         self._progress_increment = 0
         
-        self.session = export.Session()
+        self.session = btoa.Session()
         self.session.start()
 
     def __del__(self):
@@ -47,7 +47,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         #self.progress = 0
         #self._progress_increment = 1 / total_buckets
 
-        self.session.render(self, depsgraph)
+        self.session.render()
 
     def view_update(self, context, depsgraph):
         region = context.region
