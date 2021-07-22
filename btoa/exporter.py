@@ -243,11 +243,11 @@ class Exporter:
         # for slot in ob.material_slots:
         try:
             slot = ob.material_slots[0]
-            if slot.material is not None:
-                unique_name = utils.get_unique_name(slot.material)
+            if slot.material:
+                unique_name = export_utils.get_unique_name(slot.material)
 
                 if slot.material.arnold.node_tree is not None:
-                    shader = engine.session.get_node_by_name(unique_name)
+                    shader = self.session.get_node_by_name(unique_name)
 
                     if shader.is_valid():
                         node.set_pointer("shader", shader)
