@@ -4,7 +4,7 @@ from .drivers import ArnoldDisplayCallback
 from .node import ArnoldNode
 from .polymesh import ArnoldPolymesh
 from .universe_options import UniverseOptions
-from .constants import BTOA_CONVERTIBLE_TYPES, BTOA_LIGHT_SHAPE_CONVERSIONS
+from .constants import BTOA_CONVERTIBLE_TYPES, BTOA_LIGHT_SHAPE_CONVERSIONS, BTOA_LIGHT_CONVERSIONS
 from . import utils as export_utils
 
 import bmesh
@@ -302,9 +302,9 @@ class Exporter:
         return node
 
     def create_light(self, object_instance):
-        ob = utils.get_object_data_from_instance(object_instance)
+        ob = export_utils.get_object_data_from_instance(object_instance)
 
-        ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[ob.data.shape] if ob.data.type == 'AREA' else btoa.BT_LIGHT_CONVERSIONS[ob.data.type]
+        ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[ob.data.shape] if ob.data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[ob.data.type]
         node = ArnoldNode(ntype)
         self.sync_light(node, object_instance)
 
@@ -357,58 +357,56 @@ class Exporter:
             #node.set_float("rolling_shutter_duration", scene_data.rolling_shutter_duration)
 
     def sync_light(self, node, object_instance):    
-        ob = utils.get_object_data_from_instance(object_instance)
-
+        ob = export_utils.get_object_data_from_instance(object_instance)
         data = ob.data
-        arnold = data.arnold
 
-        node.set_string("name", utils.get_unique_name(object_instance))
+        node.set_string("name", export_utils.get_unique_name(object_instance))
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
             node.set_matrix(
                 "matrix",
-                utils.flatten_matrix(ob.matrix_world)
+                export_utils.flatten_matrix(ob.matrix_world)
             )
         
         node.set_rgb("color", *data.color)
-        node.set_float("intensity", arnold.intensity)
-        node.set_float("exposure", arnold.exposure)
-        node.set_int("samples", arnold.samples)
-        node.set_bool("normalize", arnold.normalize)
+        node.set_float("intensity", data.arnold.intensity)
+        node.set_float("exposure", data.arnold.exposure)
+        node.set_int("samples", data.arnold.samples)
+        node.set_bool("normalize", data.arnold.normalize)
 
-        node.set_bool("cast_shadows", arnold.cast_shadows)
-        node.set_bool("cast_volumetric_shadows", arnold.cast_volumetric_shadows)
-        node.set_rgb("shadow_color", *arnold.shadow_color)
-        node.set_float("shadow_density", arnold.shadow_density)
+        node.set_bool("cast_shadows", data.arnold.cast_shadows)
+        node.set_bool("cast_volumetric_shadows", data.arnold.cast_volumetric_shadows)
+        node.set_rgb("shadow_color", *data.arnold.shadow_color)
+        node.set_float("shadow_density", data.arnold.shadow_density)
 
-        node.set_float("camera", arnold.camera)
-        node.set_float("diffuse", arnold.diffuse)
-        node.set_float("specular", arnold.specular)
-        node.set_float("transmission", arnold.transmission)
-        node.set_float("sss", arnold.sss)
-        node.set_float("indirect", arnold.indirect)
-        node.set_float("volume", arnold.volume)
-        node.set_int("max_bounces", arnold.max_bounces)
+        node.set_float("camera", data.arnold.camera)
+        node.set_float("diffuse", data.arnold.diffuse)
+        node.set_float("specular", data.arnold.specular)
+        node.set_float("transmission", data.arnold.transmission)
+        node.set_float("sss", data.arnold.sss)
+        node.set_float("indirect", data.arnold.indirect)
+        node.set_float("volume", data.arnold.volume)
+        node.set_int("max_bounces", data.arnold.max_bounces)
 
         if data.type in ('POINT', 'SPOT'):
             node.set_float("radius", data.shadow_soft_size)
 
         if data.type == 'SUN':
-            node.set_float("angle", arnold.angle)
+            node.set_float("angle", data.arnold.angle)
 
         if data.type == 'SPOT':
             node.set_float("cone_angle", math.degrees(data.spot_size))
-            node.set_float("penumbra_angle", math.degrees(arnold.penumbra_angle))
-            node.set_float("roundness", arnold.spot_roundness)
-            node.set_float("aspect_ratio", arnold.aspect_ratio)
-            node.set_float("lens_radius", arnold.lens_radius)
+            node.set_float("penumbra_angle", math.degrees(data.arnold.penumbra_angle))
+            node.set_float("roundness", data.arnold.spot_roundness)
+            node.set_float("aspect_ratio", data.arnold.aspect_ratio)
+            node.set_float("lens_radius", data.arnold.lens_radius)
 
         if data.type == 'AREA':
-            node.set_float("roundness", arnold.area_roundness)
-            node.set_float("spread", arnold.spread)
-            node.set_int("resolution", arnold.resolution)
-            node.set_float("soft_edge", arnold.soft_edge)
+            node.set_float("roundness", data.arnold.area_roundness)
+            node.set_float("spread", data.arnold.spread)
+            node.set_int("resolution", data.arnold.resolution)
+            node.set_float("soft_edge", data.arnold.soft_edge)
             
             if data.shape == 'SQUARE':
                 smatrix = mathutils.Matrix.Diagonal((
@@ -502,8 +500,8 @@ class Exporter:
                     node = self.create_camera(object_instance)
                     options.set_pointer("camera", node)
                 
-                #if ob.type == 'LIGHT':
-                #    node = self.create_light(object_instance)
+                if ob.type == 'LIGHT':
+                    node = self.create_light(object_instance)
 
         # Export world settings
 
