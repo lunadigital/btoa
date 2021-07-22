@@ -7,8 +7,11 @@ from .universe_options import UniverseOptions
 from .constants import BTOA_CONVERTIBLE_TYPES, BTOA_LIGHT_SHAPE_CONVERSIONS
 from . import utils as export_utils
 
+import bmesh
+import ctypes
 import os
 import math
+import numpy
 
 class Exporter:
     def __init__(self, session):
@@ -22,7 +25,30 @@ class Exporter:
         return frame_int, subframe
 
     def __evaluate_mesh(self, ob):
-        pass
+        mesh = ob.to_mesh()
+
+        # Create a blank UV map if none exist
+
+        if len(mesh.uv_layers) == 0:
+            mesh.uv_layers.new(name='UVMap')
+
+        # Triangulate mesh to remove ngons
+        
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+
+        bmesh.ops.triangulate(bm, faces=bm.faces[:])
+
+        bm.to_mesh(mesh)
+        bm.free()
+
+        # Calculate normals and return
+        
+        try:
+            mesh.calc_tangents()
+            return mesh
+        except:
+            return None
 
     def __get_static_mesh_data(self, mesh):
         vlist_data = numpy.ndarray(len(mesh.vertices) * 3, dtype=numpy.float32)
@@ -46,6 +72,7 @@ class Exporter:
             return None
 
         # Calculate matrix data
+        matrix = None
         vlist_data = None
         nlist_data = None
 
@@ -59,7 +86,7 @@ class Exporter:
             if data.camera_motion_blur:
                 matrix = self.get_transform_blur_matrix(object_instance)
             else:
-                matrix = utils.flatten_matrix(object_instance.matrix_world)
+                matrix = export_utils.flatten_matrix(object_instance.matrix_world)
 
             # Deformation motion blur
 
@@ -107,6 +134,8 @@ class Exporter:
         # Calculate without motion blur
 
         else:
+            matrix = export_utils.flatten_matrix(object_instance.matrix_world)
+
             vlist_data, nlist_data = self.__get_static_mesh_data(mesh)
 
             vlist = ArnoldArray()
@@ -135,7 +164,7 @@ class Exporter:
             len(mesh.polygons),
             1,
             'UINT',
-            ctypes.c_void_p(nsides.ctypes.data)
+            ctypes.c_void_p(nsides_data.ctypes.data)
         )
 
         vidxs_data = numpy.ndarray(len(mesh.loops), dtype=numpy.uint32)
@@ -149,8 +178,7 @@ class Exporter:
             ctypes.c_void_p(vidxs_data.ctypes.data)
         )
 
-        # TODO: I feel like this is missing a line...
-        a = numpy.arange(len(mesh.loops), dtype=numpy.uint32)
+        nidxs_data = numpy.arange(len(mesh.loops), dtype=numpy.uint32)
         
         nidxs = ArnoldArray()
         nidxs.convert_from_buffer(
@@ -162,7 +190,7 @@ class Exporter:
 
         # Create polymesh object
         
-        name = utils.get_unique_name(object_instance)
+        name = export_utils.get_unique_name(object_instance)
         node = ArnoldPolymesh(name)
 
         if data.enable_motion_blur and data.camera_motion_blur:
@@ -176,8 +204,8 @@ class Exporter:
         node.set_array("nsides", nsides)
         node.set_array("vidxs", vidxs)
         node.set_array("nidxs", nidxs)
-        node.set_float("motion_start", settings.shutter_start)
-        node.set_float("motion_end", settings.shutter_end)
+        node.set_float("motion_start", data.shutter_start)
+        node.set_float("motion_end", data.shutter_end)
 
         # UV's
         for i, uvt in enumerate(mesh.uv_layers):
@@ -194,11 +222,11 @@ class Exporter:
                 )
 
                 uvlist_data = numpy.ndarray(len(uv_data) * 2, dtype=numpy.float32)
-                uv_data.foreach_get("uv", a)
+                uv_data.foreach_get("uv", uvlist_data)
 
                 uvlist = ArnoldArray()
                 uvlist.convert_from_buffer(
-                    len(data),
+                    len(uv_data),
                     1,
                     'VECTOR2',
                     ctypes.c_void_p(uvlist_data.ctypes.data)
@@ -470,7 +498,6 @@ class Exporter:
             if not node.is_valid():
                 if ob.type in BTOA_CONVERTIBLE_TYPES:
                     node = self.create_polymesh(object_instance)
-                    print("Polymesh created: ", node)
                 elif ob.name == scene.camera.name:
                     node = self.create_camera(object_instance)
                     options.set_pointer("camera", node)
