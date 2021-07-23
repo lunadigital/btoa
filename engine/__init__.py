@@ -63,8 +63,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             else:
                 min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
 
-            print(min_x, min_y, max_x, max_y)
-
             x = x - min_x
             y = max_y - y - height
 
