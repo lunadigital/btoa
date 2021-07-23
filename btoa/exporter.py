@@ -1,6 +1,5 @@
 from .array import ArnoldArray
 from .colormanager import ArnoldColorManager
-from .drivers import ArnoldDisplayCallback
 from .node import ArnoldNode
 from .polymesh import ArnoldPolymesh
 from .universe_options import UniverseOptions
@@ -506,7 +505,7 @@ class Exporter:
         # Export world settings
 
         #if depsgraph.scene.world.arnold.node_tree is not None:
-        #    self.create_world(depsgraph.scene.world)
+        #    self.create_world(depsgraph.scene.world)        
 
         # Add final required nodes
 
@@ -515,65 +514,12 @@ class Exporter:
 
         outputs = ArnoldArray()
         outputs.allocate(1, 1, 'STRING')
-        outputs.set_string(0, "RGBA RGBA gaussianFilter jpegDriver")
+        outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
         options.set_array("outputs", outputs)
 
         color_manager = ArnoldColorManager()
         color_manager.set_string("config", os.getenv("OCIO"))
         options.set_pointer("color_manager", color_manager)
-
-        # Configure display callback
-
-        _session = self.session
-        _buckets = {}
-
-        def update_render_result(x, y, width, height, buffer, data):
-            #min_x, min_y, max_x, max_y = options.get_render_region()
-
-            #x = x - min_x
-            #y = max_y - y - height
-
-            pass
-
-            '''
-            if buffer:
-                try:
-                    result = _buckets.pop((x, y), None)
-
-                    if result is None:
-                        result = _session.engine.begin_result(x, y, width, height)
-
-                    b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-                    rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
-
-                    result.layers[0].passes["Combined"].rect = rect
-                    _session.engine.end_result(result)
-                
-                finally:
-                    _session.free_buffer(buffer)
-            else:
-                _buckets[(x, y)] = _session.engine.begin_result(x, y, width, height)
-
-            if _session.engine.test_break():
-                _session.abort()
-                while _buckets:
-                    (x, y), result = _buckets.popitem()
-                    _session.engine.end_result(result, cancel=True)
-            '''
-
-        cb = ArnoldDisplayCallback(update_render_result)
-        
-        '''display_node = self.session.get_node_by_name("__display_driver")
-        
-        if not display_node.is_valid():
-            display_node = ArnoldNode("driver_display_callback")
-            display_node.set_string("name", "__display_driver")
-        
-        display_node.set_pointer("callback", cb)'''
-
-        driver = ArnoldNode("driver_jpeg")
-        driver.set_string("name", "jpegDriver")
-        driver.set_string("filename", "C:\\Users\\Shadow\\Desktop\\scene.jpg")
 
     def get_transform_blur_matrix(self, object_instance):
         matrix = ArnoldArray()

@@ -47,6 +47,61 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         #self.progress = 0
         #self._progress_increment = 1 / total_buckets
 
+        # Configure display callback
+        # NOTE: We can't do this in the exporter because it results in a nasty MEMORY_ACCESS_VIOLATION error
+
+        options = btoa.UniverseOptions()
+
+        _session = self.session
+        _buckets = {}
+
+        def update_render_result(x, y, width, height, buffer, data):
+            render = _session.depsgraph.scene.render
+
+            if render.use_border:
+                min_x, min_y, max_x, max_y = options.get_render_region()
+            else:
+                min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
+
+            print(min_x, min_y, max_x, max_y)
+
+            x = x - min_x
+            y = max_y - y - height
+
+            if buffer:
+                try:
+                    result = _buckets.pop((x, y), None)
+
+                    if result is None:
+                        result = _session.engine.begin_result(x, y, width, height)
+
+                    b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+                    rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
+
+                    result.layers[0].passes["Combined"].rect = rect
+                    _session.engine.end_result(result)
+                
+                finally:
+                    _session.free_buffer(buffer)
+            else:
+                _buckets[(x, y)] = _session.engine.begin_result(x, y, width, height)
+
+            if _session.engine.test_break():
+                _session.abort()
+                while _buckets:
+                    (x, y), result = _buckets.popitem()
+                    _session.engine.end_result(result, cancel=True)
+
+        cb = btoa.ArnoldDisplayCallback(update_render_result)
+        
+        display_node = self.session.get_node_by_name("__display_driver")
+        
+        if not display_node.is_valid():
+            display_node = btoa.ArnoldNode("driver_display_callback")
+            display_node.set_string("name", "__display_driver")
+        
+        display_node.set_pointer("callback", cb)
+
         self.session.render()
 
     def view_update(self, context, depsgraph):

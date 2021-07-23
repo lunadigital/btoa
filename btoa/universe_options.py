@@ -31,3 +31,9 @@ class UniverseOptions(ArnoldNode):
         if self.is_valid():
             self.set_int("xres", x)
             self.set_int("yres", y)
+
+    def get_render_resolution(self):
+        if self.is_valid():
+            return self.get_int("xres"), self.get_int("yres")
+
+        return None, None
