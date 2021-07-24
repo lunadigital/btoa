@@ -33,20 +33,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.session.export(self, depsgraph)
 
     def render(self, depsgraph):
-        # Calculate progress increment
-        #options = self.session.options
-        
-        #width = options.get_int("xres")
-        #height = options.get_int("yres")
-        #bucket_size = options.get_int("bucket_size")
-
-        #h_buckets = math.ceil(width / bucket_size)
-        #v_buckets = math.ceil(height / bucket_size)
-        #total_buckets = h_buckets * v_buckets
-        
-        #self.progress = 0
-        #self._progress_increment = 1 / total_buckets
-
         # Configure display callback
         # NOTE: We can't do this in the exporter because it results in a nasty MEMORY_ACCESS_VIOLATION error
 
@@ -78,6 +64,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
                     result.layers[0].passes["Combined"].rect = rect
                     _session.engine.end_result(result)
+
+                    # Update progress counter
+
+                    _session.engine.progress += _session.engine._progress_increment
+                    _session.engine.update_progress(_session.engine.progress)
                 
                 finally:
                     _session.free_buffer(buffer)
@@ -100,7 +91,22 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         
         display_node.set_pointer("callback", cb)
 
+        # Calculate progress increment
+        
+        width, height = options.get_render_resolution()
+        bucket_size = options.get_int("bucket_size")
+
+        h_buckets = math.ceil(width / bucket_size)
+        v_buckets = math.ceil(height / bucket_size)
+        total_buckets = h_buckets * v_buckets
+        
+        self.progress = 0
+        self._progress_increment = 1 / total_buckets
+
         self.session.render()
+
+        # Reset session to free RenderEngine class and call AiEnd()
+        self.session.reset()
 
     def view_update(self, context, depsgraph):
         region = context.region
