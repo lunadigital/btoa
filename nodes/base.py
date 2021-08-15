@@ -304,6 +304,14 @@ world_node_categories = [
             NodeItem("AiColorCorrect")
         ]
     ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_CONVERSION',
+        "Conversion",
+        items=[
+            NodeItem("AiFloatToRGB"),
+            NodeItem("AiFloatToRGBA"),
+        ]
+    )
 ]
 
 object_node_categories = [
@@ -356,6 +364,14 @@ object_node_categories = [
         items=[
             NodeItem("AiCoordSpace"),
             NodeItem("AiUVProjection")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_CONVERSION',
+        "Conversion",
+        items=[
+            NodeItem("AiFloatToRGB"),
+            NodeItem("AiFloatToRGBA"),
         ]
     )
 ]
