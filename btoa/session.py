@@ -15,7 +15,12 @@ class Session:
         arnold.AiRenderAbort()
 
     def end(self):
+        if self.is_interactive:
+            arnold.AiRenderEnd()
+        
         arnold.AiEnd()
+        
+        self.is_running = False
 
     def export(self, engine, depsgraph):
         self.engine = engine
@@ -36,15 +41,24 @@ class Session:
         return node
 
     def render(self):
-        arnold.AiRender(arnold.AI_RENDER_MODE_CAMERA)
+        if self.is_interactive:
+            arnold.AiRenderBegin()
+        else:
+            arnold.AiRender(arnold.AI_RENDER_MODE_CAMERA)
 
     def reset(self):
         self.engine = None
         self.depsgraph = None
         self.exporter = None
+        self.is_interactive = False
+        self.is_running = False
 
-    def start(self):
-        arnold.AiBegin()
+    def start(self, interactive=False):
+        self.is_running = True
+        self.is_interactive = interactive
+
+        render_mode = arnold.AI_SESSION_INTERACTIVE if interactive else arnold.AI_SESSION_BATCH
+        arnold.AiBegin(render_mode)
     
 
 

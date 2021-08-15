@@ -20,7 +20,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self._progress_increment = 0
         
         self.session = btoa.Session()
-        self.session.start()
+
+        self.framebuffer = None
 
     def __del__(self):
         self.session.end()
@@ -30,6 +31,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         return context.scene.render.engine == cls.bl_idname
 
     def update(self, data, depsgraph):
+        self.session.start()
         self.session.export(self, depsgraph)
 
     def render(self, depsgraph):
@@ -82,7 +84,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     _session.engine.end_result(result, cancel=True)
 
         cb = btoa.ArnoldDisplayCallback(update_render_result)
-        
+
         display_node = self.session.get_node_by_name("__display_driver")
         
         if not display_node.is_valid():
@@ -109,32 +111,37 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.session.reset()
 
     def view_update(self, context, depsgraph):
-        region = context.region
-        view3d = context.space_data
-        scene = depsgraph.scene
+        if not self.session.is_running:
+            self.session.start(interactive=True)
 
-        dimensions = region.width, region.height
+        self.session.export(self, depsgraph)
 
-        if not self.scene_data:
-            # Assume first-time initialization
-            self.scene_data = []
-            first_time = True
+        _session = self.session
+        _framebuffer = self.framebuffer
 
-            # Loop over all datablocks in scene
-            for datablock in depsgraph.ids:
-                pass
-        else:
-            first_time = False
+        def update_viewport(x, y, width, height, buffer, data):
+            print(x, y, width, height, buffer, data)
+            '''if buffer:
+                try:
+                    _buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_uint16))
+                    a = numpy.ctypeslib.as_array(_buffer, shape=(height, width, 4))
+                    _framebuffer.set_data(a)
+                    #rect[y : y + height, x : x + width] = a
+                    #redraw_event.set()
+                finally:
+                    _session.free_buffer(buffer)'''
 
-            for update in depsgraph.updates:
-                print("Datablock updated: ", update.id.name)
-            
-            if depsgraph.id_type_updated('MATERIAL'):
-                print("Materials updated")
-            
-        if first_time or depsgraph.id_type_updated('OBJECT'):
-            for instance in depsgraph.object_instances:
-                pass
+        cb = btoa.ArnoldDisplayCallback(update_viewport)
+
+        display_node = self.session.get_node_by_name("__display_driver")
+        
+        if not display_node.is_valid():
+            display_node = btoa.ArnoldNode("driver_display_callback")
+            display_node.set_string("name", "__display_driver")
+        
+        display_node.set_pointer("callback", cb)
+
+        self.session.render()
 
     def view_draw(self, context, depsgraph):
         region = context.region
@@ -146,28 +153,36 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         bgl.glBlendFunc(bgl.GL_ONE, bgl.GL_ONE_MINUS_SRC_ALPHA)
         self.bind_display_space_shader(scene)
 
-        if not self.draw_data or self.draw_data.dimensions != dimensions:
-            self.draw_data = ArnoldDrawData(dimensions)
+        if not self.framebuffer or self.framebuffer.dimensions != dimensions:
+            self.framebuffer = FrameBuffer(dimensions)
         
-        self.draw_data.draw()
+        self.framebuffer.draw()
 
         self.unbind_display_space_shader()
         bgl.glDisable(bgl.GL_BLEND)
 
-class ArnoldDrawData:
+class FrameBuffer:
     def __init__(self, dimensions):
         self.dimensions = dimensions
-        width, height = dimensions
 
-        pixels = [0.1, 0.2, 0.1, 1.0] * width * height
-        pixels = bgl.Buffer(bgl.GL_FLOAT, width * height * 4, pixels)
+        self.pixel_data = [0.0, 0.0, 0.0, 1.0] * width * height
+        self.build_gl_texture()
+
+    def set_data(self, data):
+        width, height = dimensions
+        self.pixel_data = bgl.Buffer(bgl.GL_FLOAT, width * height * 4, data)
+
+        self.build_gl_texture()
+
+    def build_gl_texture(self):
+        width, height = dimensions
 
         self.texture = bgl.Buffer(bgl.GL_INT, 1)
 
         bgl.glGenTextures(1, self.texture)
         bgl.glActiveTexture(bgl.GL_TEXTURE0)
         bgl.glBindTexture(bgl.GL_TEXTURE_2D, self.texture[0])
-        bgl.glTexImage2D(bgl.GL_TEXTURE_2D, 0, bgl.GL_RGBA16F, width, height, 0, bgl.GL_RGBA, bgl.GL_FLOAT, pixels)
+        bgl.glTexImage2D(bgl.GL_TEXTURE_2D, 0, bgl.GL_RGBA16F, width, height, 0, bgl.GL_RGBA, bgl.GL_FLOAT, self.pixel_data)
         bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MIN_FILTER, bgl.GL_LINEAR)
         bgl.glBindTexture(bgl.GL_TEXTURE_2D, 0)
 
