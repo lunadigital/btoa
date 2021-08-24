@@ -6,7 +6,9 @@ BTOA_TYPE_CONSTANTS = {
     "MATRIX": arnold.AI_TYPE_MATRIX,
     "ARRAY": arnold.AI_TYPE_ARRAY,
     "VECTOR": arnold.AI_TYPE_VECTOR,
-    "VECTOR2": arnold.AI_TYPE_VECTOR2
+    "VECTOR2": arnold.AI_TYPE_VECTOR2,
+    "BYTE": arnold.AI_TYPE_BYTE,
+    "POINTER": arnold.AI_TYPE_POINTER,
 }
 
 BTOA_LIGHT_CONVERSIONS = {

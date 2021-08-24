@@ -34,3 +34,8 @@ class ArnoldArray(AiTemplateClass):
     def set_vector(self, i, array):
         if self.is_valid():
             arnold.AiArraySetVec(self.data, i, array.data)
+
+    def set_pointer(self, i, val):
+        if self.is_valid():
+            ptr = val.data if hasattr(val, "data") else val
+            arnold.AiArraySetPtr(self.data, i, ptr)

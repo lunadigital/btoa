@@ -237,26 +237,44 @@ class Exporter:
                 break
 
         # Materials
-        # This should really be in a for loop, but for now we're only
-        # looking for the material in the first slot.
-        # for slot in ob.material_slots:
-        try:
-            slot = ob.material_slots[0]
+
+        materials = []
+
+        for slot in ob.material_slots:
             if slot.material:
                 unique_name = export_utils.get_unique_name(slot.material)
 
-                if slot.material.arnold.node_tree is not None:
+                if slot.material.arnold.node_tree:
                     shader = self.session.get_node_by_name(unique_name)
 
                     if shader.is_valid():
-                        node.set_pointer("shader", shader)
+                        materials.append(shader)
                     else:
                         surface, volume, displacement = slot.material.arnold.node_tree.export()
-                        surface[0].set_string("name", unique_name)
-                        node.set_pointer("shader", surface[0])
+                        shader = surface[0]
 
-        except:
-            print("WARNING: {} has no material slots assigned!".format(ob.name))
+                        shader.set_string("name", unique_name)
+                        materials.append(shader)
+
+        material_indices = numpy.ndarray(len(mesh.polygons), dtype=numpy.uint8)
+        mesh.polygons.foreach_get("material_index", material_indices)
+
+        shader_array = ArnoldArray()
+        shader_array.allocate(len(materials), 1, "POINTER")
+
+        for i, mat in enumerate(materials):
+            shader_array.set_pointer(i, mat)
+
+        shidxs = ArnoldArray()
+        shidxs.convert_from_buffer(
+            len(material_indices),
+            1,
+            "BYTE",
+            ctypes.c_void_p(material_indices.ctypes.data)
+        )
+
+        node.set_array("shader", shader_array)
+        node.set_array("shidxs", shidxs)
 
         return node
 
