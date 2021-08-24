@@ -6,6 +6,7 @@ from .constants import BTOA_CONVERTIBLE_TYPES
 
 import arnold
 import numpy
+import time
 
 class Session:
     def __init__(self):
@@ -41,10 +42,17 @@ class Session:
         return node
 
     def render(self):
-        if self.is_interactive:
-            arnold.AiRenderBegin()
-        else:
-            arnold.AiRender(arnold.AI_RENDER_MODE_CAMERA)
+        result = arnold.AiRenderBegin()
+        if result == arnold.AI_SUCCESS.value:
+            status = arnold.AiRenderGetStatus()
+            while status == arnold.AI_RENDER_STATUS_RENDERING.value:
+                time.sleep(0.001)
+                status = arnold.AiRenderGetStatus()
+        
+        result = arnold.AiRenderEnd()
+
+        self.end()
+        self.reset()
 
     def reset(self):
         self.engine = None
@@ -59,7 +67,3 @@ class Session:
 
         render_mode = arnold.AI_SESSION_INTERACTIVE if interactive else arnold.AI_SESSION_BATCH
         arnold.AiBegin(render_mode)
-    
-
-
-    

@@ -24,7 +24,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.framebuffer = None
 
     def __del__(self):
-        self.session.end()
+        pass
 
     @classmethod
     def is_active(cls, context):
@@ -106,9 +106,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self._progress_increment = 1 / total_buckets
 
         self.session.render()
-
-        # Reset session to free RenderEngine class and call AiEnd()
-        self.session.reset()
 
     def view_update(self, context, depsgraph):
         if not self.session.is_running:
