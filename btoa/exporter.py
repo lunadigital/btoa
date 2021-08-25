@@ -11,6 +11,7 @@ import ctypes
 import os
 import math
 import numpy
+import mathutils
 
 class Exporter:
     def __init__(self, session):
@@ -284,7 +285,7 @@ class Exporter:
         surface, volume, displacement = world.arnold.node_tree.export()
         node = surface[0]
         
-        unique_name = utils.get_unique_name(world)
+        unique_name = export_utils.get_unique_name(world)
         node.set_string("name", unique_name)
 
         # Flip image textures in the U direction
@@ -436,15 +437,15 @@ class Exporter:
             
                 node.set_matrix(
                     "matrix",
-                    utils.flatten_matrix(tmatrix)
+                    export_utils.flatten_matrix(tmatrix)
                 )
             elif data.shape == 'DISK':
                 s = ob.scale.x if ob.scale.x > ob.scale.y else ob.scale.y
                 node.set_float("radius", 0.5 * data.size * s)
             elif data.shape == 'RECTANGLE':
                 d = 0.5 * data.size_y * ob.scale.y
-                top = utils.get_position_along_local_vector(ob, d, 'Y')
-                bottom = utils.get_position_along_local_vector(ob, -d, 'Y')
+                top = export_utils.get_position_along_local_vector(ob, d, 'Y')
+                bottom = export_utils.get_position_along_local_vector(ob, -d, 'Y')
 
                 node.set_vector("top", *top)
                 node.set_vector("bottom", *bottom)
@@ -522,8 +523,8 @@ class Exporter:
 
         # Export world settings
 
-        #if depsgraph.scene.world.arnold.node_tree is not None:
-        #    self.create_world(depsgraph.scene.world)        
+        if scene.world.arnold.node_tree:
+            self.create_world(scene.world)        
 
         # Add final required nodes
 
@@ -548,7 +549,7 @@ class Exporter:
 
             self.session.engine.frame_set(frame, subframe=subframe)
             
-            m = utils.flatten_matrix(object_instance.matrix_world)
+            m = export_utils.flatten_matrix(object_instance.matrix_world)
             matrix.set_matrix(i, m)
 
         self.session.engine.frame_set(frame_current, subframe=0)

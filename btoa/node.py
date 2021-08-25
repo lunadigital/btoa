@@ -89,6 +89,6 @@ class ArnoldNode(AiTemplateClass):
         if not self.is_valid():
             return None
 
-        node = BtNode()
+        node = ArnoldNode()
         node.data = arnold.AiNodeGetLink(self.data, param, comp)
         return node
