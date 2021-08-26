@@ -1,4 +1,6 @@
 from .ai_template_class import AiTemplateClass
+from .matrix import ArnoldMatrix
+
 import arnold
 
 class ArnoldNode(AiTemplateClass):
@@ -51,7 +53,10 @@ class ArnoldNode(AiTemplateClass):
 
     def set_matrix(self, param, val):
         if self.is_valid():
-            arnold.AiNodeSetMatrix(self.data, param, arnold.AtMatrix(*val))
+            if isinstance(val, ArnoldMatrix):
+                arnold.AiNodeSetMatrix(self.data, param, val.data)
+            else:
+                arnold.AiNodeSetMatrix(self.data, param, arnold.AtMatrix(*val))
 
     def set_string(self, param, val):
         if self.is_valid():
@@ -91,4 +96,14 @@ class ArnoldNode(AiTemplateClass):
 
         node = ArnoldNode()
         node.data = arnold.AiNodeGetLink(self.data, param, comp)
+        return node
+
+    def get_matrix(self, param):
+        if not self.is_valid():
+            return None
+        
+        data = arnold.AiNodeGetMatrix(self.data, param)
+        node = ArnoldMatrix()
+        node.data = data # We pass the data directly because it's already an AtMatrix object
+
         return node

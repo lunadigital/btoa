@@ -1,5 +1,6 @@
 from .array import ArnoldArray
 from .colormanager import ArnoldColorManager
+from .matrix import ArnoldMatrix
 from .node import ArnoldNode
 from .polymesh import ArnoldPolymesh
 from .universe_options import UniverseOptions
@@ -293,6 +294,30 @@ class Exporter:
         if image.is_valid() and image.type_is("image"):
             sflip = image.get_bool("sflip")
             image.set_bool("sflip", not sflip)
+
+        # Rotate skydome with rotation controller object
+        if world.arnold.rotation_controller:
+            # Get the existing world matrix
+            matrix = node.get_matrix("matrix")
+
+            # Calculate the rotation matrix of the controller
+            rot = world.arnold.rotation_controller.rotation_euler
+
+            rx = mathutils.Matrix.Rotation(rot.x, 4, 'X')
+            ry = mathutils.Matrix.Rotation(rot.y, 4, 'Y')
+            rz = mathutils.Matrix.Rotation(-rot.z, 4, 'Z')
+            
+            r = rx @ ry @ rz
+            r = export_utils.flatten_matrix(r)
+
+            rotation = ArnoldMatrix()
+            rotation.convert_from_buffer(r)
+
+            # Multiply the two together
+            matrix.multiply(rotation)
+
+            # Set new matrix
+            node.set_matrix("matrix", matrix)
 
         node.set_int("samples", data.samples)
         node.set_bool("normalize", data.normalize)
