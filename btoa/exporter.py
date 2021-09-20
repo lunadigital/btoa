@@ -304,7 +304,7 @@ class Exporter:
 
             rx = mathutils.Matrix.Rotation(rot.x, 4, 'X')
             ry = mathutils.Matrix.Rotation(rot.y, 4, 'Y')
-            rz = mathutils.Matrix.Rotation(-rot.z, 4, 'Z')
+            rz = mathutils.Matrix.Rotation(rot.z, 4, 'Z')
             
             r = rx @ ry @ rz
             r = export_utils.flatten_matrix(r)
