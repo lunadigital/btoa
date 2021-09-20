@@ -1,8 +1,6 @@
-import bpy
-import bgl
+import bpy, bgl, mathutils
 import ctypes
 import math
-import mathutils
 import numpy
 import os
 
@@ -10,6 +8,100 @@ from .. import btoa
 
 from bl_ui.properties_render import RENDER_PT_color_management
 
+import arnold
+
+'''
+Render callbacks and global variables
+
+Listen, I know. This is messy. But the render callback needs to be available in
+memory for interactive rendering to work, and the Arnold API handles renders
+asynchronously. On top of that, the callback function needs access to the
+render engine, current session, and frame buffer to do it's job.
+
+So, that's it, we're here, deal with it. Let's move on.
+'''
+AI_ENGINE = None
+AI_SESSION = None
+
+def exists(struct):
+    ''' Checks to see if struct exists in Blender's memory '''
+    try:
+        id = struct.id_data
+    except:
+        return False
+    
+    return True
+
+def ai_render_update_callback(private_data, update_type, display_output):
+    global AI_ENGINE
+    global AI_SESSION
+
+    print("----- IN CALLBACK -----")
+
+    if exists(AI_ENGINE) and display_output != int(btoa.NO_DISPLAY_OUTPUTS):
+        AI_ENGINE.framebuffer.requires_update = True
+        AI_ENGINE.tag_redraw()
+
+    if not exists(AI_ENGINE) and update_type in (
+        int(btoa.BEFORE_PASS),
+        int(btoa.DURING_PASS),
+        int(btoa.AFTER_PASS),
+    ):
+        print("Interrupting, sorry")
+        arnold.AiRenderInterrupt()
+        #AI_ENGINE = None
+
+    status = btoa.FAILED
+
+    if update_type == int(btoa.INTERRUPTED):
+        status = btoa.INTERRUPTED
+        print("Status: Interrupted")
+    elif update_type == int(btoa.BEFORE_PASS):
+        status = btoa.RENDERING
+        print("Status: Rendering")
+    elif update_type == int(btoa.DURING_PASS):
+        status = btoa.RENDERING
+        print("Status: Rendering")
+    elif update_type == int(btoa.AFTER_PASS):
+        status = btoa.RENDERING
+        print("Status: Rendering")
+    elif update_type == int(btoa.RENDER_FINISHED):
+        status = btoa.RENDER_FINISHED
+        print("Status: Finished")
+    elif update_type == int(btoa.ERROR):
+        status = btoa.FAILED
+        AI_ENGINE = None
+        print("Status: Failed")
+
+    return status
+
+def update_viewport(x, y, width, height, buffer, data):
+    global AI_ENGINE
+    global AI_SESSION
+
+    options = btoa.UniverseOptions()
+    min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
+
+    x = x - min_x
+    y = max_y - y - height
+
+    if buffer and exists(AI_ENGINE):
+        try:
+            b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+            rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
+            rect = rect.flatten()
+
+            AI_ENGINE.framebuffer.write_bucket(x, y, width, height, rect.tolist())
+            
+        finally:
+            AI_ENGINE.session.free_buffer(buffer)
+
+AI_DISPLAY_CALLBACK = btoa.ArnoldDisplayCallback(update_viewport)
+AI_RENDER_CALLBACK = ai_render_update_callback
+
+'''
+Render engine class, registration, and other UI goodies
+'''
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
     bl_label = "Arnold"
@@ -21,10 +113,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         
         self.session = btoa.Session()
 
-        self.framebuffer = None
-
     def __del__(self):
-        pass
+        arnold.AiRenderInterrupt()
 
     @classmethod
     def is_active(cls, context):
@@ -40,11 +130,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         options = btoa.UniverseOptions()
 
-        _session = self.session
-        _buckets = {}
+        engine = self
+        buckets = {}
 
         def update_render_result(x, y, width, height, buffer, data):
-            render = _session.depsgraph.scene.render
+            render = depsgraph.scene.render
 
             if render.use_border:
                 min_x, min_y, max_x, max_y = options.get_render_region()
@@ -56,32 +146,32 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
             if buffer:
                 try:
-                    result = _buckets.pop((x, y), None)
+                    result = buckets.pop((x, y), None)
 
                     if result is None:
-                        result = _session.engine.begin_result(x, y, width, height)
+                        result = engine.begin_result(x, y, width, height)
 
                     b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
                     rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
 
                     result.layers[0].passes["Combined"].rect = rect
-                    _session.engine.end_result(result)
+                    engine.end_result(result)
 
                     # Update progress counter
 
-                    _session.engine.progress += _session.engine._progress_increment
-                    _session.engine.update_progress(_session.engine.progress)
+                    engine.progress += engine._progress_increment
+                    engine.update_progress(engine.progress)
                 
                 finally:
-                    _session.free_buffer(buffer)
+                    engine.session.free_buffer(buffer)
             else:
-                _buckets[(x, y)] = _session.engine.begin_result(x, y, width, height)
+                buckets[(x, y)] = engine.begin_result(x, y, width, height)
 
-            if _session.engine.test_break():
-                _session.abort()
+            if engine.test_break():
+                engine.session.abort()
                 while _buckets:
-                    (x, y), result = _buckets.popitem()
-                    _session.engine.end_result(result, cancel=True)
+                    (x, y), result = buckets.popitem()
+                    engine.end_result(result, cancel=True)
 
         cb = btoa.ArnoldDisplayCallback(update_render_result)
 
@@ -108,126 +198,48 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.session.render()
 
     def view_update(self, context, depsgraph):
-        if not self.session.is_running:
+        global AI_DISPLAY_CALLBACK
+        global AI_RENDER_CALLBACK
+
+        if not self.session or not self.session.is_running:
+            region = context.region
+            scene = depsgraph.scene
+
+            self.framebuffer = btoa.FrameBuffer(self, region, scene)
+
             self.session.start(interactive=True)
+            self.session.export(self, depsgraph)
 
-        self.session.export(self, depsgraph)
+            display_node = self.session.get_node_by_name("__display_driver")
+            
+            if not display_node.is_valid():
+                display_node = btoa.ArnoldNode("driver_display_callback")
+                display_node.set_string("name", "__display_driver")
+            
+            display_node.set_pointer("callback", AI_DISPLAY_CALLBACK)
 
-        _session = self.session
-        _framebuffer = self.framebuffer
-
-        def update_viewport(x, y, width, height, buffer, data):
-            print(x, y, width, height, buffer, data)
-            '''if buffer:
-                try:
-                    _buffer = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_uint16))
-                    a = numpy.ctypeslib.as_array(_buffer, shape=(height, width, 4))
-                    _framebuffer.set_data(a)
-                    #rect[y : y + height, x : x + width] = a
-                    #redraw_event.set()
-                finally:
-                    _session.free_buffer(buffer)'''
-
-        cb = btoa.ArnoldDisplayCallback(update_viewport)
-
-        display_node = self.session.get_node_by_name("__display_driver")
-        
-        if not display_node.is_valid():
-            display_node = btoa.ArnoldNode("driver_display_callback")
-            display_node.set_string("name", "__display_driver")
-        
-        display_node.set_pointer("callback", cb)
-
-        self.session.render()
+            self.session.render_interactive(AI_RENDER_CALLBACK)
 
     def view_draw(self, context, depsgraph):
+        global AI_ENGINE
+        global AI_SESSION
+        AI_ENGINE = self
+        AI_SESSION = self.session
+
         region = context.region
         scene = depsgraph.scene
 
-        dimensions = region.width, region.height
+        # This will create weird issuese when resizing the screen (Blender will forget about anything in the buffer that was
+        # rendered before resizing). Will need to add some kind of resizing method to handle this, instead of blowing the
+        # whole thing away with a new class
+        if not self.framebuffer:
+            self.framebuffer = btoa.FrameBuffer(self, region, scene)
 
-        bgl.glEnable(bgl.GL_BLEND)
-        bgl.glBlendFunc(bgl.GL_ONE, bgl.GL_ONE_MINUS_SRC_ALPHA)
-        self.bind_display_space_shader(scene)
+        if self.framebuffer.requires_update:
+            self.framebuffer.generate_texture()
+            self.tag_redraw()
 
-        if not self.framebuffer or self.framebuffer.dimensions != dimensions:
-            self.framebuffer = FrameBuffer(dimensions)
-        
-        self.framebuffer.draw()
-
-        self.unbind_display_space_shader()
-        bgl.glDisable(bgl.GL_BLEND)
-
-class FrameBuffer:
-    def __init__(self, dimensions):
-        self.dimensions = dimensions
-
-        self.pixel_data = [0.0, 0.0, 0.0, 1.0] * width * height
-        self.build_gl_texture()
-
-    def set_data(self, data):
-        width, height = dimensions
-        self.pixel_data = bgl.Buffer(bgl.GL_FLOAT, width * height * 4, data)
-
-        self.build_gl_texture()
-
-    def build_gl_texture(self):
-        width, height = dimensions
-
-        self.texture = bgl.Buffer(bgl.GL_INT, 1)
-
-        bgl.glGenTextures(1, self.texture)
-        bgl.glActiveTexture(bgl.GL_TEXTURE0)
-        bgl.glBindTexture(bgl.GL_TEXTURE_2D, self.texture[0])
-        bgl.glTexImage2D(bgl.GL_TEXTURE_2D, 0, bgl.GL_RGBA16F, width, height, 0, bgl.GL_RGBA, bgl.GL_FLOAT, self.pixel_data)
-        bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MIN_FILTER, bgl.GL_LINEAR)
-        bgl.glBindTexture(bgl.GL_TEXTURE_2D, 0)
-
-        shader_program = bgl.Buffer(bgl.GL_INT, 1)
-        bgl.glGetIntegerv(bgl.GL_CURRENT_PROGRAM, shader_program)
-
-        self.vertex_array = bgl.Buffer(bgl.GL_INT, 1)
-        bgl.glGenVertexArrays(1, self.vertex_array)
-        bgl.glBindVertexArray(self.vertex_array[0])
-
-        texturecoord_location = bgl.glGetAttribLocation(shader_program[0], "texCoord")
-        position_location = bgl.glGetAttribLocation(shader_program[0], "pos")
-
-        bgl.glEnableVertexAttribArray(texturecoord_location)
-        bgl.glEnableVertexAttribArray(position_location)
-
-        position = [0.0, 0.0, width, 0.0, width, height, 0.0, height]
-        position = bgl.Buffer(bgl.GL_FLOAT, len(position), position)
-        texcoord = [0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0]
-        texcoord = bgl.Buffer(bgl.GL_FLOAT, len(texcoord), texcoord)
-
-        self.vertex_buffer = bgl.Buffer(bgl.GL_INT, 2)
-        
-        bgl.glGenBuffers(2, self.vertex_buffer)
-        bgl.glBindBuffer(bgl.GL_ARRAY_BUFFER, self.vertex_buffer[0])
-        bgl.glBufferData(bgl.GL_ARRAY_BUFFER, 32, position, bgl.GL_STATIC_DRAW)
-        bgl.glVertexAttribPointer(position_location, 2, bgl.GL_FLOAT, bgl.GL_FALSE, 0, None)
-
-        bgl.glBindBuffer(bgl.GL_ARRAY_BUFFER, self.vertex_buffer[1])
-        bgl.glBufferData(bgl.GL_ARRAY_BUFFER, 32, texcoord, bgl.GL_STATIC_DRAW)
-        bgl.glVertexAttribPointer(texturecoord_location, 2, bgl.GL_FLOAT, bgl.GL_FALSE, 0, None)
-
-        bgl.glBindBuffer(bgl.GL_ARRAY_BUFFER, 0)
-        bgl.glBindVertexArray(0)
-
-    def __del__(self):
-        bgl.glDeleteBuffers(2, self.vertex_buffer)
-        bgl.glDeleteVertexArrays(1, self.vertex_array)
-        bgl.glBindTexture(bgl.GL_TEXTURE_2D, 0)
-        bgl.glDeleteTextures(1, self.texture)
-
-    def draw(self):
-        bgl.glActiveTexture(bgl.GL_TEXTURE0)
-        bgl.glBindTexture(bgl.GL_TEXTURE_2D, self.texture[0])
-        bgl.glBindVertexArray(self.vertex_array[0])
-        bgl.glDrawArrays(bgl.GL_TRIANGLE_FAN, 0, 4)
-        bgl.glBindVertexArray(0)
-        bgl.glBindTexture(bgl.GL_TEXTURE_2D, 0)
+        self.framebuffer.draw(self, scene)
 
 def get_panels():
     exclude_panels = {

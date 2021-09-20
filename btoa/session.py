@@ -17,18 +17,19 @@ class Session:
 
     def end(self):
         if self.is_interactive:
-            arnold.AiRenderEnd()
+            print("TRYING TO END RENDER")
+            result = arnold.AiRenderEnd()
+            if result != arnold.AI_SUCCESS:
+                print("Something went wrong")
         
+        print("TRYING TO SHUT DOWN RESOURCES")
         arnold.AiEnd()
-        
-        self.is_running = False
 
     def export(self, engine, depsgraph):
-        self.engine = engine
         self.depsgraph = depsgraph
-        self.exporter = Exporter(self)
 
-        self.exporter.export()
+        exporter = Exporter()
+        exporter.export(self, engine, depsgraph)
 
     def free_buffer(self, buffer):
         arnold.AiFree(buffer)
@@ -54,10 +55,17 @@ class Session:
         self.end()
         self.reset()
 
+    def render_interactive(self, callback):
+        render_mode = arnold.AI_RENDER_MODE_CAMERA
+        private_data = None
+
+        result = arnold.AiRenderBegin(render_mode, callback, private_data)
+        if result != arnold.AI_SUCCESS.value:
+            self.end()
+            self.reset()
+
     def reset(self):
-        self.engine = None
         self.depsgraph = None
-        self.exporter = None
         self.is_interactive = False
         self.is_running = False
 

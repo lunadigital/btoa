@@ -15,8 +15,8 @@ import numpy
 import mathutils
 
 class Exporter:
-    def __init__(self, session):
-        self.session = session
+    def __init__(self):
+        pass
 
     def __get_target_frame(self, motion_step):
         frame_flt = frame_current + motion_step
@@ -60,8 +60,7 @@ class Exporter:
 
         return vlist_data, nlist_data
 
-    def create_polymesh(self, object_instance):
-        scene = self.session.depsgraph.scene
+    def create_polymesh(self, session, engine, scene, object_instance):
         data = scene.arnold
 
         # Evaluate geometry at current frame
@@ -95,7 +94,7 @@ class Exporter:
                 for i in range(0, motion_steps.size):
                     frame, subframe = self.__get_target_frame(motion_step[i])
 
-                    self.session.engine.frame_set(frame, subframe=subframe)
+                    engine.frame_set(frame, subframe=subframe)
                     _mesh = self.__evaluate_mesh(ob)
 
                     # vlist data
@@ -247,7 +246,7 @@ class Exporter:
                 unique_name = export_utils.get_unique_name(slot.material)
 
                 if slot.material.arnold.node_tree:
-                    shader = self.session.get_node_by_name(unique_name)
+                    shader = session.get_node_by_name(unique_name)
 
                     if shader.is_valid():
                         materials.append(shader)
@@ -338,9 +337,9 @@ class Exporter:
 
         return node
 
-    def create_camera(self, object_instance):
+    def create_camera(self, scene, object_instance):
         node = ArnoldNode("persp_camera")
-        self.sync_camera(node, object_instance)
+        self.sync_camera(scene, node, object_instance)
 
         return node
 
@@ -353,9 +352,9 @@ class Exporter:
 
         return node
 
-    def sync_camera(self, node, object_instance):
+    def sync_camera(self, scene, node, object_instance):
         ob = export_utils.get_object_data_from_instance(object_instance)
-        scene_data = self.session.depsgraph.scene.arnold
+        scene_data = scene.arnold
         camera_data = ob.data
 
         node.set_string("name", export_utils.get_unique_name(object_instance))
@@ -478,8 +477,8 @@ class Exporter:
                 s = ob.scale.x if ob.scale.x > ob.scale.z else ob.scale.z
                 node.set_float("radius", 0.5 * data.size * s)
 
-    def export(self):
-        scene = self.session.depsgraph.scene
+    def export(self, session, engine, depsgraph):
+        scene = depsgraph.scene
         options = UniverseOptions()
 
         # Set resolution settings
@@ -530,17 +529,17 @@ class Exporter:
 
         # Export scene objects
 
-        for object_instance in self.session.depsgraph.object_instances:
+        for object_instance in depsgraph.object_instances:
             ob = export_utils.get_object_data_from_instance(object_instance)
             ob_unique_name = export_utils.get_unique_name(object_instance)
 
-            node = self.session.get_node_by_name(ob_unique_name)
+            node = session.get_node_by_name(ob_unique_name)
 
             if not node.is_valid():
                 if ob.type in BTOA_CONVERTIBLE_TYPES:
-                    node = self.create_polymesh(object_instance)
+                    node = self.create_polymesh(session, engine, depsgraph.scene, object_instance)
                 elif ob.name == scene.camera.name:
-                    node = self.create_camera(object_instance)
+                    node = self.create_camera(depsgraph.scene, object_instance)
                     options.set_pointer("camera", node)
                 
                 if ob.type == 'LIGHT':
@@ -565,18 +564,18 @@ class Exporter:
         color_manager.set_string("config", os.getenv("OCIO"))
         options.set_pointer("color_manager", color_manager)
 
-    def get_transform_blur_matrix(self, object_instance):
+    def get_transform_blur_matrix(self, engine, object_instance):
         matrix = ArnoldArray()
         matrix.allocate(1, data.motion_keys, 'MATRIX')
         
         for i in range(0, motion_steps.size):
             frame, subframe = self.__get_target_frame(motion_step[i])
 
-            self.session.engine.frame_set(frame, subframe=subframe)
+            engine.frame_set(frame, subframe=subframe)
             
             m = export_utils.flatten_matrix(object_instance.matrix_world)
             matrix.set_matrix(i, m)
 
-        self.session.engine.frame_set(frame_current, subframe=0)
+        engine.frame_set(frame_current, subframe=0)
 
         return matrix

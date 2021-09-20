@@ -1,3 +1,5 @@
+from .status import ArnoldStatus
+
 import arnold
 
 BTOA_TYPE_CONSTANTS = {
@@ -42,3 +44,26 @@ BTOA_SET_LAMBDA = {
     "VECTOR2": lambda n, i, v: n.set_vector2(i, *v),
     #"MATRIX": lambda n, i, v: AiNodeSetMatrix(n, i, _AiMatrix(v))
 }
+
+# Display output statuses
+NO_DISPLAY_OUTPUTS = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_NONE)
+PARTIAL_INTERACTIVE_OUTPUT = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_PARTIAL_INTERACTIVE)
+INTERACTIVE_OUTPUT = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_INTERACTIVE)
+ALL_OUTPUTS = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_ALL)
+
+# Update statuses
+INTERRUPTED = ArnoldStatus(arnold.AI_RENDER_UPDATE_INTERRUPT)
+BEFORE_PASS = ArnoldStatus(arnold.AI_RENDER_UPDATE_BEFORE_PASS)
+DURING_PASS = ArnoldStatus(arnold.AI_RENDER_UPDATE_DURING_PASS)
+AFTER_PASS = ArnoldStatus(arnold.AI_RENDER_UPDATE_AFTER_PASS)
+UPDATE_FINISHED = ArnoldStatus(arnold.AI_RENDER_UPDATE_FINISHED)
+ERROR = ArnoldStatus(arnold.AI_RENDER_UPDATE_ERROR)
+#UPDATE_IMAGERS = ArnoldStatus(arnold.AI_RENDER_UPDATE_IMAGERS)
+
+# Render statuses
+NOT_STARTED = ArnoldStatus(arnold.AI_RENDER_STATUS_NOT_STARTED)
+PAUSED = ArnoldStatus(arnold.AI_RENDER_STATUS_PAUSED)
+RESTARTING = ArnoldStatus(arnold.AI_RENDER_STATUS_RESTARTING)
+RENDERING = ArnoldStatus(arnold.AI_RENDER_STATUS_RENDERING)
+RENDER_FINISHED = ArnoldStatus(arnold.AI_RENDER_STATUS_FINISHED)
+FAILED = ArnoldStatus(arnold.AI_RENDER_STATUS_FAILED)

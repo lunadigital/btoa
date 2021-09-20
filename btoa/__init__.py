@@ -3,6 +3,7 @@ from .colormanager import *
 from .constants import *
 from .drivers import *
 from .exporter import *
+from .framebuffer import *
 from .node import *
 from .polymesh import *
 from .session import *
