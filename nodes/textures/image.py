@@ -85,7 +85,7 @@ class AiImage(Node, ArnoldNode):
     start_channel: IntProperty(
         name="Start Channel",
         min=0,
-        max=2
+        max=3
     )
 
     mipmap_bias: IntProperty(
