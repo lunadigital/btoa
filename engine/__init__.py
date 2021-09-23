@@ -149,7 +149,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     result = buckets.pop((x, y), None)
 
                     if result is None:
-                        result = engine.begin_result(x, y, width, height)
+                        result = engine.begin_result(x, y, width, height, layer=engine.session.depsgraph.view_layer_eval.name)
 
                     b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
                     rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
@@ -165,7 +165,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 finally:
                     engine.session.free_buffer(buffer)
             else:
-                buckets[(x, y)] = engine.begin_result(x, y, width, height)
+                buckets[(x, y)] = engine.begin_result(x, y, width, height, layer=engine.session.depsgraph.view_layer_eval.name)
 
             if engine.test_break():
                 engine.session.abort()
