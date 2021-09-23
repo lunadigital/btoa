@@ -18,7 +18,7 @@ class Exporter:
     def __init__(self):
         pass
 
-    def __get_target_frame(self, motion_step):
+    def __get_target_frame(self, frame_current, motion_step):
         frame_flt = frame_current + motion_step
         frame_int = math.floor(frame_flt)
         subframe = frame_flt - frame_int
@@ -77,84 +77,52 @@ class Exporter:
         nlist_data = None
 
         if data.enable_motion_blur:
-            motion_steps = numpy.linspace(data.shutter_start, data.shutter_end, data.motion_keys)
-            frame_current = scene.frame_current
-
-            # Transform motion blur
-            # TODO: I think this needs to be `transform_motion_blur`
-
-            if data.camera_motion_blur:
-                matrix = self.get_transform_blur_matrix(object_instance)
-            else:
-                matrix = export_utils.flatten_matrix(object_instance.matrix_world)
-
-            # Deformation motion blur
+            matrix = self.get_transform_blur_matrix(engine, scene, object_instance)
+            mesh = self.__evaluate_mesh(ob)
 
             if data.deformation_motion_blur:
+                motion_steps = numpy.linspace(data.shutter_start, data.shutter_end, data.motion_keys)
+                frame_current = scene.frame_current
+
                 for i in range(0, motion_steps.size):
-                    frame, subframe = self.__get_target_frame(motion_step[i])
-
+                    frame, subframe = self.__get_target_frame(frame_current, motion_steps[i])
                     engine.frame_set(frame, subframe=subframe)
-                    _mesh = self.__evaluate_mesh(ob)
 
-                    # vlist data
+                    # Evaluate the mesh and get mesh data
+                    mesh = self.__evaluate_mesh(ob)
+                    v, n = self.__get_static_mesh_data(mesh)
 
-                    a = numpy.ndarray(len(mesh.vertices) * 3, dtype=numpy.float32)
-                    _mesh.vertices.foreach_get("co", a)
+                    vlist_data = v if vlist_data is None else numpy.concatenate((vlist_data, v))
+                    nlist_data = n if nlist_data is None else numpy.concatenate((nlist_data, n))
 
-                    vlist_data = a if vlist_data is None else numpy.concatenate((vlist_data, a))
-
-                    # nlist data
-
-                    a = numpy.ndarray(len(mesh.loops) * 3, dtype=numpy.float32)
-                    _mesh.loops.foreach_get("normal", a)
-
-                    nlist_data = a if nlist_data is None else numpy.concatenate((nlist_data, a))
+                engine.frame_set(frame_current, subframe=0)
+                mesh = self.__evaluate_mesh(ob)
             else:
                 vlist_data, nlist_data = self.__get_static_mesh_data(mesh)
 
-            # Compile vlist and nlist
-
-            vlist = ArnoldArray()
-            vlist.convert_from_buffer(
-                len(mesh.vertices),
-                data.motion_keys,
-                'VECTOR',
-                ctypes.c_void_p(vlist_data.ctypes.data)
-            )
-
-            nlist = ArnoldArray()
-            nlist.convert_from_buffer(
-                len(mesh.loops),
-                data.motion_keys,
-                'VECTOR',
-                ctypes.c_void_p(nlist_data.ctypes.data)
-            )
-
-        # Calculate without motion blur
-
         else:
             matrix = export_utils.flatten_matrix(object_instance.matrix_world)
-
             vlist_data, nlist_data = self.__get_static_mesh_data(mesh)
 
-            vlist = ArnoldArray()
-            vlist.convert_from_buffer(
-                len(mesh.vertices),
-                1,
-                'VECTOR',
-                ctypes.c_void_p(vlist_data.ctypes.data)
-            )
+        # Compile polymesh data
 
-            nlist = ArnoldArray()
-            nlist.convert_from_buffer(
-                len(mesh.loops),
-                1,
-                'VECTOR',
-                ctypes.c_void_p(nlist_data.ctypes.data)
-            )
+        keys = data.motion_keys if data.enable_motion_blur and data.deformation_motion_blur else 1
 
-        # Polygons
+        vlist = ArnoldArray()
+        vlist.convert_from_buffer(
+            len(mesh.vertices),
+            keys,
+            'VECTOR',
+            ctypes.c_void_p(vlist_data.ctypes.data)
+        )
+
+        nlist = ArnoldArray()
+        nlist.convert_from_buffer(
+            len(mesh.loops),
+            keys,
+            'VECTOR',
+            ctypes.c_void_p(nlist_data.ctypes.data)
+        )
 
         nsides_data = numpy.ndarray(len(mesh.polygons), dtype=numpy.uint32)
         mesh.polygons.foreach_get("loop_total", nsides_data)
@@ -193,7 +161,7 @@ class Exporter:
         name = export_utils.get_unique_name(object_instance)
         node = ArnoldPolymesh(name)
 
-        if data.enable_motion_blur and data.camera_motion_blur:
+        if data.enable_motion_blur:
             node.set_array("matrix", matrix)
         else:
             node.set_matrix("matrix", matrix)
@@ -337,9 +305,9 @@ class Exporter:
 
         return node
 
-    def create_camera(self, scene, object_instance):
+    def create_camera(self, engine, scene, object_instance):
         node = ArnoldNode("persp_camera")
-        self.sync_camera(scene, node, object_instance)
+        self.sync_camera(engine, scene, node, object_instance)
 
         return node
 
@@ -352,7 +320,7 @@ class Exporter:
 
         return node
 
-    def sync_camera(self, scene, node, object_instance):
+    def sync_camera(self, engine, scene, node, object_instance):
         ob = export_utils.get_object_data_from_instance(object_instance)
         scene_data = scene.arnold
         camera_data = ob.data
@@ -360,7 +328,7 @@ class Exporter:
         node.set_string("name", export_utils.get_unique_name(object_instance))
 
         if scene_data.enable_motion_blur and scene_data.camera_motion_blur:
-            matrix = self.get_transform_blur_matrix(object_instance)
+            matrix = self.get_transform_blur_matrix(engine, scene, object_instance)
             node.set_array("matrix", matrix)
         else:
             matrix = export_utils.flatten_matrix(object_instance.matrix_world)
@@ -539,7 +507,7 @@ class Exporter:
                 if ob.type in BTOA_CONVERTIBLE_TYPES:
                     node = self.create_polymesh(session, engine, depsgraph.scene, object_instance)
                 elif ob.name == scene.camera.name:
-                    node = self.create_camera(depsgraph.scene, object_instance)
+                    node = self.create_camera(engine, depsgraph.scene, object_instance)
                     options.set_pointer("camera", node)
                 
                 if ob.type == 'LIGHT':
@@ -564,15 +532,19 @@ class Exporter:
         color_manager.set_string("config", os.getenv("OCIO"))
         options.set_pointer("color_manager", color_manager)
 
-    def get_transform_blur_matrix(self, engine, object_instance):
+    def get_transform_blur_matrix(self, engine, scene, object_instance):
+        data = scene.arnold
+        frame_current = scene.frame_current
+
+        motion_steps = numpy.linspace(data.shutter_start, data.shutter_end, data.motion_keys)
+
         matrix = ArnoldArray()
         matrix.allocate(1, data.motion_keys, 'MATRIX')
-        
-        for i in range(0, motion_steps.size):
-            frame, subframe = self.__get_target_frame(motion_step[i])
 
+        for i in range(0, motion_steps.size):
+            frame, subframe = self.__get_target_frame(frame_current, motion_steps[i])
             engine.frame_set(frame, subframe=subframe)
-            
+
             m = export_utils.flatten_matrix(object_instance.matrix_world)
             matrix.set_matrix(i, m)
 
