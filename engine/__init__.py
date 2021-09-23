@@ -169,7 +169,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
             if engine.test_break():
                 engine.session.abort()
-                while _buckets:
+                while buckets:
                     (x, y), result = buckets.popitem()
                     engine.end_result(result, cancel=True)
 
@@ -229,7 +229,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         region = context.region
         scene = depsgraph.scene
 
-        # This will create weird issuese when resizing the screen (Blender will forget about anything in the buffer that was
+        # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was
         # rendered before resizing). Will need to add some kind of resizing method to handle this, instead of blowing the
         # whole thing away with a new class
         if not self.framebuffer:
