@@ -231,43 +231,59 @@ class Exporter:
 
         # Materials
 
-        materials = []
+        material_override = session.depsgraph.view_layer_eval.material_override
+        
+        if material_override:
+            unique_name = export_utils.get_unique_name(material_override)
 
-        for slot in ob.material_slots:
-            if slot.material:
-                unique_name = export_utils.get_unique_name(slot.material)
+            if material_override.arnold.node_tree is not None:
+                shader = session.get_node_by_name(unique_name)
 
-                if slot.material.arnold.node_tree:
-                    shader = session.get_node_by_name(unique_name)
+                if shader.is_valid():
+                    node.set_pointer("shader", shader)
+                else:
+                    surface, volume, displacement = material_override.arnold.node_tree.export()
+                    surface[0].set_string("name", unique_name)
+                    node.set_pointer("shader", surface[0])
+        
+        else:
+            materials = []
 
-                    if shader.is_valid():
-                        materials.append(shader)
-                    else:
-                        surface, volume, displacement = slot.material.arnold.node_tree.export()
-                        shader = surface[0]
+            for slot in ob.material_slots:
+                if slot.material:
+                    unique_name = export_utils.get_unique_name(slot.material)
 
-                        shader.set_string("name", unique_name)
-                        materials.append(shader)
+                    if slot.material.arnold.node_tree:
+                        shader = session.get_node_by_name(unique_name)
 
-        material_indices = numpy.ndarray(len(mesh.polygons), dtype=numpy.uint8)
-        mesh.polygons.foreach_get("material_index", material_indices)
+                        if shader.is_valid():
+                            materials.append(shader)
+                        else:
+                            surface, volume, displacement = slot.material.arnold.node_tree.export()
+                            shader = surface[0]
 
-        shader_array = ArnoldArray()
-        shader_array.allocate(len(materials), 1, "POINTER")
+                            shader.set_string("name", unique_name)
+                            materials.append(shader)
 
-        for i, mat in enumerate(materials):
-            shader_array.set_pointer(i, mat)
+            material_indices = numpy.ndarray(len(mesh.polygons), dtype=numpy.uint8)
+            mesh.polygons.foreach_get("material_index", material_indices)
 
-        shidxs = ArnoldArray()
-        shidxs.convert_from_buffer(
-            len(material_indices),
-            1,
-            "BYTE",
-            ctypes.c_void_p(material_indices.ctypes.data)
-        )
+            shader_array = ArnoldArray()
+            shader_array.allocate(len(materials), 1, "POINTER")
 
-        node.set_array("shader", shader_array)
-        node.set_array("shidxs", shidxs)
+            for i, mat in enumerate(materials):
+                shader_array.set_pointer(i, mat)
+
+            shidxs = ArnoldArray()
+            shidxs.convert_from_buffer(
+                len(material_indices),
+                1,
+                "BYTE",
+                ctypes.c_void_p(material_indices.ctypes.data)
+            )
+
+            node.set_array("shader", shader_array)
+            node.set_array("shidxs", shidxs)
 
         return node
 
