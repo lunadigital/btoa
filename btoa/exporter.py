@@ -193,6 +193,10 @@ class Exporter:
             if visibility_options[i]:
                 visibility += BTOA_VISIBILITY[i]
 
+        # Remove camera visibility if object is indirect only
+        if ob.indirect_only_get(view_layer=session.depsgraph.view_layer_eval):
+            visibility -= 1
+
         node.set_int("visibility", visibility)
 
         # UV's
