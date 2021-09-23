@@ -7,6 +7,7 @@ import os
 from .. import btoa
 
 from bl_ui.properties_render import RENDER_PT_color_management
+from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
 
 import arnold
 
@@ -107,6 +108,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_label = "Arnold"
     bl_use_preview = True
 
+    _outliner_context_menu_draw = None
+
     def __init__(self):
         self.progress = 0
         self._progress_increment = 0
@@ -119,6 +122,32 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     @classmethod
     def is_active(cls, context):
         return context.scene.render.engine == cls.bl_idname
+
+    @classmethod
+    def register(cls):
+        if cls._outliner_context_menu_draw is None:
+            
+            def draw(self, context):
+                layout = self.layout
+
+                layout.operator("outliner.collection_exclude_set")
+                layout.operator("outliner.collection_exclude_clear")
+
+                layout.operator("outliner.collection_holdout_set")
+                layout.operator("outliner.collection_holdout_clear")
+
+                if context.engine in ('CYCLES', 'ARNOLD'):
+                    layout.operator("outliner.collection_indirect_only_set")
+                    layout.operator("outliner.collection_indirect_only_clear")
+
+            cls._outliner_context_menu_draw = OUTLINER_MT_collection_view_layer.draw
+            OUTLINER_MT_collection_view_layer.draw = draw
+
+    @classmethod
+    def unregister_outliner_context_menu_draw(cls):
+        if cls._outliner_context_menu_draw is not None:
+            OUTLINER_MT_collection_view_layer.draw = cls._outliner_context_menu_draw
+            cls._outliner_context_menu_draw = None              
 
     def update(self, data, depsgraph):
         self.session.start()
@@ -296,5 +325,4 @@ def unregister():
         if ArnoldRenderEngine.bl_idname in panel.COMPAT_ENGINES:
             panel.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)
 
-if __name__ == "__main__":
-    register()
+    ArnoldRenderEngine.unregister_outliner_context_menu_draw()
