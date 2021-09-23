@@ -31,6 +31,9 @@ BTOA_CONVERTIBLE_TYPES = [
     'CURVE'
 ]
 
+# For more info, visit https://docs.arnoldrenderer.com/display/A5NodeRef/polymesh#polymesh-visibility
+BTOA_VISIBILITY = [1, 2, 4, 8, 16, 32, 64, 128]
+
 BTOA_SET_LAMBDA = {
     "STRING": lambda n, i, v: n.set_string(i, v),
     #'ARRAY': _AiNodeSetArray,

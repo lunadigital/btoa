@@ -4,7 +4,7 @@ from .matrix import ArnoldMatrix
 from .node import ArnoldNode
 from .polymesh import ArnoldPolymesh
 from .universe_options import UniverseOptions
-from .constants import BTOA_CONVERTIBLE_TYPES, BTOA_LIGHT_SHAPE_CONVERSIONS, BTOA_LIGHT_CONVERSIONS
+from .constants import BTOA_CONVERTIBLE_TYPES, BTOA_LIGHT_SHAPE_CONVERSIONS, BTOA_LIGHT_CONVERSIONS, BTOA_VISIBILITY
 from . import utils as export_utils
 
 import bmesh
@@ -174,6 +174,26 @@ class Exporter:
         node.set_array("nidxs", nidxs)
         node.set_float("motion_start", data.shutter_start)
         node.set_float("motion_end", data.shutter_end)
+
+        # Visibility
+        ob_data = ob.arnold
+        visibility_options = [
+            ob_data.camera,
+            ob_data.shadow,
+            ob_data.diffuse_transmission,
+            ob_data.specular_transmission,
+            ob_data.volume,
+            ob_data.diffuse_reflection,
+            ob_data.specular_reflection,
+            ob_data.sss
+        ]
+
+        visibility = 0
+        for i in range(0, len(visibility_options)):
+            if visibility_options[i]:
+                visibility += BTOA_VISIBILITY[i]
+
+        node.set_int("visibility", visibility)
 
         # UV's
         for i, uvt in enumerate(mesh.uv_layers):
