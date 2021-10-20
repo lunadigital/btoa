@@ -115,7 +115,7 @@ class AiImage(Node, ArnoldNode):
     ignore_missing_textures: BoolProperty(name="Ignore Missing Textures")
     
     def init(self, context):
-        self.inputs.new("AiNodeSocketRGB", "Multiply", identifier="multiply")
+        self.inputs.new("AiNodeSocketRGB", "Multiply", identifier="multiply").default_value = (1, 1, 1)
         self.inputs.new("AiNodeSocketRGB", "Offset", identifier="offset").default_value = (0, 0, 0)
         self.inputs.new("AiNodeSocketRGBA", "Missing Texture Color", identifier="missing_texture_color").default_value = (1, 0, 1, 1)
 

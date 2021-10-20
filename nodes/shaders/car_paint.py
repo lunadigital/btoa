@@ -26,17 +26,17 @@ class AiCarPaint(Node, ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Base Roughness", identifier="base_roughness")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
-        self.inputs.new('AiNodeSocketRGB', "Specular Color", identifier="specular_color")
+        self.inputs.new('AiNodeSocketRGB', "Specular Color", identifier="specular_color").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketRGB', "Specular Flip Flop", identifier="specular_flip_flop")
         self.inputs.new('AiNodeSocketRGB', "Specular Light Facing", identifier="specular_light_facing")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Falloff", identifier="specular_falloff")
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.2
         self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_IOR").default_value = 1.52
 
-        self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color")
-        self.inputs.new('AiNodeSocketRGB', "Flake Color", identifier="flake_color")
-        self.inputs.new('AiNodeSocketRGB', "Flake Flip Flop", identifier="flake_flip_flop")
-        self.inputs.new('AiNodeSocketRGB', "Flake Light Facing", identifier="flake_light_facing")
+        self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Flake Color", identifier="flake_color").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Flake Flip Flop", identifier="flake_flip_flop").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Flake Light Facing", identifier="flake_light_facing").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketFloatNormalized', "Flake Falloff", identifier="flake_falloff")
         self.inputs.new('AiNodeSocketFloatNormalized', "Flake Roughness", identifier="flake_roughness").default_value = 0.4
         self.inputs.new('AiNodeSocketFloatAboveOne', "Flake IOR", identifier="flake_IOR")
@@ -46,7 +46,7 @@ class AiCarPaint(Node, ArnoldNode):
         self.inputs.new("AiNodeSocketCoord", "Flake Coords", identifier="flake_coord_space")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
-        self.inputs.new('AiNodeSocketRGB', "Coat Color", identifier="coat_color")
+        self.inputs.new('AiNodeSocketRGB', "Coat Color", identifier="coat_color").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat Roughness", identifier="coat_roughness")
         self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketVector', name="Coat Normal", identifier="coat_normal")
