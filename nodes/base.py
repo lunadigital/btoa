@@ -351,6 +351,13 @@ object_node_categories = [
         ]
     ),
     ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_MATH',
+        "Math",
+        items=[
+            NodeItem("AiMultiply")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
         'ARNOLD_NODES_OBJECT_UTILITIES',
         "Utility",
         items=[
