@@ -1,10 +1,19 @@
-from . import coord_space
-from . import uv_projection
+from . import (
+    coord_space,
+    facing_ratio,
+    uv_projection
+)
+
+modules = (
+    coord_space,
+    facing_ratio,
+    uv_projection
+)
 
 def register():
-    coord_space.register()
-    uv_projection.register()
+    for m in modules:
+        m.register()
 
 def unregister():
-    coord_space.unregister()
-    uv_projection.unregister()
+    for m in reversed(modules):
+        m.unregister()

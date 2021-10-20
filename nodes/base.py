@@ -362,6 +362,7 @@ object_node_categories = [
         "Utility",
         items=[
             NodeItem("AiCoordSpace"),
+            NodeItem("AiFacingRatio"),
             NodeItem("AiUVProjection")
         ]
     )
