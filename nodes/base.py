@@ -296,6 +296,7 @@ world_node_categories = [
             NodeItem("AiImage"),
             NodeItem("AiLayerFloat"),
             NodeItem("AiLayerRGBA"),
+            NodeItem("AiMixRGBA"),
             NodeItem("AiNoise")
         ]
     ),
@@ -343,6 +344,7 @@ object_node_categories = [
             NodeItem("AiImage"),
             NodeItem("AiLayerFloat"),
             NodeItem("AiLayerRGBA"),
+            NodeItem("AiMixRGBA"),
             NodeItem("AiNoise"),
             NodeItem("AiRoundCorners")
         ]

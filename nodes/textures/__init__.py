@@ -6,6 +6,7 @@ from . import (
     layered_texture,
     layer_float,
     layer_rgba,
+    mix_rgba,
     noise,
     round_corners
 )
@@ -18,6 +19,7 @@ modules = (
     layered_texture,
     layer_float,
     layer_rgba,
+    mix_rgba,
     noise,
     round_corners
 )
