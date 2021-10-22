@@ -294,6 +294,8 @@ world_node_categories = [
             NodeItem("AiCellNoise"),
             NodeItem("AiCheckerboard"),
             NodeItem("AiImage"),
+            NodeItem("AiLayerFloat"),
+            NodeItem("AiLayerRGBA"),
             NodeItem("AiNoise")
         ]
     ),
@@ -339,6 +341,8 @@ object_node_categories = [
             NodeItem("AiCheckerboard"),
             NodeItem("AiFlakes"),
             NodeItem("AiImage"),
+            NodeItem("AiLayerFloat"),
+            NodeItem("AiLayerRGBA"),
             NodeItem("AiNoise"),
             NodeItem("AiRoundCorners")
         ]
