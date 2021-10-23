@@ -8,6 +8,7 @@ from . import (
     layer_rgba,
     mix_rgba,
     noise,
+    physical_sky,
     round_corners
 )
 
@@ -21,6 +22,7 @@ modules = (
     layer_rgba,
     mix_rgba,
     noise,
+    physical_sky,
     round_corners
 )
 

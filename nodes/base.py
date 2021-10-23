@@ -297,7 +297,8 @@ world_node_categories = [
             NodeItem("AiLayerFloat"),
             NodeItem("AiLayerRGBA"),
             NodeItem("AiMixRGBA"),
-            NodeItem("AiNoise")
+            NodeItem("AiNoise"),
+            NodeItem("AiPhysicalSky")
         ]
     ),
     ArnoldWorldNodeCategory(
