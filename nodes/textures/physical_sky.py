@@ -37,30 +37,33 @@ class AiPhysicalSky(Node, ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "enable_sun")
 
-        #layout.prop(self, "use_degrees")
+        layout.prop(self, "use_degrees")
         
-        #row = layout.row()
-        #row.prop(self, "sun_direction")
-        #row.enabled = not self.use_degrees
+        row = layout.row()
+        row.prop(self, "sun_direction")
+        row.enabled = not self.use_degrees
 
     def sub_export(self, node):
         node.set_bool("enable_sun", self.enable_sun)
         node.set_bool("use_degrees", self.use_degrees)
         
-        # THIS DOESN'T WORK, REMOVING FROM UI FOR NOW
         if self.sun_direction:
             rot = self.sun_direction.rotation_euler.copy()
-            rot.x -= math.radians(90)
 
-            print(rot)
+            # We need to swap the Y and Z axes, and add a quarter-turn on the X
+            # axis and half turn on the new Y axis so everything lines up with
+            # Blender's coordinate system
+            vec = mathutils.Euler(
+                (rot.x + math.radians(90), math.radians(180) - rot.z, rot.y),
+                'XYZ'
+                )
+            
+            # Get the right axis, up axis, and back axis. We only care
+            # about the back axis for now.
+            right, up, back = vec.to_quaternion().to_matrix().transposed()
 
-            back = rot.to_matrix().transposed()[2]
-            front = -back
-
-            print(*front)
-
-            node.set_vector("sun_direction", *front)
-
+            node.set_vector("sun_direction", *back)
+            
 def register():
     bpy.utils.register_class(AiPhysicalSky)
 
