@@ -1,4 +1,5 @@
 import bpy
+import bpy_extras
 from bpy.types import Node, Object
 from bpy.props import BoolProperty, PointerProperty
 
@@ -48,21 +49,20 @@ class AiPhysicalSky(Node, ArnoldNode):
         node.set_bool("use_degrees", self.use_degrees)
         
         if self.sun_direction:
-            rot = self.sun_direction.rotation_euler.copy()
+            # Calculate global vector direction of the sun lamp
+            neg_z_axis = mathutils.Vector((0, 0, -1))
+            mw = self.sun_direction.matrix_world
 
-            # We need to swap the Y and Z axes, and add a quarter-turn on the X
-            # axis and half turn on the new Y axis so everything lines up with
-            # Blender's coordinate system
-            vec = mathutils.Euler(
-                (rot.x + math.radians(90), math.radians(180) - rot.z, rot.y),
-                'XYZ'
-                )
+            global_sun_vector = (mw @ neg_z_axis - mw.translation).normalized()
             
-            # Get the right axis, up axis, and back axis. We only care
-            # about the back axis for now.
-            right, up, back = vec.to_quaternion().to_matrix().transposed()
+            # Swap coordinates for Arnold
+            vec = mathutils.Vector((
+                global_sun_vector.x,
+                global_sun_vector.z,
+                global_sun_vector.y
+            ))
 
-            node.set_vector("sun_direction", *back)
+            node.set_vector("sun_direction", *vec)
             
 def register():
     bpy.utils.register_class(AiPhysicalSky)
