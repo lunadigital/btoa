@@ -1,9 +1,19 @@
-from . import color_correct, constant
+from . import (
+    color_correct,
+    constant,
+    color_jitter
+)
+
+modules = (
+    color_correct,
+    constant,
+    color_jitter
+)
 
 def register():
-    color_correct.register()
-    constant.register()
+    for m in modules:
+        m.register()
 
 def unregister():
-    color_correct.unregister()
-    constant.unregister()
+    for m in reversed(modules):
+        m.unregister()
