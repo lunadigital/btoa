@@ -1,5 +1,4 @@
 import bpy
-import bpy_extras
 from bpy.types import Node, Object
 from bpy.props import BoolProperty, PointerProperty
 
