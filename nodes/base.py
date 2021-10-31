@@ -187,7 +187,7 @@ class ArnoldShaderTree(ShaderNodeTree):
         '''
         for node in self.nodes:
             ntype = getattr(node, "bl_idname", None)
-            if ntype == 'AiShaderOutput':
+            if ntype == 'AiShaderOutput' and node.is_active:
                 return node
         
         return None
