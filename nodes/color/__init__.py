@@ -2,14 +2,16 @@ from . import (
     color_correct,
     constant,
     color_jitter,
-    composite
+    composite,
+    shuffle
 )
 
 modules = (
     color_correct,
     constant,
     color_jitter,
-    composite
+    composite,
+    shuffle
 )
 
 def register():
