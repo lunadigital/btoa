@@ -83,6 +83,8 @@ def get_unique_name(object_instance):
         
         ob = get_object_data_from_instance(object_instance)
         name = ob.name + "_MESH"
+    elif object_instance.type == 'MESH':
+        name = object_instance.name + "_MESH"
     else: # assume it's a material
         if object_instance.library:
             prefix = object_instance.library.name + "_"

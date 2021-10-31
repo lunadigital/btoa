@@ -544,7 +544,7 @@ class Exporter:
             node = session.get_node_by_name(ob_unique_name)
 
             if not node.is_valid():
-                if ob.type in BTOA_CONVERTIBLE_TYPES:
+                if isinstance(ob.data, BTOA_CONVERTIBLE_TYPES):
                     node = self.create_polymesh(session, engine, depsgraph.scene, object_instance)
                 elif ob.name == scene.camera.name:
                     node = self.create_camera(engine, depsgraph.scene, object_instance)

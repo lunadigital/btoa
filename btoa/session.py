@@ -17,19 +17,19 @@ class Session:
 
     def end(self):
         if self.is_interactive:
-            print("TRYING TO END RENDER")
-            result = arnold.AiRenderEnd()
-            if result != arnold.AI_SUCCESS:
-                print("Something went wrong")
+            arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
+            arnold.AiRenderEnd()
         
-        print("TRYING TO SHUT DOWN RESOURCES")
         arnold.AiEnd()
 
     def export(self, engine, depsgraph):
         self.depsgraph = depsgraph
+        self.is_updating = True
 
         exporter = Exporter()
         exporter.export(self, engine, depsgraph)
+
+        self.is_updating = False
 
     def free_buffer(self, buffer):
         arnold.AiFree(buffer)
@@ -41,6 +41,10 @@ class Session:
         node.set_data(ainode)
 
         return node
+
+    def pause(self):
+        arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
+        self.is_running = False
 
     def render(self):
         result = arnold.AiRenderBegin()
@@ -68,6 +72,11 @@ class Session:
         self.depsgraph = None
         self.is_interactive = False
         self.is_running = False
+        self.is_updating = False
+
+    def restart(self):
+        arnold.AiRenderRestart()
+        self.is_running = True
 
     def start(self, interactive=False):
         self.is_running = True

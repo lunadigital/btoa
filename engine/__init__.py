@@ -5,80 +5,55 @@ import numpy
 import os
 
 from .. import btoa
+from .. import utils as export_utils
 
 from bl_ui.properties_render import RENDER_PT_color_management
 from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
-
-import arnold
 
 '''
 Render callbacks and global variables
 
 Listen, I know. This is messy. But the render callback needs to be available in
 memory for interactive rendering to work, and the Arnold API handles renders
-asynchronously. On top of that, the callback function needs access to the
-render engine, current session, and frame buffer to do it's job.
+asynchronously. On top of that, the callback function needs access to the current
+session and frame buffer to do it's job.
 
 So, that's it, we're here, deal with it. Let's move on.
 '''
-AI_ENGINE = None
+AI_ENGINE_TAG_REDRAW = None
 AI_SESSION = None
-
-def exists(struct):
-    ''' Checks to see if struct exists in Blender's memory '''
-    try:
-        id = struct.id_data
-    except:
-        return False
-    
-    return True
+AI_FRAMEBUFFER = None
 
 def ai_render_update_callback(private_data, update_type, display_output):
-    global AI_ENGINE
-    global AI_SESSION
+    global AI_FRAMEBUFFER
+    global AI_ENGINE_TAG_REDRAW
 
-    print("----- IN CALLBACK -----")
-
-    if exists(AI_ENGINE) and display_output != int(btoa.NO_DISPLAY_OUTPUTS):
-        AI_ENGINE.framebuffer.requires_update = True
-        AI_ENGINE.tag_redraw()
-
-    if not exists(AI_ENGINE) and update_type in (
-        int(btoa.BEFORE_PASS),
-        int(btoa.DURING_PASS),
-        int(btoa.AFTER_PASS),
-    ):
-        print("Interrupting, sorry")
-        arnold.AiRenderInterrupt()
-        #AI_ENGINE = None
+    if display_output != int(btoa.NO_DISPLAY_OUTPUTS):
+        AI_FRAMEBUFFER.requires_update = True
+        AI_ENGINE_TAG_REDRAW()
 
     status = btoa.FAILED
 
     if update_type == int(btoa.INTERRUPTED):
-        status = btoa.INTERRUPTED
-        print("Status: Interrupted")
+        status = btoa.PAUSED  
     elif update_type == int(btoa.BEFORE_PASS):
         status = btoa.RENDERING
-        print("Status: Rendering")
     elif update_type == int(btoa.DURING_PASS):
         status = btoa.RENDERING
-        print("Status: Rendering")
     elif update_type == int(btoa.AFTER_PASS):
         status = btoa.RENDERING
-        print("Status: Rendering")
     elif update_type == int(btoa.RENDER_FINISHED):
         status = btoa.RENDER_FINISHED
-        print("Status: Finished")
+    elif update_type == int(btoa.PAUSED):
+        status = btoa.RESTARTING
     elif update_type == int(btoa.ERROR):
         status = btoa.FAILED
-        AI_ENGINE = None
-        print("Status: Failed")
 
     return status
 
 def update_viewport(x, y, width, height, buffer, data):
-    global AI_ENGINE
     global AI_SESSION
+    global AI_FRAMEBUFFER
 
     options = btoa.UniverseOptions()
     min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
@@ -86,16 +61,16 @@ def update_viewport(x, y, width, height, buffer, data):
     x = x - min_x
     y = max_y - y - height
 
-    if buffer and exists(AI_ENGINE):
+    if buffer:
         try:
             b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
             rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
             rect = rect.flatten()
 
-            AI_ENGINE.framebuffer.write_bucket(x, y, width, height, rect.tolist())
+            AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.tolist())
             
         finally:
-            AI_ENGINE.session.free_buffer(buffer)
+            AI_SESSION.free_buffer(buffer)
 
 AI_DISPLAY_CALLBACK = btoa.ArnoldDisplayCallback(update_viewport)
 AI_RENDER_CALLBACK = ai_render_update_callback
@@ -117,7 +92,16 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.session = btoa.Session()
 
     def __del__(self):
-        arnold.AiRenderInterrupt()
+        global AI_SESSION
+        AI_SESSION.end()
+        AI_SESSION = None
+
+        global AI_ENGINE_TAG_REDRAW
+        global dummy_tag_redraw
+        AI_ENGINE_TAG_REDRAW = None
+
+        global AI_FRAMEBUFFER
+        AI_FRAMEBUFFER = None
 
     @classmethod
     def is_active(cls, context):
@@ -227,17 +211,23 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.session.render()
 
     def view_update(self, context, depsgraph):
+        global AI_SESSION
+        global AI_FRAMEBUFFER
         global AI_DISPLAY_CALLBACK
         global AI_RENDER_CALLBACK
 
-        if not self.session or not self.session.is_running:
+        if not AI_SESSION or not AI_SESSION.is_running:
             region = context.region
             scene = depsgraph.scene
 
-            self.framebuffer = btoa.FrameBuffer(self, region, scene)
+            AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
 
-            self.session.start(interactive=True)
-            self.session.export(self, depsgraph)
+            AI_SESSION = self.session
+            AI_SESSION.start(interactive=True)
+            AI_SESSION.export(self, depsgraph)
+
+            global AI_ENGINE_TAG_REDRAW
+            AI_ENGINE_TAG_REDRAW = self.tag_redraw
 
             display_node = self.session.get_node_by_name("__display_driver")
             
@@ -247,13 +237,65 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             
             display_node.set_pointer("callback", AI_DISPLAY_CALLBACK)
 
-            self.session.render_interactive(AI_RENDER_CALLBACK)
+            AI_SESSION.render_interactive(AI_RENDER_CALLBACK)
+
+        if depsgraph.id_type_updated("OBJECT"):
+            AI_SESSION.pause()
+
+            for update in depsgraph.updates:
+                if isinstance(update.id, bpy.types.Scene):
+                    print("Scene updated")
+
+                elif isinstance(update.id, bpy.types.World):
+                    print("World updated")
+                
+                elif isinstance(update.id, bpy.types.Camera):
+                    print("Camera updated")
+
+                elif isinstance(update.id, bpy.types.Material):
+                    print("Material updated")
+
+                elif isinstance(update.id, bpy.types.Mesh):
+                    print("Mesh updated")
+                
+                elif isinstance(update.id, bpy.types.Object):
+                    print("Object updated")
+
+                    if update.is_updated_transform:
+                        unique_name = export_utils.get_unique_name(update.id)
+                        
+                        node = AI_SESSION.get_node_by_name(unique_name)
+                        node.set_matrix("matrix", export_utils.flatten_matrix(update.id.matrix_world))
+
+                elif isinstance(update.id, bpy.types.Light):
+                    print("Light updated")
+            
+            AI_SESSION.restart()
+        
+        if AI_SESSION.is_running and len(depsgraph.updates) > 0:
+            pass
+            #AI_SESSION.pause()
+
+            '''
+            for update in depsgraph.updates:
+                # DEBUG INFO
+                print("Datablock ID: ", update.id)
+                print("Is Geometry: ", update.is_updated_geometry)
+                print("Is Shading: ", update.is_updated_shading)
+                print("Is Transform: ", update.is_updated_transform)
+
+                unique_name = export_utils.get_unique_name(update.id)
+
+                if update.is_updated_transform:
+                    node = AI_SESSION.get_node_by_name(unique_name)
+                    node.set_matrix("matrix", export_utils.flatten_matrix(update.id.matrix_world))
+            '''
+
+            #AI_SESSION.restart()
 
     def view_draw(self, context, depsgraph):
-        global AI_ENGINE
         global AI_SESSION
-        AI_ENGINE = self
-        AI_SESSION = self.session
+        global AI_FRAMEBUFFER
 
         region = context.region
         scene = depsgraph.scene
@@ -261,14 +303,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was
         # rendered before resizing). Will need to add some kind of resizing method to handle this, instead of blowing the
         # whole thing away with a new class
-        if not self.framebuffer:
-            self.framebuffer = btoa.FrameBuffer(self, region, scene)
+        if not AI_FRAMEBUFFER:
+            AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
 
-        if self.framebuffer.requires_update:
-            self.framebuffer.generate_texture()
+        if AI_FRAMEBUFFER.requires_update:
+            AI_FRAMEBUFFER.generate_texture()
             self.tag_redraw()
 
-        self.framebuffer.draw(self, scene)
+        AI_FRAMEBUFFER.draw(self, scene)
 
 def get_panels():
     exclude_panels = {

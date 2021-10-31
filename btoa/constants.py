@@ -1,3 +1,4 @@
+import bpy
 from .status import ArnoldStatus
 
 import arnold
@@ -25,11 +26,11 @@ BTOA_LIGHT_SHAPE_CONVERSIONS = {
     "RECTANGLE": "cylinder_light"
 }
 
-BTOA_CONVERTIBLE_TYPES = [
-    'MESH',
-    'FONT',
-    'CURVE'
-]
+BTOA_CONVERTIBLE_TYPES = (
+    bpy.types.Mesh,
+    bpy.types.TextCurve,
+    bpy.types.Curve
+)
 
 # For more info, visit https://docs.arnoldrenderer.com/display/A5NodeRef/polymesh#polymesh-visibility
 BTOA_VISIBILITY = [1, 2, 4, 8, 16, 32, 64, 128]
