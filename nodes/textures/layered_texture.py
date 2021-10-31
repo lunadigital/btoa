@@ -17,7 +17,7 @@ class LayerProperties(PropertyGroup):
             ("color_burn", "Color Burn", ""),
             ("color_dodge", "Color Dodge", ""),
             ("difference", "Difference", ""),
-            ("disjoin_over", "Disjoint Over", ""),
+            ("disjoint_over", "Disjoint Over", ""),
             ("divide", "Divide", ""),
             ("exclusion", "Exclusion", ""),
             ("from", "From", ""),
