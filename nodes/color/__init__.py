@@ -1,13 +1,15 @@
 from . import (
     color_correct,
     constant,
-    color_jitter
+    color_jitter,
+    composite
 )
 
 modules = (
     color_correct,
     constant,
-    color_jitter
+    color_jitter,
+    composite
 )
 
 def register():

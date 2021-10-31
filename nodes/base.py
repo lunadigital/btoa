@@ -308,6 +308,7 @@ world_node_categories = [
             NodeItem("AiColorCorrect"),
             NodeItem("AiColorConstant"),
             NodeItem("AiColorJitter"),
+            NodeItem("AiComposite")
         ]
     ),
 ]
@@ -359,6 +360,7 @@ object_node_categories = [
             NodeItem("AiColorCorrect"),
             NodeItem("AiColorConstant"),
             NodeItem("AiColorJitter"),
+            NodeItem("AiComposite")
         ]
     ),
     ArnoldObjectNodeCategory(
