@@ -6,6 +6,7 @@ from . import (
     presets,
     render,
     gizmos,
+    view_layer,
     world
 )
 
@@ -17,6 +18,7 @@ modules = (
     presets,
     render,
     gizmos,
+    view_layer,
     world
 )
 

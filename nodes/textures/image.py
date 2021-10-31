@@ -34,11 +34,6 @@ class AiImage(Node, ArnoldNode):
 
     image_user: PointerProperty(type=AiImageUser)
 
-    color_space: StringProperty(
-        name="Color Space",
-        default="auto"
-    )
-
     image_filter: EnumProperty(
         name="Filter",
         items=[
@@ -115,7 +110,7 @@ class AiImage(Node, ArnoldNode):
     ignore_missing_textures: BoolProperty(name="Ignore Missing Textures")
     
     def init(self, context):
-        self.inputs.new("AiNodeSocketRGB", "Multiply", identifier="multiply")
+        self.inputs.new("AiNodeSocketRGB", "Multiply", identifier="multiply").default_value = (1, 1, 1)
         self.inputs.new("AiNodeSocketRGB", "Offset", identifier="offset").default_value = (0, 0, 0)
         self.inputs.new("AiNodeSocketRGBA", "Missing Texture Color", identifier="missing_texture_color").default_value = (1, 0, 1, 1)
 
@@ -132,7 +127,9 @@ class AiImage(Node, ArnoldNode):
 
         layout.separator()
 
-        layout.prop(self, "color_space")
+        if self.image:
+            layout.prop(self.image.colorspace_settings, "name")
+
         layout.prop(self, "image_filter")
         layout.prop(self, "swrap")
         layout.prop(self, "twrap")
@@ -156,7 +153,7 @@ class AiImage(Node, ArnoldNode):
             else:
                 node.set_string("filename", bpy.path.abspath(self.image.filepath))
 
-        node.set_string("color_space", self.color_space)
+        node.set_string("color_space", self.image.colorspace_settings.name)
         node.set_string("filter", self.image_filter)
         node.set_int("swrap", int(self.swrap))
         node.set_int("twrap", int(self.twrap))

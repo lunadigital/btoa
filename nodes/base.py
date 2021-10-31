@@ -187,7 +187,7 @@ class ArnoldShaderTree(ShaderNodeTree):
         '''
         for node in self.nodes:
             ntype = getattr(node, "bl_idname", None)
-            if ntype == 'AiShaderOutput':
+            if ntype == 'AiShaderOutput' and node.is_active:
                 return node
         
         return None
@@ -294,14 +294,22 @@ world_node_categories = [
             NodeItem("AiCellNoise"),
             NodeItem("AiCheckerboard"),
             NodeItem("AiImage"),
-            NodeItem("AiNoise")
+            NodeItem("AiLayerFloat"),
+            NodeItem("AiLayerRGBA"),
+            NodeItem("AiMixRGBA"),
+            NodeItem("AiNoise"),
+            NodeItem("AiPhysicalSky")
         ]
     ),
     ArnoldWorldNodeCategory(
         'ARNOLD_NODES_WORLD_COLOR',
         "Color",
         items=[
-            NodeItem("AiColorCorrect")
+            NodeItem("AiColorCorrect"),
+            NodeItem("AiColorConstant"),
+            NodeItem("AiColorJitter"),
+            NodeItem("AiComposite"),
+            NodeItem("AiShuffle")
         ]
     ),
 ]
@@ -339,6 +347,9 @@ object_node_categories = [
             NodeItem("AiCheckerboard"),
             NodeItem("AiFlakes"),
             NodeItem("AiImage"),
+            NodeItem("AiLayerFloat"),
+            NodeItem("AiLayerRGBA"),
+            NodeItem("AiMixRGBA"),
             NodeItem("AiNoise"),
             NodeItem("AiRoundCorners")
         ]
@@ -347,7 +358,18 @@ object_node_categories = [
         'ARNOLD_NODES_OBJECT_COLOR',
         "Color",
         items=[
-            NodeItem("AiColorCorrect")
+            NodeItem("AiColorCorrect"),
+            NodeItem("AiColorConstant"),
+            NodeItem("AiColorJitter"),
+            NodeItem("AiComposite"),
+            NodeItem("AiShuffle")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_MATH',
+        "Math",
+        items=[
+            NodeItem("AiMultiply")
         ]
     ),
     ArnoldObjectNodeCategory(
@@ -355,6 +377,7 @@ object_node_categories = [
         "Utility",
         items=[
             NodeItem("AiCoordSpace"),
+            NodeItem("AiFacingRatio"),
             NodeItem("AiUVProjection")
         ]
     )

@@ -1,13 +1,7 @@
-from . import (
-    coord_space,
-    facing_ratio,
-    uv_projection
-)
+from . import multiply
 
 modules = (
-    coord_space,
-    facing_ratio,
-    uv_projection
+    multiply,
 )
 
 def register():

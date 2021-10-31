@@ -4,6 +4,8 @@ from bpy.props import FloatProperty
 from .ainodesocket import AiNodeSocket
 from .constants import Color
 
+import math
+
 class AiNodeSocketFloat(AiNodeSocket):
     default_type = 'FLOAT'
     color = Color.float_texture
@@ -35,6 +37,12 @@ class AiNodeSocketFloatNormalized(NodeSocket, AiNodeSocketFloat):
         max=1
         )
 
+class AiNodeSocketFloatPositiveToTen(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(
+        min=0,
+        max=10
+    )
+
 # I need a better name for this
 # Covers the -1 to 1 range
 class AiNodeSocketFloatNormalizedAlt(NodeSocket, AiNodeSocketFloat):
@@ -43,12 +51,39 @@ class AiNodeSocketFloatNormalizedAlt(NodeSocket, AiNodeSocketFloat):
         max=1
         )
 
+# Special socket for AiPhysicalSky. It's limited to the range 0-90deg.
+class AiNodeSocketFloatHalfRotation(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(
+        min=0,
+        max=math.pi,
+        unit='ROTATION'
+    )
+
+    def export_default(self):
+        value = math.degrees(self.default_value)
+        return value, self.default_type
+
+# Special socket for AiPhysicalSky. It's limited to the range 0-360deg.
+class AiNodeSocketFloatFullRotation(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(
+        min=0,
+        max=(math.pi * 2),
+        unit='ROTATION'
+    )
+
+    def export_default(self):
+        value = math.degrees(self.default_value)
+        return value, self.default_type
+
 classes = (
     AiNodeSocketFloatUnbounded,
     AiNodeSocketFloatPositive,
     AiNodeSocketFloatAboveOne,
     AiNodeSocketFloatNormalized,
-    AiNodeSocketFloatNormalizedAlt
+    AiNodeSocketFloatNormalizedAlt,
+    AiNodeSocketFloatHalfRotation,
+    AiNodeSocketFloatFullRotation,
+    AiNodeSocketFloatPositiveToTen
 )
 
 def register():

@@ -15,6 +15,9 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
         #self.inputs.new(type="NodeSocketShader", name="Volume", identifier="volume")
         #self.inputs.new(type="NodeSocketShader", name="Displacement", identifier="displacement")
 
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "is_active")
+
     def export(self):
         # Will replace these Nones with volume and displacement later
         return self.inputs["Surface"].export(), None, None
