@@ -1,3 +1,4 @@
+import bpy
 import bmesh
 import math
 import numpy
@@ -73,29 +74,37 @@ def get_position_along_local_vector(ob, distance, axis):
     result = translation_matrix @ ob.matrix_world
     return result.to_translation()
 
-def get_unique_name(object_instance):
+'''
+TODO: This is a righteous mess and needs to be cleaned up.
+'''
+def get_unique_name(datablock):
     prefix = ""
     name = ""
 
-    if hasattr(object_instance, "is_instance"):
-        if object_instance.is_instance:
-            prefix = object_instance.parent.name + "_"
+    if hasattr(datablock, "is_instance"):
+        if datablock.is_instance:
+            prefix = datablock.parent.name + "_"
         
-        ob = get_object_data_from_instance(object_instance)
+        ob = get_object_data_from_instance(datablock)
         name = ob.name + "_MESH"
-    else: # assume it's a material
-        if object_instance.library:
-            prefix = object_instance.library.name + "_"
+
+    elif hasattr(datablock, "data") and isinstance(datablock.data, bpy.types.Mesh):
+        name = datablock.name + "_MESH"
+
+    else:
+        # Assume it's a material
+        if datablock.library:
+            prefix = datablock.library.name + "_"
         
-        name = object_instance.name + "_MATERIAL"
+        name = datablock.name + "_MATERIAL"
 
     return prefix + name
 
-def get_render_resolution(scene):
-    render = scene.render
-    scale = render.resolution_percentage / 100
+def get_render_resolution(session_cache):
+    render = session_cache.render
+    scale = render["resolution_percentage"] / 100
 
-    x = int(render.resolution_x * scale)
-    y = int(render.resolution_y * scale)
+    x = int(render["resolution_x"] * scale)
+    y = int(render["resolution_y"] * scale)
 
     return x, y

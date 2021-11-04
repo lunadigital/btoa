@@ -7,6 +7,7 @@ from .universe_options import UniverseOptions
 from .constants import BTOA_CONVERTIBLE_TYPES, BTOA_LIGHT_SHAPE_CONVERSIONS, BTOA_LIGHT_CONVERSIONS, BTOA_VISIBILITY
 from . import utils as export_utils
 
+import bpy
 import bmesh
 import ctypes
 import os
@@ -15,8 +16,8 @@ import numpy
 import mathutils
 
 class Exporter:
-    def __init__(self):
-        pass
+    def __init__(self, cache):
+        self.cache = cache
 
     def __get_target_frame(self, frame_current, motion_step):
         frame_flt = frame_current + motion_step
@@ -65,7 +66,11 @@ class Exporter:
 
         # Evaluate geometry at current frame
 
-        ob = export_utils.get_object_data_from_instance(object_instance)
+        if isinstance(object_instance, bpy.types.DepsgraphObjectInstance):
+            ob = export_utils.get_object_data_from_instance(object_instance)
+        else:
+            ob = object_instance
+
         mesh = self.__evaluate_mesh(ob)
 
         if not mesh:

@@ -148,6 +148,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         def update_render_result(x, y, width, height, buffer, data):
             render = depsgraph.scene.render
+            cache = engine.session.cache
 
             if render.use_border:
                 min_x, min_y, max_x, max_y = options.get_render_region()
@@ -162,7 +163,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     result = buckets.pop((x, y), None)
 
                     if result is None:
-                        result = engine.begin_result(x, y, width, height, layer=engine.session.depsgraph.view_layer_eval.name)
+                        result = engine.begin_result(x, y, width, height, layer=cache.view_layer.name)
 
                     b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
                     rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
@@ -178,7 +179,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 finally:
                     engine.session.free_buffer(buffer)
             else:
-                buckets[(x, y)] = engine.begin_result(x, y, width, height, layer=engine.session.depsgraph.view_layer_eval.name)
+                buckets[(x, y)] = engine.begin_result(x, y, width, height, layer=cache.view_layer.name)
 
             if engine.test_break():
                 engine.session.abort()
@@ -242,56 +243,32 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         if depsgraph.id_type_updated("OBJECT"):
             AI_SESSION.pause()
 
+            AI_SESSION.cache.sync(self, depsgraph)
+            btoa.OptionsExporter(AI_SESSION).export()
+
             for update in depsgraph.updates:
-                if isinstance(update.id, bpy.types.Scene):
-                    print("Scene updated")
+                if isinstance(update.id, bpy.types.Object):
+                    if update.is_updated_geometry:
+                        pass
+                        #unique_name = export_utils.get_unique_name(update.id)
+                        #node = AI_SESSION.get_node_by_name(unique_name)
 
-                elif isinstance(update.id, bpy.types.World):
-                    print("World updated")
-                
-                elif isinstance(update.id, bpy.types.Camera):
-                    print("Camera updated")
+                        #btoa.PolymeshExporter(AI_SESSION, node).export(update.id, interactive=True)
 
-                elif isinstance(update.id, bpy.types.Material):
-                    print("Material updated")
-
-                elif isinstance(update.id, bpy.types.Mesh):
-                    print("Mesh updated")
-                
-                elif isinstance(update.id, bpy.types.Object):
-                    print("Object updated")
+                    if update.is_updated_shading:
+                        pass
 
                     if update.is_updated_transform:
                         unique_name = export_utils.get_unique_name(update.id)
-                        
                         node = AI_SESSION.get_node_by_name(unique_name)
-                        node.set_matrix("matrix", export_utils.flatten_matrix(update.id.matrix_world))
 
-                elif isinstance(update.id, bpy.types.Light):
-                    print("Light updated")
+                        print("Looking for name: ", unique_name)
+
+                        print(node, node.data)
+
+                        node.set_matrix("matrix", export_utils.flatten_matrix(update.id.matrix_world))
             
             AI_SESSION.restart()
-        
-        if AI_SESSION.is_running and len(depsgraph.updates) > 0:
-            pass
-            #AI_SESSION.pause()
-
-            '''
-            for update in depsgraph.updates:
-                # DEBUG INFO
-                print("Datablock ID: ", update.id)
-                print("Is Geometry: ", update.is_updated_geometry)
-                print("Is Shading: ", update.is_updated_shading)
-                print("Is Transform: ", update.is_updated_transform)
-
-                unique_name = export_utils.get_unique_name(update.id)
-
-                if update.is_updated_transform:
-                    node = AI_SESSION.get_node_by_name(unique_name)
-                    node.set_matrix("matrix", export_utils.flatten_matrix(update.id.matrix_world))
-            '''
-
-            #AI_SESSION.restart()
 
     def view_draw(self, context, depsgraph):
         global AI_SESSION

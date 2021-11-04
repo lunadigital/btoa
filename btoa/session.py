@@ -1,12 +1,19 @@
-from .exporter import Exporter
+import bpy
+import arnold
+import numpy
+import time
+import os
+
+from .exporter import PolymeshExporter, CameraExporter, OptionsExporter, LightExporter
+
+from .array import ArnoldArray
+from .colormanager import ArnoldColorManager
 from .node import ArnoldNode
 from .polymesh import ArnoldPolymesh
 from .universe_options import UniverseOptions
 from .constants import BTOA_CONVERTIBLE_TYPES
-
-import arnold
-import numpy
-import time
+from .session_cache import SessionCache
+from . import utils as export_utils
 
 class Session:
     def __init__(self):
@@ -21,15 +28,38 @@ class Session:
             arnold.AiRenderEnd()
         
         arnold.AiEnd()
+    
+    def destroy(self, node):
+        arnold.AiNodeDestroy(node.data)
 
     def export(self, engine, depsgraph):
-        self.depsgraph = depsgraph
-        self.is_updating = True
+        self.cache.sync(engine, depsgraph)
 
-        exporter = Exporter()
-        exporter.export(self, engine, depsgraph)
+        OptionsExporter(self).export(interactive=self.is_interactive)
 
-        self.is_updating = False
+        for instance in depsgraph.object_instances:
+            ob = export_utils.get_object_data_from_instance(instance)
+
+            if isinstance(ob.data, BTOA_CONVERTIBLE_TYPES):
+                PolymeshExporter(self).export(ob)
+            elif isinstance(ob.data, bpy.types.Light):
+                LightExporter(self).export(ob)
+            elif isinstance(ob.data, bpy.types.Camera) and ob.name == depsgraph.scene.camera.name:
+                CameraExporter(self).export(ob)
+        
+        default_filter = ArnoldNode("gaussian_filter")
+        default_filter.set_string("name", "gaussianFilter")
+
+        options = UniverseOptions()
+
+        outputs = ArnoldArray()
+        outputs.allocate(1, 1, 'STRING')
+        outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
+        options.set_array("outputs", outputs)
+
+        #color_manager = ArnoldColorManager()
+        #color_manager.set_string("config", os.getenv("OCIO"))
+        #options.set_pointer("color_manager", color_manager)
 
     def free_buffer(self, buffer):
         arnold.AiFree(buffer)
@@ -69,10 +99,9 @@ class Session:
             self.reset()
 
     def reset(self):
-        self.depsgraph = None
         self.is_interactive = False
         self.is_running = False
-        self.is_updating = False
+        self.cache = SessionCache()
 
     def restart(self):
         arnold.AiRenderRestart()
