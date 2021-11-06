@@ -5,7 +5,8 @@ import math
 import mathutils
 
 from ..base import ArnoldNode
-from ... import utils
+
+from ... import btoa
 
 class AiSkydome(Node, ArnoldNode):
     ''' Returns a skydome light for World rendering '''
@@ -65,7 +66,7 @@ class AiSkydome(Node, ArnoldNode):
         matrix = mathutils.Matrix.Identity(4)
         matrix = matrix @ rot_matrix @ scale_matrix
 
-        node.set_matrix("matrix", utils.flatten_matrix(matrix))
+        node.set_matrix("matrix", btoa.utils.flatten_matrix(matrix))
 
 def register():
     from bpy.utils import register_class
