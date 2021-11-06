@@ -1,5 +1,6 @@
 from .exporter import Exporter
 from ..universe_options import UniverseOptions
+from ..node import ArnoldNode
 from .. import utils as export_utils
 
 class OptionsExporter(Exporter):
@@ -50,6 +51,12 @@ class OptionsExporter(Exporter):
         options.set_string("bucket_scanning", scene["bucket_scanning"])
         options.set_bool("parallel_node_init", scene["parallel_node_init"])
         options.set_int("threads", scene["threads"])
+
+        if not render["film_transparent"]:
+            bg_shader = ArnoldNode("flat")
+            bg_shader.set_string("name", "film_background")
+            bg_shader.set_rgb("color", 0, 0, 0)
+            options.set_pointer("background", bg_shader)
 
         if interactive:
             options.set_bool("enable_progressive_render", True)

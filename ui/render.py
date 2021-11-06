@@ -175,6 +175,23 @@ class ARNOLD_PT_motion_blur_shutter(bpy.types.Panel):
         col.prop(options, "shutter_start")
         col.prop(options, "shutter_end")
 
+class ARNOLD_PT_film(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_film"
+    bl_label = "Film"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in cls.COMPAT_ENGINES
+
+    def draw(self, context):
+        self.layout.use_property_split = True
+        self.layout.prop(context.scene.render, "film_transparent")
+
 classes = (
     ARNOLD_PT_sampling,
     ARNOLD_PT_advanced_sampling,
@@ -182,7 +199,8 @@ classes = (
     ARNOLD_PT_ray_depth,
     ARNOLD_PT_motion_blur,
     ARNOLD_PT_motion_blur_shutter,
-    ARNOLD_PT_rendering
+    ARNOLD_PT_rendering,
+    ARNOLD_PT_film
 )
 
 def register():
