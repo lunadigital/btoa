@@ -86,11 +86,11 @@ def get_render_resolution(session_cache, interactive=False):
         x = region["width"]
         y = region["height"]
     else:
-    render = session_cache.render
-    scale = render["resolution_percentage"] / 100
+        render = session_cache.render
+        scale = render["resolution_percentage"] / 100
 
-    x = int(render["resolution_x"] * scale)
-    y = int(render["resolution_y"] * scale)
+        x = int(render["resolution_x"] * scale)
+        y = int(render["resolution_y"] * scale)
 
     return x, y
 
