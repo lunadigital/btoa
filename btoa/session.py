@@ -1,5 +1,7 @@
 import bpy
 import arnold
+import math
+import mathutils
 import numpy
 import time
 import os
@@ -18,6 +20,7 @@ from . import utils as export_utils
 class Session:
     def __init__(self):
         self.reset()
+        self.last_viewport_matrix = mathutils.Matrix.Identity(4)
 
     def abort(self):
         arnold.AiRenderAbort()
@@ -32,8 +35,8 @@ class Session:
     def destroy(self, node):
         arnold.AiNodeDestroy(node.data)
 
-    def export(self, engine, depsgraph):
-        self.cache.sync(engine, depsgraph)
+    def export(self, engine, depsgraph, context=None):
+        self.cache.sync(engine, depsgraph, context)
 
         OptionsExporter(self).export(interactive=self.is_interactive)
 
@@ -44,13 +47,23 @@ class Session:
                 PolymeshExporter(self).export(ob)
             elif isinstance(ob.data, bpy.types.Light):
                 LightExporter(self).export(ob)
-            elif isinstance(ob.data, bpy.types.Camera) and ob.name == depsgraph.scene.camera.name:
-                CameraExporter(self).export(ob)
-        
-        default_filter = ArnoldNode("gaussian_filter")
-        default_filter.set_string("name", "gaussianFilter")
 
         options = UniverseOptions()
+
+        if context:
+            # In viewport, we must reconsruct the camera ourselves
+            bl_camera = export_utils.get_viewport_camera_object(context.space_data)
+            self.last_viewport_matrix = bl_camera.matrix_world
+
+            camera = CameraExporter(self).export(bl_camera)
+
+        else:
+            camera = CameraExporter(self).export(depsgraph.scene.camera)
+
+        options.set_pointer("camera", camera)
+
+        default_filter = ArnoldNode("gaussian_filter")
+        default_filter.set_string("name", "gaussianFilter")
 
         outputs = ArnoldArray()
         outputs.allocate(1, 1, 'STRING')

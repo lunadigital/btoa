@@ -6,6 +6,7 @@ class SessionCache:
     def __init__(self):
         self.scene = {}
         self.render = {}
+        self.region = {}
         self.view_layer = None
         self.frame_set = None
 
@@ -18,11 +19,14 @@ class SessionCache:
         
         return result
         
-    def sync(self, engine, depsgraph):
+    def sync(self, engine, depsgraph, context=None):
         self.scene = self.extract_attrs(depsgraph.scene)
         self.scene.update(self.extract_attrs(depsgraph.scene.arnold))
 
         self.render = self.extract_attrs(depsgraph.scene.render)
+
+        if context:
+            self.region = self.extract_attrs(context.region)
 
         self.view_layer = depsgraph.view_layer_eval
         self.frame_set = engine.frame_set

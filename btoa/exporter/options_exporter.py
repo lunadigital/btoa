@@ -9,7 +9,7 @@ class OptionsExporter(Exporter):
         
         options = UniverseOptions()
 
-        options.set_render_resolution(*export_utils.get_render_resolution(self.cache))
+        options.set_render_resolution(*export_utils.get_render_resolution(self.cache, interactive=interactive))
 
         if render["use_border"]:
             min_x = int(x * render["border_min_x"])

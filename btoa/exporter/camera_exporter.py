@@ -16,6 +16,8 @@ class CameraExporter(ObjectExporter):
             name = export_utils.get_unique_name(ob)
             self.node = ArnoldNode("persp_camera")
 
+        self.node.set_string("name", self.datablock.name)
+
         sdata = self.cache.scene
         cdata = self.datablock.data
 

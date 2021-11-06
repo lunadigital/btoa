@@ -2,8 +2,7 @@ import bgl
 
 class FrameBuffer:
     def __init__(self, engine, region, scene):
-        #self.width, self.height = region.width, region.height
-        self.width, self.height = 1920, 1080
+        self.width, self.height = region.width, region.height
         self.requires_update = False
 
         self.buffer = bgl.Buffer(bgl.GL_FLOAT, self.width * self.height * 4)
@@ -66,6 +65,13 @@ class FrameBuffer:
                 data_index += 1
 
     def generate_texture(self):
+        #if self._transparent:
+        #    gl_format = bgl.GL_RGBA
+        #    internal_format = bgl.GL_RGBA32F
+        #else:
+        #    gl_format = bgl.GL_RGB
+        #    internal_format = bgl.GL_RGB32F
+
         bgl.glActiveTexture(bgl.GL_TEXTURE0)
         bgl.glBindTexture(bgl.GL_TEXTURE_2D, self.texture[0])
         bgl.glTexImage2D(bgl.GL_TEXTURE_2D, 0, bgl.GL_RGBA16F, self.width, self.height, 0, bgl.GL_RGBA, bgl.GL_FLOAT, self.buffer)

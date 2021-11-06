@@ -2,33 +2,12 @@ import bpy
 import bmesh
 import math
 import numpy
+from bpy_extras import view3d_utils
 
 from mathutils import Vector, Matrix
 
 from .universe_options import UniverseOptions
-
-def bake_mesh(ob):
-    mesh = ob.to_mesh()
-
-    # Create a blank UV map if none exist
-    if len(mesh.uv_layers) == 0:
-        mesh.uv_layers.new(name='UVMap')
-
-    # Triangulate mesh to remove ngons
-    bm = bmesh.new()
-    bm.from_mesh(mesh)
-
-    bmesh.ops.triangulate(bm, faces=bm.faces[:])
-
-    bm.to_mesh(mesh)
-    bm.free()
-
-    # Calculate normals and return
-    try:
-        mesh.calc_tangents()
-        return mesh
-    except:
-        return None
+from .bl_intern import BlenderCamera
 
 def calc_horizontal_fov(ob):
     data = ob.data
@@ -100,7 +79,13 @@ def get_unique_name(datablock):
 
     return prefix + name
 
-def get_render_resolution(session_cache):
+def get_render_resolution(session_cache, interactive=False):
+    if interactive:
+        region = session_cache.region
+
+        x = region["width"]
+        y = region["height"]
+    else:
     render = session_cache.render
     scale = render["resolution_percentage"] / 100
 
@@ -108,3 +93,22 @@ def get_render_resolution(session_cache):
     y = int(render["resolution_y"] * scale)
 
     return x, y
+
+def get_viewport_camera_object(space_data):
+    region_3d = space_data.region_3d
+    options = UniverseOptions()
+
+    camera = BlenderCamera()
+
+    camera.name = "BTOA_VIEWPORT_CAMERA"
+
+    view_matrix = region_3d.view_matrix.inverted()
+    camera.matrix_world = view_matrix
+
+    fov = 2 * math.atan(36 / space_data.lens)
+    camera.data.angle = fov
+
+    camera.data.clip_start = space_data.clip_start
+    camera.data.clip_end = space_data.clip_end
+
+    return camera

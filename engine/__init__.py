@@ -5,7 +5,6 @@ import numpy
 import os
 
 from .. import btoa
-from .. import utils as export_utils
 
 from bl_ui.properties_render import RENDER_PT_color_management
 from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
@@ -225,7 +224,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
             AI_SESSION = self.session
             AI_SESSION.start(interactive=True)
-            AI_SESSION.export(self, depsgraph)
+            AI_SESSION.export(self, depsgraph, context)
 
             global AI_ENGINE_TAG_REDRAW
             AI_ENGINE_TAG_REDRAW = self.tag_redraw
@@ -240,17 +239,32 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
             AI_SESSION.render_interactive(AI_RENDER_CALLBACK)
 
-        if depsgraph.id_type_updated("OBJECT"):
+        # Update viewport camera
+        if AI_SESSION.is_interactive:
             AI_SESSION.pause()
 
-            AI_SESSION.cache.sync(self, depsgraph)
-            btoa.OptionsExporter(AI_SESSION).export()
+            node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
+
+            bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
+            AI_SESSION.last_viewport_matrix = bl_camera.matrix_world
+
+            btoa.CameraExporter(AI_SESSION, node).export(bl_camera)
+
+            AI_SESSION.restart()
+
+        if depsgraph.id_type_updated("SCENE"):
+            #AI_SESSION.cache.sync(self, depsgraph, context)
+            #btoa.OptionsExporter(AI_SESSION).export()
+            pass
+
+        if depsgraph.id_type_updated("OBJECT"):
+            AI_SESSION.pause()
 
             for update in depsgraph.updates:
                 if isinstance(update.id, bpy.types.Object):
                     if update.is_updated_geometry:
                         pass
-                        #unique_name = export_utils.get_unique_name(update.id)
+                        #unique_name = btoa.utils.get_unique_name(update.id)
                         #node = AI_SESSION.get_node_by_name(unique_name)
 
                         #btoa.PolymeshExporter(AI_SESSION, node).export(update.id, interactive=True)
@@ -259,14 +273,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                         pass
 
                     if update.is_updated_transform:
-                        unique_name = export_utils.get_unique_name(update.id)
+                        unique_name = btoa.utils.get_unique_name(update.id)
                         node = AI_SESSION.get_node_by_name(unique_name)
 
-                        print("Looking for name: ", unique_name)
-
-                        print(node, node.data)
-
-                        node.set_matrix("matrix", export_utils.flatten_matrix(update.id.matrix_world))
+                        node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
             
             AI_SESSION.restart()
 
@@ -276,6 +286,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         region = context.region
         scene = depsgraph.scene
+
+        # Check to see if viewport camera changed
+        if context.space_data.region_3d.view_matrix.inverted() != AI_SESSION.last_viewport_matrix:
+            self.tag_update()
 
         # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was
         # rendered before resizing). Will need to add some kind of resizing method to handle this, instead of blowing the
