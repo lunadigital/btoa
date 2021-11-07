@@ -1,11 +1,13 @@
 import bgl
+import numpy
 
 class FrameBuffer:
     def __init__(self, engine, region, scene):
         self.width, self.height = region.width, region.height
         self.requires_update = False
 
-        self.buffer = bgl.Buffer(bgl.GL_FLOAT, self.width * self.height * 4)
+        self.buffer = numpy.array([0] * self.width * self.height * 4, dtype=numpy.float32)
+        self._buffer = bgl.Buffer(bgl.GL_FLOAT, self.buffer.shape, self.buffer)
 
         self.init_opengl(engine, scene)
 
@@ -55,26 +57,18 @@ class FrameBuffer:
         data_index = 0
 
         for i in range(0, bucket_height):
-            # y * width + x
+            length = bucket_width * 4
             start = ((y + i) * self.width + x) * 4
-            #start = x * (y + i) * 4
-            end = start + (bucket_width * 4)
+            end = start + length
 
-            for j in range(start, end):
-                self.buffer[j] = data[data_index]
-                data_index += 1
+            self.buffer[start:end] = data[data_index:data_index+length]
+
+            data_index += length
 
     def generate_texture(self):
-        #if self._transparent:
-        #    gl_format = bgl.GL_RGBA
-        #    internal_format = bgl.GL_RGBA32F
-        #else:
-        #    gl_format = bgl.GL_RGB
-        #    internal_format = bgl.GL_RGB32F
-
         bgl.glActiveTexture(bgl.GL_TEXTURE0)
         bgl.glBindTexture(bgl.GL_TEXTURE_2D, self.texture[0])
-        bgl.glTexImage2D(bgl.GL_TEXTURE_2D, 0, bgl.GL_RGBA16F, self.width, self.height, 0, bgl.GL_RGBA, bgl.GL_FLOAT, self.buffer)
+        bgl.glTexImage2D(bgl.GL_TEXTURE_2D, 0, bgl.GL_RGBA16F, self.width, self.height, 0, bgl.GL_RGBA, bgl.GL_FLOAT, self._buffer)
         bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MIN_FILTER, bgl.GL_LINEAR)
         bgl.glTexParameteri(bgl.GL_TEXTURE_2D, bgl.GL_TEXTURE_MAG_FILTER, bgl.GL_LINEAR)
         bgl.glBindTexture(bgl.GL_TEXTURE_2D, 0)

@@ -64,9 +64,8 @@ def update_viewport(x, y, width, height, buffer, data):
         try:
             b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
             rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
-            rect = rect.flatten()
 
-            AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.tolist())
+            AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.flatten())
             
         finally:
             AI_SESSION.free_buffer(buffer)
@@ -299,7 +298,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         if AI_FRAMEBUFFER.requires_update:
             AI_FRAMEBUFFER.generate_texture()
-            self.tag_redraw()
+            #self.tag_redraw()
 
         AI_FRAMEBUFFER.draw(self, scene)
 
