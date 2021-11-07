@@ -80,6 +80,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
     bl_label = "Arnold"
     bl_use_preview = True
+    bl_use_eevee_viewport = True
 
     _outliner_context_menu_draw = None
 
