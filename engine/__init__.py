@@ -260,22 +260,29 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         if depsgraph.id_type_updated("OBJECT"):
             AI_SESSION.pause()
 
-            for update in depsgraph.updates:
-                if isinstance(update.id, bpy.types.Object):
-                    if update.is_updated_geometry:
-                        pass
-                        #unique_name = btoa.utils.get_unique_name(update.id)
-                        #node = AI_SESSION.get_node_by_name(unique_name)
+            light_data_needs_update = False
+            polymesh_data_needs_update = False
 
-                        #btoa.PolymeshExporter(AI_SESSION, node).export(update.id, interactive=True)
+            for update in reversed(depsgraph.updates):
+                if isinstance(update.id, bpy.types.Light):
+                    light_data_needs_update = True
+                elif isinstance(update.id, btoa.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
+                    polymesh_data_needs_update = True
+
+                if isinstance(update.id, bpy.types.Object):
+                    unique_name = btoa.utils.get_unique_name(update.id)
+                    node = AI_SESSION.get_node_by_name(unique_name)
+
+                    if update.id.type == 'LIGHT' and light_data_needs_update:
+                        btoa.LightExporter(AI_SESSION, node).export(update.id)
+
+                    elif polymesh_data_needs_update:
+                        btoa.PolymeshExporter(AI_SESSION, node).export(update.id, interactive=True)
 
                     if update.is_updated_shading:
                         pass
 
                     if update.is_updated_transform:
-                        unique_name = btoa.utils.get_unique_name(update.id)
-                        node = AI_SESSION.get_node_by_name(unique_name)
-
                         node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
             
             AI_SESSION.restart()

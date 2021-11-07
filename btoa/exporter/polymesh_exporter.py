@@ -214,9 +214,7 @@ class PolymeshExporter(ObjectExporter):
 
         self.generate_polymesh_data()
         self.generate_uv_map_data()
-
-        if not interactive:
-            self.build_shaders()
+        self.build_shaders()
 
         '''
         self.set_visibility_options()
