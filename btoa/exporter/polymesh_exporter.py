@@ -205,7 +205,6 @@ class PolymeshExporter(ObjectExporter):
         if not self.node.is_valid():
             name = export_utils.get_unique_name(ob)
             self.node = ArnoldPolymesh(name)
-            print("Exporting name: ", name)
 
         # General settings
         self.node.set_bool("smoothing", True)
