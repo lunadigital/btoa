@@ -16,6 +16,24 @@ class ArnoldShaderTree(ShaderNodeTree):
 
     _draw_header_func = None
 
+    '''
+    Custom node trees don't trigger dependency graph updates, which makes
+    it hard to pass updates to the render engine when materials change. We're
+    forcing a depsgraph update with a Blender property hack similar to how
+    BlendLuxCore handles it. Additional reading:
+
+    https://github.com/LuxCoreRender/BlendLuxCore/blob/master/nodes/base.py#:~:text=def%20update(self,update%3Dacknowledge_connection)
+    https://developer.blender.org/T66521
+    https://devtalk.blender.org/t/custom-nodes-not-showing-as-updated-in-interactive-mode/6762/2
+    '''
+    def update(self):
+        self.refresh = True
+
+    def reset_refresh(self, context):
+        self["refresh"] = False
+
+    refresh: bpy.props.BoolProperty(update=reset_refresh)
+
     @classmethod
     def poll(cls, context):
         return engine.ArnoldRenderEngine.is_active(context)

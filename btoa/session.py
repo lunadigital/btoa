@@ -122,6 +122,9 @@ class Session:
         arnold.AiRenderRestart()
         self.is_running = True
 
+    def replace_node(old_node, new_node):
+        arnold.AiNodeReplace(old_node.data, new_node.data, True)
+
     def start(self, interactive=False):
         self.is_running = True
         self.is_interactive = interactive

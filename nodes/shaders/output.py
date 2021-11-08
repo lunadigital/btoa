@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Node
 
 from ..base import ArnoldNodeOutput
+from ... import btoa
 
 class AiShaderOutput(Node, ArnoldNodeOutput):
     '''Output node for Arnold shaders.'''
@@ -16,7 +17,7 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
         #self.inputs.new(type="NodeSocketShader", name="Displacement", identifier="displacement")
 
     def draw_buttons(self, context, layout):
-        parent_material = self.get_parent_material()
+        parent_material = btoa.utils.get_parent_material_from_nodetree(self.id_data)
         layout.prop(parent_material, "diffuse_color", text="Viewport")
         
         layout.prop(self, "is_active", toggle=1)
@@ -24,11 +25,6 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
     def export(self):
         # Will replace these Nones with volume and displacement later
         return self.inputs["Surface"].export(), None, None
-
-    def get_parent_material(self):
-        for mat in bpy.data.materials:
-            if mat.arnold.node_tree == self.id_data:
-                return mat
 
 
 def register():

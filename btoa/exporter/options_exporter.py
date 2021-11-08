@@ -60,3 +60,4 @@ class OptionsExporter(Exporter):
 
         if interactive:
             options.set_bool("enable_progressive_render", True)
+            options.set_bool("enable_dependency_graph", True)

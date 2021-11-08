@@ -112,3 +112,8 @@ def get_viewport_camera_object(space_data):
     camera.data.clip_end = space_data.clip_end
 
     return camera
+
+def get_parent_material_from_nodetree(ntree):
+    for mat in bpy.data.materials:
+        if mat.arnold.node_tree and mat.arnold.node_tree.name == ntree.name:
+            return mat

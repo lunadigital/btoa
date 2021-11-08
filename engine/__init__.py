@@ -257,6 +257,29 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             #btoa.OptionsExporter(AI_SESSION).export()
             pass
 
+        # Update shaders
+        if depsgraph.id_type_updated("MATERIAL"):
+            AI_SESSION.pause()
+
+            for update in reversed(depsgraph.updates):
+                material = btoa.utils.get_parent_material_from_nodetree(update.id)
+                
+                unique_name = btoa.utils.get_unique_name(material)
+                old_node = AI_SESSION.get_node_by_name(unique_name)
+                
+                if old_node.is_valid():
+                    surface, volume, displacement = update.id.export()
+                    new_node = surface[0]
+
+                    AI_SESSION.replace_node(old_node, new_node)
+
+                    # We have to rename the node AFTER we swap them to
+                    # avoid memory and session.get_node_by_name() issues
+                    new_node.set_string("name", unique_name)
+
+            AI_SESSION.restart()
+
+        # Update everything else
         if depsgraph.id_type_updated("OBJECT"):
             AI_SESSION.pause()
 
