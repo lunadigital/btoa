@@ -21,6 +21,7 @@ class Session:
     def __init__(self):
         self.reset()
         self.last_viewport_matrix = mathutils.Matrix.Identity(4)
+        self.update_viewport_dimensions = False
 
     def abort(self):
         arnold.AiRenderAbort()
@@ -88,8 +89,8 @@ class Session:
         return node
 
     def pause(self):
-        arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
         self.is_running = False
+        arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
 
     def render(self):
         result = arnold.AiRenderBegin()
@@ -122,7 +123,7 @@ class Session:
         arnold.AiRenderRestart()
         self.is_running = True
 
-    def replace_node(old_node, new_node):
+    def replace_node(self, old_node, new_node):
         arnold.AiNodeReplace(old_node.data, new_node.data, True)
 
     def start(self, interactive=False):

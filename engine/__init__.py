@@ -62,10 +62,11 @@ def update_viewport(x, y, width, height, buffer, data):
 
     if buffer:
         try:
-            b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-            rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
+            if AI_SESSION.is_running:
+                b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+                rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
 
-            AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.flatten())
+                AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.flatten())
             
         finally:
             AI_SESSION.free_buffer(buffer)
@@ -216,10 +217,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         global AI_DISPLAY_CALLBACK
         global AI_RENDER_CALLBACK
 
-        if not AI_SESSION or not AI_SESSION.is_running:
-            region = context.region
-            scene = depsgraph.scene
+        region = context.region
+        scene = depsgraph.scene
 
+        if not AI_SESSION or not AI_SESSION.is_running:
             AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
 
             AI_SESSION = self.session
@@ -239,18 +240,37 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
             AI_SESSION.render_interactive(AI_RENDER_CALLBACK)
 
+        AI_SESSION.pause()
+
+        #if AI_SESSION.update_viewport_dimensions:
+        #    AI_SESSION.pause()
+
+            # We're going to edit the dimensions manually for performance
+        '''    options = btoa.UniverseOptions()
+            options.set_int("xres", region.width)
+            options.set_int("yres", region.height)
+
+            AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
+
+            AI_SESSION.update_viewport_dimensions = False
+
+            AI_SESSION.restart()'''
+
+        if AI_SESSION.update_viewport_dimensions:
+            AI_SESSION.update_viewport_dimensions = False
+
+            options = btoa.UniverseOptions()
+            options.set_int("xres", region.width)
+            options.set_int("yres", region.height)
+
         # Update viewport camera
         if AI_SESSION.is_interactive:
-            AI_SESSION.pause()
-
             node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
 
             bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
             AI_SESSION.last_viewport_matrix = bl_camera.matrix_world
 
             btoa.CameraExporter(AI_SESSION, node).export(bl_camera)
-
-            AI_SESSION.restart()
 
         if depsgraph.id_type_updated("SCENE"):
             #AI_SESSION.cache.sync(self, depsgraph, context)
@@ -259,8 +279,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         # Update shaders
         if depsgraph.id_type_updated("MATERIAL"):
-            AI_SESSION.pause()
-
             for update in reversed(depsgraph.updates):
                 material = btoa.utils.get_parent_material_from_nodetree(update.id)
                 
@@ -277,12 +295,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     # avoid memory and session.get_node_by_name() issues
                     new_node.set_string("name", unique_name)
 
-            AI_SESSION.restart()
-
         # Update everything else
         if depsgraph.id_type_updated("OBJECT"):
-            AI_SESSION.pause()
-
             light_data_needs_update = False
             polymesh_data_needs_update = False
 
@@ -308,7 +322,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     if update.is_updated_transform:
                         node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
             
-            AI_SESSION.restart()
+        AI_SESSION.restart()
 
     def view_draw(self, context, depsgraph):
         global AI_SESSION
@@ -316,6 +330,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         region = context.region
         scene = depsgraph.scene
+        dimensions = region.width, region.height
 
         # Check to see if viewport camera changed
         if context.space_data.region_3d.view_matrix.inverted() != AI_SESSION.last_viewport_matrix:
@@ -324,12 +339,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was
         # rendered before resizing). Will need to add some kind of resizing method to handle this, instead of blowing the
         # whole thing away with a new class
-        if not AI_FRAMEBUFFER:
+        if not AI_FRAMEBUFFER or dimensions != (AI_FRAMEBUFFER.width, AI_FRAMEBUFFER.height):
+            AI_SESSION.update_viewport_dimensions = True
             AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
+            self.tag_update()
 
         if AI_FRAMEBUFFER.requires_update:
             AI_FRAMEBUFFER.generate_texture()
-            #self.tag_redraw()
 
         AI_FRAMEBUFFER.draw(self, scene)
 
