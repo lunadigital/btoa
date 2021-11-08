@@ -1,5 +1,5 @@
-from .btnode import BtNode
+from .node import ArnoldNode
 
-class BtColorManager(BtNode):
+class ArnoldColorManager(ArnoldNode):
     def __init__(self):
         super().__init__("color_manager_ocio")

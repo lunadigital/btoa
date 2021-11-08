@@ -1,6 +1,6 @@
 from ctypes import *
 
-AtDisplayCallback = CFUNCTYPE(
+ArnoldDisplayCallback = CFUNCTYPE(
     None,
     c_uint32,
     c_uint32,

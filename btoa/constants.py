@@ -1,33 +1,41 @@
+import bpy
+from .status import ArnoldStatus
+
 import arnold
 
-BT_TYPE_CONSTANTS = {
+BTOA_TYPE_CONSTANTS = {
     "UINT": arnold.AI_TYPE_UINT,
     "STRING": arnold.AI_TYPE_STRING,
     "MATRIX": arnold.AI_TYPE_MATRIX,
     "ARRAY": arnold.AI_TYPE_ARRAY,
     "VECTOR": arnold.AI_TYPE_VECTOR,
-    "VECTOR2": arnold.AI_TYPE_VECTOR2
+    "VECTOR2": arnold.AI_TYPE_VECTOR2,
+    "BYTE": arnold.AI_TYPE_BYTE,
+    "POINTER": arnold.AI_TYPE_POINTER,
 }
 
-BT_LIGHT_CONVERSIONS = {
+BTOA_LIGHT_CONVERSIONS = {
     "POINT": "point_light",
     "SUN": "distant_light",
     "SPOT": "spot_light"
 }
 
-BT_LIGHT_SHAPE_CONVERSIONS = {
+BTOA_LIGHT_SHAPE_CONVERSIONS = {
     "SQUARE": "quad_light",
     "DISK": "disk_light",
     "RECTANGLE": "cylinder_light"
 }
 
-BT_CONVERTIBLE_TYPES = [
-    'MESH',
-    'FONT',
-    'CURVE'
-]
+BTOA_CONVERTIBLE_TYPES = (
+    bpy.types.Mesh,
+    bpy.types.TextCurve,
+    bpy.types.Curve
+)
 
-BT_SET_LAMBDA = {
+# For more info, visit https://docs.arnoldrenderer.com/display/A5NodeRef/polymesh#polymesh-visibility
+BTOA_VISIBILITY = [1, 2, 4, 8, 16, 32, 64, 128]
+
+BTOA_SET_LAMBDA = {
     "STRING": lambda n, i, v: n.set_string(i, v),
     #'ARRAY': _AiNodeSetArray,
     "BOOL": lambda n, i, v: n.set_bool(i, v),
@@ -40,3 +48,26 @@ BT_SET_LAMBDA = {
     "VECTOR2": lambda n, i, v: n.set_vector2(i, *v),
     #"MATRIX": lambda n, i, v: AiNodeSetMatrix(n, i, _AiMatrix(v))
 }
+
+# Display output statuses
+NO_DISPLAY_OUTPUTS = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_NONE)
+PARTIAL_INTERACTIVE_OUTPUT = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_PARTIAL_INTERACTIVE)
+INTERACTIVE_OUTPUT = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_INTERACTIVE)
+ALL_OUTPUTS = ArnoldStatus(arnold.AI_DISPLAY_OUTPUT_ALL)
+
+# Update statuses
+INTERRUPTED = ArnoldStatus(arnold.AI_RENDER_UPDATE_INTERRUPT)
+BEFORE_PASS = ArnoldStatus(arnold.AI_RENDER_UPDATE_BEFORE_PASS)
+DURING_PASS = ArnoldStatus(arnold.AI_RENDER_UPDATE_DURING_PASS)
+AFTER_PASS = ArnoldStatus(arnold.AI_RENDER_UPDATE_AFTER_PASS)
+UPDATE_FINISHED = ArnoldStatus(arnold.AI_RENDER_UPDATE_FINISHED)
+ERROR = ArnoldStatus(arnold.AI_RENDER_UPDATE_ERROR)
+#UPDATE_IMAGERS = ArnoldStatus(arnold.AI_RENDER_UPDATE_IMAGERS)
+
+# Render statuses
+NOT_STARTED = ArnoldStatus(arnold.AI_RENDER_STATUS_NOT_STARTED)
+PAUSED = ArnoldStatus(arnold.AI_RENDER_STATUS_PAUSED)
+RESTARTING = ArnoldStatus(arnold.AI_RENDER_STATUS_RESTARTING)
+RENDERING = ArnoldStatus(arnold.AI_RENDER_STATUS_RENDERING)
+RENDER_FINISHED = ArnoldStatus(arnold.AI_RENDER_STATUS_FINISHED)
+FAILED = ArnoldStatus(arnold.AI_RENDER_STATUS_FAILED)

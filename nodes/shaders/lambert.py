@@ -13,7 +13,7 @@ class AiLambert(Node, ArnoldNode):
 
     def init(self, context):
         color = self.inputs.new('AiNodeSocketRGB', "Color", identifier="Kd_color")
-        weight = self.inputs.new('AiNodeSocketFloatNormalized', "Weight", identifier="Kd").default_value = 0.8
+        weight = self.inputs.new('AiNodeSocketFloatNormalized', "Weight", identifier="Kd").default_value = 1
         normal = self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")

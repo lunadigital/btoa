@@ -2,9 +2,11 @@ from . import (
     camera,
     light,
     material,
+    mesh,
     presets,
     render,
     gizmos,
+    view_layer,
     world
 )
 
@@ -12,9 +14,11 @@ modules = (
     camera,
     light,
     material,
+    mesh,
     presets,
     render,
     gizmos,
+    view_layer,
     world
 )
 

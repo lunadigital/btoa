@@ -2,6 +2,7 @@ from . import (
     camera,
     light,
     material,
+    mesh,
     options,
     world
 )
@@ -10,6 +11,7 @@ modules = (
     camera,
     light,
     material,
+    mesh,
     options,
     world
 )

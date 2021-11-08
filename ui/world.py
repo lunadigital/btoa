@@ -26,7 +26,7 @@ class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
         elif world:
             layout.template_ID(space, "pin_id")
 
-        if world.arnold.node_tree is None:
+        if not world.arnold.node_tree:
             layout.operator("arnold.world_init")
 
 class ARNOLD_WORLD_PT_surface(WorldButtonsPanel, Panel):
@@ -58,7 +58,7 @@ class ARNOLD_WORLD_PT_shadows(WorldButtonsPanel, bpy.types.Panel):
 
         layout.use_property_split = True
 
-        if world.arnold.node_tree is not None:
+        if world.arnold.node_tree:
             col = layout.column()
             col.prop(data, "shadow_color")
             col.prop(data, "shadow_density")
@@ -80,7 +80,7 @@ class ARNOLD_WORLD_PT_advanced(WorldButtonsPanel, bpy.types.Panel):
 
         layout.use_property_split = True
 
-        if world.arnold.node_tree is not None:
+        if world.arnold.node_tree:
             col = layout.column()
             col.prop(data, "samples")
             col.prop(data, "normalize")
@@ -97,7 +97,7 @@ class ARNOLD_WORLD_PT_visibility(WorldButtonsPanel, bpy.types.Panel):
 
         layout.use_property_split = True
 
-        if world.arnold.node_tree is not None:
+        if world.arnold.node_tree:
             col = layout.column()
             col.prop(data, "camera")
             col.prop(data, "diffuse")

@@ -3,7 +3,12 @@ from . import (
     checkerboard,
     flakes,
     image,
+    layered_texture,
+    layer_float,
+    layer_rgba,
+    mix_rgba,
     noise,
+    physical_sky,
     round_corners
 )
 
@@ -12,7 +17,12 @@ modules = (
     checkerboard,
     flakes,
     image,
+    layered_texture,
+    layer_float,
+    layer_rgba,
+    mix_rgba,
     noise,
+    physical_sky,
     round_corners
 )
 
