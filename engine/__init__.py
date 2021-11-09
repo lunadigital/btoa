@@ -242,20 +242,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         AI_SESSION.pause()
 
-        #if AI_SESSION.update_viewport_dimensions:
-        #    AI_SESSION.pause()
-
-            # We're going to edit the dimensions manually for performance
-        '''    options = btoa.UniverseOptions()
-            options.set_int("xres", region.width)
-            options.set_int("yres", region.height)
-
-            AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
-
-            AI_SESSION.update_viewport_dimensions = False
-
-            AI_SESSION.restart()'''
-
         if AI_SESSION.update_viewport_dimensions:
             AI_SESSION.update_viewport_dimensions = False
 
@@ -322,6 +308,18 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     if update.is_updated_transform:
                         node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
             
+                # Update world material if rotation controller changed
+                if update.id.name == scene.world.arnold.rotation_controller.name:
+                    unique_name = btoa.utils.get_unique_name(scene.world)
+                    old_node = AI_SESSION.get_node_by_name(unique_name)
+                    
+                    if old_node.is_valid():
+                        new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
+
+                        AI_SESSION.replace_node(old_node, new_node)
+
+                        new_node.set_string("name", unique_name)
+
         AI_SESSION.restart()
 
     def view_draw(self, context, depsgraph):

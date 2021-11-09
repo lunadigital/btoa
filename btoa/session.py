@@ -6,7 +6,7 @@ import numpy
 import time
 import os
 
-from .exporter import PolymeshExporter, CameraExporter, OptionsExporter, LightExporter
+from .exporter import PolymeshExporter, CameraExporter, OptionsExporter, LightExporter, WorldExporter
 
 from .array import ArnoldArray
 from .colormanager import ArnoldColorManager
@@ -41,6 +41,8 @@ class Session:
 
         OptionsExporter(self).export(interactive=self.is_interactive)
 
+        # Geometry and lights
+
         for instance in depsgraph.object_instances:
             ob = export_utils.get_object_data_from_instance(instance)
 
@@ -50,6 +52,8 @@ class Session:
                 LightExporter(self).export(ob)
 
         options = UniverseOptions()
+
+        # Camera
 
         if context:
             # In viewport, we must reconsruct the camera ourselves
@@ -62,6 +66,13 @@ class Session:
             camera = CameraExporter(self).export(depsgraph.scene.camera)
 
         options.set_pointer("camera", camera)
+
+        # World
+
+        if depsgraph.scene.world.arnold.node_tree:
+            WorldExporter(self).export(depsgraph.scene.world)
+
+        # Everything else
 
         default_filter = ArnoldNode("gaussian_filter")
         default_filter.set_string("name", "gaussianFilter")
