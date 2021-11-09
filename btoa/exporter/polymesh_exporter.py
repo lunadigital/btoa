@@ -21,7 +21,7 @@ class PolymeshExporter(ObjectExporter):
                 shader = self.session.get_node_by_name(unique_name)
 
                 if shader.is_valid():
-                    node.set_pointer("shader", shader)
+                    self.node.set_pointer("shader", shader)
                 else:
                     surface, volume, displacement = material_override.arnold.node_tree.export()
                     surface[0].set_string("name", unique_name)
