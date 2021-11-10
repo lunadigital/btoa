@@ -1,3 +1,5 @@
+import math
+
 from .exporter import Exporter
 from ..universe_options import UniverseOptions
 from ..node import ArnoldNode
@@ -10,7 +12,8 @@ class OptionsExporter(Exporter):
         
         options = UniverseOptions()
 
-        options.set_render_resolution(*export_utils.get_render_resolution(self.cache, interactive=interactive))
+        x, y = export_utils.get_render_resolution(self.cache, interactive=interactive)
+        options.set_render_resolution(x, y)
 
         if render["use_border"]:
             min_x = int(x * render["border_min_x"])
