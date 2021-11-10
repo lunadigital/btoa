@@ -268,18 +268,32 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             for update in reversed(depsgraph.updates):
                 material = btoa.utils.get_parent_material_from_nodetree(update.id)
                 
-                unique_name = btoa.utils.get_unique_name(material)
-                old_node = AI_SESSION.get_node_by_name(unique_name)
-                
-                if old_node.is_valid():
-                    surface, volume, displacement = update.id.export()
-                    new_node = surface[0]
+                if material:
+                    unique_name = btoa.utils.get_unique_name(material)
+                    old_node = AI_SESSION.get_node_by_name(unique_name)
+                    
+                    if old_node.is_valid():
+                        surface, volume, displacement = update.id.export()
+                        new_node = surface[0]
 
-                    AI_SESSION.replace_node(old_node, new_node)
+                        AI_SESSION.replace_node(old_node, new_node)
 
-                    # We have to rename the node AFTER we swap them to
-                    # avoid memory and session.get_node_by_name() issues
-                    new_node.set_string("name", unique_name)
+                        # We have to rename the node AFTER we swap them to
+                        # avoid memory and session.get_node_by_name() issues
+                        new_node.set_string("name", unique_name)
+
+                elif update.id.name == scene.world.arnold.node_tree.name:
+                    # This code is repeated in view_draw() below
+                    # Consider cleaning this up
+                    unique_name = btoa.utils.get_unique_name(scene.world)
+                    old_node = AI_SESSION.get_node_by_name(unique_name)
+                    
+                    if old_node.is_valid():
+                        new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
+
+                        AI_SESSION.replace_node(old_node, new_node)
+
+                        new_node.set_string("name", unique_name)
 
         # Update everything else
         if depsgraph.id_type_updated("OBJECT"):
