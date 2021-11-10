@@ -215,9 +215,7 @@ class PolymeshExporter(ObjectExporter):
         self.generate_uv_map_data()
         self.build_shaders()
 
-        '''
         self.set_visibility_options()
-        '''
 
         return self.node
 
