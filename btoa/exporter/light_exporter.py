@@ -7,10 +7,11 @@ from ..constants import BTOA_LIGHT_CONVERSIONS, BTOA_LIGHT_SHAPE_CONVERSIONS
 from .. import utils as export_utils
 
 class LightExporter(ObjectExporter):
-    def export(self, ob):
-        super().export(ob)
+    def export(self, instance):
+        super().export(instance)
+        self.datablock_eval = export_utils.get_object_data_from_instance(instance)
 
-        data = self.datablock.data
+        data = self.datablock_eval.data
 
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
@@ -18,7 +19,7 @@ class LightExporter(ObjectExporter):
             ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
             self.node = ArnoldNode(ntype)
 
-        self.node.set_string("name", export_utils.get_unique_name(self.datablock))
+        self.node.set_string("name", export_utils.get_unique_name(self.datablock_eval))
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
@@ -73,7 +74,7 @@ class LightExporter(ObjectExporter):
                     data.size / 2
                 )).to_4x4()
 
-                tmatrix = self.datablock.matrix_world @smatrix
+                tmatrix = self.datablock.matrix_world @ smatrix
 
                 self.node.set_matrix(
                     "matrix",

@@ -47,9 +47,9 @@ class Session:
             ob = export_utils.get_object_data_from_instance(instance)
 
             if isinstance(ob.data, BTOA_CONVERTIBLE_TYPES):
-                PolymeshExporter(self).export(ob)
+                PolymeshExporter(self).export(instance)
             elif isinstance(ob.data, bpy.types.Light):
-                LightExporter(self).export(ob)
+                LightExporter(self).export(instance)
 
         options = UniverseOptions()
 

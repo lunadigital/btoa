@@ -30,7 +30,7 @@ class PolymeshExporter(ObjectExporter):
         else:
             materials = []
 
-            for slot in self.datablock.material_slots:
+            for slot in self.datablock_eval.material_slots:
                 if slot.material:
                     unique_name = export_utils.get_unique_name(slot.material)
 
@@ -192,8 +192,9 @@ class PolymeshExporter(ObjectExporter):
 
         return vlist, nlist, nsides, vidxs, nidxs
 
-    def export(self, ob, interactive=False):
-        super().export(ob)
+    def export(self, instance, interactive=False):
+        super().export(instance)
+        self.datablock_eval = export_utils.get_object_data_from_instance(instance)
 
         self.evaluate_mesh()
 
@@ -203,7 +204,7 @@ class PolymeshExporter(ObjectExporter):
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            name = export_utils.get_unique_name(ob)
+            name = export_utils.get_unique_name(self.datablock_eval)
             self.node = ArnoldPolymesh(name)
 
         # General settings
@@ -220,7 +221,7 @@ class PolymeshExporter(ObjectExporter):
         return self.node
 
     def evaluate_mesh(self):
-        m = self.datablock.to_mesh()
+        m = self.datablock_eval.to_mesh()
 
         # Make sure mesh has a UV map
         if len(m.uv_layers) == 0:
@@ -295,7 +296,7 @@ class PolymeshExporter(ObjectExporter):
                 break
 
     def set_visibility_options(self):
-        data = self.datablock.arnold
+        data = self.datablock_eval.arnold
         visibility_options = [
             data.camera,
             data.shadow,
@@ -313,7 +314,7 @@ class PolymeshExporter(ObjectExporter):
                 visibility += BTOA_VISIBILITY[i]
 
         # Remove camera visibility if object is indirect only
-        if self.datablock.indirect_only_get(view_layer=self.cache.view_layer):
+        if self.datablock_eval.indirect_only_get(view_layer=self.cache.view_layer):
             visibility -= 1
 
         self.node.set_int("visibility", visibility)
