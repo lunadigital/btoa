@@ -9,6 +9,7 @@ class SessionCache:
         self.region = {}
         self.view_layer = None
         self.frame_set = None
+        self.viewport_camera = {}
 
     def extract_attrs(self, datablock):
         result = {}

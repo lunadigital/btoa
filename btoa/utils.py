@@ -95,21 +95,35 @@ def get_render_resolution(session_cache, interactive=False):
     return x, y
 
 def get_viewport_camera_object(space_data):
+    DEFAULT_SENSOR_WIDTH = 36
+
     region_3d = space_data.region_3d
+    
     options = UniverseOptions()
+    width, height = options.get_int("xres"), options.get_int("yres")
 
     camera = BlenderCamera()
-
     camera.name = "BTOA_VIEWPORT_CAMERA"
 
     view_matrix = region_3d.view_matrix.inverted()
     camera.matrix_world = view_matrix
 
-    fov = 2 * math.atan(36 / space_data.lens)
+    fov = 2 * math.atan(DEFAULT_SENSOR_WIDTH / space_data.lens)
     camera.data.angle = fov
 
     camera.data.clip_start = space_data.clip_start
     camera.data.clip_end = space_data.clip_end
+
+    if region_3d.view_perspective == 'ORTHO':
+        camera.data.arnold.camera_type = "ortho_camera"
+
+        if height > width:
+            # This was just a lucky guess, I'm not entirely sure why this works
+            sensor = DEFAULT_SENSOR_WIDTH * (width / height)
+        else:
+            sensor = DEFAULT_SENSOR_WIDTH
+
+        camera.data.ortho_scale = 2 * region_3d.view_distance * sensor / space_data.lens
 
     return camera
 

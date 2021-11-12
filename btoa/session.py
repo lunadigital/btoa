@@ -20,7 +20,6 @@ from . import utils as export_utils
 class Session:
     def __init__(self):
         self.reset()
-        self.last_viewport_matrix = mathutils.Matrix.Identity(4)
         self.update_viewport_dimensions = False
 
     def abort(self):

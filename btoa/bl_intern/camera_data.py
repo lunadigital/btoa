@@ -23,3 +23,4 @@ class BlenderCameraData:
         self.dof = DummyDOFData()
         self.clip_start = 0.01
         self.clip_end = 1000
+        self.ortho_scale = 1
