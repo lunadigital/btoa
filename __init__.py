@@ -2,10 +2,10 @@ import bpy
 from . import environ as aienv
 
 bl_info = {
-    "name": "Arnold Render Engine",
+    "name": "Arnold Render Engine (BtoA)",
     "description": "Unofficial Arnold renderer integration",
     "author": "Luna Digital, Ltd.",
-    "version": (0, 4, 2),
+    "version": (0, 4, 3),
     "blender": (2, 83, 0),
     "category": "Render"
 }
