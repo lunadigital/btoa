@@ -15,3 +15,4 @@ class BlenderCamera:
         self.type = 'CAMERA'
         self.data = BlenderCameraData()
         self.library = None
+        self.is_instance = False

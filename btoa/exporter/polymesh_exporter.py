@@ -1,3 +1,4 @@
+import bpy
 import bmesh
 import ctypes
 import math
@@ -194,7 +195,13 @@ class PolymeshExporter(ObjectExporter):
 
     def export(self, instance, interactive=False):
         super().export(instance)
-        self.datablock_eval = export_utils.get_object_data_from_instance(instance)
+
+        if isinstance(instance, bpy.types.DepsgraphObjectInstance):
+            self.datablock_eval = export_utils.get_object_data_from_instance(instance)
+        else:
+            self.datablock_eval = instance
+
+        print(self.datablock_eval.name, self.datablock.is_instance, self.datablock.parent)
 
         self.evaluate_mesh()
 

@@ -1,4 +1,9 @@
+import math
+import numpy
+
 from .exporter import Exporter
+from ..array import ArnoldArray
+from .. import utils as export_utils
 
 class ObjectExporter(Exporter):
     def get_blur_matrices(self):
@@ -15,7 +20,9 @@ class ObjectExporter(Exporter):
             frame, subframe = self.get_target_frame(motion_steps[i])
             self.cache.frame_set(frame, subframe=subframe)
 
-            m = export_utils.flatten_matrix(self.ob.matrix_world)
+            matrix = self.datablock.parent.matrix_world if self.datablock.is_instance else self.datablock.matrix_world
+
+            m = export_utils.flatten_matrix(matrix)
             marray.set_matrix(i, m)
         
         self.cache.frame_set(self.cache.scene["frame_current"], subframe=0)

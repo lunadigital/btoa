@@ -1,3 +1,4 @@
+import bpy
 import math
 import mathutils
 
@@ -7,34 +8,39 @@ from ..node import ArnoldNode
 from .. import utils as export_utils
 
 class CameraExporter(ObjectExporter):
-    def export(self, ob):
-        super().export(ob)
+    def export(self, instance):
+        super().export(instance)
+        
+        if isinstance(instance, bpy.types.DepsgraphObjectInstance):
+            self.datablock_eval = export_utils.get_object_data_from_instance(instance)
+        else:
+            self.datablock_eval = instance
 
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            name = export_utils.get_unique_name(ob)
-            self.node = ArnoldNode(self.datablock.data.arnold.camera_type)
+            #name = export_utils.get_unique_name(ob)
+            self.node = ArnoldNode(self.datablock_eval.data.arnold.camera_type)
 
-        self.node.set_string("name", self.datablock.name)
+        self.node.set_string("name", self.datablock_eval.name)
 
         sdata = self.cache.scene
-        cdata = self.datablock.data
+        cdata = self.datablock_eval.data
 
         if sdata["enable_motion_blur"] and sdata["camera_motion_blur"]:
             matrix = self.get_blur_matrices()
             self.node.set_array("matrix", matrix)
+        else:
+            matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
+            self.node.set_matrix("matrix", matrix)
 
         if cdata.arnold.camera_type == 'ortho_camera':
             scale = cdata.ortho_scale * 0.5
             self.node.set_vector2("screen_window_min", -scale, -scale)
             self.node.set_vector2("screen_window_max", scale, scale)
         elif cdata.arnold.camera_type == 'persp_camera':
-            fov = export_utils.calc_horizontal_fov(self.datablock)
+            fov = export_utils.calc_horizontal_fov(self.datablock_eval)
             self.node.set_float("fov", math.degrees(fov))
-
-        matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
-        self.node.set_matrix("matrix", matrix)
 
         self.node.set_float("exposure", cdata.arnold.exposure)
 

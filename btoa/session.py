@@ -49,6 +49,8 @@ class Session:
                 PolymeshExporter(self).export(instance)
             elif isinstance(ob.data, bpy.types.Light):
                 LightExporter(self).export(instance)
+            elif not self.is_interactive and isinstance(ob.data, bpy.types.Camera) and ob.name == depsgraph.scene.camera.name:
+                camera = CameraExporter(self).export(instance)
 
         options = UniverseOptions()
 
@@ -60,9 +62,6 @@ class Session:
             self.last_viewport_matrix = bl_camera.matrix_world
 
             camera = CameraExporter(self).export(bl_camera)
-
-        else:
-            camera = CameraExporter(self).export(depsgraph.scene.camera)
 
         options.set_pointer("camera", camera)
 
