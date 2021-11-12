@@ -24,6 +24,9 @@ class DATA_PT_arnold_lens(CameraButtonsPanel, bpy.types.Panel):
             elif camera.lens_unit == 'FOV':
                 col.prop(camera, "angle")
             col.prop(camera, "lens_unit")
+        elif camera.arnold.camera_type == 'ortho_camera':
+            col = self.layout.column()
+            col.prop(camera, "ortho_scale")
 
         col.separator()
 

@@ -62,11 +62,10 @@ def update_viewport(x, y, width, height, buffer, data):
 
     if buffer:
         try:
-            if AI_SESSION.is_running:
-                b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-                rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
+            b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+            rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
 
-                AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.flatten())
+            AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.flatten())
             
         finally:
             AI_SESSION.free_buffer(buffer)
@@ -242,20 +241,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         AI_SESSION.pause()
 
-        #if AI_SESSION.update_viewport_dimensions:
-        #    AI_SESSION.pause()
-
-            # We're going to edit the dimensions manually for performance
-        '''    options = btoa.UniverseOptions()
-            options.set_int("xres", region.width)
-            options.set_int("yres", region.height)
-
-            AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
-
-            AI_SESSION.update_viewport_dimensions = False
-
-            AI_SESSION.restart()'''
-
         if AI_SESSION.update_viewport_dimensions:
             AI_SESSION.update_viewport_dimensions = False
 
@@ -264,18 +249,21 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             options.set_int("yres", region.height)
 
         # Update viewport camera
-        if AI_SESSION.is_interactive:
-            node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
+        node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
 
-            bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
-            AI_SESSION.last_viewport_matrix = bl_camera.matrix_world
+        bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
 
+        if node.type_is(bl_camera.data.arnold.camera_type):
             btoa.CameraExporter(AI_SESSION, node).export(bl_camera)
+        else:
+            new_node = btoa.CameraExporter(AI_SESSION).export(bl_camera)
+            AI_SESSION.replace_node(node, new_node)
 
-        if depsgraph.id_type_updated("SCENE"):
-            #AI_SESSION.cache.sync(self, depsgraph, context)
-            #btoa.OptionsExporter(AI_SESSION).export()
-            pass
+            new_node.set_string("name", bl_camera.name)
+
+        AI_SESSION.cache.viewport_camera["matrix_world"] = bl_camera.matrix_world
+        AI_SESSION.cache.viewport_camera["ortho_scale"] = bl_camera.data.ortho_scale
+        AI_SESSION.cache.viewport_camera["camera_type"] = bl_camera.data.arnold.camera_type
 
         # Update shaders
         if depsgraph.id_type_updated("MATERIAL"):
@@ -321,7 +309,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
                     if update.is_updated_transform:
                         node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
-            
+        
         AI_SESSION.restart()
 
     def view_draw(self, context, depsgraph):
@@ -333,7 +321,12 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         dimensions = region.width, region.height
 
         # Check to see if viewport camera changed
-        if context.space_data.region_3d.view_matrix.inverted() != AI_SESSION.last_viewport_matrix:
+        bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
+
+        matrix_changed = bl_camera.matrix_world != AI_SESSION.cache.viewport_camera["matrix_world"]
+        ortho_scale_changed = bl_camera.data.arnold.camera_type == "ortho_camera" and bl_camera.data.ortho_scale != AI_SESSION.cache.viewport_camera["ortho_scale"]
+
+        if matrix_changed or ortho_scale_changed:
             self.tag_update()
 
         # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was
