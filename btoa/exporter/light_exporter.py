@@ -1,3 +1,4 @@
+import bpy
 import mathutils
 
 from .object_exporter import ObjectExporter
@@ -9,7 +10,11 @@ from .. import utils as export_utils
 class LightExporter(ObjectExporter):
     def export(self, instance):
         super().export(instance)
-        self.datablock_eval = export_utils.get_object_data_from_instance(instance)
+        
+        if isinstance(instance, bpy.types.DepsgraphObjectInstance):
+            self.datablock_eval = export_utils.get_object_data_from_instance(instance)
+        else:
+            self.datablock_eval = instance
 
         data = self.datablock_eval.data
 

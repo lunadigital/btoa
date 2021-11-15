@@ -200,9 +200,7 @@ class PolymeshExporter(ObjectExporter):
             self.datablock_eval = export_utils.get_object_data_from_instance(instance)
         else:
             self.datablock_eval = instance
-
-        print(self.datablock_eval.name, self.datablock.is_instance, self.datablock.parent)
-
+            
         self.evaluate_mesh()
 
         if not self.mesh:

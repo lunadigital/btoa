@@ -325,7 +325,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                         node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
             
                 # Update world material if rotation controller changed
-                if update.id.name == scene.world.arnold.rotation_controller.name:
+                rotation_controller = scene.world.arnold.rotation_controller
+                if rotation_controller and update.id.name == rotation_controller.name:
                     unique_name = btoa.utils.get_unique_name(scene.world)
                     old_node = AI_SESSION.get_node_by_name(unique_name)
                     
