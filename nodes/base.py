@@ -214,6 +214,22 @@ class ArnoldShaderTree(ShaderNodeTree):
         output = self.get_output_node()
         return output.export()
 
+    def export_active_surface(self):
+        output = self.get_output_node()
+        return output.export_surface()
+
+    def export_active_displacement(self):
+        output = self.get_output_node()
+        return output.export_displacement()
+    
+    def has_surface(self):
+        output = self.get_output_node()
+        return output.has_surface()
+
+    def has_displacement(self):
+        output = self.get_output_node()
+        return output.has_displacement()
+
 class ArnoldNode:
     @classmethod
     def poll(cls, ntree):
@@ -355,6 +371,7 @@ object_node_categories = [
             NodeItem("AiAmbientOcclusion"),
             NodeItem("AiBump2d"),
             NodeItem("AiCarPaint"),
+            NodeItem("AiDisplacement"),
             NodeItem("AiFlat"),
             NodeItem("AiLambert"),
             NodeItem("AiMatte"),

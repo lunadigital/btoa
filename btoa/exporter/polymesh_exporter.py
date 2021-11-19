@@ -33,20 +33,46 @@ class PolymeshExporter(ObjectExporter):
 
             for slot in self.datablock_eval.material_slots:
                 if slot.material:
-                    unique_name = export_utils.get_unique_name(slot.material)
+                    mat = [None, None]
+                    node_tree = slot.material.arnold.node_tree
 
-                    if slot.material.arnold.node_tree:
+                    if node_tree and node_tree.has_surface():
+                        unique_name = export_utils.get_unique_name(slot.material)
+
                         shader = self.session.get_node_by_name(unique_name)
+                        if not shader.is_valid():
+                            shader = node_tree.export_active_surface()
+                            shader.set_string("name", unique_name)
 
-                        if shader.is_valid():
-                            materials.append(shader)
-                        else:
-                            surface, volume, displacement = slot.material.arnold.node_tree.export()
-                            shader = surface[0]
+                        mat[0] = shader
+      
+                    if node_tree and node_tree.has_displacement():
+                        unique_name = export_utils.get_unique_name(slot.material)
+                        unique_name = "{}_disp".format(unique_name)
+
+                        shader = self.session.get_node_by_name(unique_name)
+                        if not shader.is_valid():
+                            node = node_tree.export_active_displacement()
+
+                            # Check if we're using a displacment node or not. If we are, the export won't have the
+                            # BTNODE type in the export tuple
+                            if node[1] == 'BTNODE':
+                                shader = node[0]
+                            else:
+                                shader = node[0]
+
+                                self.node.set_float("disp_padding", node[1])
+                                self.node.set_float("disp_height", node[2])
+                                self.node.set_float("disp_zero_value", node[3])
+                                self.node.set_bool("disp_autobump", node[4])
 
                             shader.set_string("name", unique_name)
-                            materials.append(shader)
-            
+                        
+                        mat[1] = shader
+                    
+                    if mat[0] or mat[1]:
+                        materials.append(mat)
+             
             if len(materials) > 0:
                 material_indices = numpy.ndarray(
                     len(self.mesh.polygons),
@@ -61,8 +87,16 @@ class PolymeshExporter(ObjectExporter):
                     'POINTER'
                 )
 
+                disp_array = ArnoldArray()
+                disp_array.allocate(
+                    len(materials),
+                    1,
+                    'POINTER'
+                )
+
                 for i, mat in enumerate(materials):
-                    shader_array.set_pointer(i, mat)
+                    shader_array.set_pointer(i, mat[0])
+                    disp_array.set_pointer(i, mat[1])
 
                 shidxs = ArnoldArray()
                 shidxs.convert_from_buffer(
@@ -73,6 +107,7 @@ class PolymeshExporter(ObjectExporter):
                 )
 
                 self.node.set_array("shader", shader_array)
+                self.node.set_array("disp_map", disp_array)
                 self.node.set_array("shidxs", shidxs)
 
     def get_static_mesh_data(self):
