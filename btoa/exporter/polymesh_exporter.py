@@ -217,6 +217,19 @@ class PolymeshExporter(ObjectExporter):
         self.node.set_float("motion_start", self.cache.scene["shutter_start"])
         self.node.set_float("motion_end", self.cache.scene["shutter_end"])
 
+        # Subdivision surfaces settings
+        data = self.datablock_eval.arnold
+
+        self.node.set_string("subdiv_type", data.subdiv_type)
+        self.node.set_int("subdiv_iterations", data.subdiv_iterations)
+        self.node.set_float("subdiv_adaptive_error", data.subdiv_adaptive_error)
+        self.node.set_string("subdiv_adaptive_metric", data.subdiv_adaptive_metric)
+        self.node.set_string("subdiv_adaptive_space", data.subdiv_adaptive_space)
+        self.node.set_bool("subdiv_frustrum_ignore", data.subdiv_frustrum_ignore)
+        self.node.set_string("subdiv_uv_smoothing", data.subdiv_uv_smoothing)
+        self.node.set_bool("subdiv_smooth_derivs", data.subdiv_smooth_derivs)
+
+        # Everything else
         self.generate_polymesh_data()
         self.generate_uv_map_data()
         self.build_shaders()
