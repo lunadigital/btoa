@@ -48,6 +48,10 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
                 row.operator('object.material_slot_select', text="Select")
                 row.operator('object.material_slot_deselect', text="Deselect")
 
+        if not mat.arnold.node_tree:
+            layout.operator("arnold.material_init")
+            return
+        
         split = layout.split(factor=0.65)
 
         if ob:
