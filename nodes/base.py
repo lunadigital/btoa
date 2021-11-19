@@ -16,13 +16,31 @@ class ArnoldShaderTree(ShaderNodeTree):
 
     _draw_header_func = None
 
+    '''
+    Custom node trees don't trigger dependency graph updates, which makes
+    it hard to pass updates to the render engine when materials change. We're
+    forcing a depsgraph update with a Blender property hack similar to how
+    BlendLuxCore handles it. Additional reading:
+
+    https://github.com/LuxCoreRender/BlendLuxCore/blob/master/nodes/base.py#:~:text=def%20update(self,update%3Dacknowledge_connection)
+    https://developer.blender.org/T66521
+    https://devtalk.blender.org/t/custom-nodes-not-showing-as-updated-in-interactive-mode/6762/2
+    '''
+    def update(self):
+        self.refresh = True
+
+    def reset_refresh(self, context):
+        self["refresh"] = False
+
+    refresh: bpy.props.BoolProperty(update=reset_refresh)
+
     @classmethod
     def poll(cls, context):
         return engine.ArnoldRenderEngine.is_active(context)
 
     @classmethod
     def get_from_context(cls,  context):
-        space_data = context.scene.arnold_options.space_data
+        space_data = context.scene.arnold.space_data
         if space_data.shader_type == 'OBJECT':    
             ob = context.object
 
@@ -51,7 +69,7 @@ class ArnoldShaderTree(ShaderNodeTree):
 
                     scene = context.scene
                     snode = context.space_data
-                    arnold_space_data = scene.arnold_options.space_data
+                    arnold_space_data = scene.arnold.space_data
                     snode_id = snode.id
                     id_from = snode.id_from
                     tool_settings = context.tool_settings
@@ -187,7 +205,7 @@ class ArnoldShaderTree(ShaderNodeTree):
         '''
         for node in self.nodes:
             ntype = getattr(node, "bl_idname", None)
-            if ntype == 'AiShaderOutput':
+            if ntype == 'AiShaderOutput' and node.is_active:
                 return node
         
         return None
@@ -195,6 +213,22 @@ class ArnoldShaderTree(ShaderNodeTree):
     def export(self):
         output = self.get_output_node()
         return output.export()
+
+    def export_active_surface(self):
+        output = self.get_output_node()
+        return output.export_surface()
+
+    def export_active_displacement(self):
+        output = self.get_output_node()
+        return output.export_displacement()
+    
+    def has_surface(self):
+        output = self.get_output_node()
+        return output.has_surface()
+
+    def has_displacement(self):
+        output = self.get_output_node()
+        return output.has_displacement()
 
 class ArnoldNode:
     @classmethod
@@ -209,7 +243,7 @@ class ArnoldNode:
         pass
 
     def export(self):
-        node = btoa.BtNode(self.ai_name)
+        node = btoa.ArnoldNode(self.ai_name)
 
         self.sub_export(node)
 
@@ -220,7 +254,7 @@ class ArnoldNode:
                 if value_type == 'BTNODE':
                     socket_value.link(i.identifier, node)
                 else:
-                    btoa.BT_SET_LAMBDA[value_type](node, i.identifier, socket_value)
+                    btoa.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
 
         return node, 'BTNODE'
 
@@ -259,7 +293,7 @@ class ArnoldWorldNodeCategory(ArnoldNodeCategory):
         return (
             super().poll(context) and
             context.space_data.tree_type == 'ArnoldShaderTree' and
-            context.scene.arnold_options.space_data.shader_type == 'WORLD'
+            context.scene.arnold.space_data.shader_type == 'WORLD'
         )
 
 class ArnoldObjectNodeCategory(ArnoldNodeCategory):
@@ -268,7 +302,7 @@ class ArnoldObjectNodeCategory(ArnoldNodeCategory):
         return (
             super().poll(context) and
             context.space_data.tree_type == 'ArnoldShaderTree' and
-            context.scene.arnold_options.space_data.shader_type == 'OBJECT' and
+            context.scene.arnold.space_data.shader_type == 'OBJECT' and
             context.object.type != 'LIGHT'
         )
 
@@ -294,16 +328,32 @@ world_node_categories = [
             NodeItem("AiCellNoise"),
             NodeItem("AiCheckerboard"),
             NodeItem("AiImage"),
-            NodeItem("AiNoise")
+            NodeItem("AiLayerFloat"),
+            NodeItem("AiLayerRGBA"),
+            NodeItem("AiMixRGBA"),
+            NodeItem("AiNoise"),
+            NodeItem("AiPhysicalSky")
         ]
     ),
     ArnoldWorldNodeCategory(
         'ARNOLD_NODES_WORLD_COLOR',
         "Color",
         items=[
-            NodeItem("AiColorCorrect")
+            NodeItem("AiColorCorrect"),
+            NodeItem("AiColorConstant"),
+            NodeItem("AiColorJitter"),
+            NodeItem("AiComposite"),
+            NodeItem("AiShuffle")
         ]
     ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_CONVERSION',
+        "Conversion",
+        items=[
+            NodeItem("AiFloatToRGB"),
+            NodeItem("AiFloatToRGBA"),
+        ]
+    )
 ]
 
 object_node_categories = [
@@ -321,10 +371,12 @@ object_node_categories = [
             NodeItem("AiAmbientOcclusion"),
             NodeItem("AiBump2d"),
             NodeItem("AiCarPaint"),
+            NodeItem("AiDisplacement"),
             NodeItem("AiFlat"),
             NodeItem("AiLambert"),
             NodeItem("AiMatte"),
             NodeItem("AiMixShader"),
+            NodeItem("AiNormalMap"),
             NodeItem("AiShadowMatte"),
             NodeItem("AiStandardSurface"),
             NodeItem("AiWireframe")
@@ -338,14 +390,29 @@ object_node_categories = [
             NodeItem("AiCheckerboard"),
             NodeItem("AiFlakes"),
             NodeItem("AiImage"),
-            NodeItem("AiNoise")
+            NodeItem("AiLayerFloat"),
+            NodeItem("AiLayerRGBA"),
+            NodeItem("AiMixRGBA"),
+            NodeItem("AiNoise"),
+            NodeItem("AiRoundCorners")
         ]
     ),
     ArnoldObjectNodeCategory(
         'ARNOLD_NODES_OBJECT_COLOR',
         "Color",
         items=[
-            NodeItem("AiColorCorrect")
+            NodeItem("AiColorCorrect"),
+            NodeItem("AiColorConstant"),
+            NodeItem("AiColorJitter"),
+            NodeItem("AiComposite"),
+            NodeItem("AiShuffle")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_MATH',
+        "Math",
+        items=[
+            NodeItem("AiMultiply")
         ]
     ),
     ArnoldObjectNodeCategory(
@@ -353,7 +420,16 @@ object_node_categories = [
         "Utility",
         items=[
             NodeItem("AiCoordSpace"),
+            NodeItem("AiFacingRatio"),
             NodeItem("AiUVProjection")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_CONVERSION',
+        "Conversion",
+        items=[
+            NodeItem("AiFloatToRGB"),
+            NodeItem("AiFloatToRGBA"),
         ]
     )
 ]

@@ -1,25 +1,133 @@
-import arnold
-from .btnode import BtNode
+import bpy
+import bmesh
+import math
+import numpy
+from bpy_extras import view3d_utils
 
-def start_session():
-    arnold.AiBegin()
+from mathutils import Vector, Matrix
 
-def end_session():
-    arnold.AiEnd()
+from .universe_options import UniverseOptions
+from .bl_intern import BlenderCamera
 
-def free(buffer):
-    arnold.AiFree(buffer)
+def calc_horizontal_fov(ob):
+    data = ob.data
 
-def render():
-    arnold.AiRender(arnold.AI_RENDER_MODE_CAMERA)
+    options = UniverseOptions()
+    xres = options.get_int("xres")
+    yres = options.get_int("yres")
 
-def abort():
-    arnold.AiRenderAbort()
+    if data.sensor_fit == 'VERTICAL' or yres > xres:
+        # https://blender.stackexchange.com/questions/23431/how-to-set-camera-horizontal-and-vertical-fov
+        return 2 * math.atan((0.5 * xres) / (0.5 * yres / math.tan(data.angle / 2)))
+    else:
+        return data.angle
 
-def get_node_by_name(name):
-    ainode = arnold.AiNodeLookUpByName(name)
+def flatten_matrix(matrix):
+    return numpy.reshape(matrix.transposed(), -1)
 
-    btnode = BtNode()
-    btnode._set_data(ainode)
+def get_object_data_from_instance(object_instance):
+    return object_instance.instance_object if object_instance.is_instance else object_instance.object
 
-    return btnode
+def get_position_along_local_vector(ob, distance, axis):
+    # Determine movement vector
+    if axis == 'X':
+        mv = Vector([distance, 0, 0])
+    elif axis == 'Y':
+        mv = Vector([0, distance, 0])
+    elif axis == 'Z':
+        mv = Vector([0, 0, distance])
+    
+    # Construct rotation matrix
+    rot = ob.matrix_world.to_euler()
+    rx = Matrix.Rotation(rot.x, 4, 'X')
+    ry = Matrix.Rotation(rot.y, 4, 'Y')
+    rz = Matrix.Rotation(rot.z, 4, 'Z')
+    rot_matrix = rx @ ry @ rz
+
+    # Rotate movement vector by rotation matrix
+    rotated_vector = rot_matrix @ mv
+
+    # Create and apply transformation matrix
+    translation_matrix = Matrix.Translation(rotated_vector)
+
+    result = translation_matrix @ ob.matrix_world
+    return result.to_translation()
+
+'''
+TODO: This is a righteous mess and needs to be cleaned up.
+'''
+def get_unique_name(datablock):
+    prefix = ""
+    name = ""
+
+    if hasattr(datablock, "is_instance"):
+        if datablock.is_instance:
+            prefix = datablock.parent.name + "_"
+        
+        ob = get_object_data_from_instance(datablock)
+        name = ob.name + "_MESH"
+
+    elif hasattr(datablock, "data") and isinstance(datablock.data, bpy.types.Mesh):
+        name = datablock.name + "_MESH"
+
+    else:
+        # Assume it's a material
+        if datablock.library:
+            prefix = datablock.library.name + "_"
+        
+        name = datablock.name + "_MATERIAL"
+
+    return prefix + name
+
+def get_render_resolution(session_cache, interactive=False):
+    if interactive:
+        region = session_cache.region
+
+        x = region["width"]
+        y = region["height"]
+    else:
+        render = session_cache.render
+        scale = render["resolution_percentage"] / 100
+
+        x = int(render["resolution_x"] * scale)
+        y = int(render["resolution_y"] * scale)
+
+    return x, y
+
+def get_viewport_camera_object(space_data):
+    DEFAULT_SENSOR_WIDTH = 36
+
+    region_3d = space_data.region_3d
+    
+    options = UniverseOptions()
+    width, height = options.get_int("xres"), options.get_int("yres")
+
+    camera = BlenderCamera()
+    camera.name = "BTOA_VIEWPORT_CAMERA"
+
+    view_matrix = region_3d.view_matrix.inverted()
+    camera.matrix_world = view_matrix
+
+    fov = 2 * math.atan(DEFAULT_SENSOR_WIDTH / space_data.lens)
+    camera.data.angle = fov
+
+    camera.data.clip_start = space_data.clip_start
+    camera.data.clip_end = space_data.clip_end
+
+    if region_3d.view_perspective == 'ORTHO':
+        camera.data.arnold.camera_type = "ortho_camera"
+
+        if height > width:
+            # This was just a lucky guess, I'm not entirely sure why this works
+            sensor = DEFAULT_SENSOR_WIDTH * (width / height)
+        else:
+            sensor = DEFAULT_SENSOR_WIDTH
+
+        camera.data.ortho_scale = 2 * region_3d.view_distance * sensor / space_data.lens
+
+    return camera
+
+def get_parent_material_from_nodetree(ntree):
+    for mat in bpy.data.materials:
+        if mat.arnold.node_tree and mat.arnold.node_tree.name == ntree.name:
+            return mat

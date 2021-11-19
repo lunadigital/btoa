@@ -76,7 +76,7 @@ class ARNOLD_OT_world_select(Operator):
     ''' World selection dropdown with search '''
     bl_idname = "arnold.world_select"
     bl_label = ""
-    bl_property = "world"
+    bl_property = "worlds"
 
     callback_strings = []
 
@@ -84,7 +84,6 @@ class ARNOLD_OT_world_select(Operator):
         items = []
 
         for index, world in enumerate(bpy.data.worlds):
-            print(index, world)
             name = utils.get_name_with_lib(world)
             items.append((str(index), name, ""))
 

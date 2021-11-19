@@ -14,9 +14,13 @@ class ARNOLD_PT_sampling(bpy.types.Panel):
         return context.engine in cls.COMPAT_ENGINES
 
     def draw(self, context):
-        options = context.scene.arnold_options
+        layout = self.layout
+        options = context.scene.arnold
 
-        self.layout.use_property_split = True
+        layout.use_property_split = True
+
+        layout.prop(options, "render_device")
+        layout.separator()
 
         col = self.layout.column()
         col.prop(options, "aa_samples")
@@ -36,7 +40,7 @@ class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         self.layout.use_property_split = True
 
@@ -57,10 +61,10 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
-        self.layout.prop(context.scene.arnold_options, "use_adaptive_sampling", text="")
+        self.layout.prop(context.scene.arnold, "use_adaptive_sampling", text="")
 
     def draw(self, context):
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         self.layout.use_property_split = True
 
@@ -68,7 +72,7 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
         col.prop(options, "adaptive_aa_samples_max")
         col.prop(options, "adaptive_threshold")
 
-        self.layout.enabled = context.scene.arnold_options.use_adaptive_sampling
+        self.layout.enabled = context.scene.arnold.use_adaptive_sampling
 
 class ARNOLD_PT_ray_depth(bpy.types.Panel):
     bl_idname = "ARNOLD_PT_ray_depth"
@@ -84,7 +88,7 @@ class ARNOLD_PT_ray_depth(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         layout.use_property_split = True
 
@@ -111,7 +115,7 @@ class ARNOLD_PT_rendering(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         layout.use_property_split = True
 
@@ -135,11 +139,11 @@ class ARNOLD_PT_motion_blur(bpy.types.Panel):
         return context.engine in cls.COMPAT_ENGINES
 
     def draw_header(self, context):
-        self.layout.prop(context.scene.arnold_options, "enable_motion_blur", text="")
+        self.layout.prop(context.scene.arnold, "enable_motion_blur", text="")
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         layout.use_property_split = True
 
@@ -158,7 +162,7 @@ class ARNOLD_PT_motion_blur_shutter(bpy.types.Panel):
     bl_context = "render"
 
     def draw(self, context):
-        options = context.scene.arnold_options
+        options = context.scene.arnold
 
         self.layout.use_property_split = True
 
@@ -171,6 +175,23 @@ class ARNOLD_PT_motion_blur_shutter(bpy.types.Panel):
         col.prop(options, "shutter_start")
         col.prop(options, "shutter_end")
 
+class ARNOLD_PT_film(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_film"
+    bl_label = "Film"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in cls.COMPAT_ENGINES
+
+    def draw(self, context):
+        self.layout.use_property_split = True
+        self.layout.prop(context.scene.render, "film_transparent")
+
 classes = (
     ARNOLD_PT_sampling,
     ARNOLD_PT_advanced_sampling,
@@ -178,7 +199,8 @@ classes = (
     ARNOLD_PT_ray_depth,
     ARNOLD_PT_motion_blur,
     ARNOLD_PT_motion_blur_shutter,
-    ARNOLD_PT_rendering
+    ARNOLD_PT_rendering,
+    ARNOLD_PT_film
 )
 
 def register():

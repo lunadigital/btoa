@@ -39,14 +39,17 @@ def panel_node_draw(layout, id_data, output_type, input_name):
 
     ntree = id_data.node_tree
 
-    node = ntree.get_output_node()
-    if node:
-        input = find_node_input(node, input_name)
-        if input:
-            layout.template_node_view(ntree, node, input)
+    if ntree is not None:
+        node = ntree.get_output_node()
+        if node:
+            input = find_node_input(node, input_name)
+            if input:
+                layout.template_node_view(ntree, node, input)
+            else:
+                layout.label(text="Incompatible output node")
         else:
-            layout.label(text="Incompatible output node")
-    else:
-        layout.label(text="No output node")
+            layout.label(text="No output node")
 
-    return True
+        return True
+    
+    return False

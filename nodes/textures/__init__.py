@@ -3,7 +3,13 @@ from . import (
     checkerboard,
     flakes,
     image,
-    noise
+    layered_texture,
+    layer_float,
+    layer_rgba,
+    mix_rgba,
+    noise,
+    physical_sky,
+    round_corners
 )
 
 modules = (
@@ -11,7 +17,13 @@ modules = (
     checkerboard,
     flakes,
     image,
-    noise
+    layered_texture,
+    layer_float,
+    layer_rgba,
+    mix_rgba,
+    noise,
+    physical_sky,
+    round_corners
 )
 
 def register():
