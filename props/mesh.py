@@ -70,7 +70,7 @@ class ArnoldShape(PropertyGroup):
     
     subdiv_adaptive_error: FloatProperty(
         name="Adaptive Error",
-        description="The maximum allowable difference for the chosen metric in the chosen space. The smaller the error, the closer to the limit surface a mesh will be and the less inter-frame "popping" when the subdivision level jumps, at the expense of using more polygons. A value of 0 disables adaptive subdivision, reverting to uniform subdivision, which can be more stable in animation",
+        description="The maximum allowable difference for the chosen metric in the chosen space. The smaller the error, the closer to the limit surface a mesh will be and the less inter-frame \"popping\" when the subdivision level jumps, at the expense of using more polygons. A value of 0 disables adaptive subdivision, reverting to uniform subdivision, which can be more stable in animation",
         min=0,
         soft_max=1
     )
@@ -102,7 +102,7 @@ class ArnoldShape(PropertyGroup):
 
     subdiv_uv_smoothing: EnumProperty(
         name="UV Smoothing",
-        description="The face-varying "limit" dPdu and dPdv vectors computed during subdivision are stored and used for shading instead of computing face-constant dPdu and dPdv vectors on the fly during shading. This can be useful for anisotropic shaders but has a storage cost",
+        description="The face-varying \"limit\" dPdu and dPdv vectors computed during subdivision are stored and used for shading instead of computing face-constant dPdu and dPdv vectors on the fly during shading. This can be useful for anisotropic shaders but has a storage cost",
         items=[
             ('linear', "Linear", ""),
             ('pin_borders', "Pin Borders", ""),
