@@ -47,10 +47,6 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
                 row.operator('object.material_slot_assign', text="Assign")
                 row.operator('object.material_slot_select', text="Select")
                 row.operator('object.material_slot_deselect', text="Deselect")
-
-        if not mat.arnold.node_tree:
-            layout.operator("arnold.material_init")
-            return
         
         split = layout.split(factor=0.65)
 
@@ -70,6 +66,10 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
         elif mat:
             split.template_ID(space, "pin_id")
             split.separator()
+
+        if not mat.arnold.node_tree:
+            layout.operator("arnold.material_init")
+            return
 
 class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
     bl_label = "Surface"
