@@ -16,6 +16,8 @@ Arnold for Blender (BtoA) is not affiliated with or supported by Autodesk or Arn
 * Requires Arnold SDK 6.0.4.0 or above
 
 ## Example renders ##
+For artist features, tips and tricks, and more, [follow BtoA on Instagram](https://www.instagram.com/arnoldforblender/)!
+
 <img src="https://github.com/lunadigital/btoa/raw/dev/examples/Render_002_Web.jpg" />
 <img src="https://github.com/lunadigital/btoa/raw/dev/examples/Render_001.jpg" />
 <a href="https://www.artstation.com/artwork/eaODlP"><img src="https://github.com/lunadigital/btoa/raw/dev/examples/still_life.jpg" /></a>
