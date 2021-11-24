@@ -1,7 +1,11 @@
-from . import multiply
+from . import (
+    airange,
+    multiply
+)
 
 modules = (
-    multiply,
+    airange,
+    multiply
 )
 
 def register():
