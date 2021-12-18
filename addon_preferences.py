@@ -57,4 +57,11 @@ class ArnoldAddonPreferences(AddonPreferences):
 classes = (
     ArnoldAddonPreferences,
 )
-register, unregister = bpy.utils.register_classes_factory(classes)
+
+def register():
+    for c in classes:
+        bpy.utils.register_class(c)
+
+def unregister():
+    for c in reversed(classes):
+        bpy.utils.unregister_class(c)
