@@ -30,7 +30,7 @@ class ArnoldAddonPreferences(AddonPreferences):
     def draw(self, context):
         # SDK config
         box = self.layout.box()
-        
+
         row = box.row()
         row.prop(self, "arnold_path")
         row.enabled = not aienv.is_preconfigured()
@@ -69,7 +69,6 @@ class ArnoldAddonPreferences(AddonPreferences):
 classes = (
     ArnoldAddonPreferences,
 )
-
 def register():
     for c in classes:
         bpy.utils.register_class(c)

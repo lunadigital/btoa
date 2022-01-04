@@ -6,7 +6,7 @@ from .ainodesocket import AiNodeSocket
 from .constants import Color
 
 class AiNodeSocketVector(NodeSocket, AiNodeSocket):
-    bl_label = "Vector",
+    bl_label = "Vector"
     color = Color.mapping_3d
     default_type = "VECTOR"
 
