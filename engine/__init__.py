@@ -269,6 +269,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         if depsgraph.id_type_updated("MATERIAL"):
             for update in reversed(depsgraph.updates):
                 material = btoa.utils.get_parent_material_from_nodetree(update.id)
+                world_ntree = scene.world.arnold.node_tree
                 
                 if material:
                     unique_name = btoa.utils.get_unique_name(material)
@@ -284,7 +285,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                         # avoid memory and session.get_node_by_name() issues
                         new_node.set_string("name", unique_name)
 
-                elif update.id.name == scene.world.arnold.node_tree.name:
+                elif world_ntree and update.id.name == world_ntree.name:
                     # This code is repeated in view_draw() below
                     # Consider cleaning this up
                     unique_name = btoa.utils.get_unique_name(scene.world)
