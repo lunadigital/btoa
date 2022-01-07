@@ -347,6 +347,14 @@ world_node_categories = [
         ]
     ),
     ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_MATH',
+        "Math",
+        items=[
+            NodeItem("AiMultiply"),
+            NodeItem("AiRange")
+        ]
+    ),
+    ArnoldWorldNodeCategory(
         'ARNOLD_NODES_WORLD_CONVERSION',
         "Conversion",
         items=[
@@ -412,7 +420,8 @@ object_node_categories = [
         'ARNOLD_NODES_OBJECT_MATH',
         "Math",
         items=[
-            NodeItem("AiMultiply")
+            NodeItem("AiMultiply"),
+            NodeItem("AiRange")
         ]
     ),
     ArnoldObjectNodeCategory(
