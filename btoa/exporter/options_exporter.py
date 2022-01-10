@@ -64,3 +64,6 @@ class OptionsExporter(Exporter):
         if interactive:
             options.set_bool("enable_progressive_render", True)
             options.set_bool("enable_dependency_graph", True)
+
+        options.set_bool("abort_on_license_fail", scene["abort_on_license_fail"])
+        options.set_bool("skip_license_check", scene["skip_license_check"])

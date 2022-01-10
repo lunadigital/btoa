@@ -54,6 +54,15 @@ class ArnoldAddonPreferences(AddonPreferences):
             col.separator()
             col.label(text="To use an OCIO config other than Filmic, point the OCIO environment variable to a valid OCIO config.")
 
+        # Licensing
+        box = self.layout.box()
+
+        col = box.column()
+        col.label(text="Licensing")
+        col.separator()
+        col.prop(context.scene.arnold, "abort_on_license_fail")
+        col.prop(context.scene.arnold, "skip_license_check", text="Render with Watermarks (Skip License Check)")
+
 classes = (
     ArnoldAddonPreferences,
 )
