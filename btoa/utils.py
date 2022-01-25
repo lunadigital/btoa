@@ -108,11 +108,23 @@ def get_viewport_camera_object(space_data):
     view_matrix = region_3d.view_matrix.inverted()
     camera.matrix_world = view_matrix
 
-    fov = 2 * math.atan(DEFAULT_SENSOR_WIDTH / space_data.lens)
-    camera.data.angle = fov
+    # FOV
+    sensor_width = DEFAULT_SENSOR_WIDTH
+    lens = space_data.lens
 
+    if region_3d.view_perspective == 'CAMERA':
+        sensor_width = space_data.camera.data.sensor_width
+        lens = space_data.camera.data.lens
+
+        camera.data.is_render_view = True
+
+    camera.data.angle = 2 * math.atan(sensor_width / lens)
+
+    # Clipping
     camera.data.clip_start = space_data.clip_start
     camera.data.clip_end = space_data.clip_end
+
+    camera.data.view_camera_zoom = region_3d.view_camera_zoom
 
     if region_3d.view_perspective == 'ORTHO':
         camera.data.arnold.camera_type = "ortho_camera"

@@ -264,6 +264,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AI_SESSION.cache.viewport_camera["matrix_world"] = bl_camera.matrix_world
         AI_SESSION.cache.viewport_camera["ortho_scale"] = bl_camera.data.ortho_scale
         AI_SESSION.cache.viewport_camera["camera_type"] = bl_camera.data.arnold.camera_type
+        AI_SESSION.cache.viewport_camera["view_camera_zoom"] = bl_camera.data.view_camera_zoom
 
         # Update shaders
         if depsgraph.id_type_updated("MATERIAL"):
@@ -353,8 +354,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         matrix_changed = bl_camera.matrix_world != AI_SESSION.cache.viewport_camera["matrix_world"]
         ortho_scale_changed = bl_camera.data.arnold.camera_type == "ortho_camera" and bl_camera.data.ortho_scale != AI_SESSION.cache.viewport_camera["ortho_scale"]
+        view_zoom_changed = bl_camera.data.view_camera_zoom != AI_SESSION.cache.viewport_camera["view_camera_zoom"]
 
-        if matrix_changed or ortho_scale_changed:
+        if matrix_changed or ortho_scale_changed or view_zoom_changed:
             self.tag_update()
 
         # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was

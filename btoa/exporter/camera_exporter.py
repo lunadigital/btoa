@@ -42,6 +42,14 @@ class CameraExporter(ObjectExporter):
             fov = export_utils.calc_horizontal_fov(self.datablock_eval)
             self.node.set_float("fov", math.degrees(fov))
 
+            if cdata.is_render_view:
+                scale = 0.5 * (2 / ((math.sqrt(2) + cdata.view_camera_zoom / 50))) ** 2
+            else:
+                scale = 1
+            
+            self.node.set_vector2("screen_window_min", -scale, -scale)
+            self.node.set_vector2("screen_window_max", scale, scale)
+
         self.node.set_float("exposure", cdata.arnold.exposure)
 
         if cdata.dof.focus_object:
