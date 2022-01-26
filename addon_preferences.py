@@ -21,6 +21,9 @@ class ArnoldAddonPreferences(AddonPreferences):
         update=refresh_addon
     )
 
+    abort_on_license_fail: BoolProperty(name="Abort On License Fail")
+    skip_license_check: BoolProperty(name="Skip License Check")
+
     # Used to check if we need to unregister everything or just addon preferences
     full_unregister: BoolProperty()
 
@@ -60,8 +63,8 @@ class ArnoldAddonPreferences(AddonPreferences):
         col = box.column()
         col.label(text="Licensing")
         col.separator()
-        col.prop(context.scene.arnold, "abort_on_license_fail")
-        col.prop(context.scene.arnold, "skip_license_check", text="Render with Watermarks (Skip License Check)")
+        col.prop(self, "abort_on_license_fail")
+        col.prop(self, "skip_license_check", text="Render with Watermarks (Skip License Check)")
 
 classes = (
     ArnoldAddonPreferences,

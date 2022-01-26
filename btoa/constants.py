@@ -1,7 +1,11 @@
 import bpy
+from os.path import basename, dirname
+
 from .status import ArnoldStatus
 
 import arnold
+
+BTOA_PACKAGE_NAME = basename(dirname(dirname(__file__)))
 
 BTOA_TYPE_CONSTANTS = {
     "UINT": arnold.AI_TYPE_UINT,

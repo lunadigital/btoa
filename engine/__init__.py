@@ -133,8 +133,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             cls._outliner_context_menu_draw = None              
 
     def update(self, data, depsgraph):
+        prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
+
         self.session.start()
-        self.session.export(self, depsgraph)
+        self.session.export(self, depsgraph, prefs)
 
     def render(self, depsgraph):
         # Configure display callback
@@ -220,11 +222,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         scene = depsgraph.scene
 
         if not AI_SESSION or not AI_SESSION.is_running:
+            prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
+
             AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
 
             AI_SESSION = self.session
             AI_SESSION.start(interactive=True)
-            AI_SESSION.export(self, depsgraph, context)
+            AI_SESSION.export(self, depsgraph, prefs, context)
 
             global AI_ENGINE_TAG_REDRAW
             AI_ENGINE_TAG_REDRAW = self.tag_redraw

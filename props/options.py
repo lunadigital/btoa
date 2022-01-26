@@ -222,10 +222,6 @@ class ArnoldOptions(PropertyGroup):
 
     space_data: PointerProperty(type=AiSpaceDataProperties)
 
-    # Ignore flags
-    abort_on_license_fail: BoolProperty(name="Abort On License Fail")
-    skip_license_check: BoolProperty(name="Skip License Check")
-
 classes = (
     AiSpaceDataProperties,
     ArnoldOptions,

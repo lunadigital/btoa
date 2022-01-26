@@ -9,6 +9,7 @@ class OptionsExporter(Exporter):
     def export(self, interactive=False):
         scene = self.cache.scene
         render = self.cache.render
+        prefs = self.cache.preferences
         
         options = UniverseOptions()
 
@@ -65,5 +66,5 @@ class OptionsExporter(Exporter):
             options.set_bool("enable_progressive_render", True)
             options.set_bool("enable_dependency_graph", True)
 
-        options.set_bool("abort_on_license_fail", scene["abort_on_license_fail"])
-        options.set_bool("skip_license_check", scene["skip_license_check"])
+        options.set_bool("abort_on_license_fail", prefs["abort_on_license_fail"])
+        options.set_bool("skip_license_check", prefs["skip_license_check"])

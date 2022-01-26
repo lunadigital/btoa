@@ -10,6 +10,7 @@ class SessionCache:
         self.view_layer = None
         self.frame_set = None
         self.viewport_camera = {}
+        self.preferences = {}
 
     def extract_attrs(self, datablock):
         result = {}
@@ -20,11 +21,13 @@ class SessionCache:
         
         return result
         
-    def sync(self, engine, depsgraph, context=None):
+    def sync(self, engine, depsgraph, prefs, context=None):
         self.scene = self.extract_attrs(depsgraph.scene)
         self.scene.update(self.extract_attrs(depsgraph.scene.arnold))
 
         self.render = self.extract_attrs(depsgraph.scene.render)
+
+        self.preferences = self.extract_attrs(prefs)
 
         if context:
             self.region = self.extract_attrs(context.region)
