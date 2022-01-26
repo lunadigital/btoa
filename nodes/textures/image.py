@@ -147,13 +147,14 @@ class AiImage(Node, ArnoldNode):
         layout.prop(self, "ignore_missing_textures")
 
     def sub_export(self, node):
-        if self.image is not None:
+        if self.image:
             if self.image.library:
                 node.set_string("filename", bpy.path.abspath(self.image.filepath, library=self.image.library))
             else:
                 node.set_string("filename", bpy.path.abspath(self.image.filepath))
 
-        node.set_string("color_space", self.image.colorspace_settings.name)
+            node.set_string("color_space", self.image.colorspace_settings.name)
+
         node.set_string("filter", self.image_filter)
         node.set_int("swrap", int(self.swrap))
         node.set_int("twrap", int(self.twrap))
