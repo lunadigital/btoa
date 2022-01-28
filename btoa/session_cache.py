@@ -1,3 +1,5 @@
+from .camera_cache import CameraCache
+
 class SessionCache:
     '''
     Caches Blender attributes required by an Arnold render session
@@ -9,7 +11,7 @@ class SessionCache:
         self.region = {}
         self.view_layer = None
         self.frame_set = None
-        self.viewport_camera = {}
+        self.viewport_camera = CameraCache()
 
     def extract_attrs(self, datablock):
         result = {}

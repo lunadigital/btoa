@@ -125,6 +125,7 @@ def get_viewport_camera_object(space_data):
     camera.data.clip_end = space_data.clip_end
 
     camera.data.view_camera_zoom = region_3d.view_camera_zoom
+    camera.data.view_camera_offset = region_3d.view_camera_offset
 
     if region_3d.view_perspective == 'ORTHO':
         camera.data.arnold.camera_type = "ortho_camera"
