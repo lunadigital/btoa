@@ -44,7 +44,7 @@ class CameraExporter(ObjectExporter):
             scale = 1
             x_offset, y_offset = (0, 0)
             
-            if cdata.is_render_view:
+            if hasattr(cdata, "is_render_view") and cdata.is_render_view:
                 scale = 0.5 * (2 / ((math.sqrt(2) + cdata.view_camera_zoom / 50))) ** 2
                 x_offset, y_offset = cdata.view_camera_offset
 
