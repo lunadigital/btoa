@@ -18,7 +18,9 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
 
     def draw_buttons(self, context, layout):
         parent_material = btoa.utils.get_parent_material_from_nodetree(self.id_data)
-        layout.prop(parent_material, "diffuse_color", text="Viewport")
+
+        if parent_material:
+            layout.prop(parent_material, "diffuse_color", text="Viewport")
         
         layout.prop(self, "is_active", toggle=1)
 
