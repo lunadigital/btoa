@@ -265,14 +265,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
             new_node.set_string("name", bl_camera.name)
 
-        AI_SESSION.cache.viewport_camera["matrix_world"] = bl_camera.matrix_world
-        AI_SESSION.cache.viewport_camera["ortho_scale"] = bl_camera.data.ortho_scale
-        AI_SESSION.cache.viewport_camera["camera_type"] = bl_camera.data.arnold.camera_type
+        AI_SESSION.cache.viewport_camera.sync(bl_camera)
 
         # Update shaders
         if depsgraph.id_type_updated("MATERIAL"):
             for update in reversed(depsgraph.updates):
                 material = btoa.utils.get_parent_material_from_nodetree(update.id)
+                world_ntree = scene.world.arnold.node_tree
                 
                 if material:
                     unique_name = btoa.utils.get_unique_name(material)
@@ -288,7 +287,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                         # avoid memory and session.get_node_by_name() issues
                         new_node.set_string("name", unique_name)
 
-                elif update.id.name == scene.world.arnold.node_tree.name:
+                elif world_ntree and update.id.name == world_ntree.name:
                     # This code is repeated in view_draw() below
                     # Consider cleaning this up
                     unique_name = btoa.utils.get_unique_name(scene.world)
@@ -354,10 +353,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # Check to see if viewport camera changed
         bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
 
-        matrix_changed = bl_camera.matrix_world != AI_SESSION.cache.viewport_camera["matrix_world"]
-        ortho_scale_changed = bl_camera.data.arnold.camera_type == "ortho_camera" and bl_camera.data.ortho_scale != AI_SESSION.cache.viewport_camera["ortho_scale"]
-
-        if matrix_changed or ortho_scale_changed:
+        if AI_SESSION.cache.viewport_camera.redraw_required(bl_camera):
             self.tag_update()
 
         # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was

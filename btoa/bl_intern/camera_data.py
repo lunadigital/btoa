@@ -24,3 +24,6 @@ class BlenderCameraData:
         self.clip_start = 0.01
         self.clip_end = 1000
         self.ortho_scale = 1
+        self.view_camera_zoom = 0
+        self.view_camera_offset = (0, 0)
+        self.is_render_view = False
