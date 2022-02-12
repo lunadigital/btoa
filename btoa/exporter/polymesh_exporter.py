@@ -56,9 +56,9 @@ class PolymeshExporter(ObjectExporter):
 
                             # Check if we're using a displacment node or not. If we are, the export won't have the
                             # BTNODE type in the export tuple
-                            if node[1] == 'BTNODE':
-                                shader = node[0]
-                            else:
+                            shader = node[0]
+                            
+                            if node[1] != 'BTNODE':
                                 shader = node[0]
 
                                 self.node.set_float("disp_padding", node[1])
