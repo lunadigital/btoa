@@ -1,4 +1,5 @@
 from .ai_template_class import AiTemplateClass
+from .array import ArnoldArray
 from .matrix import ArnoldMatrix
 
 import arnold
@@ -83,6 +84,20 @@ class ArnoldNode(AiTemplateClass):
             return None
             
         return arnold.AiNodeGetInt(self.data, param)
+
+    def get_array(self, param, copy=False):
+        if not self.is_valid():
+            return None
+
+        ainode = arnold.AiNodeGetArray(self.data, param)
+
+        if copy:
+            ainode = arnold.AiArrayCopy(ainode)
+
+        node = ArnoldArray()
+        node.data = ainode
+
+        return node
 
     def get_bool(self, param):
         if not self.is_valid():

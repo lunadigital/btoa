@@ -53,31 +53,20 @@ def get_position_along_local_vector(ob, distance, axis):
     result = translation_matrix @ ob.matrix_world
     return result.to_translation()
 
-'''
-TODO: This is a righteous mess and needs to be cleaned up.
-'''
 def get_unique_name(datablock):
-    prefix = ""
-    name = ""
+    db = datablock
 
-    if hasattr(datablock, "is_instance"):
-        if datablock.is_instance:
-            prefix = datablock.parent.name + "_"
-        
-        ob = get_object_data_from_instance(datablock)
-        name = ob.name + "_MESH"
+    if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
+        db = datablock.instance_object
 
-    elif hasattr(datablock, "data") and isinstance(datablock.data, bpy.types.Mesh):
-        name = datablock.name + "_MESH"
+    if hasattr(db, "data"):
+        t = db.type
+        n = db.name
+    elif isinstance(db, bpy.types.Material):
+        t = db.arnold.node_tree.type
+        n = db.arnold.node_tree.name
 
-    else:
-        # Assume it's a material
-        if datablock.library:
-            prefix = datablock.library.name + "_"
-        
-        name = datablock.name + "_MATERIAL"
-
-    return prefix + name
+    return "{}_{}".format(t, n)
 
 def get_render_resolution(session_cache, interactive=False):
     if interactive:

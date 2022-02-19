@@ -1,5 +1,6 @@
 from .ai_template_class import AiTemplateClass
 from .constants import BTOA_TYPE_CONSTANTS
+from .matrix import ArnoldMatrix
 
 import arnold
 
@@ -29,7 +30,10 @@ class ArnoldArray(AiTemplateClass):
 
     def set_matrix(self, i, val):
         if self.is_valid():
-            arnold.AiArraySetMtx(self.data, i, arnold.AtMatrix(*val))
+            if isinstance(val, ArnoldMatrix):
+                arnold.AiArraySetMtx(self.data, i, val.data)
+            else:
+                arnold.AiArraySetMtx(self.data, i, arnold.AtMatrix(*val))
 
     def set_vector(self, i, array):
         if self.is_valid():
@@ -39,3 +43,18 @@ class ArnoldArray(AiTemplateClass):
         if self.is_valid():
             ptr = val.data if hasattr(val, "data") else val
             arnold.AiArraySetPtr(self.data, i, ptr)
+            
+    def get_num_keys(self):
+        if not self.is_valid():
+            return None
+        
+        return arnold.AiArrayGetNumKeys(self.data)
+    
+    def get_matrix(self, i):
+        if not self.is_valid():
+            return None
+
+        node = ArnoldMatrix()
+        node.data = arnold.AiArrayGetMtx(self.data, i)
+        
+        return node
