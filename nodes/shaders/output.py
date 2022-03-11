@@ -25,7 +25,11 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
         layout.prop(self, "is_active", toggle=1)
 
     def export(self):
-        return self.inputs["Surface"].export(), None, self.inputs["Displacement"].export()
+        surface = self.inputs["Surface"].export() if "Surface" in self.inputs.keys() else None
+        volume = None # Not implemented yet
+        displacement = self.inputs["Displacement"].export() if "Displacement" in self.inputs.keys() else None
+        
+        return surface, volume, displacement
 
     def export_surface(self):
         return self.inputs["Surface"].export()[0]
