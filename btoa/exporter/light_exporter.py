@@ -2,6 +2,7 @@ import bpy
 import mathutils
 
 from .object_exporter import ObjectExporter
+from .instance_exporter import InstanceExporter
 
 from ..node import ArnoldNode
 from ..constants import BTOA_LIGHT_CONVERSIONS, BTOA_LIGHT_SHAPE_CONVERSIONS
@@ -21,10 +22,17 @@ class LightExporter(ObjectExporter):
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
-            self.node = ArnoldNode(ntype)
+            name = export_utils.get_unique_name(self.datablock_eval)
+            existing_node = self.session.get_node_by_name(name)
 
-        self.node.set_string("name", export_utils.get_unique_name(self.datablock_eval))
+            if existing_node.is_valid():
+                instancer = InstanceExporter(self.session)
+                instancer.set_transform(self.get_transform_matrix())
+                return instancer.export(existing_node)
+            else:
+                ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
+                self.node = ArnoldNode(ntype)
+                self.node.set_string("name", name)
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':

@@ -5,7 +5,9 @@ import math
 import numpy
 
 from .object_exporter import ObjectExporter
+from .instance_exporter import InstanceExporter
 
+from ..node import ArnoldNode
 from ..array import ArnoldArray
 from ..constants import BTOA_VISIBILITY
 from ..polymesh import ArnoldPolymesh
@@ -125,44 +127,46 @@ class PolymeshExporter(ObjectExporter):
 
         return vlist_data, nlist_data
 
-    def generate_matrices(self):
-        matrix = None
+    def get_transform_matrix(self):
+        '''Overrides parent method so we can re-evaluate mesh if needed'''
+        matrix = super().get_transform_matrix()
+        scene = self.cache.scene
+
+        if scene["enable_motion_blur"]:
+            self.evaluate_mesh()
+        
+        return matrix
+
+    def get_vertex_normal_data(self):
+        scene = self.cache.scene
+
         vlist_data = None
         nlist_data = None
 
-        if self.cache.scene["enable_motion_blur"]:
-            matrix = self.get_blur_matrices()
-            self.evaluate_mesh()
+        if scene["enable_motion_blur"] and scene["deformation_motion_blur"]:
+            motion_steps = numpy.linspace(
+                self.cache.scene["shutter_start"],
+                self.cache.scene["shutter_end"],
+                self.cache.scene["motion_keys"]
+            )
 
-            if self.cache.scene["deformation_motion_blur"]:
-                motion_steps = numpy.linspace(
-                    self.cache.scene["shutter_start"],
-                    self.cache.scene["shutter_end"],
-                    self.cache.scene["motion_keys"]
-                )
+            for i in range(0, motion_steps.size):
+                frame, subframe = self.get_target_frame(motion_steps[i])
+                self.cache.frame_set(frame, subframe=subframe)
 
-                for i in range(0, motion_steps.size):
-                    frame, subframe = self.get_target_frame(motion_steps[i])
-                    self.cache.frame_set(frame, subframe=subframe)
-
-                    self.evaluate_mesh()
-
-                    v, n = self.get_static_mesh_data()
-
-                    vlist_data = v if vlist_data is None else numpy.concatenate((vlist_data, v))
-                    nlist_data = n if nlist_data is None else numpy.concatenate((nlist_data, n))
-
-                self.cache.frame_set(self.cache.scene["frame_current"], subframe=0)
                 self.evaluate_mesh()
 
-            else:
-                vlist_data, nlist_data = self.get_static_mesh_data()
-        
+                v, n = self.get_static_mesh_data()
+
+                vlist_data = v if vlist_data is None else numpy.concatenate((vlist_data, v))
+                nlist_data = n if nlist_data is None else numpy.concatenate((nlist_data, n))
+
+            self.cache.frame_set(self.cache.scene["frame_current"], subframe=0)
+            self.evaluate_mesh()
         else:
-            matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
             vlist_data, nlist_data = self.get_static_mesh_data()
         
-        return matrix, vlist_data, nlist_data
+        return vlist_data, nlist_data
     
     def extract_mesh_data(self, vlist_data, nlist_data):
         sdata = self.cache.scene
@@ -235,17 +239,24 @@ class PolymeshExporter(ObjectExporter):
             self.datablock_eval = export_utils.get_object_data_from_instance(instance)
         else:
             self.datablock_eval = instance
-            
-        self.evaluate_mesh()
-
-        if not self.mesh:
-            return None
 
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
             name = export_utils.get_unique_name(self.datablock_eval)
-            self.node = ArnoldPolymesh(name)
+            existing_node = self.session.get_node_by_name(name)
+
+            if existing_node.is_valid():
+                instancer = InstanceExporter(self.session)
+                instancer.set_transform(self.get_transform_matrix())
+                return instancer.export(existing_node)
+            else:
+                self.node = ArnoldPolymesh(name)
+
+        self.evaluate_mesh()
+
+        if not self.mesh:
+            return None
 
         # General settings
         self.node.set_bool("smoothing", True)
@@ -297,7 +308,8 @@ class PolymeshExporter(ObjectExporter):
             self.mesh = None
 
     def generate_polymesh_data(self):
-        matrix, vlist_data, nlist_data = self.generate_matrices()
+        matrix = self.get_transform_matrix()
+        vlist_data, nlist_data = self.get_vertex_normal_data()
         vlist, nlist, nsides, vidxs, nidxs = self.extract_mesh_data(vlist_data, nlist_data)
 
         if self.cache.scene["enable_motion_blur"]:
