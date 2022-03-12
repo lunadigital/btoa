@@ -69,8 +69,11 @@ def get_unique_name(datablock):
     elif isinstance(db, bpy.types.Material):
         t = db.arnold.node_tree.type
         n = db.arnold.node_tree.name
+        _type = db.type
+    elif isinstance(db, (bpy.types.Material, bpy.types.World)):
+        _type = db.arnold.node_tree.type
 
-    return "{}_{}".format(t, n)
+    return "{}_{}".format(_type, db.name)
 
 def get_render_resolution(session_cache, interactive=False):
     if interactive:
