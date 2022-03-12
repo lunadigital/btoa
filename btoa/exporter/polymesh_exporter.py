@@ -5,6 +5,7 @@ import math
 import numpy
 
 from .object_exporter import ObjectExporter
+from .instance_exporter import InstanceExporter
 
 from ..node import ArnoldNode
 from ..array import ArnoldArray
@@ -127,18 +128,20 @@ class PolymeshExporter(ObjectExporter):
         return vlist_data, nlist_data
 
     def get_transform_matrix(self):
+        '''Overrides parent method so we can re-evaluate mesh if needed'''
+        matrix = super().get_transform_matrix()
         scene = self.cache.scene
 
         if scene["enable_motion_blur"]:
-            matrix = self.get_blur_matrices()
             self.evaluate_mesh()
-        else:
-            matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
         
         return matrix
 
     def get_vertex_normal_data(self):
         scene = self.cache.scene
+
+        vlist_data = None
+        nlist_data = None
 
         if scene["enable_motion_blur"] and scene["deformation_motion_blur"]:
             motion_steps = numpy.linspace(
@@ -244,31 +247,9 @@ class PolymeshExporter(ObjectExporter):
             existing_node = self.session.get_node_by_name(name)
 
             if existing_node.is_valid():
-                self.node = ArnoldNode("instancer")
-
-                node_array = ArnoldArray()
-                node_array.allocate(1, 1, 'POINTER')
-                node_array.set_pointer(0, existing_node)
-                self.node.set_array("nodes", node_array)
-
-                transform = self.get_transform_matrix()
-
-                if self.cache.scene["enable_motion_blur"]:
-                    existing_transform = existing_node.get_array("matrix", copy=True)
-
-                    for i in range(0, existing_transform.get_num_keys()):
-                        existing_mtx = existing_transform.get_matrix(i)
-                        instance_mtx = transform.get_matrix(i)
-
-                        existing_mtx.multiply(instance_mtx)
-
-                        existing_transform.set_matrix(i, existing_mtx)
-                        
-                    self.node.set_array("instance_matrix", existing_transform)
-                else:
-                    self.node.set_matrix("instance_matrix", transform)
-
-                return self.node
+                instancer = InstanceExporter(self.session)
+                instancer.set_transform(self.get_transform_matrix())
+                return instancer.export(existing_node)
             else:
                 self.node = ArnoldPolymesh(name)
 

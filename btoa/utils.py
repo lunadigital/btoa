@@ -60,8 +60,12 @@ def get_unique_name(datablock):
         db = datablock.instance_object
 
     if hasattr(db, "data"):
-        t = db.type
-        n = db.name
+        if isinstance(db.data, bpy.types.Light):
+            t = db.data.type
+            n = db.data.name
+        else:
+            t = db.type
+            n = db.name
     elif isinstance(db, bpy.types.Material):
         t = db.arnold.node_tree.type
         n = db.arnold.node_tree.name
