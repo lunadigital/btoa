@@ -3,7 +3,10 @@ import bpy
 ''' Utility functions for operators '''
 
 def make_nodetree_name(material_name):
-    return "Ai_" + material_name
+    import uuid
+    uid = uuid.uuid4()
+
+    return "Ai_{}_{}".format(material_name, uid.hex)
 
 def poll_object(context):
     return context.object and not context.object.library

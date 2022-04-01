@@ -70,6 +70,11 @@ def get_unique_name(datablock):
         t = db.arnold.node_tree.type
         n = db.arnold.node_tree.name
 
+        # For backwards compatibility with previous BtoA versions that
+        # don't use UUIDs in the node tree name
+        if len(db.arnold.node_tree.name.split("_")) == 2:
+            n = "{}_{}".format(db.arnold.node_tree.name, db.name)
+
     return "{}_{}".format(t, n)
 
 def get_render_resolution(session_cache, interactive=False):
