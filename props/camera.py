@@ -4,6 +4,14 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty,
 
 class ArnoldCamera(PropertyGroup):
     # Basic lens settings
+    def toggle_blender_camera_type(self, context):
+        if self.camera_type == 'ortho_camera':
+            bpy.context.object.data.type = 'ORTHO'
+        elif self.camera_type == 'persp_camera':
+            bpy.context.object.data.type = 'PERSP'
+        elif self.camera_type == 'spherical_camera':
+            bpy.context.object.data.type = 'PANO'
+
     camera_type: EnumProperty(
         name="Type",
         items=[
@@ -15,7 +23,8 @@ class ArnoldCamera(PropertyGroup):
             ('vr_camera', "VR", "VR"),
             ('uv_camera', "UV", "UV"),
         ],
-        default='persp_camera'
+        default='persp_camera',
+        update=toggle_blender_camera_type
     )
 
     exposure: FloatProperty(name="Exposure")
