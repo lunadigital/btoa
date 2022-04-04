@@ -25,7 +25,7 @@ class ArnoldNode(AiTemplateClass):
     
     def set_byte(self, param, val):
         if self.is_valid():
-            arnold.AiSetByte(self.data, param, val)
+            arnold.AiNodeSetByte(self.data, param, val)
 
     def set_int(self, param, val):
         if self.is_valid():

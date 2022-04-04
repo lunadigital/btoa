@@ -164,7 +164,7 @@ class AiImage(Node, ArnoldNode):
         node.set_bool("tflip", self.tflip)
         node.set_bool("swap_st", self.swap_st)
         node.set_bool("single_channel", self.single_channel)
-        node.set_int("start_channel", self.start_channel)
+        node.set_byte("start_channel", self.start_channel)
         node.set_int("mipmap_bias", self.mipmap_bias)
         node.set_string("uvset", self.uvset)
         node.set_float("soffset", self.soffset)

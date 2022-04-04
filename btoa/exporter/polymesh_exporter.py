@@ -267,11 +267,11 @@ class PolymeshExporter(ObjectExporter):
         data = self.datablock_eval.arnold
 
         self.node.set_string("subdiv_type", data.subdiv_type)
-        self.node.set_int("subdiv_iterations", data.subdiv_iterations)
+        self.node.set_byte("subdiv_iterations", data.subdiv_iterations)
         self.node.set_float("subdiv_adaptive_error", data.subdiv_adaptive_error)
         self.node.set_string("subdiv_adaptive_metric", data.subdiv_adaptive_metric)
         self.node.set_string("subdiv_adaptive_space", data.subdiv_adaptive_space)
-        self.node.set_bool("subdiv_frustrum_ignore", data.subdiv_frustrum_ignore)
+        self.node.set_bool("subdiv_frustum_ignore", data.subdiv_frustum_ignore)
         self.node.set_string("subdiv_uv_smoothing", data.subdiv_uv_smoothing)
         self.node.set_bool("subdiv_smooth_derivs", data.subdiv_smooth_derivs)
 
@@ -382,4 +382,4 @@ class PolymeshExporter(ObjectExporter):
         if self.datablock_eval.indirect_only_get(view_layer=self.cache.view_layer):
             visibility -= 1
 
-        self.node.set_int("visibility", visibility)
+        self.node.set_byte("visibility", visibility)

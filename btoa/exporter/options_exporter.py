@@ -39,7 +39,7 @@ class OptionsExporter(Exporter):
 
         options.set_bool("enable_adaptive_sampling", scene["use_adaptive_sampling"])
         options.set_int("AA_samples_max", scene["adaptive_aa_samples_max"])
-        options.set_float("adaptive_threshold", scene["adaptive_threshold"])
+        options.set_float("AA_adaptive_threshold", scene["adaptive_threshold"])
 
         if scene["aa_seed"] > 0:
             options.set_int("AA_seed", scene["aa_seed"])
