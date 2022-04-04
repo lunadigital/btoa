@@ -67,7 +67,7 @@ def get_unique_name(datablock):
             t = db.type
             n = db.name
     elif isinstance(db, (bpy.types.Material, bpy.types.World)):
-        t = db.arnold.node_tree.type
+        t = "SHADER"
         n = db.arnold.node_tree.name
 
         # For backwards compatibility with previous BtoA versions that
