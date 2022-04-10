@@ -1,6 +1,7 @@
 import bpy
 import bmesh
 import math
+import mathutils
 import numpy
 from bpy_extras import view3d_utils
 
@@ -92,49 +93,45 @@ def get_render_resolution(session_cache, interactive=False):
 
     return x, y
 
-def get_viewport_camera_object(space_data):
-    DEFAULT_SENSOR_WIDTH = 36
-
-    region_3d = space_data.region_3d
-    
-    options = UniverseOptions()
-    width, height = options.get_int("xres"), options.get_int("yres")
+def get_viewport_camera_object(context):
+    DEFAULT_SENSOR_WIDTH = 36.0
+    ratio = context.region.width / context.region.height
 
     camera = BlenderCamera()
     camera.name = "BTOA_VIEWPORT_CAMERA"
 
-    view_matrix = region_3d.view_matrix.inverted()
-    camera.matrix_world = view_matrix
+    camera.matrix_world = context.region_data.view_matrix.inverted()
+    camera.data.clip_start = context.space_data.clip_start
+    camera.data.clip_end = context.space_data.clip_end
 
-    # FOV
-    sensor_width = DEFAULT_SENSOR_WIDTH
-    lens = space_data.lens
-
-    if region_3d.view_perspective == 'CAMERA':
-        sensor_width = space_data.camera.data.sensor_width
-        lens = space_data.camera.data.lens
-
-        camera.data.is_render_view = True
-
+    sensor_width = context.space_data.camera.data.sensor_width if context.region_data.view_perspective == 'CAMERA' else DEFAULT_SENSOR_WIDTH
+    lens = context.space_data.camera.data.lens if context.region_data.view_perspective == 'CAMERA' else context.space_data.lens
     camera.data.angle = 2 * math.atan(sensor_width / lens)
 
-    # Clipping
-    camera.data.clip_start = space_data.clip_start
-    camera.data.clip_end = space_data.clip_end
+    if context.region_data.view_perspective == 'CAMERA':
+        camera.data.arnold.camera_type = context.space_data.camera.data.arnold.camera_type
+        camera.data.is_render_view = True
 
-    camera.data.view_camera_zoom = region_3d.view_camera_zoom
-    camera.data.view_camera_offset = region_3d.view_camera_offset
+        camera.data.zoom = 2.0 / (2.0 ** 0.5 + context.region_data.view_camera_zoom / 50.0) ** 2
+        camera.data.offset = (
+            context.region_data.view_camera_offset[0] * 2,
+            context.region_data.view_camera_offset[1] * 2
+            )
 
-    if region_3d.view_perspective == 'ORTHO':
+        if camera.data.arnold.camera_type == 'ortho_camera':
+            camera.data.ortho_scale = context.space_data.camera.data.ortho_scale
+    elif context.region_data.view_perspective == 'ORTHO':
         camera.data.arnold.camera_type = "ortho_camera"
 
-        if height > width:
-            # This was just a lucky guess, I'm not entirely sure why this works
-            sensor = DEFAULT_SENSOR_WIDTH * (width / height)
-        else:
-            sensor = DEFAULT_SENSOR_WIDTH
+        sensor = sensor_width * ratio if ratio < 1.0 else DEFAULT_SENSOR_WIDTH
+        camera.data.ortho_scale = context.region_data.view_distance * sensor / lens
 
-        camera.data.ortho_scale = 2 * region_3d.view_distance * sensor / space_data.lens
+        '''
+        By default an orthographic viewport camera is VERY close to the origin of the
+        scene, which causes clipping. We're going to manually move it back 100 units
+        along the local Z (forward/backward) axis to avoid this.
+        '''
+        camera.matrix_world @= mathutils.Matrix.Translation((0.0, 0.0, 100.0))
 
     return camera
 

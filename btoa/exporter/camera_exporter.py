@@ -33,23 +33,26 @@ class CameraExporter(ObjectExporter):
             matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
             self.node.set_matrix("matrix", matrix)
 
+        zoom = 1
+        x_offset, y_offset = (0, 0)
+
         if cdata.arnold.camera_type == 'ortho_camera':
-            scale = cdata.ortho_scale * 0.5
-            self.node.set_vector2("screen_window_min", -scale, -scale)
-            self.node.set_vector2("screen_window_max", scale, scale)
+            zoom = cdata.ortho_scale
+            
+            if hasattr(cdata, "is_render_view") and cdata.is_render_view:
+                zoom = zoom * cdata.zoom
+                x_offset, y_offset = cdata.offset
+
         elif cdata.arnold.camera_type == 'persp_camera':
             fov = export_utils.calc_horizontal_fov(self.datablock_eval)
             self.node.set_float("fov", math.degrees(fov))
 
-            scale = 1
-            x_offset, y_offset = (0, 0)
-            
             if hasattr(cdata, "is_render_view") and cdata.is_render_view:
-                scale = 0.5 * (2 / ((math.sqrt(2) + cdata.view_camera_zoom / 50))) ** 2
-                x_offset, y_offset = cdata.view_camera_offset
+                zoom = cdata.zoom
+                x_offset, y_offset = cdata.offset
 
-            self.node.set_vector2("screen_window_min", -scale + x_offset * 2, -scale + y_offset * 2)
-            self.node.set_vector2("screen_window_max", scale + x_offset * 2, scale + y_offset * 2)
+        self.node.set_vector2("screen_window_min", -zoom + x_offset, -zoom + y_offset)
+        self.node.set_vector2("screen_window_max", zoom + x_offset, zoom + y_offset)
 
         self.node.set_float("exposure", cdata.arnold.exposure)
 

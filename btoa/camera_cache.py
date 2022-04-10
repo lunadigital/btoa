@@ -3,8 +3,8 @@ class CameraCache:
         self.matrix_world = None
         self.ortho_scale = None
         self.camera_type = None
-        self.view_camera_zoom = 0
-        self.view_camera_offset = (0, 0)
+        self.zoom = 0
+        self.offset = (0, 0)
 
     def __matrix_changed(self, camera):
         return self.matrix_world != camera.matrix_world
@@ -13,17 +13,17 @@ class CameraCache:
         return camera.data.arnold.camera_type == "ortho_camera" and camera.data.ortho_scale != self.ortho_scale
     
     def __view_zoom_changed(self, camera):
-        return self.view_camera_zoom != camera.data.view_camera_zoom
+        return self.zoom != camera.data.zoom
     
     def __view_offset_changed(self, camera):
-        return self.view_camera_offset != tuple(list(camera.data.view_camera_offset))
+        return self.offset != tuple(list(camera.data.offset))
 
     def sync(self, camera):
         self.matrix_world = camera.matrix_world
         self.ortho_scale = camera.data.ortho_scale
         self.camera_type = camera.data.arnold.camera_type
-        self.view_camera_zoom = camera.data.view_camera_zoom
-        self.view_camera_offset = tuple(list(camera.data.view_camera_offset))
+        self.zoom = camera.data.zoom
+        self.offset = tuple(list(camera.data.offset))
 
     def redraw_required(self, camera):
         if (

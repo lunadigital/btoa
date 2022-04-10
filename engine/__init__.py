@@ -255,7 +255,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # Update viewport camera
         node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
 
-        bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
+        bl_camera = btoa.utils.get_viewport_camera_object(context)
 
         if node.type_is(bl_camera.data.arnold.camera_type):
             btoa.CameraExporter(AI_SESSION, node).export(bl_camera)
@@ -351,7 +351,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         dimensions = region.width, region.height
 
         # Check to see if viewport camera changed
-        bl_camera = btoa.utils.get_viewport_camera_object(context.space_data)
+        bl_camera = btoa.utils.get_viewport_camera_object(context)
 
         if AI_SESSION.cache.viewport_camera.redraw_required(bl_camera):
             self.tag_update()

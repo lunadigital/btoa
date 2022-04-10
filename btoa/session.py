@@ -58,7 +58,7 @@ class Session:
 
         if context:
             # In viewport, we must reconsruct the camera ourselves
-            bl_camera = export_utils.get_viewport_camera_object(context.space_data)
+            bl_camera = export_utils.get_viewport_camera_object(context)
             self.last_viewport_matrix = bl_camera.matrix_world
 
             camera = CameraExporter(self).export(bl_camera)
