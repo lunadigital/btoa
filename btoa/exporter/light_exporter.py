@@ -93,14 +93,14 @@ class LightExporter(ObjectExporter):
                 s = self.datablock.scale.x if self.datablock.scale.x > 0 else self.datablock.scale.y
                 self.node.set_float("radius", 0.5 * data.size * s)
             elif data.shape == 'RECTANGLE':
-                d = 0.5 * data.size_y * self.datablock.scale.y
-                top = export_utils.get_position_along_local_vector(self.datablock, d, 'Y')
-                bottom = export_utils.get_position_along_local_vector(self.datablock, -d, 'Y')
+                d = 0.5 * data.size_y * self.datablock_eval.scale.y
+                top = export_utils.get_position_along_local_vector(self.datablock_eval, d, 'Y')
+                bottom = export_utils.get_position_along_local_vector(self.datablock_eval, -d, 'Y')
 
                 self.node.set_vector("top", *top)
                 self.node.set_vector("bottom", *bottom)
 
-                s = self.datablock.scale.x if self.datablock.scale.x > self.datablock.scale.z else self.datablock.scale.z
+                s = self.datablock_eval.scale.x if self.datablock_eval.scale.x > self.datablock_eval.scale.z else self.datablock_eval.scale.z
                 self.node.set_float("radius", 0.5 * data.size * s)
 
         return self.node
