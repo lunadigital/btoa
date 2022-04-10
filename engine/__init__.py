@@ -315,16 +315,16 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     unique_name = btoa.utils.get_unique_name(update.id)
                     node = AI_SESSION.get_node_by_name(unique_name)
 
-                    if update.id.type == 'LIGHT' and light_data_needs_update:
-                        btoa.LightExporter(AI_SESSION, node).export(update.id)
+                    if update.id.type == 'LIGHT':
+                        if update.is_updated_transform or light_data_needs_update:
+                            btoa.LightExporter(AI_SESSION, node).export(update.id)
 
                     elif polymesh_data_needs_update:
                         btoa.PolymeshExporter(AI_SESSION, node).export(update.id, interactive=True)
 
-                    if update.is_updated_shading:
-                        pass
-
-                    if update.is_updated_transform:
+                    # Transforms for lights have to be handled brute-force by the LightExporter to
+                    # account for size and other parameters
+                    if update.is_updated_transform and update.id.type != 'LIGHT':
                         node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
             
                 # Update world material if rotation controller changed

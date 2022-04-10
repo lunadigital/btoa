@@ -64,15 +64,15 @@ class LightExporter(ObjectExporter):
         if data.type in ('POINT', 'SPOT'):
             self.node.set_float("radius", data.shadow_soft_size)
 
+            if data.type == 'SPOT':
+                self.node.set_float("cone_angle", math.degrees(data.spot_size))
+                self.node.set_float("penumbra_angle", math.degrees(data.arnold.penumbra_angle))
+                self.node.set_float("roundness", data.arnold.spot_roundness)
+                self.node.set_float("aspect_ratio", data.arnold.aspect_ratio)
+                self.node.set_float("lens_radius", data.arnold.lens_radius)
+
         elif data.type == 'SUN':
             self.node.set_float("angle", data.arnold.angle)
-
-        elif data.type == 'SPOT':
-            self.node.set_float("cone_angle", math.degrees(data.spot_size))
-            self.node.set_float("penumbra_angle", math.degrees(data.arnold.penumbra_angle))
-            self.node.set_float("roundness", data.arnold.spot_roundness)
-            self.node.set_float("aspect_ratio", data.arnold.aspect_ratio)
-            self.node.set_float("lens_radius", data.arnold.lens_radius)
 
         elif data.type == 'AREA':
             self.node.set_float("roundness", data.arnold.area_roundness)
@@ -81,13 +81,9 @@ class LightExporter(ObjectExporter):
             self.node.set_float("soft_edge", data.arnold.soft_edge)
 
             if data.shape == 'SQUARE':
-                smatrix = mathutils.Matrix.Diagonal((
-                    data.size / 2,
-                    data.size / 2,
-                    data.size / 2
-                )).to_4x4()
-
-                tmatrix = self.datablock.matrix_world @ smatrix
+                tmatrix = self.datablock.matrix_world @ \
+                          mathutils.Matrix.Scale(0.5, 4) @ \
+                          mathutils.Matrix.Scale(data.size, 4)
 
                 self.node.set_matrix(
                     "matrix",
