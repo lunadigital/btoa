@@ -1,4 +1,5 @@
 import bpy
+import math
 import mathutils
 
 from .object_exporter import ObjectExporter
