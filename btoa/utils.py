@@ -139,3 +139,10 @@ def get_parent_material_from_nodetree(ntree):
     for mat in bpy.data.materials:
         if mat.arnold.node_tree and mat.arnold.node_tree.name == ntree.name:
             return mat
+
+def get_volume_domain(ob):
+    for modifier in ob.modifiers:
+        if modifier.type == 'FLUID' and isinstance(modifier.domain_settings, bpy.types.FluidDomainSettings):
+            return modifier
+
+    return None

@@ -6,7 +6,7 @@ import numpy
 import time
 import os
 
-from .exporter import PolymeshExporter, CameraExporter, OptionsExporter, LightExporter, WorldExporter
+from .exporter import *
 
 from .array import ArnoldArray
 from .colormanager import ArnoldColorManager
@@ -46,7 +46,10 @@ class Session:
             ob = export_utils.get_object_data_from_instance(instance)
 
             if isinstance(ob.data, BTOA_CONVERTIBLE_TYPES):
-                PolymeshExporter(self).export(instance)
+                if export_utils.get_volume_domain(ob):
+                    VolumeExporter(self).export(instance)
+                else:
+                    PolymeshExporter(self).export(instance)
             elif isinstance(ob.data, bpy.types.Light):
                 LightExporter(self).export(instance)
             elif not self.is_interactive and isinstance(ob.data, bpy.types.Camera) and ob.name == depsgraph.scene.camera.name:
