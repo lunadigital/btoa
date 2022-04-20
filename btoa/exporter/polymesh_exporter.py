@@ -383,3 +383,8 @@ class PolymeshExporter(ObjectExporter):
             visibility -= 1
 
         self.node.set_byte("visibility", visibility)
+
+        self.node.set_bool(
+            "matte",
+            self.datablock_eval.holdout_get(view_layer=self.cache.view_layer)
+        )
