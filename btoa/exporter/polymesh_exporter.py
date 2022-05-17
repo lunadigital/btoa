@@ -29,7 +29,7 @@ class PolymeshExporter(ObjectExporter):
                     surface, volume, displacement = material_override.arnold.node_tree.export()
                     surface[0].set_string("name", unique_name)
                     self.node.set_pointer("shader", surface[0])
-        
+
         else:
             materials = []
 
@@ -47,7 +47,7 @@ class PolymeshExporter(ObjectExporter):
                             shader.set_string("name", unique_name)
 
                         mat[0] = shader
-      
+
                     if node_tree and node_tree.has_displacement():
                         unique_name = export_utils.get_unique_name(slot.material)
                         unique_name = "{}_disp".format(unique_name)
@@ -59,7 +59,7 @@ class PolymeshExporter(ObjectExporter):
                             # Check if we're using a displacment node or not. If we are, the export won't have the
                             # BTNODE type in the export tuple
                             shader = node[0]
-                            
+
                             if node[1] != 'BTNODE':
                                 shader = node[0]
 
@@ -69,12 +69,12 @@ class PolymeshExporter(ObjectExporter):
                                 self.node.set_bool("disp_autobump", node[4])
 
                             shader.set_string("name", unique_name)
-                        
+
                         mat[1] = shader
-                    
+
                     if mat[0] or mat[1]:
                         materials.append(mat)
-             
+
             if len(materials) > 0:
                 material_indices = numpy.ndarray(
                     len(self.mesh.polygons),
@@ -134,7 +134,7 @@ class PolymeshExporter(ObjectExporter):
 
         if scene["enable_motion_blur"]:
             self.evaluate_mesh()
-        
+
         return matrix
 
     def get_vertex_normal_data(self):
@@ -165,9 +165,9 @@ class PolymeshExporter(ObjectExporter):
             self.evaluate_mesh()
         else:
             vlist_data, nlist_data = self.get_static_mesh_data()
-        
+
         return vlist_data, nlist_data
-    
+
     def extract_mesh_data(self, vlist_data, nlist_data):
         sdata = self.cache.scene
 
@@ -221,7 +221,7 @@ class PolymeshExporter(ObjectExporter):
             len(self.mesh.loops),
             dtype=numpy.uint32
         )
-        
+
         nidxs = ArnoldArray()
         nidxs.convert_from_buffer(
             len(self.mesh.loops),
