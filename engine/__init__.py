@@ -1,3 +1,4 @@
+from typing import Optional
 import bpy, bgl, mathutils
 import ctypes
 import math
@@ -5,6 +6,7 @@ import numpy
 import os
 
 from .. import btoa
+from ..btoa import utils
 
 from bl_ui.properties_render import RENDER_PT_color_management
 from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
@@ -20,21 +22,24 @@ session and frame buffer to do it's job.
 So, that's it, we're here, deal with it. Let's move on.
 '''
 AI_ENGINE_TAG_REDRAW = None
-AI_SESSION = None
-AI_FRAMEBUFFER = None
+AI_SESSION: Optional[btoa.Session] = None
+AI_FRAMEBUFFER:Optional[btoa.FrameBuffer] = None
 
 def ai_render_update_callback(private_data, update_type, display_output):
     global AI_FRAMEBUFFER
     global AI_ENGINE_TAG_REDRAW
 
     if display_output != int(btoa.NO_DISPLAY_OUTPUTS):
+        assert AI_FRAMEBUFFER is not None
         AI_FRAMEBUFFER.requires_update = True
+
+        assert AI_ENGINE_TAG_REDRAW
         AI_ENGINE_TAG_REDRAW()
 
     status = btoa.FAILED
 
     if update_type == int(btoa.INTERRUPTED):
-        status = btoa.PAUSED  
+        status = btoa.PAUSED
     elif update_type == int(btoa.BEFORE_PASS):
         status = btoa.RENDERING
     elif update_type == int(btoa.DURING_PASS):
@@ -48,7 +53,7 @@ def ai_render_update_callback(private_data, update_type, display_output):
     elif update_type == int(btoa.ERROR):
         status = btoa.FAILED
 
-    return status
+    return int(status)
 
 def update_viewport(x, y, width, height, buffer, data):
     global AI_SESSION
@@ -64,11 +69,12 @@ def update_viewport(x, y, width, height, buffer, data):
         try:
             b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
             rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
-
+            assert AI_FRAMEBUFFER is not None
             AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.flatten())
-            
+
         finally:
-            AI_SESSION.free_buffer(buffer)
+            if (AI_SESSION):
+                AI_SESSION.free_buffer(buffer)
 
 AI_DISPLAY_CALLBACK = btoa.ArnoldDisplayCallback(update_viewport)
 AI_RENDER_CALLBACK = ai_render_update_callback
@@ -87,13 +93,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def __init__(self):
         self.progress = 0
         self._progress_increment = 0
-        
         self.session = btoa.Session()
 
     def __del__(self):
         global AI_SESSION
-        AI_SESSION.end()
-        AI_SESSION = None
+        if (AI_SESSION is not None):
+            AI_SESSION.end()
+            AI_SESSION = None
 
         global AI_ENGINE_TAG_REDRAW
         global dummy_tag_redraw
@@ -109,7 +115,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     @classmethod
     def register(cls):
         if cls._outliner_context_menu_draw is None:
-            
+
             def draw(self, context):
                 layout = self.layout
 
@@ -130,7 +136,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def unregister_outliner_context_menu_draw(cls):
         if cls._outliner_context_menu_draw is not None:
             OUTLINER_MT_collection_view_layer.draw = cls._outliner_context_menu_draw
-            cls._outliner_context_menu_draw = None              
+            cls._outliner_context_menu_draw = None
 
     def update(self, data, depsgraph):
         prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
@@ -176,7 +182,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
                     engine.progress += engine._progress_increment
                     engine.update_progress(engine.progress)
-                
+
                 finally:
                     engine.session.free_buffer(buffer)
             else:
@@ -191,22 +197,22 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         cb = btoa.ArnoldDisplayCallback(update_render_result)
 
         display_node = self.session.get_node_by_name("__display_driver")
-        
+
         if not display_node.is_valid():
             display_node = btoa.ArnoldNode("driver_display_callback")
             display_node.set_string("name", "__display_driver")
-        
+
         display_node.set_pointer("callback", cb)
 
         # Calculate progress increment
-        
-        width, height = options.get_render_resolution()
+
+        (width, height) = options.get_render_resolution()
         bucket_size = options.get_int("bucket_size")
 
         h_buckets = math.ceil(width / bucket_size)
         v_buckets = math.ceil(height / bucket_size)
         total_buckets = h_buckets * v_buckets
-        
+
         self.progress = 0
         self._progress_increment = 1 / total_buckets
 
@@ -234,11 +240,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             AI_ENGINE_TAG_REDRAW = self.tag_redraw
 
             display_node = self.session.get_node_by_name("__display_driver")
-            
+
             if not display_node.is_valid():
                 display_node = btoa.ArnoldNode("driver_display_callback")
                 display_node.set_string("name", "__display_driver")
-            
+
             display_node.set_pointer("callback", AI_DISPLAY_CALLBACK)
 
             AI_SESSION.render_interactive(AI_RENDER_CALLBACK)
@@ -255,7 +261,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # Update viewport camera
         node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
 
-        bl_camera = btoa.utils.get_viewport_camera_object(context)
+        bl_camera = utils.get_viewport_camera_object(context.space_data)
 
         if node.type_is(bl_camera.data.arnold.camera_type):
             btoa.CameraExporter(AI_SESSION, node).export(bl_camera)
@@ -270,13 +276,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # Update shaders
         if depsgraph.id_type_updated("MATERIAL"):
             for update in reversed(depsgraph.updates):
-                material = btoa.utils.get_parent_material_from_nodetree(update.id)
+                material = utils.get_parent_material_from_nodetree(update.id)
                 world_ntree = scene.world.arnold.node_tree
-                
+
                 if material:
-                    unique_name = btoa.utils.get_unique_name(material)
+                    unique_name = utils.get_unique_name(material)
                     old_node = AI_SESSION.get_node_by_name(unique_name)
-                    
+
                     if old_node.is_valid():
                         surface, volume, displacement = update.id.export()
                         new_node = surface[0]
@@ -290,9 +296,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 elif world_ntree and update.id.name == world_ntree.name:
                     # This code is repeated in view_draw() below
                     # Consider cleaning this up
-                    unique_name = btoa.utils.get_unique_name(scene.world)
+                    unique_name = utils.get_unique_name(scene.world)
                     old_node = AI_SESSION.get_node_by_name(unique_name)
-                    
+
                     if old_node.is_valid():
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
 
@@ -312,7 +318,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     polymesh_data_needs_update = True
 
                 if isinstance(update.id, bpy.types.Object):
-                    unique_name = btoa.utils.get_unique_name(update.id)
+                    unique_name = utils.get_unique_name(update.id)
                     node = AI_SESSION.get_node_by_name(unique_name)
 
                     if update.id.type == 'LIGHT':
@@ -325,14 +331,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     # Transforms for lights have to be handled brute-force by the LightExporter to
                     # account for size and other parameters
                     if update.is_updated_transform and update.id.type != 'LIGHT':
-                        node.set_matrix("matrix", btoa.utils.flatten_matrix(update.id.matrix_world))
-            
+                        node.set_matrix("matrix", utils.flatten_matrix(update.id.matrix_world))
+
                 # Update world material if rotation controller changed
                 rotation_controller = scene.world.arnold.rotation_controller
                 if rotation_controller and update.id.name == rotation_controller.name:
-                    unique_name = btoa.utils.get_unique_name(scene.world)
+                    unique_name = utils.get_unique_name(scene.world)
                     old_node = AI_SESSION.get_node_by_name(unique_name)
-                    
+
                     if old_node.is_valid():
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
 
@@ -346,12 +352,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         global AI_SESSION
         global AI_FRAMEBUFFER
 
+        assert AI_SESSION
+
         region = context.region
         scene = depsgraph.scene
         dimensions = region.width, region.height
 
         # Check to see if viewport camera changed
-        bl_camera = btoa.utils.get_viewport_camera_object(context)
+        bl_camera = utils.get_viewport_camera_object(context)
 
         if AI_SESSION.cache.viewport_camera.redraw_required(bl_camera):
             self.tag_update()
@@ -405,7 +413,7 @@ def gpencil_poll_override(cls, context):
 
 def register():
     bpy.utils.register_class(ArnoldRenderEngine)
-    
+
     for panel in get_panels():
         panel.COMPAT_ENGINES.add(ArnoldRenderEngine.bl_idname)
 
@@ -419,7 +427,7 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(ArnoldRenderEngine)
-    
+
     for panel in get_panels():
         if ArnoldRenderEngine.bl_idname in panel.COMPAT_ENGINES:
             panel.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)

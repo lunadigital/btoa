@@ -147,7 +147,6 @@ class ARNOLD_OT_material_init(Operator):
         material = context.object.active_material
         tree_name = utils.make_nodetree_name(material.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
-        
         utils.init_mat_node_tree(node_tree)
         material.arnold.node_tree = node_tree
 

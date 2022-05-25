@@ -10,7 +10,7 @@ class OptionsExporter(Exporter):
         scene = self.cache.scene
         render = self.cache.render
         prefs = self.cache.preferences
-        
+
         options = UniverseOptions()
 
         x, y = export_utils.get_render_resolution(self.cache, interactive=interactive)
@@ -23,7 +23,7 @@ class OptionsExporter(Exporter):
             max_y = int(math.ceil(y * (1 - render["border_min_y"])))
 
             options.set_render_region(min_x, min_y, max_x, max_y)
-        
+
         options.set_int("render_device", int(scene["render_device"]))
 
         options.set_int("AA_samples", scene["aa_samples"])

@@ -17,6 +17,9 @@ from .constants import BTOA_CONVERTIBLE_TYPES
 from .session_cache import SessionCache
 from . import utils as export_utils
 
+if "AI_SESSION" not in globals().keys():
+    AI_SESSION = None
+
 class Session:
     def __init__(self):
         self.reset()
@@ -29,14 +32,15 @@ class Session:
         if self.is_interactive:
             arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
             arnold.AiRenderEnd()
-        
+
         arnold.AiEnd()
-    
+
     def destroy(self, node):
         arnold.AiNodeDestroy(node.data)
 
-    def export(self, engine, depsgraph, prefs, context=None):
-        self.cache.sync(engine, depsgraph, prefs, context)
+    def export(self, engine, depsgraph, context=None):
+        global AI_SESSION
+        self.cache.sync(engine, depsgraph, context)
 
         OptionsExporter(self).export(interactive=self.is_interactive)
 
@@ -80,7 +84,7 @@ class Session:
         outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
         options.set_array("outputs", outputs)
 
-        arnold.AiRenderAddInteractiveOutput(None, 0)
+        arnold.AiRenderAddInteractiveOutput(AI_SESSION, 0)
 
         color_manager = ArnoldColorManager()
         color_manager.set_string("config", os.getenv("OCIO"))
@@ -108,7 +112,7 @@ class Session:
             while status == arnold.AI_RENDER_STATUS_RENDERING.value:
                 time.sleep(0.001)
                 status = arnold.AiRenderGetStatus()
-        
+
         result = arnold.AiRenderEnd()
 
         self.end()
