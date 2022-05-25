@@ -38,9 +38,9 @@ class Session:
     def destroy(self, node):
         arnold.AiNodeDestroy(node.data)
 
-    def export(self, engine, depsgraph, context=None):
+    def export(self, engine, depsgraph, prefs, context=None):
         global AI_SESSION
-        self.cache.sync(engine, depsgraph, context)
+        self.cache.sync(engine, depsgraph, prefs, context)
 
         OptionsExporter(self).export(interactive=self.is_interactive)
 
