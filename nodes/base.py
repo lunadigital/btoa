@@ -387,6 +387,7 @@ object_node_categories = [
             NodeItem("AiNormalMap"),
             NodeItem("AiShadowMatte"),
             NodeItem("AiStandardSurface"),
+            NodeItem("AiTwoSided"),
             NodeItem("AiWireframe")
         ]
     ),

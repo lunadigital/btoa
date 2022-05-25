@@ -14,6 +14,7 @@ from . import (
     shadow_matte,
     skydome,
     standard_surface,
+    two_sided,
     wireframe
 )
 
@@ -33,6 +34,7 @@ modules = (
     shadow_matte,
     skydome,
     standard_surface,
+    two_sided,
     wireframe
 )
 
