@@ -27,7 +27,7 @@ class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
             layout.template_ID(space, "pin_id")
 
         if not world.arnold.node_tree:
-            layout.operator("arnold.world_init")
+            layout.operator("arnold.world_init", icon='NODETREE')
 
 class ARNOLD_WORLD_PT_surface(WorldButtonsPanel, Panel):
     bl_label = "Surface"

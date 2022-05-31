@@ -139,8 +139,8 @@ class ARNOLD_OT_material_select(Operator):
 
 class ARNOLD_OT_material_init(Operator):
     bl_idname = 'arnold.material_init'
-    bl_label = "Initialize Arnold Nodes"
-    bl_description = "Initializes an Arnold node tree on an existing material"
+    bl_label = "Use Nodes"
+    bl_description = "Creates an Arnold node tree for an existing material"
     bl_options = {'UNDO'}
 
     def execute(self, context):

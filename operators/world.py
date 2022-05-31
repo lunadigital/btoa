@@ -24,8 +24,8 @@ class ARNOLD_OT_world_new(Operator):
 
 class ARNOLD_OT_world_init(Operator):
     bl_idname = 'arnold.world_init'
-    bl_label = "Initialize Arnold Nodes"
-    bl_description = "Initializes an Arnold node tree on an existing world"
+    bl_label = "Use Nodes"
+    bl_description = "Creates an Arnold node tree for an existing world"
     bl_options = {'UNDO'}
 
     def execute(self, context):
