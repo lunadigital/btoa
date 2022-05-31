@@ -12,11 +12,12 @@ class AiColorConstant(Node, ArnoldNode):
         self.inputs.new("AiNodeSocketRGB", name="Color", identifier="input")
         self.outputs.new("AiNodeSocketRGB", "RGB", identifier="output")
 
-    # This isn't a native Arnold node class, so we're
-    # hijacking the export method to get the result
-    # we want.
+    '''
+    This isn't a native Arnold node class, so we're hijacking the export method
+    to get the result we want.
+    '''
     def export(self):
-        return self.inputs[0].default_value, self.inputs[0].default_type
+        return self.inputs[0].export()
 
 def register():
     from bpy.utils import register_class
