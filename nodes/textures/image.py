@@ -107,8 +107,6 @@ class AiImage(Node, ArnoldNode):
         soft_max=1
     )
 
-    ignore_missing_textures: BoolProperty(name="Ignore Missing Textures")
-    
     def init(self, context):
         self.inputs.new("AiNodeSocketRGB", "Multiply", identifier="multiply").default_value = (1, 1, 1)
         self.inputs.new("AiNodeSocketRGB", "Offset", identifier="offset").default_value = (0, 0, 0)
@@ -144,7 +142,6 @@ class AiImage(Node, ArnoldNode):
         layout.prop(self, "uvset")
         layout.prop(self, "soffset")
         layout.prop(self, "toffset")
-        layout.prop(self, "ignore_missing_textures")
 
     def sub_export(self, node):
         if self.image:
@@ -169,7 +166,9 @@ class AiImage(Node, ArnoldNode):
         node.set_string("uvset", self.uvset)
         node.set_float("soffset", self.soffset)
         node.set_float("toffset", self.toffset)
-        node.set_bool("ignore_missing_textures", self.ignore_missing_textures)
+
+        prefs = bpy.context.preferences.addons["btoa"].preferences
+        node.set_bool("ignore_missing_textures", prefs.ignore_missing_textures)
 
 classes = (
     AiImageUser,

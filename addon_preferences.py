@@ -23,6 +23,7 @@ class ArnoldAddonPreferences(AddonPreferences):
 
     abort_on_license_fail: BoolProperty(name="Abort On License Fail")
     skip_license_check: BoolProperty(name="Skip License Check")
+    ignore_missing_textures: BoolProperty(name="Ignore Missing Textures", default=True)
 
     # Used to check if we need to unregister everything or just addon preferences
     full_unregister: BoolProperty()
@@ -65,6 +66,14 @@ class ArnoldAddonPreferences(AddonPreferences):
         col.separator()
         col.prop(self, "abort_on_license_fail")
         col.prop(self, "skip_license_check", text="Render with Watermarks (Skip License Check)")
+
+        # Error Handling
+        box = self.layout.box()
+
+        col = box.column()
+        col.label(text="Error Handling")
+        col.separator()
+        col.prop(self, "ignore_missing_textures")
 
 classes = (
     ArnoldAddonPreferences,
