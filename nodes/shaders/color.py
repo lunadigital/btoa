@@ -1,6 +1,7 @@
 import bpy
 from bpy.props import *
 from .. import base
+from ... import utils
 
 '''
 AiColorConstant

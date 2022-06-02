@@ -1,20 +1,36 @@
 import bpy
-from bpy.types import Node
-from bpy.props import BoolProperty
+from bpy.props import *
+from .. import base
+from ... import utils
 
-from ..base import ArnoldNode
+'''
+AiMultiply
+https://docs.arnoldrenderer.com/display/A5NodeRef/multiply
 
-class AiRange(Node, ArnoldNode):
-    '''
-    Remap input from the [input_min, input_max] range to the
-    [ouput_min, output_max] range linearly. The result is not
-    clamped unless smoothstep is on, and the result is
-    interpolated smoothly and the result is clamped in the
-    [output_min, output_max] range.
-    '''
+Returns input1 x input2.
+'''
+class AiMultiply(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Multiply"
+    ai_name = "multiply"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketRGB', "Input 1", identifier="input1").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Input 2", identifier="input2").default_value = (1, 1, 1)
+
+        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+
+'''
+AiRange
+https://docs.arnoldrenderer.com/display/A5NodeRef/range
+
+Remap input from the [input_min, input_max] range to the
+[ouput_min, output_max] range linearly. The result is not
+clamped unless smoothstep is on, and the result is
+interpolated smoothly and the result is clamped in the
+[output_min, output_max] range.
+'''
+class AiRange(bpy.types.Node, base.ArnoldNode):
     bl_label = "Range"
-    bl_icon = 'NONE'
-
     ai_name = "range"
 
     smoothstep: BoolProperty(name="Smoothstep")
@@ -38,8 +54,13 @@ class AiRange(Node, ArnoldNode):
     def sub_export(self, node):
         node.set_bool("smoothstep", self.smoothstep)
 
+classes = (
+    AiMultiply,
+    AiRange,
+)
+
 def register():
-    bpy.utils.register_class(AiRange)
+    utils.register_classes(classes)
 
 def unregister():
-    bpy.utils.unregister_class(AiRange)
+    utils.unregister_classes(classes)
