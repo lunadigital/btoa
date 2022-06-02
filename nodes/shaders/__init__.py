@@ -1,47 +1,13 @@
-from . import (
-    ambient_occlusion,
-    bump2d,
-    car_paint,
-    displacement,
-    flat,
-    float_to_rgb,
-    float_to_rgba,
-    lambert,
-    matte,
-    mix_shader,
-    normal_map,
-    output,
-    shadow_matte,
-    skydome,
-    standard_surface,
-    two_sided,
-    wireframe
-)
-
-modules = (
-    ambient_occlusion,
-    bump2d,
-    car_paint,
-    displacement,
-    flat,
-    float_to_rgb,
-    float_to_rgba,
-    lambert,
-    matte,
-    mix_shader,
-    normal_map,
-    output,
-    shadow_matte,
-    skydome,
-    standard_surface,
-    two_sided,
-    wireframe
-)
+from . import conversion
+from . import lights
+from . import surface
 
 def register():
-    for m in modules:
-        m.register()
+    conversion.register()
+    lights.register()
+    surface.register()
 
 def unregister():
-    for m in reversed(modules):
-        m.unregister()
+    conversion.unregister()
+    lights.unregister()
+    surface.unregister()

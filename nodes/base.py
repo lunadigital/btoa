@@ -1,5 +1,5 @@
 import bpy
-from bpy.types import NodeTree, ShaderNodeTree
+from bpy.types import NodeTree, ShaderNodeTree, Node
 from bpy.props import BoolProperty
 
 from bl_ui.space_node import NODE_HT_header, NODE_MT_editor_menus
@@ -231,6 +231,8 @@ class ArnoldShaderTree(ShaderNodeTree):
         return output.has_displacement()
 
 class ArnoldNode:
+    bl_icon = 'NONE'
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == ArnoldShaderTree.bl_idname
@@ -281,6 +283,45 @@ class ArnoldNodeOutput:
     
     def copy(self, node):
         self._set_active()
+
+class AiShaderOutput(Node, ArnoldNodeOutput):
+    '''Output node for Arnold shaders.'''
+    bl_label = "Shader Output"
+    bl_icon = 'NONE'
+
+    def init(self, context):
+        super().init(context)
+
+        self.inputs.new(type="AiNodeSocketSurface", name="Surface", identifier="surface")
+        #self.inputs.new(type="NodeSocketShader", name="Volume", identifier="volume")
+        self.inputs.new(type="AiNodeSocketSurface", name="Displacement", identifier="displacement")
+
+    def draw_buttons(self, context, layout):
+        parent_material = btoa.utils.get_parent_material_from_nodetree(self.id_data)
+
+        if parent_material:
+            layout.prop(parent_material, "diffuse_color", text="Viewport")
+        
+        layout.prop(self, "is_active", toggle=1)
+
+    def export(self):
+        surface = self.inputs["Surface"].export() if "Surface" in self.inputs.keys() else None
+        volume = None # Not implemented yet
+        displacement = self.inputs["Displacement"].export() if "Displacement" in self.inputs.keys() else None
+        
+        return surface, volume, displacement
+
+    def export_surface(self):
+        return self.inputs["Surface"].export()[0]
+
+    def export_displacement(self):
+        return self.inputs["Displacement"].export()
+    
+    def has_surface(self):
+        return self.inputs["Surface"].is_linked
+
+    def has_displacement(self):
+        return self.inputs["Displacement"].is_linked
 
 class ArnoldNodeCategory(NodeCategory):
     @classmethod
