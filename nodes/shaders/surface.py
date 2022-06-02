@@ -502,4 +502,3 @@ def register():
 
 def unregister():
     utils.unregister_classes(classes)
-
