@@ -68,7 +68,7 @@ class LayerProperties(PropertyGroup):
 class AiLayeredTexture(Node, ArnoldNode):
     ''' A base class for layered Arnold texture nodes (layer_float, layer_rgba). This is NOT a public-facing class. '''
     bl_icon = 'NONE'
-    bl_width_default = constants.BL_NODE_WIDTH_DEFAULT
+    bl_width_default = constants.BL_NODE_WIDTH_WIDE
 
     layers: CollectionProperty(type=LayerProperties)
 
