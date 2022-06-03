@@ -3,6 +3,7 @@ from . import conversion
 from . import lights
 from . import math
 from . import surface
+from . import textures
 
 def register():
     color.register()
@@ -10,6 +11,7 @@ def register():
     lights.register()
     math.register()
     surface.register()
+    textures.register()
 
 def unregister():
     color.unregister()
@@ -17,3 +19,4 @@ def unregister():
     lights.unregister()
     math.unregister()
     surface.unregister()
+    textures.unregister()
