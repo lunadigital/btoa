@@ -1,4 +1,5 @@
 import bpy
+import math, mathutils
 from bpy.props import *
 from .. import base, constants
 from ... import utils
@@ -116,7 +117,7 @@ AiImageUser
 
 A helper class for AiImage below.
 '''
-class AiImageUser(PropertyGroup):
+class AiImageUser(bpy.types.PropertyGroup):
     image: PointerProperty(type=bpy.types.Image)
 
     frame_start: IntProperty(name="First Frame")
@@ -128,7 +129,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/image
 
 Performs texture mapping using a specified image file.
 '''
-class AiImage(Node, ArnoldNode):
+class AiImage(bpy.types.Node, base.ArnoldNode):
     bl_label = "Image"
     bl_width_default = constants.BL_NODE_WIDTH_WIDE
     ai_name = "image"
@@ -237,7 +238,7 @@ LayerProperties
 
 A helper class for layered shaders.
 '''
-class LayerProperties(PropertyGroup):
+class LayerProperties(bpy.types.PropertyGroup):
     enabled: BoolProperty(name="Enable", default=True)
     name: StringProperty(name="Name")
     operation: EnumProperty(
@@ -471,7 +472,7 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
 
     enable_sun: BoolProperty(name="Enable Sun", default=True)
     use_degrees: BoolProperty(name="Use Degrees", default=True)
-    sun_direction: PointerProperty(name="Sun Direction", type=Object)
+    sun_direction: PointerProperty(name="Sun Direction", type=bpy.types.Object)
 
     def init(self, context):
         self.inputs.new('AiNodeSocketFloatPositiveToTen', "Turbidity", identifier="turbidity").default_value = 3
@@ -549,6 +550,7 @@ classes = (
     AiCellNoise,
     AiCheckerboard,
     AiFlakes,
+    AiImageUser,
     AiImage,
     LayerProperties,
     AiLayerFloat,

@@ -356,27 +356,6 @@ world_node_categories = [
         ]
     ),
     ArnoldWorldNodeCategory(
-        'ARNOLD_NODES_WORLD_SHADERS',
-        "Shader",
-        items=[
-            NodeItem("AiSkydome"),
-        ]
-    ),
-    ArnoldWorldNodeCategory(
-        'ARNOLD_NODES_WORLD_TEXTURES',
-        "Texture",
-        items=[
-            NodeItem("AiCellNoise"),
-            NodeItem("AiCheckerboard"),
-            NodeItem("AiImage"),
-            NodeItem("AiLayerFloat"),
-            NodeItem("AiLayerRGBA"),
-            NodeItem("AiMixRGBA"),
-            NodeItem("AiNoise"),
-            NodeItem("AiPhysicalSky")
-        ]
-    ),
-    ArnoldWorldNodeCategory(
         'ARNOLD_NODES_WORLD_COLOR',
         "Color",
         items=[
@@ -388,6 +367,21 @@ world_node_categories = [
         ]
     ),
     ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_CONVERSION',
+        "Conversion",
+        items=[
+            NodeItem("AiFloatToRGB"),
+            NodeItem("AiFloatToRGBA"),
+        ]
+    ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_LIGHTS',
+        "Lights",
+        items=[
+            NodeItem("AiSkydome"),
+        ]
+    ),
+    ArnoldWorldNodeCategory(
         'ARNOLD_NODES_WORLD_MATH',
         "Math",
         items=[
@@ -396,13 +390,19 @@ world_node_categories = [
         ]
     ),
     ArnoldWorldNodeCategory(
-        'ARNOLD_NODES_WORLD_CONVERSION',
-        "Conversion",
+        'ARNOLD_NODES_WORLD_TEXTURES',
+        "Textures",
         items=[
-            NodeItem("AiFloatToRGB"),
-            NodeItem("AiFloatToRGBA"),
+            NodeItem("AiCellNoise"),
+            NodeItem("AiCheckerboard"),
+            NodeItem("AiImage"),
+            NodeItem("AiLayerFloat"),
+            NodeItem("AiLayerRGBA"),
+            NodeItem("AiMixRGBA"),
+            NodeItem("AiNoise"),
+            NodeItem("AiPhysicalSky")
         ]
-    )
+    ),
 ]
 
 object_node_categories = [
@@ -414,8 +414,35 @@ object_node_categories = [
         ]
     ),
     ArnoldObjectNodeCategory(
-        'ARNOLD_NODES_OBJECT_SHADERS',
-        "Shader",
+        'ARNOLD_NODES_OBJECT_COLOR',
+        "Color",
+        items=[
+            NodeItem("AiColorCorrect"),
+            NodeItem("AiColorConstant"),
+            NodeItem("AiColorJitter"),
+            NodeItem("AiComposite"),
+            NodeItem("AiShuffle")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_CONVERSION',
+        "Conversion",
+        items=[
+            NodeItem("AiFloatToRGB"),
+            NodeItem("AiFloatToRGBA"),
+        ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_MATH',
+        "Math",
+        items=[
+            NodeItem("AiMultiply"),
+            NodeItem("AiRange")
+        ]
+    ),
+    ArnoldObjectNodeCategory(
+        'ARNOLD_NODES_OBJECT_SURFACE',
+        "Surface",
         items=[
             NodeItem("AiAmbientOcclusion"),
             NodeItem("AiBump2d"),
@@ -434,7 +461,7 @@ object_node_categories = [
     ),
     ArnoldObjectNodeCategory(
         'ARNOLD_NODES_OBJECT_TEXTURES',
-        "Texture",
+        "Textures",
         items=[
             NodeItem("AiCellNoise"),
             NodeItem("AiCheckerboard"),
@@ -448,26 +475,7 @@ object_node_categories = [
         ]
     ),
     ArnoldObjectNodeCategory(
-        'ARNOLD_NODES_OBJECT_COLOR',
-        "Color",
-        items=[
-            NodeItem("AiColorCorrect"),
-            NodeItem("AiColorConstant"),
-            NodeItem("AiColorJitter"),
-            NodeItem("AiComposite"),
-            NodeItem("AiShuffle")
-        ]
-    ),
-    ArnoldObjectNodeCategory(
-        'ARNOLD_NODES_OBJECT_MATH',
-        "Math",
-        items=[
-            NodeItem("AiMultiply"),
-            NodeItem("AiRange")
-        ]
-    ),
-    ArnoldObjectNodeCategory(
-        'ARNOLD_NODES_OBJECT_UTILITIES',
+        'ARNOLD_NODES_OBJECT_UTILITY',
         "Utility",
         items=[
             NodeItem("AiCoordSpace"),
@@ -475,18 +483,11 @@ object_node_categories = [
             NodeItem("AiUVProjection")
         ]
     ),
-    ArnoldObjectNodeCategory(
-        'ARNOLD_NODES_OBJECT_CONVERSION',
-        "Conversion",
-        items=[
-            NodeItem("AiFloatToRGB"),
-            NodeItem("AiFloatToRGBA"),
-        ]
-    )
 ]
 
 classes = (
     ArnoldShaderTree,
+    AiShaderOutput,
 )
 
 def register():

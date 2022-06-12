@@ -25,14 +25,17 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/float_to_rgba
 
 Creates RGBA color from R, G, B, A float values.
 '''
-class AiFloatToRGBA(AiFloatToRGB):
+class AiFloatToRGBA(bpy.types.Node, base.ArnoldNode):
     bl_label = "Float to RGBA"
     ai_name = "float_to_rgba"
 
     def init(self, context):
-        super().init(context)
+        self.inputs.new('AiNodeSocketFloatPositive', "R", identifier="r")
+        self.inputs.new('AiNodeSocketFloatPositive', "G", identifier="g")
+        self.inputs.new('AiNodeSocketFloatPositive', "B", identifier="b")
         self.inputs.new('AiNodeSocketFloatPositive', "A", identifier="a")
-        self.outputs[0].name = "RGBA"
+        
+        self.outputs.new('AiNodeSocketRGB', name="RGBA", identifier="output")
 
 classes = (
     AiFloatToRGB,

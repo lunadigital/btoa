@@ -1,4 +1,6 @@
 import bpy
+import math, mathutils
+from bpy.props import *
 from .. import base
 from ... import btoa, utils
 
