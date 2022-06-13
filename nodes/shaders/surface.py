@@ -62,6 +62,24 @@ class AiBump2d(bpy.types.Node, base.ArnoldNode):
         self.outputs.new('AiNodeSocketVector', name="Vector", identifier="output")
 
 '''
+AiBump3d
+https://docs.arnoldrenderer.com/display/A5NodeRef/bump3d
+
+Provides bump mapping based on a 3d input.
+'''
+class AiBump3d(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Bump 3D"
+    ai_name = "bump3d"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Map", identifier="bump_map")
+        self.inputs.new('AiNodeSocketFloatPositive', name="Bump Height", identifier="bump_height").default_value = 0.01
+        self.inputs.new('AiNodeSocketFloatPositive', name="Epsilon", identifier="epsilon").default_value = 0.001
+        self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
+
+        self.outputs.new('AiNodeSocketSurface', name="RGBA", identifier="output")
+
+'''
 AiCarPaint
 https://docs.arnoldrenderer.com/display/A5NodeRef/car_paint
 
@@ -484,6 +502,7 @@ class AiWireframe(bpy.types.Node, base.ArnoldNode):
 classes = (
     AiAmbientOcclusion,
     AiBump2d,
+    AiBump3d,
     AiCarPaint,
     AiDisplacement,
     AiFlat,
