@@ -22,22 +22,6 @@ class ARNOLD_OT_world_new(Operator):
 
         return {'FINISHED'}
 
-class ARNOLD_OT_world_init(Operator):
-    bl_idname = 'arnold.world_init'
-    bl_label = "Use Nodes"
-    bl_description = "Creates an Arnold node tree for an existing world"
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        world = context.scene.world
-        tree_name = utils.make_nodetree_name(world.name)
-        node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
-        
-        utils.init_world_node_tree(node_tree)
-        world.arnold.node_tree = node_tree
-
-        return {'FINISHED'}
-
 class ARNOLD_OT_world_unlink(Operator):
     bl_idname = "arnold.world_unlink"
     bl_label = ""
@@ -111,7 +95,6 @@ class ARNOLD_OT_world_select(Operator):
 
 classes = (
     ARNOLD_OT_world_new,
-    ARNOLD_OT_world_init,
     ARNOLD_OT_world_unlink,
     ARNOLD_OT_world_copy,
     ARNOLD_OT_world_select

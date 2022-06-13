@@ -1,5 +1,5 @@
 from bpy.types import Material, PropertyGroup
-from bpy.props import PointerProperty
+from bpy.props import BoolProperty, PointerProperty
 
 from ..nodes.base import ArnoldShaderTree
 

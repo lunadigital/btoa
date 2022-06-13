@@ -39,12 +39,17 @@ class ARNOLD_WORLD_PT_surface(WorldButtonsPanel, Panel):
     def draw(self, context):
         layout = self.layout
 
+        world = context.world
+        
+        layout.prop(world, "use_nodes", icon='NODETREE')
+        layout.separator()
+
         layout.use_property_split = True
 
-        world = context.world
-
-        if not utils.panel_node_draw(layout, world.arnold, 'OUTPUT_WORLD', 'Surface'):
-            layout.prop(world, "color")
+        if world.use_nodes:
+            utils.panel_node_draw(layout, world.arnold.node_tree, 'OUTPUT_WORLD', "Surface")
+        else:
+            layout.prop(world, "color", text="Color")
 
 class ARNOLD_WORLD_PT_shadows(WorldButtonsPanel, bpy.types.Panel):
     bl_idname = "ARNOLD_WORLD_PT_shadows"

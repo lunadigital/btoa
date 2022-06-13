@@ -90,11 +90,20 @@ class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
     def draw(self, context):
         layout = self.layout
 
+        mat = context.material
+        
+        layout.prop(mat, "use_nodes", icon='NODETREE')
+        layout.separator()
+
         layout.use_property_split = True
 
-        mat = context.material
-        if not utils.panel_node_draw(layout, mat.arnold, 'OUTPUT_MATERIAL', 'Surface'):
-            layout.prop(mat, "diffuse_color")
+        if mat.use_nodes:
+            utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
+        else:
+            layout.prop(mat, "diffuse_color", text="Base Color")
+            layout.prop(mat, "metallic")
+            layout.prop(mat, "specular_intensity", text="Specular")
+            layout.prop(mat, "roughness")
 
 classes = (
     ARNOLD_MATERIAL_PT_context_material,

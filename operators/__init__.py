@@ -1,9 +1,11 @@
 from . import (
+    handlers,
     material,
     world
 )
 
 modules = (
+    handlers,
     material,
     world
 )
