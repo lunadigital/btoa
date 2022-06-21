@@ -1,6 +1,7 @@
 import bpy
 from bpy.props import *
 from .. import base
+from ... import btoa
 from ... import utils
 
 '''
@@ -96,14 +97,6 @@ class AiColorJitter(bpy.types.Node, base.ArnoldNode):
         ]
     )
 
-    gain_min: FloatProperty(name="Gain Min", min=0, soft_max=1)
-    gain_max: FloatProperty(name="Gain Max", min=0, soft_max=1)
-    hue_min: FloatProperty(name="Hue Min", min=-1, max=1)
-    hue_max: FloatProperty(name="Hue Max", min=-1, max=1)
-    saturation_min: FloatProperty(name="Saturation Min", min=0, soft_max=1)
-    saturation_max: FloatProperty(name="Saturation Max", min=0, soft_max=1)
-    seed: IntProperty(name="Seed", min=0, soft_max=10)
-
     face_mode: EnumProperty(
         name="Mode",
         items=[
@@ -114,31 +107,42 @@ class AiColorJitter(bpy.types.Node, base.ArnoldNode):
 
     def init(self, context):
         self.inputs.new('AiNodeSocketRGB', name="Input", identifier="input")
+        self.inputs.new('AiNodeSocketFloatPositive', name="Min Gain", identifier="gain_min")
+        self.inputs.new('AiNodeSocketFloatPositive', name="Max Gain", identifier="gain_max")
+        self.inputs.new('AiNodeSocketFloatPositive', name="Min Hue", identifier="hue_min")
+        self.inputs.new('AiNodeSocketFloatPositive', name="Max Hue", identifier="hue_max")
+        self.inputs.new('AiNodeSocketFloatPositive', name="Min Saturation", identifier="saturation_min")
+        self.inputs.new('AiNodeSocketFloatPositive', name="Max Saturation", identifier="saturation_max")
+        self.inputs.new('AiNodeSocketIntPositive', name="Seed", identifier="seed")
+
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+
+    def export(self):
+        node = btoa.ArnoldNode(self.ai_name)
+
+        self.sub_export(node)
+
+        for i in self.inputs:
+            socket_value, value_type = i.export()
+            
+            # We need to rebuild the identifier value to account for the different enum options in jitter_type
+            identifier = "{}_{}".format(self.jitter_type, i.identifier)
+            
+            if socket_value is not None and value_type is not None:
+                if value_type == 'BTNODE':
+                    socket_value.link(identifier, node)
+                else:
+                    btoa.BTOA_SET_LAMBDA[value_type](node, identifier, socket_value)
+
+        return node, 'BTNODE'
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "jitter_type")
-
-        layout.prop(self, "gain_min")
-        layout.prop(self, "gain_max")
-        layout.prop(self, "hue_min")
-        layout.prop(self, "hue_max")
-        layout.prop(self, "saturation_min")
-        layout.prop(self, "saturation_max")
-        layout.prop(self, "seed")
 
         if self.jitter_type == "face":
             layout.prop(self, "face_mode")
 
     def sub_export(self, node):
-        node.set_float("{}_gain_min".format(self.jitter_type), self.gain_min)
-        node.set_float("{}_gain_max".format(self.jitter_type), self.gain_max)
-        node.set_float("{}_hue_min".format(self.jitter_type), self.hue_min)
-        node.set_float("{}_hue_max".format(self.jitter_type), self.hue_max)
-        node.set_float("{}_saturation_min".format(self.jitter_type), self.saturation_min)
-        node.set_float("{}_saturation_max".format(self.jitter_type), self.saturation_max)
-        node.set_int("{}_seed".format(self.jitter_type), self.seed)
-
         if self.jitter_type == "face":
             node.set_string("face_mode", self.face_mode)
 
