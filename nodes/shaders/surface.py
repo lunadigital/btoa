@@ -131,30 +131,27 @@ hijacking the polymesh node.
 '''
 class AiDisplacement(bpy.types.Node, base.ArnoldNode):
     bl_label = "Displacement"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
 
-    disp_padding: FloatProperty(name="Padding", min=0, soft_max=1)
-    disp_height: FloatProperty(name="Height", soft_min=0, soft_max=2, default=1)
-    disp_zero_value: FloatProperty(name="Zero Value", soft_min=-1, soft_max=1)
     disp_autobump: BoolProperty(name="Auto Bump")
 
     def init(self, context):
+        self.inputs.new('AiNodeSocketFloatPositive', "Padding", identifier="disp_padding")
+        self.inputs.new('AiNodeSocketFloatUnbounded', "Height", identifier="disp_height").default_value = 1
+        self.inputs.new('AiNodeSocketFloatUnbounded', "Zero Value", identifier="disp_zero_value")
         self.inputs.new('AiNodeSocketRGB', "Input", identifier="disp_map").default_value = (0, 0, 0)
+        
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "disp_padding")
-        layout.prop(self, "disp_height")
-        layout.prop(self, "disp_zero_value")
         layout.prop(self, "disp_autobump")
 
     # Overriding export() because this isn't a native Arnold struct
     def export(self):
         return (
-            self.inputs[0].export()[0],
-            self.disp_padding,
-            self.disp_height,
-            self.disp_zero_value,
+            self.inputs[3].export()[0], # input
+            self.inputs[0].export()[0], # padding
+            self.inputs[1].export()[0], # height
+            self.inputs[2].export()[0], # zero value
             self.disp_autobump
         )
 
