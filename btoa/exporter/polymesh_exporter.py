@@ -379,7 +379,10 @@ class PolymeshExporter(ObjectExporter):
                 visibility += BTOA_VISIBILITY[i]
 
         # Remove camera visibility if object is indirect only
-        if self.datablock_eval.indirect_only_get(view_layer=self.cache.view_layer):
+        if (self.datablock_eval.indirect_only_get(view_layer=self.cache.view_layer)
+            or self.datablock.is_instance
+            and self.datablock.parent.indirect_only_get(view_layer=self.cache.view_layer)
+            ):
             visibility -= 1
 
         self.node.set_byte("visibility", visibility)
