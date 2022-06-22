@@ -340,6 +340,58 @@ class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
         node.set_bool("alpha_mask", self.alpha_mask)
 
 '''
+AiStandardHair
+https://docs.arnoldrenderer.com/display/A5NodeRef/standard_hair
+
+Standard_hair is a physically-based shader to render hair and fur,
+based on the d'Eon model for specular and Zinke model for diffuse.
+'''
+class AiStandardHair(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Standard Hair"
+    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    ai_name = "standard_hair"
+
+    roughness_anisotropic: BoolProperty(name="Anisotropic Roughness")
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Melanin", identifier="melanin").default_value = 1
+        self.inputs.new('AiNodeSocketFloatNormalized', "Melanin Redness", identifier="melanin_redness").default_value = 0.5
+        self.inputs.new('AiNodeSocketFloatNormalized', "Melanin Randomize", identifier="melanin_randomize")
+
+        self.inputs.new('AiNodeSocketFloatNormalized', "Roughness", identifier="roughness").default_value = 0.2
+        self.inputs.new('AiNodeSocketFloatNormalized', "Azimuthal Roughness", identifier="roughness_azimuthal").default_value = 0.2
+        self.inputs.new('AiNodeSocketFloatAboveOne', "IOR", identifier="ior").default_value = 1.55
+        self.inputs.new('AiNodeSocketFloatPositive', "Shift", identifier="shift").default_value = 3
+
+        self.inputs.new('AiNodeSocketRGB', "Specular Tint", identifier="specular_tint").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Specular2 Tint", identifier="specular2_tint").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Transmission Tint", identifier="transmission_tint").default_value = (1, 1, 1)
+
+        self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse", identifier="diffuse")
+        self.inputs.new('AiNodeSocketRGB', "Diffuse Color", identifier="diffuse_color").default_value = (1, 1, 1)
+
+        self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
+        self.inputs.new('AiNodeSocketRGB', "Emission Color", identifier="emission_color").default_value = (1, 1, 1)
+
+        self.inputs.new('AiNodeSocketRGB', "Opacity", identifier="opacity").default_value = (1, 1, 1)
+
+        self.inputs.new('AiNodeSocketFloatPositive', "Indirect Diffuse", identifier="indirect_diffuse").default_value = 1
+        self.inputs.new('AiNodeSocketFloatPositive', "Indirect Specular", identifier="indirect_specular")
+
+        self.inputs.new('AiNodeSocketIntPositive', "Extra Depth", identifier="extra_depth").default_value = 16
+        self.inputs.new('AiNodeSocketIntPositive', "Extra Samples", identifier="extra_samples")
+
+        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "roughness_anisotropic")
+
+    def sub_export(self, node):
+        node.set_bool("roughness_anisotropic", self.roughness_anisotropic)
+
+'''
 AiStandardSurface
 https://docs.arnoldrenderer.com/display/A5NodeRef/standard_surface
 
@@ -500,6 +552,7 @@ classes = (
     AiMixShader,
     AiNormalMap,
     AiShadowMatte,
+    AiStandardHair,
     AiStandardSurface,
     AiTwoSided,
     AiWireframe,
