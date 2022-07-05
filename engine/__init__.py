@@ -24,17 +24,19 @@ So, that's it, we're here, deal with it. Let's move on.
 AI_ENGINE_TAG_REDRAW = None
 AI_SESSION: Optional[btoa.Session] = None
 AI_FRAMEBUFFER:Optional[btoa.FrameBuffer] = None
+AI_DRIVER_UPDATE_VIEWPORT = False
 
 def ai_render_update_callback(private_data, update_type, display_output):
     global AI_FRAMEBUFFER
     global AI_ENGINE_TAG_REDRAW
+    global AI_DRIVER_UPDATE_VIEWPORT
 
-    if display_output != int(btoa.NO_DISPLAY_OUTPUTS):
-        assert AI_FRAMEBUFFER is not None
-        AI_FRAMEBUFFER.requires_update = True
+    #if display_output != int(btoa.NO_DISPLAY_OUTPUTS):
+    assert AI_FRAMEBUFFER is not None
+    AI_FRAMEBUFFER.requires_update = True
 
-        assert AI_ENGINE_TAG_REDRAW
-        AI_ENGINE_TAG_REDRAW()
+    assert AI_ENGINE_TAG_REDRAW
+    AI_ENGINE_TAG_REDRAW()
 
     status = btoa.FAILED
 
@@ -46,18 +48,22 @@ def ai_render_update_callback(private_data, update_type, display_output):
         status = btoa.RENDERING
     elif update_type == int(btoa.AFTER_PASS):
         status = btoa.RENDERING
+        AI_DRIVER_UPDATE_VIEWPORT = True
     elif update_type == int(btoa.RENDER_FINISHED):
         status = btoa.RENDER_FINISHED
+        AI_DRIVER_UPDATE_VIEWPORT = False
     elif update_type == int(btoa.PAUSED):
         status = btoa.RESTARTING
     elif update_type == int(btoa.ERROR):
         status = btoa.FAILED
+        AI_DRIVER_UPDATE_VIEWPORT = False
 
     return int(status)
 
 def update_viewport(x, y, width, height, buffer, data):
     global AI_SESSION
     global AI_FRAMEBUFFER
+    global AI_DRIVER_UPDATE_VIEWPORT
 
     options = btoa.UniverseOptions()
     min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
@@ -76,6 +82,10 @@ def update_viewport(x, y, width, height, buffer, data):
             if (AI_SESSION):
                 AI_SESSION.free_buffer(buffer)
 
+                if AI_DRIVER_UPDATE_VIEWPORT:
+                    AI_FRAMEBUFFER.requires_update = True
+                    AI_ENGINE_TAG_REDRAW()
+
 AI_DISPLAY_CALLBACK = btoa.ArnoldDisplayCallback(update_viewport)
 AI_RENDER_CALLBACK = ai_render_update_callback
 
@@ -85,8 +95,8 @@ Render engine class, registration, and other UI goodies
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = "ARNOLD"
     bl_label = "Arnold"
-    bl_use_preview = True
     bl_use_eevee_viewport = True
+    bl_use_postprocess = True
 
     _outliner_context_menu_draw = None
 
@@ -373,6 +383,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             self.tag_update()
 
         if AI_FRAMEBUFFER.requires_update:
+            print("UPDATING FRAMEBUFFER")
             AI_FRAMEBUFFER.generate_texture()
 
         AI_FRAMEBUFFER.draw(self, scene)
