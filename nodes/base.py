@@ -44,7 +44,7 @@ class ArnoldShaderTree(ShaderNodeTree):
         if space_data.shader_type == 'OBJECT':    
             ob = context.object
 
-            if ob and ob.type not in {'LIGHT', 'CAMERA'}:
+            if ob and ob.type != 'CAMERA':
                 mat = ob.active_material
 
                 if ob.active_material is not None and ob.active_material.arnold.node_tree is not None:
@@ -106,11 +106,10 @@ class ArnoldShaderTree(ShaderNodeTree):
                             # Show material.new when no active ID/slot exists
                             #if not id_from and ob_type in types_that_support_material:
                             #    row.template_ID(ob, "active_material", new="material.new")
-                            # Material ID, but not for Lights
-                            #if id_from and ob_type != 'LIGHT':
-                            #    row.template_ID(id_from, "active_material", new="material.new")
 
-                            row = utils.aishader_template_ID(layout, ob.active_material)
+                            # Material ID, but not for Lights
+                            if id_from and ob_type != 'LIGHT':
+                                row = utils.aishader_template_ID(layout, ob.active_material)
 
                         if arnold_space_data.shader_type == 'WORLD':
                             NODE_MT_editor_menus.draw_collapsible(context, layout)
