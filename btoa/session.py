@@ -84,7 +84,7 @@ class Session:
         outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
         options.set_array("outputs", outputs)
 
-        arnold.AiRenderAddInteractiveOutput(AI_SESSION, 0)
+        arnold.AiRenderAddInteractiveOutput(None, 0)
 
         color_manager = ArnoldColorManager()
         color_manager.set_string("config", os.getenv("OCIO"))

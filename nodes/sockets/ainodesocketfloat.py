@@ -15,14 +15,14 @@ class AiNodeSocketFloat(AiNodeSocket):
 
 class AiNodeSocketFloatUnbounded(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(
-        soft_min=-5,
-        soft_max=5
+        soft_min=-1,
+        soft_max=1
         )
 
 class AiNodeSocketFloatPositive(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(
         min=0,
-        soft_max=5
+        soft_max=1
         )
 
 class AiNodeSocketFloatAboveOne(NodeSocket, AiNodeSocketFloat):

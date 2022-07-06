@@ -1,5 +1,5 @@
-from bpy.types import Material, PropertyGroup
-from bpy.props import PointerProperty
+from bpy.types import Light, Material, PropertyGroup
+from bpy.props import BoolProperty, PointerProperty
 
 from ..nodes.base import ArnoldShaderTree
 
@@ -16,8 +16,15 @@ def register():
         type=ArnoldShader
     )
 
+    #Light.arnold = PointerProperty(
+    #    name="Arnold Shader Settings",
+    #    description="Arnold shader settings",
+    #    type=ArnoldShader
+    #)
+
 def unregister():
     from bpy.utils import unregister_class
     unregister_class(ArnoldShader)
 
+    #del Light.arnold
     del Material.arnold
