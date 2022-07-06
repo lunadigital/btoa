@@ -16,15 +16,15 @@ def register():
         type=ArnoldShader
     )
 
-    Light.arnold = PointerProperty(
-        name="Arnold Shader Settings",
-        description="Arnold shader settings",
-        type=ArnoldShader
-    )
+    #Light.arnold = PointerProperty(
+    #    name="Arnold Shader Settings",
+    #    description="Arnold shader settings",
+    #    type=ArnoldShader
+    #)
 
 def unregister():
     from bpy.utils import unregister_class
     unregister_class(ArnoldShader)
 
-    del Light.arnold
+    #del Light.arnold
     del Material.arnold
