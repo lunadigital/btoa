@@ -3,7 +3,7 @@
 Arnold for Blender (or BtoA) provides a bridge to the Arnold renderer from within Blender's standard interface. BtoA is an unofficial Blender add-on and is not affiliated with Autodesk or Arnold.
 
 ## How to Get BtoA ##
-Arnold for Blender (BtoA 0.4.4-alpha) is available for Windows, macOS, and Linux. [Go to the downloads page](https://github.com/lunadigital/btoa/releases).
+Arnold for Blender (BtoA 0.4.5-alpha) is available for Windows, macOS, and Linux. [Go to the downloads page](https://github.com/lunadigital/btoa/releases).
 
 ## Licensing & Installation
 Although the Arnold SDK is [free to download](https://www.arnoldrenderer.com/download/) from Autodesk, you need to purchase a license to render without watermarks - we do not provide licenses with BtoA. Licences are reasonably priced and can be purchased on a monthly, quarterly, or yearly basis on the [Autodesk website](https://www.autodesk.com/products/arnold/overview).
@@ -23,10 +23,8 @@ Arnold for Blender (BtoA) is not affiliated with or supported by Autodesk. For b
 
 ## Requirements & Platforms ##
 * Available on Windows, macOS, and Linux
-* Compatible with Blender 2.83 LTS or above
-* Requires Arnold SDK 6.0.4.0 or above
-
-BtoA is not compatible with Arnold 7 or Blender 3.x but we are working on it!
+* Compatible with Blender 2.93 LTS or above (we support Blender 3!)
+* Requires Arnold SDK 7.1.2.0 or above
 
 ## Example renders ##
 For artist features, tips and tricks, and more, [follow BtoA on Instagram](https://www.instagram.com/arnoldforblender/)!
