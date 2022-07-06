@@ -82,8 +82,6 @@ class AiCarPaint(bpy.types.Node, base.ArnoldNode):
     bl_width_default = constants.BL_NODE_WIDTH_WIDE
     ai_name = "car_paint"
 
-    flake_layers: IntProperty(name="Flake Layers", min=1, default=1)
-
     def init(self, context):
         self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
         self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
@@ -99,6 +97,7 @@ class AiCarPaint(bpy.types.Node, base.ArnoldNode):
 
         self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketRGB', "Flake Color", identifier="flake_color").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketIntAboveOne', "Flake Layers", identifier="flake_layers").default_value = 1
         self.inputs.new('AiNodeSocketRGB', "Flake Flip Flop", identifier="flake_flip_flop").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketRGB', "Flake Light Facing", identifier="flake_light_facing").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketFloatNormalized', "Flake Falloff", identifier="flake_falloff")
@@ -116,12 +115,6 @@ class AiCarPaint(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketVector', name="Coat Normal", identifier="coat_normal")
 
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
-
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "flake_layers")
-
-    def sub_export(self, node):
-        node.set_int("flake_layers", self.flake_layers)
 
 '''
 AiDisplacement
