@@ -472,7 +472,14 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
 
     enable_sun: BoolProperty(name="Enable Sun", default=True)
     use_degrees: BoolProperty(name="Use Degrees", default=True)
-    sun_direction: PointerProperty(name="Sun Direction", type=bpy.types.Object)
+    direction_object: PointerProperty(name="Sun Direction", type=bpy.types.Object)
+    direction_vector: FloatVectorProperty(
+        default=(-0.4, 0.75, 0.5),
+        min=-1.000000,
+        max=1.000000,
+        subtype="DIRECTION",
+        size=3
+    )
 
     def init(self, context):
         self.inputs.new('AiNodeSocketFloatPositiveToTen', "Turbidity", identifier="turbidity").default_value = 3
@@ -490,28 +497,29 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "enable_sun")
         layout.prop(self, "use_degrees")
+
+        row = layout.row()
+        row.prop(self, "direction_vector", text="")
+        row.enabled = not self.use_degrees and not self.direction_object
         
         row = layout.row()
-        row.prop(self, "sun_direction")
+        row.prop(self, "direction_object")
         row.enabled = not self.use_degrees
 
     def sub_export(self, node):
         node.set_bool("enable_sun", self.enable_sun)
         node.set_bool("use_degrees", self.use_degrees)
-        
-        if self.sun_direction:
-            neg_z_axis = mathutils.Vector((0, 0, -1))
-            mw = self.sun_direction.matrix_world
 
-            global_sun_vector = (mw @ neg_z_axis - mw.translation).normalized()
-            
-            # Swap coordinates for Arnold
-            vec = mathutils.Vector((
-                global_sun_vector.x,
-                global_sun_vector.z,
-                global_sun_vector.y
-            ))
-
+        if not self.use_degrees:
+            if self.direction_object:
+                neg_z_axis = mathutils.Vector((0, 0, -1))
+                mw = self.direction_object.matrix_world
+                direction = (mw @ neg_z_axis - mw.translation).normalized()  
+            else:
+                direction = self.direction_vector.copy()
+                direction.negate()
+    
+            vec = mathutils.Vector((direction.x, direction.z, direction.y)) # Swap coordinates to match Arnold
             node.set_vector("sun_direction", *vec)
 
 '''
