@@ -63,8 +63,6 @@ class AiCheckerboard(bpy.types.Node, base.ArnoldNode):
     ai_name = "checkerboard"
 
     def init(self, context):
-        self.inputs.new("AiNodeSocketRGB", "Color1", identifier="color1")
-        self.inputs.new("AiNodeSocketRGB", "Color2", identifier="color2").default_value = (0, 0 ,0)
         self.inputs.new("AiNodeSocketFloatPositive", "U Frequency", identifier="u_frequency").default_value = 1
         self.inputs.new("AiNodeSocketFloatPositive", "V Frequency", identifier="v_frequency").default_value = 1
         self.inputs.new("AiNodeSocketFloatUnbounded", "U Offset", identifier="u_offset")
@@ -72,6 +70,8 @@ class AiCheckerboard(bpy.types.Node, base.ArnoldNode):
         self.inputs.new("AiNodeSocketFloatNormalized", "Contrast", identifier="contrast").default_value = 1
         self.inputs.new("AiNodeSocketFloatPositive", "Filter Strength", identifier="filter_strength").default_value = 1
         self.inputs.new("AiNodeSocketFloatNormalized", "Filter Offset", identifier="filter_offset")
+        self.inputs.new("AiNodeSocketRGB", "Color1", identifier="color1")
+        self.inputs.new("AiNodeSocketRGB", "Color2", identifier="color2").default_value = (0, 0 ,0)
 
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
@@ -440,8 +440,6 @@ class AiNoise(bpy.types.Node, base.ArnoldNode):
     )
 
     def init(self, context):
-        self.inputs.new("AiNodeSocketRGB", "Color1", identifier="color1")
-        self.inputs.new("AiNodeSocketRGB", "Color2", identifier="color2").default_value = (0, 0 ,0)
         self.inputs.new("AiNodeSocketIntAboveOne", "Octaves", identifier="octaves").default_value = 1
         self.inputs.new("AiNodeSocketFloatPositive", "Distortion", identifier="distortion").default_value = 1
         self.inputs.new("AiNodeSocketFloatPositive", "Lacunarity", identifier="lacunarity").default_value = 1.92
@@ -450,6 +448,8 @@ class AiNoise(bpy.types.Node, base.ArnoldNode):
         self.inputs.new("AiNodeSocketVector", "Offset", identifier="offset")
         self.inputs.new("AiNodeSocketCoord", "Coords", identifier="coord_space")
         self.inputs.new("AiNodeSocketFloatUnbounded", "Time", identifier="time")
+        self.inputs.new("AiNodeSocketRGB", "Color1", identifier="color1")
+        self.inputs.new("AiNodeSocketRGB", "Color2", identifier="color2").default_value = (0, 0 ,0)
         
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
