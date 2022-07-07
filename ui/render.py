@@ -75,6 +75,23 @@ class ARNOLD_PT_clamping(bpy.types.Panel):
 
         layout.prop(options, "indirect_sample_clamp")
 
+class ARNOLD_PT_sample_filtering(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_sample_filtering"
+    bl_label = "Filter"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        options = context.scene.arnold
+        layout = self.layout
+
+        layout.use_property_split = True
+
+        layout.prop(options, "filter_type")
+        layout.prop(options, "filter_width")
+
 class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
     bl_idname = "ARNOLD_PT_advanced_sampling"
     bl_label = "Advanced"
@@ -215,6 +232,7 @@ classes = (
     ARNOLD_PT_sampling,
     ARNOLD_PT_adaptive_sampling,
     ARNOLD_PT_clamping,
+    ARNOLD_PT_sample_filtering,
     ARNOLD_PT_advanced_sampling,
     ARNOLD_PT_ray_depth,
     ARNOLD_PT_motion_blur,

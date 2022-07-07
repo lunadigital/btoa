@@ -4,7 +4,7 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty,
 
 class AiSpaceDataProperties(PropertyGroup):
     shader_type: EnumProperty(
-        name="Shaderl Type",
+        name="Shader Type",
         items=[
             ('OBJECT', "Object", "Object shaders", "OBJECT_DATA", 0),
             ('WORLD', "World", "World shaders", "WORLD_DATA", 1),
@@ -94,6 +94,32 @@ class ArnoldOptions(PropertyGroup):
     lock_sampling_pattern: BoolProperty(
         name="Lock Sampling Pattern",
         description=""
+    )
+
+    filter_type: EnumProperty(
+        name="Filter Type",
+        items=[
+            ("blackman_harris_filter", "Blackman-Harris", "Blackman-Harris"),
+            ("box_filter", "Box", "Box"),
+            ("catrom_filter", "Catrom", "Catrom"),
+            ("closest_filter", "Closest", "Closest"),
+            ("contour_filter", "Contour", "Contour"),
+            ("difference_filter", "Difference", "Difference"),
+            ("farthest_filter", "Farthest", "Farthest"),
+            ("gaussian_filter", "Gaussian", "Gaussian"),
+            ("heatmap_filter", "Heatmap", "Heatmap"),
+            ("mitnet_filter", "Mitnet", "Mitnet"),
+            ("sinc_filter", "Sinc", "Sinc"),
+            ("triangle_filter", "Triangle", "Triangle"),
+            ("variance_filter", "Variance", "Variance"),
+        ],
+        default="gaussian_filter"
+    )
+
+    filter_width: FloatProperty(
+        name="Width",
+        description="",
+        default=2
     )
 
     # Ray depth

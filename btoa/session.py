@@ -75,13 +75,15 @@ class Session:
             WorldExporter(self).export(depsgraph.scene.world)
 
         # Everything else
+        scene = self.cache.scene
 
-        default_filter = ArnoldNode("gaussian_filter")
-        default_filter.set_string("name", "gaussianFilter")
+        default_filter = ArnoldNode(scene["filter_type"])
+        default_filter.set_string("name", "btoa_image_filter")
+        default_filter.set_float("width", scene["filter_width"])
 
         outputs = ArnoldArray()
         outputs.allocate(1, 1, 'STRING')
-        outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
+        outputs.set_string(0, "RGBA RGBA btoa_image_filter __display_driver")
         options.set_array("outputs", outputs)
 
         arnold.AiRenderAddInteractiveOutput(None, 0)
