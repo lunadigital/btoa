@@ -5,23 +5,6 @@ from ... import btoa
 from ... import utils
 
 '''
-AiColorConstant
-
-Returns a constant RGBA color value. This is a dummy node for a
-similar node in Blender/Cycles, but doesn't have an equivalent
-node in Arnold.
-'''
-class AiColorConstant(bpy.types.Node, base.ArnoldNode):
-    bl_label = "Constant"
-
-    def init(self, context):
-        self.inputs.new("AiNodeSocketRGB", name="Color", identifier="input")
-        self.outputs.new("AiNodeSocketRGB", "RGB", identifier="output")
-
-    def export(self):
-        return self.inputs[0].export()
-
-'''
 AiColorCorrect
 https://docs.arnoldrenderer.com/display/A5NodeRef/color_correct
 
@@ -314,7 +297,6 @@ class AiShuffle(bpy.types.Node, base.ArnoldNode):
         node.set_bool("negate_a", self.negate_a)
 
 classes = (
-    AiColorConstant,
     AiColorCorrect,
     AiColorJitter,
     AiComposite,

@@ -359,7 +359,6 @@ world_node_categories = [
         "Color",
         items=[
             NodeItem("AiColorCorrect"),
-            NodeItem("AiColorConstant"),
             NodeItem("AiColorJitter"),
             NodeItem("AiComposite"),
             NodeItem("AiShuffle")
@@ -386,6 +385,13 @@ world_node_categories = [
         items=[
             NodeItem("AiMultiply"),
             NodeItem("AiRange")
+        ]
+    ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_SURFACE',
+        "Surface",
+        items=[
+            NodeItem("AiFlat"),
         ]
     ),
     ArnoldWorldNodeCategory(
@@ -417,7 +423,6 @@ object_node_categories = [
         "Color",
         items=[
             NodeItem("AiColorCorrect"),
-            NodeItem("AiColorConstant"),
             NodeItem("AiColorJitter"),
             NodeItem("AiComposite"),
             NodeItem("AiShuffle")
