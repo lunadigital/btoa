@@ -49,12 +49,6 @@ class ArnoldOptions(PropertyGroup):
         min=0,
         default=2
         )
-    aa_seed: IntProperty(
-        name="AA Seed",
-        description="The AA_seed by default is set to the current frame number, so the noise changes at every frame, like film grain. This can be locked so that the sampling noise won't change by setting a value > 0",
-        min=0, 
-        default=0
-        )
     sample_clamp: FloatProperty(
         name="Sample Clamp",
         description="If enabled, this control will clamp pixel samples to this specified maximum value. This can make it easier to anti-alias certain high-dynamic-range effects such as bright motion-blurred specular streaks (at the cost of reduced contrast)",
@@ -90,6 +84,11 @@ class ArnoldOptions(PropertyGroup):
         min=0,
         default=0.015
         )
+    
+    lock_sampling_pattern: BoolProperty(
+        name="Lock Sampling Pattern",
+        description=""
+    )
 
     # Ray depth
     total_depth: IntProperty(

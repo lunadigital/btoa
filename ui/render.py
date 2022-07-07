@@ -29,27 +29,6 @@ class ARNOLD_PT_sampling(bpy.types.Panel):
         col.prop(options, "sss_samples")
         col.prop(options, "volume_samples")
         col.enabled = (options.render_device == '0') # if using CPU
-
-class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
-    bl_parent_id = ARNOLD_PT_sampling.bl_idname
-    bl_idname = "ARNOLD_PT_advanced_sampling"
-    bl_label = "Advanced"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "render"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-        options = context.scene.arnold
-
-        self.layout.use_property_split = True
-
-        col = self.layout.column()
-        col.prop(options, "aa_seed")
-        col.prop(options, "sample_clamp")
-        col.prop(options, "clamp_aovs")
-        col.prop(options, "indirect_sample_clamp")
-        col.prop(options, "low_light_threshold")
     
 class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
     bl_parent_id = ARNOLD_PT_sampling.bl_idname
@@ -73,6 +52,26 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
         col.prop(options, "adaptive_threshold")
 
         self.layout.enabled = context.scene.arnold.use_adaptive_sampling
+
+class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_advanced_sampling"
+    bl_label = "Advanced"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        options = context.scene.arnold
+
+        self.layout.use_property_split = True
+
+        col = self.layout.column()
+        col.prop(options, "lock_sampling_pattern")
+        #col.prop(options, "sample_clamp")
+        #col.prop(options, "clamp_aovs")
+        #col.prop(options, "indirect_sample_clamp")
+        #col.prop(options, "low_light_threshold")
 
 class ARNOLD_PT_ray_depth(bpy.types.Panel):
     bl_idname = "ARNOLD_PT_ray_depth"
@@ -194,8 +193,8 @@ class ARNOLD_PT_film(bpy.types.Panel):
 
 classes = (
     ARNOLD_PT_sampling,
-    ARNOLD_PT_advanced_sampling,
     ARNOLD_PT_adaptive_sampling,
+    ARNOLD_PT_advanced_sampling,
     ARNOLD_PT_ray_depth,
     ARNOLD_PT_motion_blur,
     ARNOLD_PT_motion_blur_shutter,

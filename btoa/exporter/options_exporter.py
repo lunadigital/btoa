@@ -41,8 +41,8 @@ class OptionsExporter(Exporter):
         options.set_int("AA_samples_max", scene["adaptive_aa_samples_max"])
         options.set_float("AA_adaptive_threshold", scene["adaptive_threshold"])
 
-        if scene["aa_seed"] > 0:
-            options.set_int("AA_seed", scene["aa_seed"])
+        seed = 1 if scene["lock_sampling_pattern"] else scene["frame_current"]
+        options.set_int("AA_seed", seed)
 
         options.set_int("GI_total_depth", scene["total_depth"])
         options.set_int("GI_diffuse_depth", scene["diffuse_depth"])
