@@ -76,13 +76,14 @@ class ArnoldOptions(PropertyGroup):
         name="Max Camera (AA)",
         description="Sets the maximum amount of supersampling. It controls the per-pixel maximum sampling rate and is equivalent to the units used by AA_samples. Adaptive sampling is enabled when AA_samples_max > Camera (AA) samples and Camera (AA) samples >= 2. Scenes with a large amount of depth of field or motion blur may require higher Max. Camera (AA) values. This parameter can also help with 'buzzing' speculars and hair shading as well",
         min=0, 
-        default=0
+        default=20
         )
     adaptive_threshold: FloatProperty(
         name="Adaptive Threshold",
         description="The threshold which triggers/terminates adaptive-AA. This value controls how sensitive to noise the adaptive sampling algorithm gets. Lower numbers will detect more noise. The default value should work well for most scenes",
         min=0,
-        default=0.015
+        default=0.015,
+        precision=3
         )
     
     lock_sampling_pattern: BoolProperty(

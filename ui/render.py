@@ -31,7 +31,6 @@ class ARNOLD_PT_sampling(bpy.types.Panel):
         col.enabled = (options.render_device == '0') # if using CPU
     
 class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
-    bl_parent_id = ARNOLD_PT_sampling.bl_idname
     bl_idname = "ARNOLD_PT_adaptive_sampling"
     bl_label = "Adaptive Sampling"
     bl_space_type = "PROPERTIES"
