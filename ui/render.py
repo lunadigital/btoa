@@ -20,15 +20,15 @@ class ARNOLD_PT_sampling(bpy.types.Panel):
         layout.use_property_split = True
 
         layout.prop(options, "render_device")
-        layout.separator()
+        layout.prop(options, "aa_samples")
 
         col = self.layout.column()
-        col.prop(options, "aa_samples")
         col.prop(options, "diffuse_samples")
         col.prop(options, "specular_samples")
         col.prop(options, "transmission_samples")
         col.prop(options, "sss_samples")
         col.prop(options, "volume_samples")
+        col.enabled = (options.render_device == '0') # if using CPU
 
 class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
     bl_parent_id = ARNOLD_PT_sampling.bl_idname

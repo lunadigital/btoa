@@ -14,37 +14,37 @@ class AiSpaceDataProperties(PropertyGroup):
 class ArnoldOptions(PropertyGroup):
     # Sampling
     aa_samples: IntProperty(
-        name="Camera (AA) Samples",
+        name="Camera (AA)",
         description="Supersampling control over the number of rays per pixel that will be traced from the camera. The higher the number of samples, the better the anti-aliasing quality, and the longer the render times. The exact number of rays per pixel is the square of this value",
         min=0,
         default=3
         )
     diffuse_samples: IntProperty(
-        name="Diffuse Samples",
+        name="Diffuse",
         description="Controls the number of rays fired when computing the reflected indirect-radiance integrated over the hemisphere. The exact number of hemispherical rays is the square of this value. Increase this number to reduce the indirect diffuse noise",
         min=0,
         default=2
         )
     specular_samples: IntProperty(
-        name="Specular Samples",
+        name="Specular",
         description="Controls the number of rays fired when computing the reflected indirect-radiance integrated over the hemisphere weighted by a specular BRDF. The exact number of rays is the square of this value. Increase this number to reduce the indirect specular noise",
         min=0,
         default=2
         )
     transmission_samples: IntProperty(
-        name="Transmission Samples",
+        name="Transmission",
         description="Controls the number of samples used to simulate the microfacet-based transmission evaluations. Increase this value to resolve any noise in the transmission",
         min=0,
         default=2
         )
     sss_samples: IntProperty(
-        name="SSS Samples",
+        name="SSS",
         description="This value controls the number of lighting samples (direct and indirect) that will be taken to estimate lighting within a radius of the point being shaded to compute sub-surface scattering. Higher values produce a cleaner solution but will take longer to render",
         min=0,
         default=2
         )
     volume_samples: IntProperty(
-        name="Volume Samples",
+        name="Volume",
         description="Controls the number of sample rays that get fired to compute indirect lighting of the volume",
         min=0,
         default=2
@@ -79,7 +79,7 @@ class ArnoldOptions(PropertyGroup):
         )
     use_adaptive_sampling: BoolProperty()
     adaptive_aa_samples_max: IntProperty(
-        name="AA Samples Max",
+        name="Max Camera (AA)",
         description="Sets the maximum amount of supersampling. It controls the per-pixel maximum sampling rate and is equivalent to the units used by AA_samples. Adaptive sampling is enabled when AA_samples_max > Camera (AA) samples and Camera (AA) samples >= 2. Scenes with a large amount of depth of field or motion blur may require higher Max. Camera (AA) values. This parameter can also help with 'buzzing' speculars and hair shading as well",
         min=0, 
         default=0
@@ -93,36 +93,36 @@ class ArnoldOptions(PropertyGroup):
 
     # Ray depth
     total_depth: IntProperty(
-        name="Total Depth",
+        name="Total",
         description="Specifies the total maximum recursion depth of any ray in the scene (diffuse + transmission + specular <= Total)",
         min=0,
         default=10
         )
     diffuse_depth: IntProperty(
-        name="Diffuse Depth",
+        name="Diffuse",
         description="Defines the maximum ray diffuse depth bounces. Zero diffuse is equal to disabling diffuse illumination. Increasing the depth will add more bounced light to the scene, which can be especially noticeable in interiors",
         min=0,
         default=1
         )
     specular_depth: IntProperty(
-        name="Specular Depth",
+        name="Specular",
         description="Defines the maximum number of times a ray can be specularly reflected. Scenes with many specular surfaces may require higher values to look correct. A minimum value of 1 is necessary to get any specular reflections",
         min=0,
         default=1
         )
     transmission_depth: IntProperty(
-        name="Transmission Depth",
+        name="Transmission",
         description="The maximum number of times a ray can be refracted. Scenes with many refractive surfaces may require higher values to look correct",
         min=0,
         default=10
         )
     volume_depth: IntProperty(
-        name="Volume Depth",
+        name="Volume",
         description="This parameter sets the number of multiple scattering bounces within a volume. This is useful when rendering volumes such as clouds for which multiple scattering has a large influence on their appearance",
         min=0
         )
     transparency_depth: IntProperty(
-        name="Transparency Depth",
+        name="Transparency",
         description="The number of allowed transparency hits. With 0 objects will be treated as opaque",
         min=0,
         default=10
