@@ -32,8 +32,11 @@ class OptionsExporter(Exporter):
         options.set_int("GI_transmission_samples", scene["transmission_samples"])
         options.set_int("GI_sss_samples", scene["sss_samples"])
         options.set_int("GI_volume_samples", scene["volume_samples"])
-        options.set_float("AA_sample_clamp", scene["sample_clamp"])
-        options.set_bool("AA_sample_clamp_affects_aovs", scene["clamp_aovs"])
+
+        if scene["clamp_aa_samples"]:
+            options.set_float("AA_sample_clamp", scene["sample_clamp"])
+            options.set_bool("AA_sample_clamp_affects_aovs", scene["clamp_aovs"])
+            
         options.set_float("indirect_sample_clamp", scene["indirect_sample_clamp"])
         options.set_float("low_light_threshold", scene["low_light_threshold"])
 

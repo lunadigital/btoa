@@ -49,14 +49,19 @@ class ArnoldOptions(PropertyGroup):
         min=0,
         default=2
         )
+
+    clamp_aa_samples: BoolProperty(
+        name="Clamp AA Samples",
+        description="Enable/disable clamping"
+    )
     sample_clamp: FloatProperty(
-        name="Sample Clamp",
+        name="AA Clamp Value",
         description="If enabled, this control will clamp pixel samples to this specified maximum value. This can make it easier to anti-alias certain high-dynamic-range effects such as bright motion-blurred specular streaks (at the cost of reduced contrast)",
         min=0,
         default=10
         )
     clamp_aovs: BoolProperty(
-        name="Clamp AOVs",
+        name="Affect AOVs",
         description="With this control enabled the pixel samples of the AOVs will also be clamped. AOV clamping will affect every RGB and RGBA (except the A component) AOV. Currently, there is no way to tell Arnold which AOV's to clamp and which ones to preserve"
         )
     indirect_sample_clamp: FloatProperty(
