@@ -383,7 +383,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             self.tag_update()
 
         if AI_FRAMEBUFFER.requires_update:
-            print("UPDATING FRAMEBUFFER")
             AI_FRAMEBUFFER.generate_texture()
 
         AI_FRAMEBUFFER.draw(self, scene)
