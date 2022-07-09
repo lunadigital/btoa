@@ -165,13 +165,14 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
     swap_st: BoolProperty(name="Swap UV")
     mipmap_bias: IntProperty(name="Mipmap Bias", soft_min=-5, soft_max=5)
     uvset: StringProperty(name="UV Set")
-    soffset: FloatProperty(name="Offset U", soft_min=-1, soft_max=1)
-    toffset: FloatProperty(name="Offset V", soft_min=-1, soft_max=1)
 
     def init(self, context):
         self.inputs.new("AiNodeSocketRGB", "Multiply", identifier="multiply").default_value = (1, 1, 1)
         self.inputs.new("AiNodeSocketRGB", "Offset", identifier="offset").default_value = (0, 0, 0)
-        self.inputs.new("AiNodeSocketRGBA", "Missing Texture Color", identifier="missing_texture_color").default_value = (1, 0, 1, 1)
+        self.inputs.new("AiNodeSocketUVOffset", "Offset U", identifier="soffset")
+        self.inputs.new("AiNodeSocketUVOffset", "Offset V", identifier="toffset")
+        self.inputs.new("AiNodeSocketUVScale", "Scale U", identifier="sscale")
+        self.inputs.new("AiNodeSocketUVScale", "Scale V", identifier="tscale")
 
         self.outputs.new("AiNodeSocketRGBA", "RGBA")
         self.outputs.new("AiNodeSocketBW", "R")
@@ -196,15 +197,11 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "image_filter")
         layout.prop(self, "swrap")
         layout.prop(self, "twrap")
-        layout.prop(self, "sscale")
-        layout.prop(self, "tscale")
         layout.prop(self, "sflip")
         layout.prop(self, "tflip")
         layout.prop(self, "swap_st")
         layout.prop(self, "mipmap_bias")
-        layout.prop(self, "uvset")
-        layout.prop(self, "soffset")
-        layout.prop(self, "toffset")
+        #layout.prop(self, "uvset")
 
     def sub_export(self, node, socket_index=0):
         if self.image:
@@ -229,11 +226,10 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         node.set_bool("swap_st", self.swap_st)
         node.set_int("mipmap_bias", self.mipmap_bias)
         node.set_string("uvset", self.uvset)
-        node.set_float("soffset", self.soffset)
-        node.set_float("toffset", self.toffset)
 
         prefs = bpy.context.preferences.addons["btoa"].preferences
         node.set_bool("ignore_missing_textures", prefs.ignore_missing_textures)
+        node.set_rgba("missing_texture_color", *prefs.missing_texture_color)
 
 '''
 LayerProperties

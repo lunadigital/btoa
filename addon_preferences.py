@@ -1,7 +1,7 @@
 import bpy
 
 from bpy.types import AddonPreferences, Operator
-from bpy.props import StringProperty, BoolProperty
+from bpy.props import StringProperty, BoolProperty, FloatVectorProperty
 
 import os
 
@@ -24,6 +24,7 @@ class ArnoldAddonPreferences(AddonPreferences):
     abort_on_license_fail: BoolProperty(name="Abort On License Fail")
     skip_license_check: BoolProperty(name="Skip License Check")
     ignore_missing_textures: BoolProperty(name="Ignore Missing Textures", default=True)
+    missing_texture_color: FloatVectorProperty(name="Missing Texture Color", size=4, default=(1, 0, 1, 1), subtype='COLOR')
 
     # Used to check if we need to unregister everything or just addon preferences
     full_unregister: BoolProperty()
@@ -69,11 +70,11 @@ class ArnoldAddonPreferences(AddonPreferences):
 
         # Error Handling
         box = self.layout.box()
+        box.label(text="Error Handling")
 
-        col = box.column()
-        col.label(text="Error Handling")
-        col.separator()
-        col.prop(self, "ignore_missing_textures")
+        row = box.row()
+        row.prop(self, "ignore_missing_textures")
+        row.prop(self, "missing_texture_color", text="")
 
 classes = (
     ArnoldAddonPreferences,

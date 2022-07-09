@@ -51,6 +51,12 @@ class AiNodeSocketFloatNormalizedAlt(NodeSocket, AiNodeSocketFloat):
         max=1
         )
 
+class AiNodeSocketUVScale(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(min=0.00001, soft_max=2, default=1)
+
+class AiNodeSocketUVOffset(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(soft_min=-1, soft_max=1)
+
 # Special socket for AiPhysicalSky. It's limited to the range 0-90deg.
 class AiNodeSocketFloatHalfRotation(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(
@@ -83,7 +89,9 @@ classes = (
     AiNodeSocketFloatNormalizedAlt,
     AiNodeSocketFloatHalfRotation,
     AiNodeSocketFloatFullRotation,
-    AiNodeSocketFloatPositiveToTen
+    AiNodeSocketFloatPositiveToTen,
+    AiNodeSocketUVOffset,
+    AiNodeSocketUVScale,
 )
 
 def register():
