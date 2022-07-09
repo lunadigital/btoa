@@ -145,7 +145,7 @@ class ArnoldOptions(PropertyGroup):
         name="Transmission",
         description="The maximum number of times a ray can be refracted. Scenes with many refractive surfaces may require higher values to look correct",
         min=0,
-        default=10
+        default=8
         )
     volume_depth: IntProperty(
         name="Volume",
