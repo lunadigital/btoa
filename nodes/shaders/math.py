@@ -51,7 +51,7 @@ class AiRange(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "smoothstep")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("smoothstep", self.smoothstep)
 
 classes = (

@@ -32,7 +32,7 @@ class AiAmbientOcclusion(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "invert_normals")
         layout.prop(self, "self_only")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("invert_normals", self.invert_normals)
         node.set_bool("self_only", self.self_only)
 
@@ -227,7 +227,7 @@ class AiMixShader(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "mode")
         layout.prop(self, "add_transparency")
         
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_int("mode", int(self.mode))
         node.set_bool("add_transparency", self.add_transparency)
 
@@ -270,7 +270,7 @@ class AiNormalMap(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "color_to_signed")
         layout.prop(self, "normalize")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("invert_x", self.invert_x)
         node.set_bool("invert_y", self.invert_y)
         node.set_bool("invert_z", self.invert_z)
@@ -325,7 +325,7 @@ class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "indirect_specular_enable")
         layout.prop(self, "alpha_mask")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_int("background", int(self.background))
         node.set_bool("diffuse_use_background", self.diffuse_use_background)
         node.set_bool("indirect_diffuse_enable", self.indirect_diffuse_enable)
@@ -381,7 +381,7 @@ class AiStandardHair(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "roughness_anisotropic")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("roughness_anisotropic", self.roughness_anisotropic)
 
 '''
@@ -473,7 +473,7 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "exit_to_background")
         layout.prop(self, "subsurface_type")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("transmit_aovs", self.transmit_aovs)
         node.set_bool("thin_walled", self.thin_walled)
         node.set_bool("caustics", self.caustics)
@@ -529,7 +529,7 @@ class AiWireframe(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "edge_type")
         layout.prop(self, "raster_space")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_int("edge_type", int(self.edge_type))
         node.set_bool("raster_space", self.raster_space)
 

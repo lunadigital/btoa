@@ -1,5 +1,6 @@
 class Color:
     material = (0.39, 0.78, 0.39, 1.0)
+    single_channel = (0.5, 0.5, 0.5, 1.0)
     color_texture = (0.78, 0.78, 0.16, 1.0)
     float_texture = (0.63, 0.63, 0.63, 1.0)
     vector_texture = (0.39, 0.39, 0.78, 1.0)

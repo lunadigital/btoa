@@ -28,7 +28,8 @@ class AiNodeSocket:
         link = utils.get_link(self)
 
         if link:
-            return link.from_node.export()
+            socket_index = int(link.from_socket.path_from_id()[-2:-1])
+            return link.from_node.export(socket_index)
         elif hasattr(self, "default_value"):
             return self.export_default()
         else:

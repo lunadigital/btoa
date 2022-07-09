@@ -48,7 +48,7 @@ class AiCellNoise(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "pattern", text="")
         layout.prop(self, "additive")
     
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_int("pattern", int(self.pattern))
         node.set_bool("additive", self.additive)
 
@@ -109,7 +109,7 @@ class AiFlakes(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "output_space", text="")
     
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_int("pattern", int(self.output_space))
 
 '''
@@ -163,8 +163,6 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
     sflip: BoolProperty(name="Flip U")
     tflip: BoolProperty(name="Flip V")
     swap_st: BoolProperty(name="Swap UV")
-    single_channel: BoolProperty(name="Single Channel")
-    start_channel: IntProperty(name="Start Channel", min=0, max=3)
     mipmap_bias: IntProperty(name="Mipmap Bias", soft_min=-5, soft_max=5)
     uvset: StringProperty(name="UV Set")
     soffset: FloatProperty(name="Offset U", soft_min=-1, soft_max=1)
@@ -176,6 +174,10 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         self.inputs.new("AiNodeSocketRGBA", "Missing Texture Color", identifier="missing_texture_color").default_value = (1, 0, 1, 1)
 
         self.outputs.new("AiNodeSocketRGBA", "RGBA")
+        self.outputs.new("AiNodeSocketBW", "R")
+        self.outputs.new("AiNodeSocketBW", "G")
+        self.outputs.new("AiNodeSocketBW", "B")
+        self.outputs.new("AiNodeSocketBW", "A")
 
     def draw_label(self):
         if self.image:
@@ -199,14 +201,12 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "sflip")
         layout.prop(self, "tflip")
         layout.prop(self, "swap_st")
-        layout.prop(self, "single_channel")
-        layout.prop(self, "start_channel")
         layout.prop(self, "mipmap_bias")
         layout.prop(self, "uvset")
         layout.prop(self, "soffset")
         layout.prop(self, "toffset")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         if self.image:
             if self.image.library:
                 node.set_string("filename", bpy.path.abspath(self.image.filepath, library=self.image.library))
@@ -214,6 +214,10 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
                 node.set_string("filename", bpy.path.abspath(self.image.filepath))
 
             node.set_string("color_space", self.image.colorspace_settings.name)
+        
+        if socket_index > 0:
+            node.set_bool("single_channel", True)
+            node.set_byte("start_channel", socket_index - 1)
 
         node.set_string("filter", self.image_filter)
         node.set_int("swrap", int(self.swrap))
@@ -223,8 +227,6 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         node.set_bool("sflip", self.sflip)
         node.set_bool("tflip", self.tflip)
         node.set_bool("swap_st", self.swap_st)
-        node.set_bool("single_channel", self.single_channel)
-        node.set_byte("start_channel", self.start_channel)
         node.set_int("mipmap_bias", self.mipmap_bias)
         node.set_string("uvset", self.uvset)
         node.set_float("soffset", self.soffset)
@@ -328,7 +330,7 @@ class AiLayer(bpy.types.Node, base.ArnoldNode):
         for layer in self.layers:
             self.template_layer_properties(layout, layer)
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         for layer, i in zip(self.layers, range(1, 9)):
             node.set_bool("enable{}".format(i), layer.enabled)
             node.set_string("name{}".format(i), layer.name)
@@ -392,7 +394,7 @@ class AiLayerRGBA(AiLayer):
         layout.prop(self, "clamp")
         layout.separator()
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         super().sub_export(node)
 
         for layer, i in zip(self.layers, range(1, 9)):
@@ -456,7 +458,7 @@ class AiNoise(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "mode", text="")
     
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_int("mode", int(self.mode))
 
 '''
@@ -506,7 +508,7 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
         row.prop(self, "direction_object")
         row.enabled = not self.use_degrees
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("enable_sun", self.enable_sun)
         node.set_bool("use_degrees", self.use_degrees)
 
@@ -549,7 +551,7 @@ class AiRoundCorners(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "self_only")
         layout.prop(self, "object_space")
     
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("inclusive", self.inclusive)
         node.set_bool("self_only", self.self_only)
         node.set_bool("object_space", self.object_space)

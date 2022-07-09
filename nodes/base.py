@@ -236,17 +236,17 @@ class ArnoldNode:
     def poll(cls, ntree):
         return ntree.bl_idname == ArnoldShaderTree.bl_idname
 
-    def sub_export(self, ainode):
+    def sub_export(self, ainode, socket_index=0):
         '''
         Used to set custom properties in a node if available
         Must be implemented by subclasses
         '''
         pass
 
-    def export(self):
+    def export(self, socket_index=0):
         node = btoa.ArnoldNode(self.ai_name)
 
-        self.sub_export(node)
+        self.sub_export(node, socket_index)
 
         for i in self.inputs:
             socket_value, value_type = i.export()
