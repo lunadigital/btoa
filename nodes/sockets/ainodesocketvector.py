@@ -1,13 +1,11 @@
 import bpy
 from bpy.types import NodeSocket
 from bpy.props import FloatVectorProperty
-
-from .ainodesocket import AiNodeSocket
-from .constants import Color
+from .ainodesocket import AiNodeSocket, SocketColor
 
 class AiNodeSocketVector(NodeSocket, AiNodeSocket):
     bl_label = "Vector"
-    color = Color.mapping_3d
+    color = SocketColor.VECTOR
     default_type = "VECTOR"
 
     default_value: FloatVectorProperty()

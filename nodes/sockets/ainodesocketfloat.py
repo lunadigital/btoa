@@ -1,14 +1,11 @@
 from bpy.types import NodeSocket
 from bpy.props import FloatProperty
-
-from .ainodesocket import AiNodeSocket
-from .constants import Color
-
+from .ainodesocket import AiNodeSocket, SocketColor
 import math
 
 class AiNodeSocketFloat(AiNodeSocket):
     default_type = 'FLOAT'
-    color = Color.float_texture
+    color = SocketColor.FLOAT
 
     def export_default(self):
         return self.default_value, self.default_type
