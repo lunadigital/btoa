@@ -7,7 +7,7 @@ BtoA 0.4.5 is available for Windows, macOS, and Linux. [Go to the downloads page
 
 ## Requirements & Platforms ##
 * Available on Windows, macOS, and Linux
-* Compatible with Blender 2.93 LTS or above (we support Blender 3!)
+* Compatible with Blender 2.83 LTS or above (we support Blender 3!)
 * Requires Arnold SDK 7.1.2.0 or above
 
 ## Licensing & Installation
