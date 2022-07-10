@@ -158,17 +158,15 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
 
     swrap: EnumProperty(name="Wrap U", items=AI_WRAP_OPTIONS, default="0")
     twrap: EnumProperty(name="Wrap V", items=AI_WRAP_OPTIONS, default="0")
-    sscale: FloatProperty(name="Scale U", min=0.00001, soft_max=2, default=1)
-    tscale: FloatProperty(name="Scale V", min=0.00001, soft_max=2, default=1)
     sflip: BoolProperty(name="Flip U")
     tflip: BoolProperty(name="Flip V")
     swap_st: BoolProperty(name="Swap UV")
-    mipmap_bias: IntProperty(name="Mipmap Bias", soft_min=-5, soft_max=5)
     uvset: StringProperty(name="UV Set")
 
     def init(self, context):
         self.inputs.new("AiNodeSocketRGB", "Multiply", identifier="multiply").default_value = (1, 1, 1)
         self.inputs.new("AiNodeSocketRGB", "Offset", identifier="offset").default_value = (0, 0, 0)
+        self.inputs.new("AiNodeSocketIntUnbounded", "Mipmap Bias", identifier="mipmap_bias")
         self.inputs.new("AiNodeSocketUVOffset", "Offset U", identifier="soffset")
         self.inputs.new("AiNodeSocketUVOffset", "Offset V", identifier="toffset")
         self.inputs.new("AiNodeSocketUVScale", "Scale U", identifier="sscale")
@@ -200,7 +198,6 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "sflip")
         layout.prop(self, "tflip")
         layout.prop(self, "swap_st")
-        layout.prop(self, "mipmap_bias")
         #layout.prop(self, "uvset")
 
     def sub_export(self, node, socket_index=0):
@@ -219,12 +216,9 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         node.set_string("filter", self.image_filter)
         node.set_int("swrap", int(self.swrap))
         node.set_int("twrap", int(self.twrap))
-        node.set_float("sscale", self.sscale)
-        node.set_float("tscale", self.tscale)
         node.set_bool("sflip", self.sflip)
         node.set_bool("tflip", self.tflip)
         node.set_bool("swap_st", self.swap_st)
-        node.set_int("mipmap_bias", self.mipmap_bias)
         node.set_string("uvset", self.uvset)
 
         prefs = bpy.context.preferences.addons["btoa"].preferences
