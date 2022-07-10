@@ -20,39 +20,17 @@ class ARNOLD_PT_sampling(bpy.types.Panel):
         layout.use_property_split = True
 
         layout.prop(options, "render_device")
-        layout.separator()
+        layout.prop(options, "aa_samples")
 
         col = self.layout.column()
-        col.prop(options, "aa_samples")
         col.prop(options, "diffuse_samples")
         col.prop(options, "specular_samples")
         col.prop(options, "transmission_samples")
         col.prop(options, "sss_samples")
         col.prop(options, "volume_samples")
-
-class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
-    bl_parent_id = ARNOLD_PT_sampling.bl_idname
-    bl_idname = "ARNOLD_PT_advanced_sampling"
-    bl_label = "Advanced"
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "render"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    def draw(self, context):
-        options = context.scene.arnold
-
-        self.layout.use_property_split = True
-
-        col = self.layout.column()
-        col.prop(options, "aa_seed")
-        col.prop(options, "sample_clamp")
-        col.prop(options, "clamp_aovs")
-        col.prop(options, "indirect_sample_clamp")
-        col.prop(options, "low_light_threshold")
+        col.enabled = (options.render_device == '0') # if using CPU
     
 class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
-    bl_parent_id = ARNOLD_PT_sampling.bl_idname
     bl_idname = "ARNOLD_PT_adaptive_sampling"
     bl_label = "Adaptive Sampling"
     bl_space_type = "PROPERTIES"
@@ -73,6 +51,64 @@ class ARNOLD_PT_adaptive_sampling(bpy.types.Panel):
         col.prop(options, "adaptive_threshold")
 
         self.layout.enabled = context.scene.arnold.use_adaptive_sampling
+
+class ARNOLD_PT_clamping(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_clamping"
+    bl_label = "Clamping"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        options = context.scene.arnold
+        layout = self.layout
+
+        layout.use_property_split = True
+
+        layout.prop(options, "clamp_aa_samples")
+
+        col = self.layout.column()
+        col.prop(options, "sample_clamp")
+        col.prop(options, "clamp_aovs")
+        col.enabled = options.clamp_aa_samples
+
+        layout.prop(options, "indirect_sample_clamp")
+
+class ARNOLD_PT_sample_filtering(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_sample_filtering"
+    bl_label = "Filter"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        options = context.scene.arnold
+        layout = self.layout
+
+        layout.use_property_split = True
+
+        layout.prop(options, "filter_type")
+        layout.prop(options, "filter_width")
+
+class ARNOLD_PT_advanced_sampling(bpy.types.Panel):
+    bl_idname = "ARNOLD_PT_advanced_sampling"
+    bl_label = "Advanced"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        options = context.scene.arnold
+
+        self.layout.use_property_split = True
+
+        col = self.layout.column()
+        col.prop(options, "lock_sampling_pattern")
+       
+        #col.prop(options, "low_light_threshold")
 
 class ARNOLD_PT_ray_depth(bpy.types.Panel):
     bl_idname = "ARNOLD_PT_ray_depth"
@@ -194,8 +230,10 @@ class ARNOLD_PT_film(bpy.types.Panel):
 
 classes = (
     ARNOLD_PT_sampling,
-    ARNOLD_PT_advanced_sampling,
     ARNOLD_PT_adaptive_sampling,
+    ARNOLD_PT_clamping,
+    ARNOLD_PT_sample_filtering,
+    ARNOLD_PT_advanced_sampling,
     ARNOLD_PT_ray_depth,
     ARNOLD_PT_motion_blur,
     ARNOLD_PT_motion_blur_shutter,

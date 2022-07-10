@@ -3,15 +3,15 @@ import bpy
 ''' Utility functions for operators '''
 
 def make_nodetree_name(material_name):
-    return "Ai_" + material_name
+    import uuid
+    uid = uuid.uuid4()
+
+    return "Ai_{}_{}".format(material_name, uid.hex)
 
 def poll_object(context):
     return context.object and not context.object.library
 
 def init_mat_node_tree(node_tree):
-    # Seems like we still need this.
-    # User counting does not work reliably with Python PointerProperty.
-    # Sometimes, the material this tree is linked to is not counted as user.
     node_tree.use_fake_user = True
 
     nodes = node_tree.nodes

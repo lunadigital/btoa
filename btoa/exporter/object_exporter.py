@@ -29,6 +29,16 @@ class ObjectExporter(Exporter):
 
         return marray
     
+    def get_transform_matrix(self):
+        scene = self.cache.scene
+
+        if scene["enable_motion_blur"]:
+            matrix = self.get_blur_matrices()
+        else:
+            matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
+
+        return matrix
+    
     def get_target_frame(self, motion_step):
         frame_current = self.cache.scene["frame_current"]
 

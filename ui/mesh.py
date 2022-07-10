@@ -45,7 +45,7 @@ class OBJECT_PT_arnold_subdivisions(ObjectButtonsPanel, bpy.types.Panel):
 
         layout.prop(ob.arnold, "subdiv_type")
         layout.prop(ob.arnold, "subdiv_iterations")
-        layout.prop(ob.arnold, "subdiv_frustrum_ignore")
+        layout.prop(ob.arnold, "subdiv_frustum_ignore")
 
 class OBJECT_PT_arnold_adaptive_subdivisions(ObjectButtonsPanel, bpy.types.Panel):
     bl_idname = "OBJECT_PT_arnold_adaptive_subdivisions"

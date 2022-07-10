@@ -1,7 +1,9 @@
 import bpy
+import math
 import mathutils
 
 from .object_exporter import ObjectExporter
+from .instance_exporter import InstanceExporter
 
 from ..node import ArnoldNode
 from ..constants import BTOA_LIGHT_CONVERSIONS, BTOA_LIGHT_SHAPE_CONVERSIONS
@@ -21,10 +23,17 @@ class LightExporter(ObjectExporter):
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
-            self.node = ArnoldNode(ntype)
+            name = export_utils.get_unique_name(self.datablock_eval)
+            existing_node = self.session.get_node_by_name(name)
 
-        self.node.set_string("name", export_utils.get_unique_name(self.datablock_eval))
+            if existing_node.is_valid():
+                instancer = InstanceExporter(self.session)
+                instancer.set_transform(self.get_transform_matrix())
+                return instancer.export(existing_node)
+            else:
+                ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
+                self.node = ArnoldNode(ntype)
+                self.node.set_string("name", name)
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
@@ -56,15 +65,15 @@ class LightExporter(ObjectExporter):
         if data.type in ('POINT', 'SPOT'):
             self.node.set_float("radius", data.shadow_soft_size)
 
+            if data.type == 'SPOT':
+                self.node.set_float("cone_angle", math.degrees(data.spot_size))
+                self.node.set_float("penumbra_angle", math.degrees(data.arnold.penumbra_angle))
+                self.node.set_float("roundness", data.arnold.spot_roundness)
+                self.node.set_float("aspect_ratio", data.arnold.aspect_ratio)
+                self.node.set_float("lens_radius", data.arnold.lens_radius)
+
         elif data.type == 'SUN':
             self.node.set_float("angle", data.arnold.angle)
-
-        elif data.type == 'SPOT':
-            self.node.set_float("cone_angle", math.degrees(data.spot_size))
-            self.node.set_float("penumbra_angle", math.degrees(data.arnold.penumbra_angle))
-            self.node.set_float("roundness", data.arnold.spot_roundness)
-            self.node.set_float("aspect_ratio", data.arnold.aspect_ratio)
-            self.node.set_float("lens_radius", data.arnold.lens_radius)
 
         elif data.type == 'AREA':
             self.node.set_float("roundness", data.arnold.area_roundness)
@@ -73,13 +82,9 @@ class LightExporter(ObjectExporter):
             self.node.set_float("soft_edge", data.arnold.soft_edge)
 
             if data.shape == 'SQUARE':
-                smatrix = mathutils.Matrix.Diagonal((
-                    data.size / 2,
-                    data.size / 2,
-                    data.size / 2
-                )).to_4x4()
-
-                tmatrix = self.datablock.matrix_world @ smatrix
+                tmatrix = self.datablock.matrix_world @ \
+                          mathutils.Matrix.Scale(0.5, 4) @ \
+                          mathutils.Matrix.Scale(data.size, 4)
 
                 self.node.set_matrix(
                     "matrix",
@@ -89,14 +94,14 @@ class LightExporter(ObjectExporter):
                 s = self.datablock.scale.x if self.datablock.scale.x > 0 else self.datablock.scale.y
                 self.node.set_float("radius", 0.5 * data.size * s)
             elif data.shape == 'RECTANGLE':
-                d = 0.5 * data.size_y * self.datablock.scale.y
-                top = export_utils.get_position_along_local_vector(self.datablock, d, 'Y')
-                bottom = export_utils.get_position_along_local_vector(self.datablock, -d, 'Y')
+                d = 0.5 * data.size_y * self.datablock_eval.scale.y
+                top = export_utils.get_position_along_local_vector(self.datablock_eval, d, 'Y')
+                bottom = export_utils.get_position_along_local_vector(self.datablock_eval, -d, 'Y')
 
                 self.node.set_vector("top", *top)
                 self.node.set_vector("bottom", *bottom)
 
-                s = self.datablock.scale.x if self.datablock.scale.x > self.datablock.scale.z else self.datablock.scale.z
+                s = self.datablock_eval.scale.x if self.datablock_eval.scale.x > self.datablock_eval.scale.z else self.datablock_eval.scale.z
                 self.node.set_float("radius", 0.5 * data.size * s)
 
         return self.node

@@ -95,8 +95,8 @@ class ArnoldShape(PropertyGroup):
         ]
     )
 
-    subdiv_frustrum_ignore: BoolProperty(
-        name="Frustrum Culling",
+    subdiv_frustum_ignore: BoolProperty(
+        name="Frustum Culling",
         description="Disables subdivision frustum culling of the mesh"
     )
 

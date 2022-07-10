@@ -19,7 +19,6 @@ class CameraExporter(ObjectExporter):
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            #name = export_utils.get_unique_name(ob)
             self.node = ArnoldNode(self.datablock_eval.data.arnold.camera_type)
 
         self.node.set_string("name", self.datablock_eval.name)
@@ -34,13 +33,26 @@ class CameraExporter(ObjectExporter):
             matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
             self.node.set_matrix("matrix", matrix)
 
+        zoom = 1
+        x_offset, y_offset = (0, 0)
+
         if cdata.arnold.camera_type == 'ortho_camera':
-            scale = cdata.ortho_scale * 0.5
-            self.node.set_vector2("screen_window_min", -scale, -scale)
-            self.node.set_vector2("screen_window_max", scale, scale)
+            zoom = cdata.ortho_scale
+            
+            if hasattr(cdata, "is_render_view") and cdata.is_render_view:
+                zoom = zoom * cdata.zoom
+                x_offset, y_offset = cdata.offset
+
         elif cdata.arnold.camera_type == 'persp_camera':
             fov = export_utils.calc_horizontal_fov(self.datablock_eval)
             self.node.set_float("fov", math.degrees(fov))
+
+            if hasattr(cdata, "is_render_view") and cdata.is_render_view:
+                zoom = cdata.zoom
+                x_offset, y_offset = cdata.offset
+
+        self.node.set_vector2("screen_window_min", -zoom + x_offset, -zoom + y_offset)
+        self.node.set_vector2("screen_window_max", zoom + x_offset, zoom + y_offset)
 
         self.node.set_float("exposure", cdata.arnold.exposure)
 

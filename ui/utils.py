@@ -32,24 +32,17 @@ def aiworld_template_ID(layout, world):
         row.operator('arnold.world_new', text="New", icon='ADD')
     return row
 
-def panel_node_draw(layout, id_data, output_type, input_name):
-    #if not id_data.use_nodes:
-    #    layout.operator("cycles.use_shading_nodes", icon='NODETREE')
-    #    return False
+def panel_node_draw(layout, ntree, _output_type, input_name):
+    if not ntree:
+        return
 
-    ntree = id_data.node_tree
+    node = ntree.get_output_node()
 
-    if ntree is not None:
-        node = ntree.get_output_node()
-        if node:
-            input = find_node_input(node, input_name)
-            if input:
-                layout.template_node_view(ntree, node, input)
-            else:
-                layout.label(text="Incompatible output node")
+    if node:
+        input = find_node_input(node, input_name)
+        if input:
+            layout.template_node_view(ntree, node, input)
         else:
-            layout.label(text="No output node")
-
-        return True
-    
-    return False
+            layout.label(text="Incompatible output node")
+    else:
+        layout.label(text="No output node")

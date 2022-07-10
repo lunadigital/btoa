@@ -21,6 +21,7 @@ class ARNOLD_OT_material_new(Operator):
         
         utils.init_mat_node_tree(node_tree)
         mat.arnold.node_tree = node_tree
+        mat.use_nodes = True
 
         ob = context.object # might need to make this context.view_layer.objects.active
         if ob.material_slots:

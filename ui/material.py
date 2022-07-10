@@ -47,7 +47,7 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
                 row.operator('object.material_slot_assign', text="Assign")
                 row.operator('object.material_slot_select', text="Select")
                 row.operator('object.material_slot_deselect', text="Deselect")
-
+        
         split = layout.split(factor=0.65)
 
         if ob:
@@ -66,6 +66,10 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
         elif mat:
             split.template_ID(space, "pin_id")
             split.separator()
+
+        if not mat.arnold.node_tree:
+            layout.operator("arnold.material_init", icon='NODETREE')
+            return
 
 class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
     bl_label = "Surface"
@@ -86,11 +90,20 @@ class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
     def draw(self, context):
         layout = self.layout
 
+        mat = context.material
+        
+        layout.prop(mat, "use_nodes", icon='NODETREE')
+        layout.separator()
+
         layout.use_property_split = True
 
-        mat = context.material
-        if not utils.panel_node_draw(layout, mat.arnold, 'OUTPUT_MATERIAL', 'Surface'):
-            layout.prop(mat, "diffuse_color")
+        if mat.use_nodes:
+            utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
+        else:
+            layout.prop(mat, "diffuse_color", text="Base Color")
+            layout.prop(mat, "metallic")
+            layout.prop(mat, "specular_intensity", text="Specular")
+            layout.prop(mat, "roughness")
 
 classes = (
     ARNOLD_MATERIAL_PT_context_material,

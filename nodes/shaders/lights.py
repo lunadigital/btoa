@@ -1,18 +1,17 @@
-from bpy.types import Node
-from bpy.props import EnumProperty, FloatVectorProperty
+import bpy
+import math, mathutils
+from bpy.props import *
+from .. import base
+from ... import btoa, utils
 
-import math
-import mathutils
+'''
+AiSkydome
+https://docs.arnoldrenderer.com/display/A5NodeRef/skydome_light
 
-from ..base import ArnoldNode
-
-from ... import btoa
-
-class AiSkydome(Node, ArnoldNode):
-    ''' Returns a skydome light for World rendering '''
+Returns a skydome light for World rendering.
+'''
+class AiSkydome(bpy.types.Node, base.ArnoldNode):
     bl_label = "Skydome"
-    bl_icon = 'NONE'
-    
     ai_name = "skydome_light"
 
     image_format: EnumProperty(
@@ -36,7 +35,7 @@ class AiSkydome(Node, ArnoldNode):
     )
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color")
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color").default_value = (0.050876, 0.050876, 0.050876)
         self.inputs.new('AiNodeSocketFloatPositive', "Intensity", identifier="intensity").default_value = 1
         self.inputs.new('AiNodeSocketFloatPositive', "Exposure", identifier="exposure")
         self.inputs.new('AiNodeSocketIntPositive', "Resolution", identifier="resolution").default_value = 1000
@@ -49,13 +48,14 @@ class AiSkydome(Node, ArnoldNode):
 
         layout.prop(context.scene.world.arnold, "rotation_controller")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_int("format", int(self.image_format))
         node.set_int("portal_mode", int(self.portal_mode))
 
-        # Set skydome orientation
-        # This assumes a rotation of (0, 0, 0)
-        # Additional rotation should be set with a rotation controller
+        '''
+        Set the skydome's rotation to align with Blender's coordinate system. Additional rotation
+        can be set with a rotation controller in the UI.
+        '''
         rx = mathutils.Matrix.Rotation(0 + (math.pi / 2), 4, 'X')
         ry = mathutils.Matrix.Rotation(0, 4, 'Y')
         rz = mathutils.Matrix.Rotation(0, 4, 'Z')
@@ -68,10 +68,12 @@ class AiSkydome(Node, ArnoldNode):
 
         node.set_matrix("matrix", btoa.utils.flatten_matrix(matrix))
 
+classes = (
+    AiSkydome,
+)
+
 def register():
-    from bpy.utils import register_class
-    register_class(AiSkydome)
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    unregister_class(AiSkydome)
+    utils.unregister_classes(classes)

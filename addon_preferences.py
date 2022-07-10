@@ -1,7 +1,7 @@
 import bpy
 
 from bpy.types import AddonPreferences, Operator
-from bpy.props import StringProperty, BoolProperty
+from bpy.props import StringProperty, BoolProperty, FloatVectorProperty
 
 import os
 
@@ -21,13 +21,18 @@ class ArnoldAddonPreferences(AddonPreferences):
         update=refresh_addon
     )
 
+    abort_on_license_fail: BoolProperty(name="Abort On License Fail")
+    skip_license_check: BoolProperty(name="Skip License Check")
+    ignore_missing_textures: BoolProperty(name="Ignore Missing Textures", default=True)
+    missing_texture_color: FloatVectorProperty(name="Missing Texture Color", size=4, default=(1, 0, 1, 1), subtype='COLOR')
+
     # Used to check if we need to unregister everything or just addon preferences
     full_unregister: BoolProperty()
 
     def draw(self, context):
         # SDK config
         box = self.layout.box()
-        
+
         row = box.row()
         row.prop(self, "arnold_path")
         row.enabled = not aienv.is_preconfigured()
@@ -54,7 +59,30 @@ class ArnoldAddonPreferences(AddonPreferences):
             col.separator()
             col.label(text="To use an OCIO config other than Filmic, point the OCIO environment variable to a valid OCIO config.")
 
+        # Licensing
+        box = self.layout.box()
+
+        col = box.column()
+        col.label(text="Licensing")
+        col.separator()
+        col.prop(self, "abort_on_license_fail")
+        col.prop(self, "skip_license_check", text="Render with Watermarks (Skip License Check)")
+
+        # Error Handling
+        box = self.layout.box()
+        box.label(text="Error Handling")
+
+        row = box.row()
+        row.prop(self, "ignore_missing_textures")
+        row.prop(self, "missing_texture_color", text="")
+
 classes = (
     ArnoldAddonPreferences,
 )
-register, unregister = bpy.utils.register_classes_factory(classes)
+def register():
+    for c in classes:
+        bpy.utils.register_class(c)
+
+def unregister():
+    for c in reversed(classes):
+        bpy.utils.unregister_class(c)

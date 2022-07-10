@@ -1,6 +1,7 @@
 import bpy
 import bmesh
 import math
+import mathutils
 import numpy
 from bpy_extras import view3d_utils
 
@@ -53,31 +54,29 @@ def get_position_along_local_vector(ob, distance, axis):
     result = translation_matrix @ ob.matrix_world
     return result.to_translation()
 
-'''
-TODO: This is a righteous mess and needs to be cleaned up.
-'''
 def get_unique_name(datablock):
-    prefix = ""
-    name = ""
+    db = datablock
 
-    if hasattr(datablock, "is_instance"):
-        if datablock.is_instance:
-            prefix = datablock.parent.name + "_"
-        
-        ob = get_object_data_from_instance(datablock)
-        name = ob.name + "_MESH"
+    if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
+        db = datablock.instance_object
 
-    elif hasattr(datablock, "data") and isinstance(datablock.data, bpy.types.Mesh):
-        name = datablock.name + "_MESH"
+    if hasattr(db, "data"):
+        if isinstance(db.data, bpy.types.Light):
+            t = db.data.type
+            n = db.data.name
+        else:
+            t = db.type
+            n = db.name
+    elif isinstance(db, (bpy.types.Material, bpy.types.World)):
+        t = "SHADER"
+        n = db.arnold.node_tree.name
 
-    else:
-        # Assume it's a material
-        if datablock.library:
-            prefix = datablock.library.name + "_"
-        
-        name = datablock.name + "_MATERIAL"
+        # For backwards compatibility with previous BtoA versions that
+        # don't use UUIDs in the node tree name
+        if len(db.arnold.node_tree.name.split("_")) == 2:
+            n = "{}_{}".format(db.arnold.node_tree.name, db.name)
 
-    return prefix + name
+    return "{}_{}".format(t, n)
 
 def get_render_resolution(session_cache, interactive=False):
     if interactive:
@@ -94,36 +93,45 @@ def get_render_resolution(session_cache, interactive=False):
 
     return x, y
 
-def get_viewport_camera_object(space_data):
-    DEFAULT_SENSOR_WIDTH = 36
-
-    region_3d = space_data.region_3d
-    
-    options = UniverseOptions()
-    width, height = options.get_int("xres"), options.get_int("yres")
+def get_viewport_camera_object(context):
+    DEFAULT_SENSOR_WIDTH = 36.0
+    ratio = context.region.width / context.region.height
 
     camera = BlenderCamera()
     camera.name = "BTOA_VIEWPORT_CAMERA"
 
-    view_matrix = region_3d.view_matrix.inverted()
-    camera.matrix_world = view_matrix
+    camera.matrix_world = context.region_data.view_matrix.inverted()
+    camera.data.clip_start = context.space_data.clip_start
+    camera.data.clip_end = context.space_data.clip_end
 
-    fov = 2 * math.atan(DEFAULT_SENSOR_WIDTH / space_data.lens)
-    camera.data.angle = fov
+    sensor_width = context.space_data.camera.data.sensor_width if context.region_data.view_perspective == 'CAMERA' else DEFAULT_SENSOR_WIDTH
+    lens = context.space_data.camera.data.lens if context.region_data.view_perspective == 'CAMERA' else context.space_data.lens
+    camera.data.angle = 2 * math.atan(sensor_width / lens)
 
-    camera.data.clip_start = space_data.clip_start
-    camera.data.clip_end = space_data.clip_end
+    if context.region_data.view_perspective == 'CAMERA':
+        camera.data.arnold.camera_type = context.space_data.camera.data.arnold.camera_type
+        camera.data.is_render_view = True
 
-    if region_3d.view_perspective == 'ORTHO':
+        camera.data.zoom = 2.0 / (2.0 ** 0.5 + context.region_data.view_camera_zoom / 50.0) ** 2
+        camera.data.offset = (
+            context.region_data.view_camera_offset[0] * 2,
+            context.region_data.view_camera_offset[1] * 2
+            )
+
+        if camera.data.arnold.camera_type == 'ortho_camera':
+            camera.data.ortho_scale = context.space_data.camera.data.ortho_scale
+    elif context.region_data.view_perspective == 'ORTHO':
         camera.data.arnold.camera_type = "ortho_camera"
 
-        if height > width:
-            # This was just a lucky guess, I'm not entirely sure why this works
-            sensor = DEFAULT_SENSOR_WIDTH * (width / height)
-        else:
-            sensor = DEFAULT_SENSOR_WIDTH
+        sensor = sensor_width * ratio if ratio < 1.0 else DEFAULT_SENSOR_WIDTH
+        camera.data.ortho_scale = context.region_data.view_distance * sensor / lens
 
-        camera.data.ortho_scale = 2 * region_3d.view_distance * sensor / space_data.lens
+        '''
+        By default an orthographic viewport camera is VERY close to the origin of the
+        scene, which causes clipping. We're going to manually move it back 100 units
+        along the local Z (forward/backward) axis to avoid this.
+        '''
+        camera.matrix_world @= mathutils.Matrix.Translation((0.0, 0.0, 100.0))
 
     return camera
 

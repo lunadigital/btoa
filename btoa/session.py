@@ -17,6 +17,9 @@ from .constants import BTOA_CONVERTIBLE_TYPES
 from .session_cache import SessionCache
 from . import utils as export_utils
 
+if "AI_SESSION" not in globals().keys():
+    AI_SESSION = None
+
 class Session:
     def __init__(self):
         self.reset()
@@ -29,14 +32,15 @@ class Session:
         if self.is_interactive:
             arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
             arnold.AiRenderEnd()
-        
+
         arnold.AiEnd()
-    
+
     def destroy(self, node):
         arnold.AiNodeDestroy(node.data)
 
-    def export(self, engine, depsgraph, context=None):
-        self.cache.sync(engine, depsgraph, context)
+    def export(self, engine, depsgraph, prefs, context=None):
+        global AI_SESSION
+        self.cache.sync(engine, depsgraph, prefs, context)
 
         OptionsExporter(self).export(interactive=self.is_interactive)
 
@@ -58,7 +62,7 @@ class Session:
 
         if context:
             # In viewport, we must reconsruct the camera ourselves
-            bl_camera = export_utils.get_viewport_camera_object(context.space_data)
+            bl_camera = export_utils.get_viewport_camera_object(context)
             self.last_viewport_matrix = bl_camera.matrix_world
 
             camera = CameraExporter(self).export(bl_camera)
@@ -71,16 +75,18 @@ class Session:
             WorldExporter(self).export(depsgraph.scene.world)
 
         # Everything else
+        scene = self.cache.scene
 
-        default_filter = ArnoldNode("gaussian_filter")
-        default_filter.set_string("name", "gaussianFilter")
+        default_filter = ArnoldNode(scene["filter_type"])
+        default_filter.set_string("name", "btoa_image_filter")
+        default_filter.set_float("width", scene["filter_width"])
 
         outputs = ArnoldArray()
         outputs.allocate(1, 1, 'STRING')
-        outputs.set_string(0, "RGBA RGBA gaussianFilter __display_driver")
+        outputs.set_string(0, "RGBA RGBA btoa_image_filter __display_driver")
         options.set_array("outputs", outputs)
 
-        arnold.AiRenderAddInteractiveOutput(0)
+        arnold.AiRenderAddInteractiveOutput(None, 0)
 
         color_manager = ArnoldColorManager()
         color_manager.set_string("config", os.getenv("OCIO"))
@@ -108,7 +114,7 @@ class Session:
             while status == arnold.AI_RENDER_STATUS_RENDERING.value:
                 time.sleep(0.001)
                 status = arnold.AiRenderGetStatus()
-        
+
         result = arnold.AiRenderEnd()
 
         self.end()

@@ -1,13 +1,11 @@
 import bpy
 from bpy.types import NodeSocket
 from bpy.props import IntProperty
-
-from .ainodesocket import AiNodeSocket
-from .constants import Color
+from .ainodesocket import AiNodeSocket, SocketColor
 
 class AiNodeSocketInt(AiNodeSocket):
     default_type = 'INT'
-    color = Color.float_texture
+    color = SocketColor.FLOAT
 
     def export_default(self):
         return self.default_value, self.default_type
