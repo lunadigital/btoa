@@ -6,7 +6,7 @@ import numpy
 import os
 
 from .. import btoa
-from ..btoa import utils
+from ..btoa import utils, OptionsExporter
 
 from bl_ui.properties_render import RENDER_PT_color_management
 from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
@@ -236,10 +236,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         region = context.region
         scene = depsgraph.scene
+        prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
 
         if not AI_SESSION or not AI_SESSION.is_running:
-            prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
-
             AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
 
             AI_SESSION = self.session
@@ -260,6 +259,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             AI_SESSION.render_interactive(AI_RENDER_CALLBACK)
 
         AI_SESSION.pause()
+
+        AI_SESSION.cache.sync(self, depsgraph, prefs, context)
+        OptionsExporter(AI_SESSION).export(interactive=True)
 
         if AI_SESSION.update_viewport_dimensions:
             AI_SESSION.update_viewport_dimensions = False
