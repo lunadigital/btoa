@@ -1,4 +1,8 @@
 import math
+import os
+from pathlib import Path
+from datetime import datetime
+import arnold
 
 from .exporter import Exporter
 from ..universe_options import UniverseOptions
@@ -71,3 +75,40 @@ class OptionsExporter(Exporter):
 
         options.set_bool("abort_on_license_fail", prefs["abort_on_license_fail"])
         options.set_bool("skip_license_check", prefs["skip_license_check"])
+
+        if prefs["log_to_file"]:
+            t = str(datetime.now()).replace(" ", "-").replace(":", "-").split(".")[0]
+            filepath = prefs["log_path"] if prefs["log_path"] != "" else os.path.join(Path.home(), f"arnold-{t}.log")
+
+            arnold.AiMsgSetLogFileName(filepath)
+        
+        if not interactive:
+            if prefs["log_all"]:
+                arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_ALL)
+            else:
+                arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_NONE)
+
+                if prefs["log_info"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_INFO)
+                if prefs["log_warnings"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_WARNINGS)
+                if prefs["log_errors"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_ERRORS)
+                if prefs["log_debug"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_DEBUG)
+                if prefs["log_stats"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_STATS)
+                if prefs["log_plugins"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_PLUGINS)
+                if prefs["log_progress"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_PROGRESS)
+                if prefs["log_nan"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_NAN)
+                if prefs["log_timestamp"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_TIMESTAMP)
+                if prefs["log_backtrace"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_BACKTRACE)
+                if prefs["log_memory"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_MEMORY)
+                if prefs["log_color"]:
+                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_COLOR)
