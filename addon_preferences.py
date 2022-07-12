@@ -1,16 +1,38 @@
 import bpy
-
+import os
+from pathlib import Path
 from bpy.types import AddonPreferences, Operator
 from bpy.props import StringProperty, BoolProperty, FloatVectorProperty
-
-import os
-
 from . import environ as aienv
 
 def refresh_addon(self, context):
     prefs = bpy.context.preferences.addons[__package__].preferences
     aienv.save_cached_arnold_path(prefs.arnold_path)
     bpy.ops.script.reload()
+
+class ARNOLD_OT_reset_log_flags(Operator):
+    bl_idname = 'arnold.reset_log_flags'
+    bl_label = "Reset Log Flags"
+    bl_description = "Reset logging flags"
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        prefs = context.preferences.addons[__package__].preferences
+        prefs.property_unset("log_info")
+        prefs.property_unset("log_warnings")
+        prefs.property_unset("log_errors")
+        prefs.property_unset("log_debug")
+        prefs.property_unset("log_stats")
+        prefs.property_unset("log_plugins")
+        prefs.property_unset("log_progress")
+        prefs.property_unset("log_nan")
+        prefs.property_unset("log_timestamp")
+        prefs.property_unset("log_backtrace")
+        prefs.property_unset("log_memory")
+        prefs.property_unset("log_color")
+        prefs.property_unset("log_all")
+
+        return {'FINISHED'}
 
 class ArnoldAddonPreferences(AddonPreferences):
     bl_idname = __package__
@@ -26,7 +48,7 @@ class ArnoldAddonPreferences(AddonPreferences):
     ignore_missing_textures: BoolProperty(name="Ignore Missing Textures", default=True)
     missing_texture_color: FloatVectorProperty(name="Missing Texture Color", size=4, default=(1, 0, 1, 1), subtype='COLOR')
     log_to_file: BoolProperty(name="Log to file")
-    log_path: StringProperty(name="Log Path", subtype="FILE_PATH")
+    log_path: StringProperty(name="Log Path", subtype="DIR_PATH", default=os.path.join(Path.home(), "arnold_logs"))
     log_info: BoolProperty(name="Info", default=True)
     log_warnings: BoolProperty(name="Warnings", default=True)
     log_errors: BoolProperty(name="Errors", default=True)
@@ -95,12 +117,11 @@ class ArnoldAddonPreferences(AddonPreferences):
         box = self.layout.box()
         box.label(text="Logging")
 
-        row = box.row(align=True, heading="Log to file")
-        col = row.column(align=True)
-        col.prop(self, "log_to_file", text="")
-        col = row.column(align=True)
+        box.prop(self, "log_to_file")
+
+        col = box.column()
         col.enabled = self.log_to_file
-        col.prop(self, "log_path", text="")
+        col.prop(self, "log_path")
 
         box.separator()
         box.prop(self, "log_all")
@@ -126,7 +147,10 @@ class ArnoldAddonPreferences(AddonPreferences):
         row.prop(self, "log_memory")
         row.prop(self, "log_color")
 
+        box.operator("arnold.reset_log_flags")
+
 classes = (
+    ARNOLD_OT_reset_log_flags,
     ArnoldAddonPreferences,
 )
 def register():

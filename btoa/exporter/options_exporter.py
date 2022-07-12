@@ -78,7 +78,11 @@ class OptionsExporter(Exporter):
 
         if prefs["log_to_file"]:
             t = str(datetime.now()).replace(" ", "-").replace(":", "-").split(".")[0]
-            filepath = prefs["log_path"] if prefs["log_path"] != "" else os.path.join(Path.home(), f"arnold-{t}.log")
+            folder = prefs["log_path"] if prefs["log_path"] != "" else Path.home()
+            filename = f"arnold-{t}.log"
+            filepath = os.path.join(folder, filename)
+
+            Path(folder).mkdir(parents=True, exist_ok=True)
 
             arnold.AiMsgSetLogFileName(filepath)
         
