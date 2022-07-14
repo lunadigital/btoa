@@ -80,10 +80,11 @@ def get_unique_name(datablock):
 
 def get_render_resolution(session_cache, interactive=False):
     if interactive:
+        scene = session_cache.scene
         region = session_cache.region
 
-        x = region["width"]
-        y = region["height"]
+        x = int(region["width"] * float(scene["viewport_scale"]))
+        y = int(region["height"] * float(scene["viewport_scale"]))
     else:
         render = session_cache.render
         scale = render["resolution_percentage"] / 100

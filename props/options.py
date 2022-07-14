@@ -253,6 +253,17 @@ class ArnoldOptions(PropertyGroup):
 
     space_data: PointerProperty(type=AiSpaceDataProperties)
 
+    viewport_scale: EnumProperty(
+        name="Viewport Scale",
+        items=[
+            ("1.0", "100%", "100% Render Resolution"),
+            ("0.75", "75%", "75% Render Resolution"),
+            ("0.5", "50%", "50% Render Resolution"),
+            ("0.25", "25%", "25% Render Resolution")
+        ],
+        default="1.0"
+    )
+
 classes = (
     AiSpaceDataProperties,
     ArnoldOptions,

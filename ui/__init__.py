@@ -7,6 +7,7 @@ from . import (
     render,
     gizmos,
     view_layer,
+    viewport,
     world
 )
 
@@ -19,6 +20,7 @@ modules = (
     render,
     gizmos,
     view_layer,
+    viewport,
     world
 )
 
