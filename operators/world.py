@@ -40,10 +40,9 @@ class ARNOLD_OT_world_copy(Operator):
     
     def execute(self, context):
         current_world = context.scene.world
-        
-        new_world = current_world.copy()
-
         current_node_tree = current_world.arnold.node_tree
+
+        new_world = current_world.copy()
 
         if current_node_tree:
             new_node_tree = current_node_tree.copy()

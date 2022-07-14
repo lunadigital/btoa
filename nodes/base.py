@@ -98,27 +98,19 @@ class ArnoldShaderTree(ShaderNodeTree):
                                 row = layout.row()
                                 row.enabled = has_material_slots
                                 row.ui_units_x = 4
-                                row.popover(panel="NODE_PT_material_slots")
+                                row.popover(panel="NODE_PT_material_slots")                            
 
-                            row = layout.row()
-                            row.enabled = has_material_slots
-
-                            # Show material.new when no active ID/slot exists
-                            #if not id_from and ob_type in types_that_support_material:
-                            #    row.template_ID(ob, "active_material", new="material.new")
-
-                            # Material ID, but not for Lights
                             if id_from and ob_type != 'LIGHT':
                                 row = utils.aishader_template_ID(layout, ob.active_material)
+                                row.enabled = has_material_slots
 
                         if arnold_space_data.shader_type == 'WORLD':
                             NODE_MT_editor_menus.draw_collapsible(context, layout)
 
                             layout.separator_spacer()
 
-                            row = layout.row()
+                            row = utils.aiworld_template_ID(layout, scene.world)
                             row.enabled = not snode.pin
-                            row.template_ID(scene, "world", new="world.new")
 
                     elif snode.tree_type == 'TextureNodeTree':
                         layout.prop(snode, "texture_type", text="")
