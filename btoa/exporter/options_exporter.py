@@ -116,3 +116,7 @@ class OptionsExporter(Exporter):
                     arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_MEMORY)
                 if prefs["log_color"]:
                     arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_COLOR)
+        
+        for key in scene.keys():
+            if "ignore_" in key:
+                options.set_bool(key, scene[key])

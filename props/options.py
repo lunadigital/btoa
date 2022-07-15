@@ -264,6 +264,23 @@ class ArnoldOptions(PropertyGroup):
         default="1.0"
     )
 
+    # Ignore flags
+    ignore_textures: BoolProperty(name="Ignore Textures")
+    ignore_shaders: BoolProperty(name="Ignore Shaders")
+    ignore_atmosphere: BoolProperty(name="Ignore Atmosphere")
+    ignore_lights: BoolProperty(name="Ignore Lights")
+    ignore_shadows: BoolProperty(name="Ignore Shadows")
+    ignore_subdivision: BoolProperty(name="Ignore Subdivision")
+    ignore_displacement: BoolProperty(name="Ignore Displacement")
+    ignore_bump: BoolProperty(name="Ignore Bump")
+    ignore_motion: BoolProperty(name="Ignore Motion")
+    ignore_dof: BoolProperty(name="Ignore Depth of Field")
+    ignore_smoothing: BoolProperty(name="Ignore Normal Smoothing")
+    ignore_sss: BoolProperty(name="Ignore Sub-Surface Scattering")
+    # ignore_operators: BoolProperty(name="Ignore Operators")
+    # ignore_imagers: BoolProperty(name="Ignore Imagers")
+    # force_shader_assignments
+
 classes = (
     AiSpaceDataProperties,
     ArnoldOptions,
