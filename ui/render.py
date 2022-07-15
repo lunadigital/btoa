@@ -244,6 +244,7 @@ class ARNOLD_PT_feature_overrides(bpy.types.Panel):
         layout = self.layout
         options = context.scene.arnold
 
+        layout.prop(options, "ignore_textures")
         layout.prop(options, "ignore_shaders")
         layout.prop(options, "ignore_atmosphere")
         layout.prop(options, "ignore_lights")
@@ -255,8 +256,6 @@ class ARNOLD_PT_feature_overrides(bpy.types.Panel):
         layout.prop(options, "ignore_motion")
         layout.prop(options, "ignore_dof")
         layout.prop(options, "ignore_sss")
-        layout.prop(options, "ignore_textures")
-        layout.prop(options, "ignore_missing_textures")
 
 classes = (
     ARNOLD_PT_sampling,
