@@ -15,7 +15,6 @@ def register():
     addon_preferences.register()
 
     aienv.configure_arnold_environment()
-    aienv.configure_ocio()
 
     prefs = bpy.context.preferences.addons[__package__].preferences
     if prefs.arnold_path != "":
@@ -55,5 +54,3 @@ def unregister():
           
     from . import addon_preferences
     addon_preferences.unregister()
-
-    aienv.reset_ocio()

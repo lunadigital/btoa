@@ -78,11 +78,8 @@ class ArnoldAddonPreferences(AddonPreferences):
         if aienv.is_preconfigured():
             row.label(text="Path automatically set by $ARNOLD_ROOT")
 
-        # OCIO config notification
-        profile = "Filmic"
-        if os.getenv("OCIO") != aienv.get_default_ocio_config():
-            normalized_path = os.path.normpath(os.path.dirname(os.getenv("OCIO")))
-            profile = normalized_path.split(os.sep).pop()
+        # OCIO config
+        profile = "OCIO" if 'OCIO' in os.environ else "Filmic"
 
         box = self.layout.box()
 
@@ -90,11 +87,12 @@ class ArnoldAddonPreferences(AddonPreferences):
         col.label(text="OCIO Color Management")
         col.separator()
         col.label(text="Active Config: {}".format(profile))
-        col.label(text="Config Path: {}".format(os.getenv("OCIO")))
 
         if profile == "Filmic":
             col.separator()
             col.label(text="To use an OCIO config other than Filmic, point the OCIO environment variable to a valid OCIO config.")
+        else:
+            col.label(text="Config Path: {}".format(os.getenv('OCIO')))
 
         # Licensing
         box = self.layout.box()

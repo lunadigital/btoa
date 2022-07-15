@@ -86,17 +86,3 @@ def remove_plugins():
         os.environ["ARNOLD_PLUGIN_PATH"] = os.pathsep.join(plugins)
     else:
         del os.environ["ARNOLD_PLUGIN_PATH"]
-
-def get_default_ocio_config():
-    addon_root = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(addon_root, "config", "colormanagement", "config.ocio")
-
-def configure_ocio():
-    if not "OCIO" in os.environ:
-        print("No custom OCIO config found, using default Filmic...")
-        os.environ["OCIO"] = get_default_ocio_config()
-
-def reset_ocio():
-    # Clear OCIO profile if set to Filmic
-    if os.getenv("OCIO") == get_default_ocio_config():
-        del os.environ["OCIO"]
