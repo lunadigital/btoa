@@ -94,13 +94,7 @@ class ArnoldShaderTree(ShaderNodeTree):
                             # disable also when the selected object does not support materials
                             has_material_slots = not snode.pin and ob_type in types_that_support_material
 
-                            if ob_type != 'LIGHT':
-                                row = layout.row()
-                                row.enabled = has_material_slots
-                                row.ui_units_x = 4
-                                row.popover(panel="NODE_PT_material_slots")                            
-
-                            if id_from and ob_type != 'LIGHT':
+                            if ob_type not in ('LIGHT', 'CAMERA'):
                                 row = utils.aishader_template_ID(layout, ob.active_material)
                                 row.enabled = has_material_slots
 
