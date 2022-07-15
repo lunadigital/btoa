@@ -8,6 +8,7 @@ import gpu
 
 from .. import btoa
 from ..btoa import utils, OptionsExporter
+from ..props.light import ArnoldLight
 
 from bl_ui.properties_render import RENDER_PT_color_management
 from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
@@ -327,7 +328,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             polymesh_data_needs_update = False
 
             for update in reversed(depsgraph.updates):
-                if isinstance(update.id, bpy.types.Light):
+                if isinstance(update.id, bpy.types.Light) or hasattr(update.id, "data") and isinstance(update.id.data.arnold, ArnoldLight):
                     light_data_needs_update = True
                 elif isinstance(update.id, btoa.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
                     polymesh_data_needs_update = True
@@ -371,6 +372,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         
         region = context.region
         dimensions = region.width, region.height
+
         # Check to see if viewport camera changed
         bl_camera = utils.get_viewport_camera_object(context)
 
