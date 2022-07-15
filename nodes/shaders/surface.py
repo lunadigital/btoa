@@ -139,7 +139,7 @@ class AiDisplacement(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "disp_autobump")
 
     # Overriding export() because this isn't a native Arnold struct
-    def export(self):
+    def export(self, socket_index=0):
         return (
             self.inputs[3].export()[0], # input
             self.inputs[0].export()[0], # padding
