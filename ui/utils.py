@@ -39,9 +39,9 @@ def panel_node_draw(layout, ntree, _output_type, input_name):
     node = ntree.get_output_node()
 
     if node:
-        input = find_node_input(node, input_name)
-        if input:
-            layout.template_node_view(ntree, node, input)
+        socket = find_node_input(node, input_name)
+        if socket:
+            layout.template_node_view(ntree, node, socket)
         else:
             layout.label(text="Incompatible output node")
     else:
