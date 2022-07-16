@@ -228,6 +228,35 @@ class ARNOLD_PT_film(bpy.types.Panel):
         self.layout.use_property_split = True
         self.layout.prop(context.scene.render, "film_transparent")
 
+class ARNOLD_PT_feature_overrides(bpy.types.Panel):
+    bl_label = "Feature Overrides"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in cls.COMPAT_ENGINES
+
+    def draw(self, context):
+        layout = self.layout
+        options = context.scene.arnold
+
+        layout.prop(options, "ignore_textures")
+        layout.prop(options, "ignore_shaders")
+        layout.prop(options, "ignore_atmosphere")
+        layout.prop(options, "ignore_lights")
+        layout.prop(options, "ignore_shadows")
+        layout.prop(options, "ignore_subdivision")
+        layout.prop(options, "ignore_displacement")
+        layout.prop(options, "ignore_bump")
+        layout.prop(options, "ignore_smoothing")
+        layout.prop(options, "ignore_motion")
+        layout.prop(options, "ignore_dof")
+        layout.prop(options, "ignore_sss")
+
 classes = (
     ARNOLD_PT_sampling,
     ARNOLD_PT_adaptive_sampling,
@@ -238,7 +267,8 @@ classes = (
     ARNOLD_PT_motion_blur,
     ARNOLD_PT_motion_blur_shutter,
     ARNOLD_PT_rendering,
-    ARNOLD_PT_film
+    ARNOLD_PT_film,
+    ARNOLD_PT_feature_overrides,
 )
 
 def register():

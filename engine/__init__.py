@@ -4,9 +4,11 @@ import ctypes
 import math
 import numpy
 import os
+import gpu
 
 from .. import btoa
-from ..btoa import utils
+from ..btoa import utils, OptionsExporter
+from ..props.light import ArnoldLight
 
 from bl_ui.properties_render import RENDER_PT_color_management
 from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
@@ -236,11 +238,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         region = context.region
         scene = depsgraph.scene
+        prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
 
         if not AI_SESSION or not AI_SESSION.is_running:
-            prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
-
-            AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
+            AI_FRAMEBUFFER = btoa.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
 
             AI_SESSION = self.session
             AI_SESSION.start(interactive=True)
@@ -261,12 +262,17 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         AI_SESSION.pause()
 
+        AI_SESSION.cache.sync(self, depsgraph, prefs, context)
+        OptionsExporter(AI_SESSION).export(interactive=True)
+
         if AI_SESSION.update_viewport_dimensions:
             AI_SESSION.update_viewport_dimensions = False
 
             options = btoa.UniverseOptions()
-            options.set_int("xres", region.width)
-            options.set_int("yres", region.height)
+            options.set_int("xres", int(region.width * float(scene.arnold.viewport_scale)))
+            options.set_int("yres", int(region.height * float(scene.arnold.viewport_scale)))
+
+            AI_FRAMEBUFFER = btoa.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
 
         # Update viewport camera
         node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
@@ -322,7 +328,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             polymesh_data_needs_update = False
 
             for update in reversed(depsgraph.updates):
-                if isinstance(update.id, bpy.types.Light):
+                if isinstance(update.id, bpy.types.Light) or hasattr(update.id, "data") and isinstance(update.id.data.arnold, ArnoldLight):
                     light_data_needs_update = True
                 elif isinstance(update.id, btoa.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
                     polymesh_data_needs_update = True
@@ -363,9 +369,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         global AI_FRAMEBUFFER
 
         assert AI_SESSION
-
+        
         region = context.region
-        scene = depsgraph.scene
         dimensions = region.width, region.height
 
         # Check to see if viewport camera changed
@@ -374,19 +379,20 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         if AI_SESSION.cache.viewport_camera.redraw_required(bl_camera):
             self.tag_update()
 
-        # This will create weird issues when resizing the screen (Blender will forget about anything in the buffer that was
-        # rendered before resizing). Will need to add some kind of resizing method to handle this, instead of blowing the
-        # whole thing away with a new class
-        if not AI_FRAMEBUFFER or dimensions != (AI_FRAMEBUFFER.width, AI_FRAMEBUFFER.height):
+        if AI_FRAMEBUFFER and (dimensions != AI_FRAMEBUFFER.get_dimensions(scaling=False) or float(depsgraph.scene.arnold.viewport_scale) != AI_FRAMEBUFFER.scale):
             AI_SESSION.update_viewport_dimensions = True
-            AI_FRAMEBUFFER = btoa.FrameBuffer(self, region, scene)
             self.tag_update()
-
+            
         if AI_FRAMEBUFFER.requires_update:
-            print("UPDATING FRAMEBUFFER")
-            AI_FRAMEBUFFER.generate_texture()
+            AI_FRAMEBUFFER.tag_update()
 
-        AI_FRAMEBUFFER.draw(self, scene)
+        gpu.state.blend_set('ALPHA_PREMULT')
+        self.bind_display_space_shader(depsgraph.scene)
+
+        AI_FRAMEBUFFER.draw()
+
+        self.unbind_display_space_shader()
+        gpu.state.blend_set('NONE')
 
 def get_panels():
     exclude_panels = {

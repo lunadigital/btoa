@@ -21,6 +21,7 @@ class ARNOLD_OT_material_new(Operator):
         
         utils.init_mat_node_tree(node_tree)
         mat.arnold.node_tree = node_tree
+        mat.use_nodes = True
 
         ob = context.object # might need to make this context.view_layer.objects.active
         if ob.material_slots:
@@ -45,7 +46,7 @@ class ARNOLD_OT_material_unlink(Operator):
         return utils.poll_object(context)
     
     def execute(self, context):
-        ob = context.object # might need to make this context.view_layer.objects.active
+        ob = context.object
         if ob.material_slots:
             ob.material_slots[ob.active_material_index].material = None
         return {'FINISHED'}
@@ -61,10 +62,8 @@ class ARNOLD_OT_material_copy(Operator):
         return utils.poll_object(context)
     
     def execute(self, context):
-        current_mat = context.object.active_material # might need to make this context.view_layer.objects.active
-        
+        current_mat = context.object.active_material
         new_mat = current_mat.copy()
-
         current_node_tree = current_mat.arnold.node_tree
 
         if current_node_tree:
@@ -74,7 +73,7 @@ class ARNOLD_OT_material_copy(Operator):
 
             new_mat.arnold.node_tree = new_node_tree
 
-        context.object.active_material = new_mat # might need to make this context.view_layer.objects.active
+        context.object.active_material = new_mat
 
         return {'FINISHED'}
 

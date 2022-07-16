@@ -37,18 +37,18 @@ class CameraExporter(ObjectExporter):
         x_offset, y_offset = (0, 0)
 
         if cdata.arnold.camera_type == 'ortho_camera':
-            zoom = cdata.ortho_scale
+            zoom = cdata.ortho_scale / 2.0
             
             if hasattr(cdata, "is_render_view") and cdata.is_render_view:
                 zoom = zoom * cdata.zoom
-                x_offset, y_offset = cdata.offset
+                x_offset, y_offset = (cdata.offset[0] * zoom, cdata.offset[1] * zoom)
 
         elif cdata.arnold.camera_type == 'persp_camera':
             fov = export_utils.calc_horizontal_fov(self.datablock_eval)
             self.node.set_float("fov", math.degrees(fov))
 
             if hasattr(cdata, "is_render_view") and cdata.is_render_view:
-                zoom = cdata.zoom
+                zoom = cdata.zoom / 2.0
                 x_offset, y_offset = cdata.offset
 
         self.node.set_vector2("screen_window_min", -zoom + x_offset, -zoom + y_offset)

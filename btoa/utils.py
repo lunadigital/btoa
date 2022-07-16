@@ -80,10 +80,11 @@ def get_unique_name(datablock):
 
 def get_render_resolution(session_cache, interactive=False):
     if interactive:
+        scene = session_cache.scene
         region = session_cache.region
 
-        x = region["width"]
-        y = region["height"]
+        x = int(region["width"] * float(scene["viewport_scale"]))
+        y = int(region["height"] * float(scene["viewport_scale"]))
     else:
         render = session_cache.render
         scale = render["resolution_percentage"] / 100
@@ -112,7 +113,7 @@ def get_viewport_camera_object(context):
         camera.data.arnold.camera_type = context.space_data.camera.data.arnold.camera_type
         camera.data.is_render_view = True
 
-        camera.data.zoom = 2.0 / (2.0 ** 0.5 + context.region_data.view_camera_zoom / 50.0) ** 2
+        camera.data.zoom = 4.0 / ((math.sqrt(2) + context.region_data.view_camera_zoom / 50.0) ** 2)
         camera.data.offset = (
             context.region_data.view_camera_offset[0] * 2,
             context.region_data.view_camera_offset[1] * 2
@@ -124,7 +125,7 @@ def get_viewport_camera_object(context):
         camera.data.arnold.camera_type = "ortho_camera"
 
         sensor = sensor_width * ratio if ratio < 1.0 else DEFAULT_SENSOR_WIDTH
-        camera.data.ortho_scale = context.region_data.view_distance * sensor / lens
+        camera.data.ortho_scale = 2.0 * context.region_data.view_distance * sensor / lens
 
         '''
         By default an orthographic viewport camera is VERY close to the origin of the

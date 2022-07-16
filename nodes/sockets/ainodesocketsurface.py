@@ -1,11 +1,9 @@
 from bpy.types import NodeSocket
-from .ainodesocket import AiNodeSocket
-from .constants import Color
+from .ainodesocket import AiNodeSocket, SocketColor
 
 class AiNodeSocketSurface(NodeSocket, AiNodeSocket):
     bl_label = "Surface"
-
-    color = Color.material
+    color = SocketColor.SHADER
     default_value: None
 
     def draw_prop(self, context, layout, node, text):

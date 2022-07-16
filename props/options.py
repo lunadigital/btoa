@@ -145,7 +145,7 @@ class ArnoldOptions(PropertyGroup):
         name="Transmission",
         description="The maximum number of times a ray can be refracted. Scenes with many refractive surfaces may require higher values to look correct",
         min=0,
-        default=10
+        default=8
         )
     volume_depth: IntProperty(
         name="Volume",
@@ -252,6 +252,34 @@ class ArnoldOptions(PropertyGroup):
     )
 
     space_data: PointerProperty(type=AiSpaceDataProperties)
+
+    viewport_scale: EnumProperty(
+        name="Viewport Scale",
+        items=[
+            ("1.0", "100%", "100% Render Resolution"),
+            ("0.75", "75%", "75% Render Resolution"),
+            ("0.5", "50%", "50% Render Resolution"),
+            ("0.25", "25%", "25% Render Resolution")
+        ],
+        default="1.0"
+    )
+
+    # Ignore flags
+    ignore_textures: BoolProperty(name="Ignore Textures")
+    ignore_shaders: BoolProperty(name="Ignore Shaders")
+    ignore_atmosphere: BoolProperty(name="Ignore Atmosphere")
+    ignore_lights: BoolProperty(name="Ignore Lights")
+    ignore_shadows: BoolProperty(name="Ignore Shadows")
+    ignore_subdivision: BoolProperty(name="Ignore Subdivision")
+    ignore_displacement: BoolProperty(name="Ignore Displacement")
+    ignore_bump: BoolProperty(name="Ignore Bump")
+    ignore_motion: BoolProperty(name="Ignore Motion")
+    ignore_dof: BoolProperty(name="Ignore Depth of Field")
+    ignore_smoothing: BoolProperty(name="Ignore Normal Smoothing")
+    ignore_sss: BoolProperty(name="Ignore Sub-Surface Scattering")
+    # ignore_operators: BoolProperty(name="Ignore Operators")
+    # ignore_imagers: BoolProperty(name="Ignore Imagers")
+    # force_shader_assignments
 
 classes = (
     AiSpaceDataProperties,

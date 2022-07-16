@@ -52,7 +52,7 @@ class AiColorCorrect(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "invert")
         layout.prop(self, "invert_alpha")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_bool("alpha_is_luminance", self.alpha_is_luminance)
         node.set_bool("invert", self.invert)
         node.set_bool("invert_alpha", self.invert_alpha)
@@ -125,7 +125,7 @@ class AiColorJitter(bpy.types.Node, base.ArnoldNode):
         if self.jitter_type == "face":
             layout.prop(self, "face_mode")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         if self.jitter_type == "face":
             node.set_string("face_mode", self.face_mode)
 
@@ -194,7 +194,7 @@ class AiComposite(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "operation")
         layout.prop(self, "alpha_operation")
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_string("operation", self.operation)
         node.set_string("alpha_operation", self.alpha_operation)
 
@@ -285,7 +285,7 @@ class AiShuffle(bpy.types.Node, base.ArnoldNode):
 
         layout.separator()
 
-    def sub_export(self, node):
+    def sub_export(self, node, socket_index=0):
         node.set_string("channel_r", self.channel_r)
         node.set_string("channel_g", self.channel_g)
         node.set_string("channel_b", self.channel_b)

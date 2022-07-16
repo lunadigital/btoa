@@ -94,31 +94,17 @@ class ArnoldShaderTree(ShaderNodeTree):
                             # disable also when the selected object does not support materials
                             has_material_slots = not snode.pin and ob_type in types_that_support_material
 
-                            if ob_type != 'LIGHT':
-                                row = layout.row()
-                                row.enabled = has_material_slots
-                                row.ui_units_x = 4
-                                row.popover(panel="NODE_PT_material_slots")
-
-                            row = layout.row()
-                            row.enabled = has_material_slots
-
-                            # Show material.new when no active ID/slot exists
-                            #if not id_from and ob_type in types_that_support_material:
-                            #    row.template_ID(ob, "active_material", new="material.new")
-
-                            # Material ID, but not for Lights
-                            if id_from and ob_type != 'LIGHT':
+                            if ob_type not in ('LIGHT', 'CAMERA'):
                                 row = utils.aishader_template_ID(layout, ob.active_material)
+                                row.enabled = has_material_slots
 
                         if arnold_space_data.shader_type == 'WORLD':
                             NODE_MT_editor_menus.draw_collapsible(context, layout)
 
                             layout.separator_spacer()
 
-                            row = layout.row()
+                            row = utils.aiworld_template_ID(layout, scene.world)
                             row.enabled = not snode.pin
-                            row.template_ID(scene, "world", new="world.new")
 
                     elif snode.tree_type == 'TextureNodeTree':
                         layout.prop(snode, "texture_type", text="")
@@ -236,17 +222,17 @@ class ArnoldNode:
     def poll(cls, ntree):
         return ntree.bl_idname == ArnoldShaderTree.bl_idname
 
-    def sub_export(self, ainode):
+    def sub_export(self, ainode, socket_index=0):
         '''
         Used to set custom properties in a node if available
         Must be implemented by subclasses
         '''
         pass
 
-    def export(self):
+    def export(self, socket_index=0):
         node = btoa.ArnoldNode(self.ai_name)
 
-        self.sub_export(node)
+        self.sub_export(node, socket_index)
 
         for i in self.inputs:
             socket_value, value_type = i.export()

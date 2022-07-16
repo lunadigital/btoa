@@ -1,14 +1,11 @@
 from bpy.types import NodeSocket
 from bpy.props import FloatProperty
-
-from .ainodesocket import AiNodeSocket
-from .constants import Color
-
+from .ainodesocket import AiNodeSocket, SocketColor
 import math
 
 class AiNodeSocketFloat(AiNodeSocket):
     default_type = 'FLOAT'
-    color = Color.float_texture
+    color = SocketColor.FLOAT
 
     def export_default(self):
         return self.default_value, self.default_type
@@ -51,6 +48,12 @@ class AiNodeSocketFloatNormalizedAlt(NodeSocket, AiNodeSocketFloat):
         max=1
         )
 
+class AiNodeSocketUVScale(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(min=0.00001, soft_max=2, default=1)
+
+class AiNodeSocketUVOffset(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(soft_min=-1, soft_max=1)
+
 # Special socket for AiPhysicalSky. It's limited to the range 0-90deg.
 class AiNodeSocketFloatHalfRotation(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(
@@ -83,7 +86,9 @@ classes = (
     AiNodeSocketFloatNormalizedAlt,
     AiNodeSocketFloatHalfRotation,
     AiNodeSocketFloatFullRotation,
-    AiNodeSocketFloatPositiveToTen
+    AiNodeSocketFloatPositiveToTen,
+    AiNodeSocketUVOffset,
+    AiNodeSocketUVScale,
 )
 
 def register():

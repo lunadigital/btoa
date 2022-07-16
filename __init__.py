@@ -3,10 +3,10 @@ from . import environ as aienv
 
 bl_info = {
     "name": "Arnold Render Engine (BtoA)",
-    "description": "Unofficial Arnold renderer integration",
+    "description": "Community-developed Arnold renderer integration",
     "author": "Luna Digital, Ltd.",
-    "version": (0, 4, 5),
-    "blender": (2, 83, 0),
+    "version": (0, 4, 6),
+    "blender": (3, 0, 0),
     "category": "Render"
 }
 
@@ -15,7 +15,6 @@ def register():
     addon_preferences.register()
 
     aienv.configure_arnold_environment()
-    aienv.configure_ocio()
 
     prefs = bpy.context.preferences.addons[__package__].preferences
     if prefs.arnold_path != "":
@@ -55,5 +54,3 @@ def unregister():
           
     from . import addon_preferences
     addon_preferences.unregister()
-
-    aienv.reset_ocio()

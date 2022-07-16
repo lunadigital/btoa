@@ -1,12 +1,10 @@
 from bpy.types import NodeSocket
 from bpy.props import StringProperty
-
-from .ainodesocket import AiNodeSocket
-from .constants import Color
+from .ainodesocket import AiNodeSocket, SocketColor
 
 class AiNodeSocketCoord(NodeSocket, AiNodeSocket):
     bl_label = "Coords"
-    color = Color.mapping_2d
+    color = SocketColor.VECTOR
     default_type = "STRING"
 
     default_value: StringProperty(
