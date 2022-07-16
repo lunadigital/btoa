@@ -1,14 +1,14 @@
 # Arnold for Blender
 
-Arnold for Blender (BtoA) is a community-developed Blender add-on for the Arnold renderer. BtoA is an unofficial project and is not affiliated with Autodesk or Arnold.
+Arnold for Blender (BtoA) is a community-developed Blender add-on for the Arnold renderer.
 
 ## How to Get BtoA
-BtoA 0.4.5 is available for Windows, macOS, and Linux. [Go to the downloads page](https://github.com/lunadigital/btoa/releases).
+BtoA is available for Windows, macOS, and Linux. [Go to the downloads page](https://github.com/lunadigital/btoa/releases).
 
 ## Requirements & Platforms
-* Available on Windows, macOS, and Linux
-* Compatible with Blender 2.83 LTS or above (we support Blender 3!)
-* Requires Arnold SDK 7.1.2.0 or above
+* Windows, macOS, Linux
+* Blender 3.0 and above
+* Arnold SDK 7.1.2.0
 
 ## Licensing & Installation
 The Arnold SDK is [free to download](https://www.arnoldrenderer.com/download/) from Autodesk. To render with BtoA without a watermark, a license subscription must be purchased on a monthly, quarterly, or yearly basis through the [Autodesk website](https://www.autodesk.com/products/arnold/overview).
@@ -24,9 +24,8 @@ For Arnold-specific resources, take a look at Autodesk's website:
 - [Arnold Node Reference](https://docs.arnoldrenderer.com/display/A5NodeRef)
 - [Arnold Autodesk Forum](https://forums.autodesk.com/t5/arnold/ct-p/arnold)
 
-Arnold for Blender (BtoA) is not affiliated with or supported by Autodesk. For bug reports, please [open a new issue](https://github.com/lunadigital/btoa/issues) on the issue tracker and we'll look into it!
-
-BtoA is not compatible with Arnold 7 or Blender 3.x but we are working on it!
-
-## Example renders
 For artist features, tips and tricks, and more, [follow BtoA on Instagram](https://www.instagram.com/arnoldforblender/)!
+
+## Legal
+
+Arnold for Blender (BtoA) is developed by Luna Digital, Ltd. and the BtoA community. We are not affiliated with or supported by Autodesk or the Arnold development team.
