@@ -1,17 +1,17 @@
 import bpy
 from bl_ui.properties_object import ObjectButtonsPanel
-from .. import engine
+from .. import utils
 
-class OBJECT_PT_arnold_shape_visibility(ObjectButtonsPanel, bpy.types.Panel):
-    bl_idname = "OBJECT_PT_arnold_shape"
-    bl_label = "Arnold"
-    bl_parent_id = "OBJECT_PT_visibility"
-    bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
-
+class ArnoldObjectPanel(ObjectButtonsPanel, bpy.types.Panel):
     @classmethod
     def poll(self, context):
-        return context.object.type == 'MESH'
+        return context.engine in {'ARNOLD'} and context.object.type == 'MESH'
+    
+
+class OBJECT_PT_arnold_shape_visibility(ArnoldObjectPanel):
+    bl_parent_id = "OBJECT_PT_visibility"
+    bl_label = "Arnold"
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         layout = self.layout
@@ -28,14 +28,8 @@ class OBJECT_PT_arnold_shape_visibility(ObjectButtonsPanel, bpy.types.Panel):
         layout.prop(ob.arnold, "specular_reflection")
         layout.prop(ob.arnold, "sss")
 
-class OBJECT_PT_arnold_subdivisions(ObjectButtonsPanel, bpy.types.Panel):
-    bl_idname = "OBJECT_PT_arnold_subdivisions"
+class OBJECT_PT_arnold_subdivisions(ArnoldObjectPanel):
     bl_label = "Subdivision"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
-
-    @classmethod
-    def poll(self, context):
-        return context.object.type == 'MESH'
 
     def draw(self, context):
         layout = self.layout
@@ -47,16 +41,10 @@ class OBJECT_PT_arnold_subdivisions(ObjectButtonsPanel, bpy.types.Panel):
         layout.prop(ob.arnold, "subdiv_iterations")
         layout.prop(ob.arnold, "subdiv_frustum_ignore")
 
-class OBJECT_PT_arnold_adaptive_subdivisions(ObjectButtonsPanel, bpy.types.Panel):
-    bl_idname = "OBJECT_PT_arnold_adaptive_subdivisions"
+class OBJECT_PT_arnold_adaptive_subdivisions(ArnoldObjectPanel):
+    bl_parent_id = 'OBJECT_PT_arnold_subdivisions'
     bl_label = "Adaptive Subdivision"
-    bl_parent_id = "OBJECT_PT_arnold_subdivisions"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
-
-    @classmethod
-    def poll(self, context):
-        return context.object.type == 'MESH'
 
     def draw(self, context):
         layout = self.layout
@@ -68,16 +56,10 @@ class OBJECT_PT_arnold_adaptive_subdivisions(ObjectButtonsPanel, bpy.types.Panel
         layout.prop(ob.arnold, "subdiv_adaptive_metric")
         layout.prop(ob.arnold, "subdiv_adaptive_space")
 
-class OBJECT_PT_arnold_subdivisions_advanced(ObjectButtonsPanel, bpy.types.Panel):
-    bl_idname = "OBJECT_PT_arnold_subdivisions_advanced"
+class OBJECT_PT_arnold_subdivisions_advanced(ArnoldObjectPanel):
+    bl_parent_id = 'OBJECT_PT_arnold_subdivisions'
     bl_label = "Advanced"
-    bl_parent_id = "OBJECT_PT_arnold_subdivisions"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
-
-    @classmethod
-    def poll(self, context):
-        return context.object.type == 'MESH'
 
     def draw(self, context):
         layout = self.layout
@@ -96,11 +78,7 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    utils.register_classes(classes)
