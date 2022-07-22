@@ -80,14 +80,18 @@ class ARNOLD_PT_clamping(ArnoldRenderPanel):
 
         layout.use_property_split = True
 
-        layout.prop(options, "clamp_aa_samples")
-
-        col = self.layout.column()
-        col.prop(options, "sample_clamp")
-        col.prop(options, "clamp_aovs")
-        col.enabled = options.clamp_aa_samples
-
         layout.prop(options, "indirect_sample_clamp")
+
+        heading = layout.column(align=True, heading="Camera Sample Clamp")
+        row = heading.row(align=True)
+        row.prop(options, "clamp_aa_samples", text="")
+        sub = row.row()
+        sub.enabled = options.clamp_aa_samples
+        sub.prop(options, "sample_clamp", text="")
+
+        col = layout.column()
+        col.enabled = options.clamp_aa_samples
+        col.prop(options, "clamp_aovs")
 
 class ARNOLD_PT_sample_filtering(ArnoldRenderPanel):
     bl_label = "Pixel Filter"
