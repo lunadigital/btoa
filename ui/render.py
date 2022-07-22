@@ -90,7 +90,7 @@ class ARNOLD_PT_clamping(ArnoldRenderPanel):
         layout.prop(options, "indirect_sample_clamp")
 
 class ARNOLD_PT_sample_filtering(ArnoldRenderPanel):
-    bl_label = "Filter"
+    bl_label = "Pixel Filter"
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
