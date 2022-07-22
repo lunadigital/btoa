@@ -16,10 +16,17 @@ class DATA_PT_arnold_light(DataButtonsPanel, bpy.types.Panel):
 
         layout.use_property_split = True
 
+        is_quad_light = (light.type == 'AREA' and light.arnold.shape == 'quad_light')
+
         col = layout.column()
+        col.enabled = not is_quad_light or not light.arnold.portal
         col.prop(light, "color")
         col.prop(light.arnold, "intensity")
         col.prop(light.arnold, "exposure")
+
+        if is_quad_light:
+            col = layout.column()
+            col.prop(light.arnold, "portal")
 
         col.separator()
 
@@ -45,7 +52,10 @@ class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
 
         layout.use_property_split = True
 
+        is_quad_light = (light.type == 'AREA' and light.arnold.shape == 'quad_light')
+
         col = layout.column()
+        col.enabled = not is_quad_light or not light.arnold.portal
 
         if light.type == 'SPOT':
             col.prop(light, "spot_size", text="Cone Angle")

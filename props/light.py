@@ -229,6 +229,9 @@ class ArnoldLight(PropertyGroup):
         min=0,
         max=1
         )
+    portal: BoolProperty(
+        name="Is Portal Light"
+    )
 
     def get_shape_type(self):
         light = self.id_data

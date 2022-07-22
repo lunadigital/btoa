@@ -90,6 +90,8 @@ class LightExporter(ObjectExporter):
                     "matrix",
                     export_utils.flatten_matrix(tmatrix)
                 )
+
+                self.node.set_bool("portal", data.arnold.portal)
             elif data.shape == 'DISK':
                 s = self.datablock.scale.x if self.datablock.scale.x > 0 else self.datablock.scale.y
                 self.node.set_float("radius", 0.5 * data.size * s)
