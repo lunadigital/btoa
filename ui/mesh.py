@@ -81,4 +81,4 @@ def register():
     utils.register_classes(classes)
 
 def unregister():
-    utils.register_classes(classes)
+    utils.unregister_classes(classes)
