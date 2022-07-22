@@ -30,6 +30,28 @@ class ARNOLD_PT_sampling(ArnoldRenderPanel):
         col.prop(options, "volume_samples")
         col.enabled = (options.render_device == '0') # if using CPU
     
+class ARNOLD_PT_denoising(ArnoldRenderPanel):
+    bl_parent_id = 'ARNOLD_PT_sampling'
+    bl_label = "Denoising"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw_header(self, context):
+        self.layout.prop(context.scene.arnold, "enable_denoising", text="")
+    
+    def draw(self, context):
+        layout = self.layout
+        enable_denoising = context.scene.arnold.enable_denoising
+
+        layout.use_property_split = True
+
+        col = layout.column()
+        col.prop(context.scene.arnold, "denoiser")
+        col.enabled = enable_denoising
+
+        if enable_denoising:
+            col.separator()
+            col.label(text="Denoising with imagers not suited for animations", icon='ERROR')
+
 class ARNOLD_PT_adaptive_sampling(ArnoldRenderPanel):
     bl_label = "Adaptive Sampling"
     bl_options = {'DEFAULT_CLOSED'}
@@ -195,6 +217,7 @@ class ARNOLD_PT_feature_overrides(ArnoldRenderPanel):
 
 classes = (
     ARNOLD_PT_sampling,
+    ARNOLD_PT_denoising,
     ARNOLD_PT_adaptive_sampling,
     ARNOLD_PT_clamping,
     ARNOLD_PT_sample_filtering,

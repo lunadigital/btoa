@@ -264,6 +264,15 @@ class ArnoldOptions(PropertyGroup):
         default="1.0"
     )
 
+    enable_denoising: BoolProperty(name="Enable Denoising")
+    denoiser: EnumProperty(
+        name="Denoiser",
+        items=[
+            ('imager_denoiser_oidn', "OpenImageDenoise", "Use OpenImageDenoise AI denoiser running on the CPU"),
+            ('imager_denoiser_optix', "OptiX", "Use the OptiX AI denoiser with GPU acceleration, only available on NVIDIA GPUs")
+        ]
+    )
+
     # Ignore flags
     ignore_textures: BoolProperty(name="Ignore Textures")
     ignore_shaders: BoolProperty(name="Ignore Shaders")
@@ -278,7 +287,7 @@ class ArnoldOptions(PropertyGroup):
     ignore_smoothing: BoolProperty(name="Ignore Normal Smoothing")
     ignore_sss: BoolProperty(name="Ignore Sub-Surface Scattering")
     # ignore_operators: BoolProperty(name="Ignore Operators")
-    # ignore_imagers: BoolProperty(name="Ignore Imagers")
+    ignore_imagers: BoolProperty(name="Ignore Imagers")
     # force_shader_assignments
 
 classes = (

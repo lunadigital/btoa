@@ -120,3 +120,13 @@ class OptionsExporter(Exporter):
         for key in scene.keys():
             if "ignore_" in key:
                 options.set_bool(key, scene[key])
+
+        display_driver = arnold.AiNodeLookUpByName("btoa_driver")
+        denoiser = arnold.AiNodeGetPtr(display_driver, "input")
+
+        if denoiser:
+            arnold.AiNodeDestroy(denoiser)
+        
+        if scene["enable_denoising"]:
+            denoiser = arnold.AiNode(scene["denoiser"])
+            arnold.AiNodeSetPtr(display_driver, "input", denoiser)

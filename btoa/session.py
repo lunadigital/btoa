@@ -83,7 +83,7 @@ class Session:
 
         outputs = ArnoldArray()
         outputs.allocate(1, 1, 'STRING')
-        outputs.set_string(0, "RGBA RGBA btoa_image_filter __display_driver")
+        outputs.set_string(0, "RGBA RGBA btoa_image_filter btoa_driver")
         options.set_array("outputs", outputs)
 
         arnold.AiRenderAddInteractiveOutput(None, 0)
