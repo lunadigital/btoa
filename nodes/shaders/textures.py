@@ -1,5 +1,7 @@
 import bpy
-import math, mathutils
+import math
+import mathutils
+import os
 from bpy.props import *
 from .. import base, constants
 from ... import utils
@@ -202,7 +204,14 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
 
     def sub_export(self, node, socket_index=0):
         if self.image:
-            if self.image.library:
+            if self.image.packed_file:
+                filepath = os.path.join(bpy.app.tempdir, self.image.name)
+                
+                with open(filepath, 'wb+') as f:
+                    f.write(self.image.packed_file.data)
+
+                node.set_string("filename", filepath)
+            elif self.image.library:
                 node.set_string("filename", bpy.path.abspath(self.image.filepath, library=self.image.library))
             else:
                 node.set_string("filename", bpy.path.abspath(self.image.filepath))
