@@ -32,7 +32,7 @@ class ARNOLD_PT_sampling(ArnoldRenderPanel):
     
 class ARNOLD_PT_denoising(ArnoldRenderPanel):
     bl_parent_id = 'ARNOLD_PT_sampling'
-    bl_label = "Denoising"
+    bl_label = "Viewport Denoising"
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
@@ -48,9 +48,9 @@ class ARNOLD_PT_denoising(ArnoldRenderPanel):
         col.prop(context.scene.arnold, "denoiser")
         col.enabled = enable_denoising
 
-        if enable_denoising:
-            col.separator()
-            col.label(text="Denoising with imagers not suited for animations", icon='ERROR')
+        #if enable_denoising:
+        #    col.separator()
+        #    col.label(text="Denoising with imagers not suited for animations", icon='ERROR')
 
 class ARNOLD_PT_adaptive_sampling(ArnoldRenderPanel):
     bl_label = "Adaptive Sampling"
