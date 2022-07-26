@@ -127,6 +127,11 @@ class OptionsExporter(Exporter):
         if denoiser:
             arnold.AiNodeDestroy(denoiser)
         
-        if scene["enable_denoising"]:
-            denoiser = arnold.AiNode(scene["denoiser"])
-            arnold.AiNodeSetPtr(display_driver, "input", denoiser)
+        if interactive:
+            if scene["enable_viewport_denoising"]:
+                denoiser = arnold.AiNode(scene["viewport_denoiser"])
+                arnold.AiNodeSetPtr(display_driver, "input", denoiser)
+        else:
+            if scene["enable_render_denoising"]:
+                denoiser = arnold.AiNode('imager_denoiser_noice')
+                arnold.AiNodeSetPtr(display_driver, "input", denoiser)

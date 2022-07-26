@@ -264,8 +264,9 @@ class ArnoldOptions(PropertyGroup):
         default="1.0"
     )
 
-    enable_denoising: BoolProperty(name="Enable Denoising")
-    denoiser: EnumProperty(
+    enable_render_denoising: BoolProperty(name="Denoise Render (Noice)")
+    enable_viewport_denoising: BoolProperty(name="Denoise Viewport")
+    viewport_denoiser: EnumProperty(
         name="Denoiser",
         items=[
             ('imager_denoiser_oidn', "OpenImageDenoise", "Use OpenImageDenoise AI denoiser running on the CPU"),

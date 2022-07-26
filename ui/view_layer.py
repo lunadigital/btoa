@@ -1,14 +1,37 @@
 import bpy
 from bl_ui.properties_view_layer import ViewLayerButtonsPanel
-from bpy.types import Panel
 
-from .. import engine
-
-class ARNOLD_PT_override(ViewLayerButtonsPanel, Panel):
-    bl_label = "Override"
+class ArnoldViewLayerPanel(ViewLayerButtonsPanel, bpy.types.Panel):
     bl_context = "view_layer"
+
+    @classmethod
+    def poll(cls, context):
+        return context.engine in {'ARNOLD'}
+
+class ARNOLD_RENDER_PT_aovs(ArnoldViewLayerPanel):
+    bl_label = "AOVs"
+
+    def draw(self, context):
+        pass
+
+class ARNOLD_RENDER_PT_aovs_data(ArnoldViewLayerPanel):
+    bl_label = "Data"
+    bl_parent_id = "ARNOLD_RENDER_PT_aovs"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+
+        arnold_view_layer = context.view_layer.arnold
+
+        col = layout.column()
+        for annotation in arnold_view_layer.passes.__annotations__.keys():
+            col.prop(arnold_view_layer.passes, annotation)
+
+class ARNOLD_RENDER_PT_override(ArnoldViewLayerPanel):
+    bl_label = "Override"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -20,7 +43,9 @@ class ARNOLD_PT_override(ViewLayerButtonsPanel, Panel):
         layout.prop(view_layer, "material_override")
 
 classes = (
-    ARNOLD_PT_override,
+    ARNOLD_RENDER_PT_aovs,
+    ARNOLD_RENDER_PT_aovs_data,
+    ARNOLD_RENDER_PT_override,
 )
 
 def register():

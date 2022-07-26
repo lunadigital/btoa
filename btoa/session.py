@@ -76,14 +76,22 @@ class Session:
 
         # Everything else
         scene = self.cache.scene
+        aovs = bpy.context.view_layer.arnold.passes
 
         default_filter = ArnoldNode(scene["filter_type"])
         default_filter.set_string("name", "btoa_image_filter")
         default_filter.set_float("width", scene["filter_width"])
 
+        active_aovs = [aov[9:] for aov in aovs.__annotations__.keys() if getattr(aovs, aov)]
+        active_aovs = list(map(lambda x: x.replace("beauty", "RGBA"), active_aovs))
+        active_aovs = list(map(lambda x: x.replace("z", "Z"), active_aovs))
+
         outputs = ArnoldArray()
-        outputs.allocate(1, 1, 'STRING')
-        outputs.set_string(0, "RGBA RGBA btoa_image_filter btoa_driver")
+        outputs.allocate(len(active_aovs), 1, 'STRING')
+
+        for aov in active_aovs:
+            outputs.set_string(active_aovs.index(aov), f"{aov} RGBA btoa_image_filter btoa_driver")
+
         options.set_array("outputs", outputs)
 
         arnold.AiRenderAddInteractiveOutput(None, 0)

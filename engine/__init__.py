@@ -5,6 +5,7 @@ import math
 import numpy
 import os
 import gpu
+import arnold
 
 from .. import btoa
 from ..btoa import utils, OptionsExporter
@@ -33,7 +34,6 @@ def ai_render_update_callback(private_data, update_type, display_output):
     global AI_ENGINE_TAG_REDRAW
     global AI_DRIVER_UPDATE_VIEWPORT
 
-    #if display_output != int(btoa.NO_DISPLAY_OUTPUTS):
     assert AI_FRAMEBUFFER is not None
     AI_FRAMEBUFFER.requires_update = True
 
@@ -62,7 +62,7 @@ def ai_render_update_callback(private_data, update_type, display_output):
 
     return int(status)
 
-def update_viewport(x, y, width, height, buffer, data):
+def update_viewport(x, y, width, height, buffer):
     global AI_SESSION
     global AI_FRAMEBUFFER
     global AI_DRIVER_UPDATE_VIEWPORT
@@ -159,15 +159,15 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def render(self, depsgraph):
         # Configure display callback
         # NOTE: We can't do this in the exporter because it results in a nasty MEMORY_ACCESS_VIOLATION error
-
         options = btoa.UniverseOptions()
-
         engine = self
-        buckets = {}
+        self.use_highlight_tiles = True
 
-        def update_render_result(x, y, width, height, buffer, data):
+        def update_render_result(aovs, x, y, width, height, buffer):
             render = depsgraph.scene.render
             cache = engine.session.cache
+
+            bucket_size = width * height * 4
 
             if render.use_border:
                 min_x, min_y, max_x, max_y = options.get_render_region()
@@ -177,47 +177,51 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             x = x - min_x
             y = max_y - y - height
 
-            if buffer:
-                try:
-                    result = buckets.pop((x, y), None)
+            aovs = ctypes.cast(aovs, ctypes.c_char_p).value.decode().split("\\")[:-1]
+            aovs = list(map(lambda x: x.replace("RGBA", "Combined"), aovs))
 
-                    if result is None:
-                        result = engine.begin_result(x, y, width, height, layer=cache.view_layer.name)
+            print(aovs)
 
-                    b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-                    rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
+            b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
+            b = numpy.ctypeslib.as_array(b, shape=(width * height * len(aovs), 4))
 
-                    result.layers[0].passes["Combined"].rect = rect
-                    engine.end_result(result)
+            result = engine.begin_result(x, y, width, height, layer=cache.view_layer.name)
 
-                    # Update progress counter
+            for aov in aovs:
+                start = aovs.index(aov) * bucket_size
+                result.layers[0].passes[aov].rect = b[start:start + bucket_size]
 
-                    engine.progress += engine._progress_increment
-                    engine.update_progress(engine.progress)
+            engine.end_result(result)
+            engine.session.free_buffer(buffer)
 
-                finally:
-                    engine.session.free_buffer(buffer)
-            else:
-                buckets[(x, y)] = engine.begin_result(x, y, width, height, layer=cache.view_layer.name)
+            # Update progress counter
+            engine.progress += engine._progress_increment
+            engine.update_progress(engine.progress)
 
             if engine.test_break():
                 engine.session.abort()
-                while buckets:
-                    (x, y), result = buckets.popitem()
-                    engine.end_result(result, cancel=True)
+                engine.end_result(result, cancel=True)
 
         cb = btoa.ArnoldDisplayCallback(update_render_result)
+        driver = btoa.ArnoldNode("driver_display_callback")
+        driver.set_string("name", "btoa_driver")
+        driver.set_pointer("callback", cb)
 
-        display_node = self.session.get_node_by_name("btoa_driver")
+        # Set up custom render passes
+        aovs = depsgraph.view_layer.arnold.passes
+        
+        for aov in aovs.__annotations__.keys():
+            if not getattr(aovs, aov):
+                continue
 
-        if not display_node.is_valid():
-            display_node = btoa.ArnoldNode("driver_display_callback")
-            display_node.set_string("name", "btoa_driver")
+            aov_name = "Z" if aov[9:] == 'z' else aov[9:]
 
-        display_node.set_pointer("callback", cb)
+            if aov_name == 'beauty':
+                continue
+            
+            self.add_pass(aov_name, 4, "RGBA")
 
         # Calculate progress increment
-
         (width, height) = options.get_render_resolution()
         bucket_size = options.get_int("bucket_size")
 
