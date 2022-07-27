@@ -155,7 +155,7 @@ node_loader
       return false;
  
    node->methods      = DriverDisplayCallbackMtd;
-   node->name         = "driver_display_callback";
+   node->name         = "btoa_display_driver";
    node->node_type    = AI_NODE_DRIVER;
    strcpy(node->version, AI_VERSION);
    return true;

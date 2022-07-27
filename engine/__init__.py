@@ -201,7 +201,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 engine.end_result(result, cancel=True)
 
         cb = btoa.ArnoldDisplayCallback(update_render_result)
-        driver = btoa.ArnoldNode("driver_display_callback")
+        driver = btoa.ArnoldNode("btoa_display_driver")
         driver.set_string("name", "btoa_driver")
         driver.set_pointer("callback", cb)
 
@@ -252,7 +252,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             global AI_ENGINE_TAG_REDRAW
             AI_ENGINE_TAG_REDRAW = self.tag_redraw
 
-            display_driver = btoa.ArnoldNode("driver_display_callback")
+            display_driver = btoa.ArnoldNode("btoa_display_driver")
             display_driver.set_string("name", "btoa_driver")
             display_driver.set_pointer("callback", AI_DISPLAY_CALLBACK)
 
