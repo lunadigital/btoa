@@ -4,11 +4,16 @@
 namespace ASTR {
    static const AtString callback("callback");
 };
+
+namespace NODEDATA {
+   int total_aovs = 1;
+   std::string serialized_aov_names;
+}
  
 AI_DRIVER_NODE_EXPORT_METHODS(DriverDisplayCallbackMtd)
  
 typedef void (*DisplayCallback)(const char* aovs, uint32_t x, uint32_t y, uint32_t width, uint32_t height, float* buffer);
- 
+
 node_parameters
 {
    AiParameterPtr("callback", NULL);
@@ -33,7 +38,22 @@ driver_extension
 }
 
 driver_open
-{}
+{
+   // Get total AOVs to render
+   AtNode* options = AiUniverseGetOptions();
+   AtArray* outputs = AiNodeGetArray(options, AtString("outputs"));
+   NODEDATA::total_aovs = AiArrayGetNumElements(outputs);
+
+   // Collect AOV names
+   AtString name;
+   std::vector<std::string> aovs;
+
+   while(AiOutputIteratorGetNext(iterator, &name, NULL, NULL)) {
+      aovs.push_back(name.c_str());
+   }
+
+   for (const auto &aov : aovs) NODEDATA::serialized_aov_names += aov + "\\";
+}
 
 driver_needs_bucket
 {
@@ -43,23 +63,28 @@ driver_needs_bucket
 driver_prepare_bucket
 {}
 
+/*
+ * I'm going to try to document this as well as possible for future me - or other devs that look at this code.
+ *
+ * We support multiple AOVs by saving AOV data in a 1D buffer of type float*. For example, a render with 1 AOV would
+ * have a buffer 4096 pixels values long (practically, 4096 * 4), a render with 2 AOVs 8192, etc. We send a serialized
+ * list of the rendered AOV names to the callback with the buffer, and the callback separates out the AOV data for
+ * the bucket by offsetting and slicing the array for each AOV. See the `update_render_result()` function in
+ * "engine/__init__.py" for an example of how this is done.
+ *
+ * There's probably a more elegant way to do this, but I'm much more fluent in Python development than C++. I know even
+ * less about ctypes. This was the best way I could figure out to handle it for now, until someone smarter than me can
+ * take a second look.
+ */
 driver_write_bucket
 {
-   AtString aov_name;
    int pixel_type;
    const void* bucket_data;
-
-   AtNode* options = AiUniverseGetOptions();
-   AtArray* outputs = AiNodeGetArray(options, AtString("outputs"));
-   int total_aovs = AiArrayGetNumElements(outputs);
-
-   std::vector<std::string> aovs;
    int bucket_offset = 0;
-   float* buffer = (float*)AiMalloc(bucket_size_x * bucket_size_y * sizeof(float) * 4 * total_aovs);
+   float* buffer = (float*)AiMalloc(bucket_size_x * bucket_size_y * sizeof(float) * 4 * NODEDATA::total_aovs);
 
-   while(AiOutputIteratorGetNext(iterator, &aov_name, &pixel_type, &bucket_data))
+   while(AiOutputIteratorGetNext(iterator, NULL, &pixel_type, &bucket_data))
    {
-      aovs.push_back(aov_name.c_str());
       int offset = bucket_size_x * bucket_size_y * bucket_offset * 4;
 
       for (int j = 0; (j < bucket_size_y); j++)
@@ -102,13 +127,10 @@ driver_write_bucket
       bucket_offset++;
    }
 
-   std::string aov_list;
-   for (const auto &aov : aovs) aov_list += aov + "\\";
-
    DisplayCallback cb = (DisplayCallback) AiNodeGetPtr(node, ASTR::callback);
    if (cb)
    {
-      (*cb)(aov_list.c_str(), bucket_xo, bucket_yo, bucket_size_x, bucket_size_y, buffer);
+      (*cb)(NODEDATA::serialized_aov_names.c_str(), bucket_xo, bucket_yo, bucket_size_x, bucket_size_y, buffer);
    }
 }
  
