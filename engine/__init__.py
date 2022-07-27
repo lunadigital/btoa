@@ -167,7 +167,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             render = depsgraph.scene.render
             cache = engine.session.cache
 
-            bucket_size = width * height * 4
+            bucket_size = width * height
 
             if render.use_border:
                 min_x, min_y, max_x, max_y = options.get_render_region()
@@ -180,10 +180,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             aovs = ctypes.cast(aovs, ctypes.c_char_p).value.decode().split("\\")[:-1]
             aovs = list(map(lambda x: x.replace("RGBA", "Combined"), aovs))
 
-            print(aovs)
-
             b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-            b = numpy.ctypeslib.as_array(b, shape=(width * height * len(aovs), 4))
+            b = numpy.ctypeslib.as_array(b, shape=(width * height * 4 * len(aovs), 4))
 
             result = engine.begin_result(x, y, width, height, layer=cache.view_layer.name)
 
