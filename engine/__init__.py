@@ -208,11 +208,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 continue
 
             aov_name = "Z" if aov[9:] == 'z' else aov[9:]
-
+    
             if aov_name == 'beauty':
                 continue
-            
-            self.add_pass(aov_name, 4, "RGBA")
+
+            if aov_name == "Z":
+                self.add_pass(aov_name, 1, "Z")
+            else:
+                self.add_pass(aov_name, 3, "RGB")
 
         # Calculate progress increment
         (width, height) = options.get_render_resolution()

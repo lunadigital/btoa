@@ -90,7 +90,21 @@ class Session:
         outputs.allocate(len(active_aovs), 1, 'STRING')
 
         for aov in active_aovs:
-            outputs.set_string(active_aovs.index(aov), f"{aov} RGBA btoa_image_filter btoa_driver")
+            pixel_type = 'RGB'
+            image_filter = "btoa_image_filter"
+
+            if aov == 'Z':
+                pixel_type = 'FLOAT'
+
+                closest_filter = ArnoldNode("closest_filter")
+                closest_filter.set_string("name", "btoa_closest_filter")
+                closest_filter.set_float("width", scene["filter_width"])
+
+                image_filter = 'btoa_closest_filter'
+            elif aov == 'RGBA':
+                pixel_type = 'RGBA'
+
+            outputs.set_string(active_aovs.index(aov), f"{aov} {pixel_type} {image_filter} btoa_driver")
 
         options.set_array("outputs", outputs)
 
