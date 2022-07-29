@@ -163,31 +163,26 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         engine = self
         self.use_highlight_tiles = True
 
-        def update_render_result(aovs, x, y, width, height, buffer):
+        def update_render_result(buffer):
             render = depsgraph.scene.render
             cache = engine.session.cache
-
-            bucket_size = width * height
+            rdata = buffer.contents
 
             if render.use_border:
                 min_x, min_y, max_x, max_y = options.get_render_region()
             else:
                 min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
 
-            x = x - min_x
-            y = max_y - y - height
+            x = rdata.x - min_x
+            y = max_y - rdata.y - rdata.height
 
-            aovs = ctypes.cast(aovs, ctypes.c_char_p).value.decode().split("\\")[:-1]
-            aovs = list(map(lambda x: x.replace("RGBA", "Combined"), aovs))
+            result = engine.begin_result(x, y, rdata.width, rdata.height, layer=cache.view_layer.name)
 
-            b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-            b = numpy.ctypeslib.as_array(b, shape=(width * height * 4 * len(aovs), 4))
-
-            result = engine.begin_result(x, y, width, height, layer=cache.view_layer.name)
-
-            for aov in aovs:
-                start = aovs.index(aov) * bucket_size
-                result.layers[0].passes[aov].rect = b[start:start + bucket_size]
+            for i in range(0, rdata.count):
+                aov = rdata.aovs[i]
+                name = 'Combined' if aov.name == b'RGBA' else aov.name.decode()
+                pixels = numpy.ctypeslib.as_array(aov.data, shape=(rdata.width * rdata.height, aov.channels))
+                result.layers[0].passes[name].rect = pixels
 
             engine.end_result(result)
             engine.session.free_buffer(buffer)
