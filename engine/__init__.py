@@ -62,31 +62,26 @@ def ai_render_update_callback(private_data, update_type, display_output):
 
     return int(status)
 
-def update_viewport(x, y, width, height, buffer):
+def update_viewport(buffer):
     global AI_SESSION
     global AI_FRAMEBUFFER
     global AI_DRIVER_UPDATE_VIEWPORT
 
+    rdata = buffer.contents
     options = btoa.UniverseOptions()
     min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
 
-    x = x - min_x
-    y = max_y - y - height
+    x = rdata.x - min_x
+    y = max_y - rdata.y - rdata.height
 
-    if buffer:
-        try:
-            b = ctypes.cast(buffer, ctypes.POINTER(ctypes.c_float))
-            rect = numpy.ctypeslib.as_array(b, shape=(width * height, 4))
-            assert AI_FRAMEBUFFER is not None
-            AI_FRAMEBUFFER.write_bucket(x, y, width, height, rect.flatten())
+    aov = rdata.aovs[0] # Get beauty aov
+    pixels = numpy.ctypeslib.as_array(aov.data, shape=(rdata.width * rdata.height, aov.channels))
+    AI_FRAMEBUFFER.write_bucket(x, y, rdata.width, rdata.height, pixels.flatten())
+    AI_SESSION.free_buffer(buffer)
 
-        finally:
-            if (AI_SESSION):
-                AI_SESSION.free_buffer(buffer)
-
-                if AI_DRIVER_UPDATE_VIEWPORT:
-                    AI_FRAMEBUFFER.requires_update = True
-                    AI_ENGINE_TAG_REDRAW()
+    if AI_DRIVER_UPDATE_VIEWPORT:
+        AI_FRAMEBUFFER.requires_update = True
+        AI_ENGINE_TAG_REDRAW()
 
 AI_DISPLAY_CALLBACK = btoa.ArnoldDisplayCallback(update_viewport)
 AI_RENDER_CALLBACK = ai_render_update_callback
@@ -161,7 +156,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         # NOTE: We can't do this in the exporter because it results in a nasty MEMORY_ACCESS_VIOLATION error
         options = btoa.UniverseOptions()
         engine = self
-        self.use_highlight_tiles = True
 
         def update_render_result(buffer):
             render = depsgraph.scene.render

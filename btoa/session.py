@@ -82,9 +82,13 @@ class Session:
         default_filter.set_string("name", "btoa_image_filter")
         default_filter.set_float("width", scene["filter_width"])
 
-        active_aovs = [aov[9:] for aov in aovs.__annotations__.keys() if getattr(aovs, aov)]
-        active_aovs = list(map(lambda x: x.replace("beauty", "RGBA"), active_aovs))
-        active_aovs = list(map(lambda x: x.replace("z", "Z"), active_aovs))
+        if self.is_interactive:
+            # Force only RGBA aov
+            active_aovs = ['RGBA']
+        else:
+            active_aovs = [aov[9:] for aov in aovs.__annotations__.keys() if getattr(aovs, aov)]
+            active_aovs = list(map(lambda x: x.replace("beauty", "RGBA"), active_aovs))
+            active_aovs = list(map(lambda x: x.replace("z", "Z"), active_aovs))
 
         outputs = ArnoldArray()
         outputs.allocate(len(active_aovs), 1, 'STRING')
