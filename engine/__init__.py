@@ -384,6 +384,25 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.unbind_display_space_shader()
         gpu.state.blend_set('NONE')
 
+    def update_render_passes(self, scene=None, renderlayer=None):
+        self.register_pass(scene, renderlayer, "Combined", 4, "RGBA", 'COLOR')
+
+        aovs = renderlayer.arnold.passes
+
+        for aov in aovs.__annotations__.keys():
+            if not getattr(aovs, aov):
+                continue
+
+            aov_name = "Z" if aov[9:] == 'z' else aov[9:]
+
+            if aov_name == 'beauty':
+                continue
+
+            if aov_name == "Z":
+                self.register_pass(scene, renderlayer, "Z", 1, "Z", "VALUE")
+            else:
+                self.register_pass(scene, renderlayer, aov_name, 3, "RGB", "COLOR")
+
 def get_panels():
     exclude_panels = {
         'RENDER_PT_gpencil',
