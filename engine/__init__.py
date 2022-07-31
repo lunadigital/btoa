@@ -181,6 +181,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             engine.end_result(result)
             engine.session.free_buffer(buffer)
 
+            engine.update_result(result)
+
             # Update progress counter
             engine.progress += engine._progress_increment
             engine.update_progress(engine.progress)
@@ -195,21 +197,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         driver.set_pointer("callback", cb)
 
         # Set up custom render passes
-        aovs = depsgraph.view_layer.arnold.passes
-        
-        for aov in aovs.__annotations__.keys():
-            if not getattr(aovs, aov):
-                continue
+        aovs = depsgraph.view_layer.arnold.aovs
 
-            aov_name = "Z" if aov[9:] == 'z' else aov[9:]
-    
-            if aov_name == 'beauty':
+        for aov in aovs.enabled_aovs:
+            if aov.name == "Beauty":
                 continue
-
-            if aov_name == "Z":
-                self.add_pass(aov_name, 1, "Z")
-            else:
-                self.add_pass(aov_name, 3, "RGB")
+            
+            self.add_pass(aov.ainame, aov.channels, aov.chan_id)
 
         # Calculate progress increment
         (width, height) = options.get_render_resolution()
@@ -387,21 +381,13 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def update_render_passes(self, scene=None, renderlayer=None):
         self.register_pass(scene, renderlayer, "Combined", 4, "RGBA", 'COLOR')
 
-        aovs = renderlayer.arnold.passes
+        aovs = renderlayer.arnold.aovs
 
-        for aov in aovs.__annotations__.keys():
-            if not getattr(aovs, aov):
-                continue
-
-            aov_name = "Z" if aov[9:] == 'z' else aov[9:]
-
-            if aov_name == 'beauty':
-                continue
-
-            if aov_name == "Z":
-                self.register_pass(scene, renderlayer, "Z", 1, "Z", "VALUE")
-            else:
-                self.register_pass(scene, renderlayer, aov_name, 3, "RGB", "COLOR")
+        for aov in aovs.enabled_aovs:
+            if aov.name == "Beauty":
+                continue 
+                
+            self.register_pass(scene, renderlayer, aov.ainame, aov.channels, aov.chan_id, aov.pass_type)
 
 def get_panels():
     exclude_panels = {

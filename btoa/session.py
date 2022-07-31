@@ -74,46 +74,34 @@ class Session:
         if depsgraph.scene.world.arnold.node_tree:
             WorldExporter(self).export(depsgraph.scene.world)
 
-        # Everything else
+        # AOVs
         scene = self.cache.scene
-        aovs = bpy.context.view_layer.arnold.passes
+        aovs = bpy.context.view_layer.arnold.aovs
+        enabled_aovs = [aovs.beauty] if self.is_interactive else aovs.enabled_aovs
 
         default_filter = ArnoldNode(scene["filter_type"])
-        default_filter.set_string("name", "btoa_image_filter")
+        default_filter.set_string("name", "btoa_default_filter")
         default_filter.set_float("width", scene["filter_width"])
 
-        if self.is_interactive:
-            # Force only RGBA aov
-            active_aovs = ['RGBA']
-        else:
-            active_aovs = [aov[9:] for aov in aovs.__annotations__.keys() if getattr(aovs, aov)]
-            active_aovs = list(map(lambda x: x.replace("beauty", "RGBA"), active_aovs))
-            active_aovs = list(map(lambda x: x.replace("z", "Z"), active_aovs))
-
         outputs = ArnoldArray()
-        outputs.allocate(len(active_aovs), 1, 'STRING')
+        outputs.allocate(len(enabled_aovs), 1, 'STRING')
 
-        for aov in active_aovs:
-            pixel_type = 'RGB'
-            image_filter = "btoa_image_filter"
+        for aov in enabled_aovs:
+            filter_type = "btoa_default_filter"
 
-            if aov == 'Z':
-                pixel_type = 'FLOAT'
-
+            if aov.name == 'Z':
                 closest_filter = ArnoldNode("closest_filter")
                 closest_filter.set_string("name", "btoa_closest_filter")
                 closest_filter.set_float("width", scene["filter_width"])
 
-                image_filter = 'btoa_closest_filter'
-            elif aov == 'RGBA':
-                pixel_type = 'RGBA'
+                filter_type = "btoa_closest_filter"
 
-            outputs.set_string(active_aovs.index(aov), f"{aov} {pixel_type} {image_filter} btoa_driver")
+            outputs.set_string(enabled_aovs.index(aov), f"{aov.ainame} {aov.pixel_type} {filter_type} btoa_driver")
 
         options.set_array("outputs", outputs)
-
         arnold.AiRenderAddInteractiveOutput(None, 0)
 
+        # Color management
         color_manager = ArnoldColorManager()
 
         if 'OCIO' in os.environ:

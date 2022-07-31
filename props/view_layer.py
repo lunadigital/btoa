@@ -2,43 +2,98 @@ from bpy.types import ViewLayer, PropertyGroup
 from bpy.props import *
 from .. import utils
 
+'''
+RenderPassConfig is a simple helper class to manage AOV data
+differences between Blender and Arnold.
+'''
+class RenderPassConfig:
+    def __init__(self, name, ainame, channels, chan_id, pixel_type):
+        self.name = name             # label in UI
+        self.ainame = ainame         # Arnold-specific name
+        self.channels = channels     # Number of channels
+        self.chan_id = chan_id       # Channel names, one character per channel
+        self.pixel_type = pixel_type # Arnold-specific pixel type (FLOAT, RGB, RGBA, etc)
+        
+        # For compositor
+        # Enum in ['VALUE', 'VECTOR', 'COLOR']
+        if pixel_type == 'FLOAT':
+            self.pass_type = 'VALUE'
+        elif 'RGB' in pixel_type:
+            self.pass_type = 'COLOR'
+
+class RenderPassConfigGroup:
+    data = (
+        RenderPassConfig("Beauty", "RGBA", 4, "RGBA", "RGBA"),
+        RenderPassConfig("Z", "Z", 1, "Z", "FLOAT"),
+        RenderPassConfig("Direct", "direct", 3, "RGB", "RGB"),
+        RenderPassConfig("Indirect", "indirect", 3, "RGB", "RGB"),
+        RenderPassConfig("Emission", "emission", 3, "RGB", "RGB"),
+        RenderPassConfig("Background", "background", 3, "RGB", "RGB"),
+        RenderPassConfig("Diffuse", "diffuse", 3, "RGB", "RGB"),
+        RenderPassConfig("Specular", "specular", 3, "RGB", "RGB"),
+        RenderPassConfig("Coat", "coat", 3, "RGB", "RGB"),
+        RenderPassConfig("Transmission", "transmission", 3, "RGB", "RGB"),
+        RenderPassConfig("SSS", "sss", 3, "RGB", "RGB"),
+        RenderPassConfig("Volume", "volume", 3, "RGB", "RGB"),
+        RenderPassConfig("Albedo", "albedo", 3, "RGB", "RGB"),
+        RenderPassConfig("Light Groups", "light_groups", 3, "RGB", "RGB"),
+        RenderPassConfig("Motion Vectors", "motionvector", 3, "RGB", "RGB"), # this pixel type is probably wrong
+    )
+
+    light = (
+        RenderPassConfig("Diffuse Direct", "diffuse_direct", 3, "RGB", "RGB"),
+        RenderPassConfig("Diffuse Indirect", "diffuse_indirect", 3, "RGB", "RGB"),
+        RenderPassConfig("Diffuse Albedo", "diffuse_albedo", 3, "RGB", "RGB"),
+        RenderPassConfig("Specular Direct", "specular_direct", 3, "RGB", "RGB"),
+        RenderPassConfig("Specular Indirect", "specular_indirect", 3, "RGB", "RGB"),
+        RenderPassConfig("Specular Albedo", "specular_albedo", 3, "RGB", "RGB"),
+        RenderPassConfig("Coat Direct", "coat_direct", 3, "RGB", "RGB"),
+        RenderPassConfig("Coat Indirect", "coat_indirect", 3, "RGB", "RGB"),
+        RenderPassConfig("Coat Albedo", "coat_albedo", 3, "RGB", "RGB"),
+        RenderPassConfig("Transmission Direct", "transmission_direct", 3, "RGB", "RGB"),
+        RenderPassConfig("Transmission Indirect", "transmission_indirect", 3, "RGB", "RGB"),
+        RenderPassConfig("Transmission Albedo", "transmission_albedo", 3, "RGB", "RGB"),
+        RenderPassConfig("SSS Direct", "sss_direct", 3, "RGB", "RGB"),
+        RenderPassConfig("SSS Indirect", "sss_indirect", 3, "RGB", "RGB"),
+        RenderPassConfig("SSS Albedo", "sss_albedo", 3, "RGB", "RGB"),
+        RenderPassConfig("Volume Direct", "volume_direct", 3, "RGB", "RGB"),
+        RenderPassConfig("Volume Indirect", "volume_indirect", 3, "RGB", "RGB"),
+        RenderPassConfig("Volume Albedo", "volume_albedo", 3, "RGB", "RGB"),
+    )
+
 class ArnoldRenderPasses(PropertyGroup):
-    use_pass_beauty: BoolProperty(name="Beauty", default=True)
-    use_pass_z: BoolProperty(name="Z", default=True)
-    use_pass_direct: BoolProperty(name="Direct")
-    use_pass_indirect: BoolProperty(name="Indirect")
-    use_pass_emission: BoolProperty(name="Emission")
-    use_pass_background: BoolProperty(name="Background")
-    use_pass_diffuse: BoolProperty(name="Diffuse")
-    use_pass_specular: BoolProperty(name="Specular")
-    use_pass_coat: BoolProperty(name="Coat")
-    use_pass_transmission: BoolProperty(name="Transmission")
-    use_pass_sss: BoolProperty(name="SSS")
-    use_pass_volume: BoolProperty(name="Volume")
-    use_pass_albedo: BoolProperty(name="Albedo")
-    use_pass_diffuse_direct: BoolProperty(name="Diffuse Direct")
-    use_pass_diffuse_indirect: BoolProperty(name="Diffuse Indirect")
-    use_pass_diffuse_albedo: BoolProperty(name="Diffuse Albedo")
-    use_pass_specular_direct: BoolProperty(name="Specular Direct")
-    use_pass_specular_indirect: BoolProperty(name="Specular Indirect")
-    use_pass_specular_albedo: BoolProperty(name="Specular Albedo")
-    use_pass_coat_direct: BoolProperty(name="Coat Direct")
-    use_pass_coat_indirect: BoolProperty(name="Coat Indirect")
-    use_pass_coat_albedo: BoolProperty(name="Coat Albedo")
-    use_pass_transmission_direct: BoolProperty(name="Transmission Direct")
-    use_pass_transmission_indirect: BoolProperty(name="Transmission Indirect")
-    use_pass_transmission_albedo: BoolProperty(name="Transmission Albedo")
-    use_pass_sss_direct: BoolProperty(name="SSS Direct")
-    use_pass_sss_indirect: BoolProperty(name="SSS Indirect")
-    use_pass_sss_albedo: BoolProperty(name="SSS Albedo")
-    use_pass_volume_direct: BoolProperty(name="Volume Direct")
-    use_pass_volume_indirect: BoolProperty(name="Volume Indirect")
-    use_pass_volume_albedo: BoolProperty(name="Volume Albedo")
-    use_pass_light_groups: BoolProperty(name="Light Groups")
-    use_pass_motionvector: BoolProperty(name="Motion Vectors")
+    config = RenderPassConfigGroup()
+
+    def update_render_passes(self, context):
+        context.view_layer.update_render_passes()
+
+    enabled_data_aovs: BoolVectorProperty(
+        name="Data AOVs",
+        size=len(config.data),
+        default=tuple(aov.name in {"Beauty", "Z"} for aov in config.data),
+        update=update_render_passes
+    )
+
+    enabled_light_aovs: BoolVectorProperty(
+        name="Light AOVs",
+        size=len(config.light),
+        default=tuple(False for i in range(len(config.light))),
+        update=update_render_passes
+    )
+
+    @property
+    def beauty(self):
+        return self.config.data[0]
+
+    @property
+    def enabled_aovs(self):
+        result = [aov for aov in self.config.data if self.enabled_data_aovs[self.config.data.index(aov)]]
+        result += [aov for aov in self.config.light if self.enabled_light_aovs[self.config.light.index(aov)]]
+
+        return result
 
 class ArnoldRenderLayer(PropertyGroup):
-    passes: PointerProperty(type=ArnoldRenderPasses)
+    aovs: PointerProperty(type=ArnoldRenderPasses)
 
 classes = (
     ArnoldRenderPasses,
