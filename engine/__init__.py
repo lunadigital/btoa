@@ -203,7 +203,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             if aov.name == "Beauty":
                 continue
             
-            self.add_pass(aov.ainame, aov.channels, aov.chan_id)
+            self.add_pass(aov.ainame, aov.channels, aov.chan_id, layer=depsgraph.view_layer_eval.name)
 
         # Calculate progress increment
         (width, height) = options.get_render_resolution()

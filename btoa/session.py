@@ -45,7 +45,6 @@ class Session:
         OptionsExporter(self).export(interactive=self.is_interactive)
 
         # Geometry and lights
-
         for instance in depsgraph.object_instances:
             ob = export_utils.get_object_data_from_instance(instance)
 
@@ -59,7 +58,6 @@ class Session:
         options = UniverseOptions()
 
         # Camera
-
         if context:
             # In viewport, we must reconsruct the camera ourselves
             bl_camera = export_utils.get_viewport_camera_object(context)
@@ -70,13 +68,12 @@ class Session:
         options.set_pointer("camera", camera)
 
         # World
-
         if depsgraph.scene.world.arnold.node_tree:
             WorldExporter(self).export(depsgraph.scene.world)
 
         # AOVs
         scene = self.cache.scene
-        aovs = bpy.context.view_layer.arnold.aovs
+        aovs = depsgraph.view_layer.arnold.aovs
         enabled_aovs = [aovs.beauty] if self.is_interactive else aovs.enabled_aovs
 
         default_filter = ArnoldNode(scene["filter_type"])
