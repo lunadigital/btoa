@@ -41,7 +41,7 @@ class CameraExporter(ObjectExporter):
             
             if hasattr(cdata, "is_render_view") and cdata.is_render_view:
                 zoom = zoom * cdata.zoom
-                x_offset, y_offset = (cdata.offset[0] * zoom, cdata.offset[1] * zoom)
+                x_offset, y_offset = (cdata.offset[0] * cdata.ortho_scale, cdata.offset[1] * cdata.ortho_scale)
 
         elif cdata.arnold.camera_type == 'persp_camera':
             fov = export_utils.calc_horizontal_fov(self.datablock_eval)
