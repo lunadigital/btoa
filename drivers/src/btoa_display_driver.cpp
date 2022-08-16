@@ -78,21 +78,27 @@ driver_write_bucket
             switch (pixel_type)
             {
                case AI_TYPE_FLOAT:
+               {
                   target[0] = ((float*)bucket_data)[flipped_idx];
                   break;
+               }
                case AI_TYPE_RGB:
+               {
                   AtRGB rgb_data = ((AtRGB*)bucket_data)[flipped_idx];
                   target[0] = rgb_data.r;
                   target[1] = rgb_data.g;
                   target[2] = rgb_data.b;
                   break;
+               }
                case AI_TYPE_RGBA:
+               {
                   AtRGBA rgba_data =((AtRGBA*)bucket_data)[flipped_idx];
                   target[0] = rgba_data.r;
                   target[1] = rgba_data.g;
                   target[2] = rgba_data.b;
                   target[3] = rgba_data.a;
                   break;
+               }
             }
          }
       }
