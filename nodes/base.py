@@ -438,6 +438,7 @@ object_node_categories = [
             NodeItem("AiBump2d"),
             NodeItem("AiBump3d"),
             NodeItem("AiCarPaint"),
+            NodeItem("AiCurvature"),
             NodeItem("AiDisplacement"),
             NodeItem("AiFlat"),
             NodeItem("AiLambert"),

@@ -117,6 +117,51 @@ class AiCarPaint(bpy.types.Node, base.ArnoldNode):
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
 '''
+AiCurvature
+https://docs.arnoldrenderer.com/display/A5NodeRef/curvature
+
+This shader will sample around the shading point within a given
+radius to output the curvature. You can adjust the radius, falloff,
+and spread of the curvature sampling as well as specify a trace set
+to exclude or include objects. This shader is useful for creating
+procedural wear or dirt maps in conjunction with a noise shader.
+'''
+class AiCurvature(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Curvature"
+    ai_name = "curvature"
+
+    output: EnumProperty(
+        name="Output",
+        items=[
+            ('convex', "Convex", "Convex (positive) curvature"),
+            ('concave', "Concave", "Concave (negative) curvature"),
+            ('both', "Both", "Both convex and concave curvature")
+        ]
+    )
+
+    samples: IntProperty(name="Samples", min=1, soft_max=10, default=3)
+    self_only: BoolProperty(name="Self Only")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'output')
+        layout.prop(self, 'self_only')
+        layout.prop(self, 'samples')
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketFloatPositive', "Radius", identifier="radius").default_value = 0.1
+        self.inputs.new('AiNodeSocketFloatNormalized', "Spread", identifier="spread").default_value = 1
+        self.inputs.new('AiNodeSocketFloatNormalized', "Threshold", identifier="threshold")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Bias", identifier="bias").default_value = 0.5
+        self.inputs.new('AiNodeSocketFloatPositiveToTen', "Multiply", identifier="multiply").default_value = 1
+
+        self.outputs.new('AiNodeSocketRGB', "RGB")
+
+    def sub_export(self, node, socket_index=0):
+        node.set_string('output', self.output)
+        node.set_uint('samples', self.samples)
+        node.set_bool('self_only', self.self_only)
+
+'''
 AiDisplacement
 
 This is a dummy node that exports displacement data to Arnold by
@@ -538,6 +583,7 @@ classes = (
     AiBump2d,
     AiBump3d,
     AiCarPaint,
+    AiCurvature,
     AiDisplacement,
     AiFlat,
     AiLambert,
