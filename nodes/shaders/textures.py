@@ -50,7 +50,7 @@ class AiCellNoise(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "pattern", text="")
         layout.prop(self, "additive")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("pattern", int(self.pattern))
         node.set_bool("additive", self.additive)
 
@@ -111,7 +111,7 @@ class AiFlakes(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "output_space", text="")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("pattern", int(self.output_space))
 
 '''
@@ -202,7 +202,7 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "swap_st")
         #layout.prop(self, "uvset")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         if self.image:
             if self.image.packed_file:
                 filepath = os.path.join(bpy.app.tempdir, self.image.name)
@@ -217,10 +217,6 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
                 node.set_string("filename", bpy.path.abspath(self.image.filepath))
 
             node.set_string("color_space", self.image.colorspace_settings.name)
-        
-        if socket_index > 0:
-            node.set_bool("single_channel", True)
-            node.set_byte("start_channel", socket_index - 1)
 
         node.set_string("filter", self.image_filter)
         node.set_int("swrap", int(self.swrap))
@@ -329,7 +325,7 @@ class AiLayer(bpy.types.Node, base.ArnoldNode):
         for layer in self.layers:
             self.template_layer_properties(layout, layer)
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         for layer, i in zip(self.layers, range(1, 9)):
             node.set_bool("enable{}".format(i), layer.enabled)
             node.set_string("name{}".format(i), layer.name)
@@ -393,7 +389,7 @@ class AiLayerRGBA(AiLayer):
         layout.prop(self, "clamp")
         layout.separator()
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         super().sub_export(node)
 
         for layer, i in zip(self.layers, range(1, 9)):
@@ -457,7 +453,7 @@ class AiNoise(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "mode", text="")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("mode", int(self.mode))
 
 '''
@@ -507,7 +503,7 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
         row.prop(self, "direction_object")
         row.enabled = not self.use_degrees
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("enable_sun", self.enable_sun)
         node.set_bool("use_degrees", self.use_degrees)
 
@@ -550,7 +546,7 @@ class AiRoundCorners(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "self_only")
         layout.prop(self, "object_space")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("inclusive", self.inclusive)
         node.set_bool("self_only", self.self_only)
         node.set_bool("object_space", self.object_space)

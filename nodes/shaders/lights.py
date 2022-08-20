@@ -48,7 +48,7 @@ class AiSkydome(bpy.types.Node, base.ArnoldNode):
 
         layout.prop(context.scene.world.arnold, "rotation_controller")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("format", int(self.image_format))
         node.set_int("portal_mode", int(self.portal_mode))
 

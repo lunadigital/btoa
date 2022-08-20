@@ -32,7 +32,7 @@ class AiAmbientOcclusion(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "invert_normals")
         layout.prop(self, "self_only")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("invert_normals", self.invert_normals)
         node.set_bool("self_only", self.self_only)
 
@@ -118,6 +118,54 @@ class AiCarPaint(bpy.types.Node, base.ArnoldNode):
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
 '''
+AiCurvature
+https://docs.arnoldrenderer.com/display/A5NodeRef/curvature
+
+This shader will sample around the shading point within a given
+radius to output the curvature. You can adjust the radius, falloff,
+and spread of the curvature sampling as well as specify a trace set
+to exclude or include objects. This shader is useful for creating
+procedural wear or dirt maps in conjunction with a noise shader.
+'''
+class AiCurvature(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Curvature"
+    ai_name = "curvature"
+
+    output: EnumProperty(
+        name="Output",
+        items=[
+            ('convex', "Convex", "Convex (positive) curvature"),
+            ('concave', "Concave", "Concave (negative) curvature"),
+            ('both', "Both", "Both convex and concave curvature")
+        ]
+    )
+
+    samples: IntProperty(name="Samples", min=1, soft_max=10, default=3)
+    self_only: BoolProperty(name="Self Only")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'self_only')
+        layout.prop(self, 'output', text="")
+        layout.prop(self, 'samples')
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketFloatPositive', "Radius", identifier="radius").default_value = 0.1
+        self.inputs.new('AiNodeSocketFloatNormalized', "Spread", identifier="spread").default_value = 1
+        self.inputs.new('AiNodeSocketFloatNormalized', "Threshold", identifier="threshold")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Bias", identifier="bias").default_value = 0.5
+        self.inputs.new('AiNodeSocketFloatPositiveToTen', "Multiply", identifier="multiply").default_value = 1
+
+        self.outputs.new('AiNodeSocketRGB', "RGB")
+        self.outputs.new('AiNodeSocketBW', "R")
+        self.outputs.new('AiNodeSocketBW', "G")
+        self.outputs.new('AiNodeSocketBW', "B")
+
+    def sub_export(self, node):
+        node.set_string('output', self.output)
+        node.set_uint('samples', self.samples)
+        node.set_bool('self_only', self.self_only)
+
+'''
 AiDisplacement
 
 This is a dummy node that exports displacement data to Arnold by
@@ -140,7 +188,7 @@ class AiDisplacement(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "disp_autobump")
 
     # Overriding export() because this isn't a native Arnold struct
-    def export(self, socket_index=0):
+    def export(self):
         return (
             self.inputs[3].export()[0], # input
             self.inputs[0].export()[0], # padding
@@ -228,7 +276,7 @@ class AiMixShader(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "mode")
         layout.prop(self, "add_transparency")
         
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("mode", int(self.mode))
         node.set_bool("add_transparency", self.add_transparency)
 
@@ -271,7 +319,7 @@ class AiNormalMap(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "color_to_signed")
         layout.prop(self, "normalize")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("invert_x", self.invert_x)
         node.set_bool("invert_y", self.invert_y)
         node.set_bool("invert_z", self.invert_z)
@@ -326,7 +374,7 @@ class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "indirect_specular_enable")
         layout.prop(self, "alpha_mask")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("background", int(self.background))
         node.set_bool("diffuse_use_background", self.diffuse_use_background)
         node.set_bool("indirect_diffuse_enable", self.indirect_diffuse_enable)
@@ -382,7 +430,7 @@ class AiStandardHair(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "roughness_anisotropic")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("roughness_anisotropic", self.roughness_anisotropic)
 
 '''
@@ -433,10 +481,10 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
         self.inputs.new('AiNodeSocketIntUnbounded', "Dielectric Priority", identifier="dielectric_priority")
 
-        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
+        self.inputs.new('AiNodeSocketFloatNormalized', "SSS Weight", identifier="subsurface")
         self.inputs.new('AiNodeSocketRGB', "SSS Color", identifier="subsurface_color").default_value = (1, 1, 1)
-        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
-        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
+        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale").default_value = 1
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
@@ -474,7 +522,7 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "exit_to_background")
         layout.prop(self, "subsurface_type")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("transmit_aovs", self.transmit_aovs)
         node.set_bool("thin_walled", self.thin_walled)
         node.set_bool("caustics", self.caustics)
@@ -530,7 +578,7 @@ class AiWireframe(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "edge_type")
         layout.prop(self, "raster_space")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("edge_type", int(self.edge_type))
         node.set_bool("raster_space", self.raster_space)
 
@@ -539,6 +587,7 @@ classes = (
     AiBump2d,
     AiBump3d,
     AiCarPaint,
+    AiCurvature,
     AiDisplacement,
     AiFlat,
     AiLambert,

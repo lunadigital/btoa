@@ -44,7 +44,7 @@ class AiNodeSocketFloatNormalized(NodeSocket, AiNodeSocketFloat):
 class AiNodeSocketFloatPositiveToTen(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(
         min=0,
-        max=10
+        soft_max=10
     )
 
 # I need a better name for this

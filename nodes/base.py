@@ -222,24 +222,24 @@ class ArnoldNode:
     def poll(cls, ntree):
         return ntree.bl_idname == ArnoldShaderTree.bl_idname
 
-    def sub_export(self, ainode, socket_index=0):
+    def sub_export(self, ainode):
         '''
         Used to set custom properties in a node if available
         Must be implemented by subclasses
         '''
         pass
 
-    def export(self, socket_index=0):
+    def export(self):
         node = btoa.ArnoldNode(self.ai_name)
 
-        self.sub_export(node, socket_index)
+        self.sub_export(node)
 
         for i in self.inputs:
-            socket_value, value_type = i.export()
+            socket_value, value_type, socket_index = i.export()
             
             if socket_value is not None and value_type is not None:
                 if value_type == 'BTNODE':
-                    socket_value.link(i.identifier, node)
+                    socket_value.link(i.identifier, node, socket_index)
                 else:
                     btoa.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
 
@@ -438,6 +438,7 @@ object_node_categories = [
             NodeItem("AiBump2d"),
             NodeItem("AiBump3d"),
             NodeItem("AiCarPaint"),
+            NodeItem("AiCurvature"),
             NodeItem("AiDisplacement"),
             NodeItem("AiFlat"),
             NodeItem("AiLambert"),

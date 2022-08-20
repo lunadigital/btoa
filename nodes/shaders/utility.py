@@ -36,13 +36,13 @@ class AiFacingRatio(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Bias", identifier="bias").default_value = 0.5
         self.inputs.new('AiNodeSocketFloatNormalized', "Gain", identifier="gain").default_value = 0.5
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="Float", identifier="output")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "linear")
         layout.prop(self, "invert")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("linear", self.linear)
         node.set_bool("invert", self.invert)
 
@@ -80,7 +80,7 @@ class AiUVProjection(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "projection_type")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_string("projection_type", self.projection_type)
 
 classes = (
