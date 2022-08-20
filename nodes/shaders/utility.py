@@ -42,7 +42,7 @@ class AiFacingRatio(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "linear")
         layout.prop(self, "invert")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("linear", self.linear)
         node.set_bool("invert", self.invert)
 
@@ -80,7 +80,7 @@ class AiUVProjection(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "projection_type")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_string("projection_type", self.projection_type)
 
 classes = (
