@@ -47,7 +47,7 @@ class AiBump2d(bpy.types.Node, base.ArnoldNode):
     ai_name = "bump2d"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketVector', name="Bump Map", identifier="bump_map")
+        self.inputs.new('AiNodeSocketRGB', name="Bump Map", identifier="bump_map").hide_color = True
         self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Height", identifier="bump_height").default_value = 1
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
@@ -61,15 +61,16 @@ Provides bump mapping based on a 3d input.
 '''
 class AiBump3d(bpy.types.Node, base.ArnoldNode):
     bl_label = "Bump 3D"
+    bl_width_default = 160
     ai_name = "bump3d"
 
     def init(self, context):
         self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Map", identifier="bump_map")
         self.inputs.new('AiNodeSocketFloatPositive', name="Bump Height", identifier="bump_height").default_value = 0.01
-        self.inputs.new('AiNodeSocketFloatPositive', name="Epsilon", identifier="epsilon").default_value = 0.001
+        self.inputs.new('AiNodeSocketFloatPositiveSmall', name="Epsilon", identifier="epsilon").default_value = 0.001
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketVector', name="Vector", identifier="output")
 
 '''
 AiCarPaint

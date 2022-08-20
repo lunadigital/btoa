@@ -1,5 +1,5 @@
 from bpy.types import NodeSocket
-from bpy.props import FloatProperty
+from bpy.props import *
 from .ainodesocket import AiNodeSocket, SocketColor
 import math
 
@@ -22,10 +22,17 @@ class AiNodeSocketFloatPositive(NodeSocket, AiNodeSocketFloat):
         soft_max=1
         )
 
+class AiNodeSocketFloatPositiveSmall(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(
+        min=0,
+        soft_max=1,
+        precision=3
+        )
+
 class AiNodeSocketFloatAboveOne(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(
-        min=1,
-        soft_max=5
+        min=0,
+        soft_max=1,
         )
 
 class AiNodeSocketFloatNormalized(NodeSocket, AiNodeSocketFloat):
@@ -81,6 +88,7 @@ class AiNodeSocketFloatFullRotation(NodeSocket, AiNodeSocketFloat):
 classes = (
     AiNodeSocketFloatUnbounded,
     AiNodeSocketFloatPositive,
+    AiNodeSocketFloatPositiveSmall,
     AiNodeSocketFloatAboveOne,
     AiNodeSocketFloatNormalized,
     AiNodeSocketFloatNormalizedAlt,

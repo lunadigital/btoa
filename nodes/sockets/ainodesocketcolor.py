@@ -1,15 +1,19 @@
 from bpy.types import NodeSocket
-from bpy.props import FloatVectorProperty
+from bpy.props import *
 from .ainodesocket import AiNodeSocket, SocketColor
 
 class AiNodeSocketColor(AiNodeSocket):
     bl_label = "Color"
     color = SocketColor.COLOR
 
+    hide_color: BoolProperty()
+
     def draw_prop(self, context, layout, node, text):
         row = layout.row(align=True)
         row.label(text=text)
-        row.prop(self, "default_value", text="")
+
+        if not self.hide_color:
+            row.prop(self, "default_value", text="")
     
     def export_default(self):
         return list(self.default_value), self.default_type
