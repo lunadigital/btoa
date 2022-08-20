@@ -143,8 +143,8 @@ class AiCurvature(bpy.types.Node, base.ArnoldNode):
     self_only: BoolProperty(name="Self Only")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'output')
         layout.prop(self, 'self_only')
+        layout.prop(self, 'output', text="")
         layout.prop(self, 'samples')
 
     def init(self, context):
