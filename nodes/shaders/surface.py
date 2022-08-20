@@ -480,10 +480,10 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
         self.inputs.new('AiNodeSocketIntUnbounded', "Dielectric Priority", identifier="dielectric_priority")
 
-        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
+        self.inputs.new('AiNodeSocketFloatNormalized', "SSS Weight", identifier="subsurface")
         self.inputs.new('AiNodeSocketRGB', "SSS Color", identifier="subsurface_color").default_value = (1, 1, 1)
-        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
-        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
+        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale").default_value = 1
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
