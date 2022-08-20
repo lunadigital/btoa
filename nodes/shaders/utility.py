@@ -36,7 +36,7 @@ class AiFacingRatio(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Bias", identifier="bias").default_value = 0.5
         self.inputs.new('AiNodeSocketFloatNormalized', "Gain", identifier="gain").default_value = 0.5
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="Float", identifier="output")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "linear")
