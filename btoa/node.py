@@ -14,11 +14,9 @@ class ArnoldNode(AiTemplateClass):
     def type_is(self, node_type):
         return arnold.AiNodeIs(self.data, node_type)
 
-    def link(self, param, val, socket_index=0):
-        outputs = ['', 'r', 'g', 'b', 'a']
-        
+    def link(self, param, val, output_type):
         if self.is_valid():
-            arnold.AiNodeLinkOutput(self.data, outputs[socket_index], val.data, param)
+            arnold.AiNodeLinkOutput(self.data, output_type, val.data, param)
 
     def destroy(self):
         if self.is_valid():

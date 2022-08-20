@@ -51,7 +51,9 @@ class AiBump2d(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Height", identifier="bump_height").default_value = 1
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketVector', name="Vector", identifier="output")
+        self.outputs.new('AiNodeSocketVector', name="Vector")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="X")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="Y")
 
 '''
 AiBump3d
@@ -69,7 +71,10 @@ class AiBump3d(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatPositive', name="Epsilon", identifier="epsilon").default_value = 0.001
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketVector', name="Vector")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="X")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="Y")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="Z")
 
 '''
 AiCarPaint

@@ -1,3 +1,4 @@
+import bpy
 from . import utils
 
 class SocketColor:
@@ -32,12 +33,17 @@ class AiNodeSocket:
         return None
 
     def export(self):
+        rgba_outputs = ['', 'r', 'g', 'b', 'a']
+        vector_outputs = ['', 'x', 'y', 'z']
+
         link = utils.get_link(self)
 
         if link:
             socket_index = int(link.from_socket.path_from_id()[-2:-1])
-            return *link.from_node.export(), socket_index
+            output_type = vector_outputs[socket_index] if hasattr(link.from_socket, 'default_value') and isinstance(link.from_socket.default_value, bpy.types.FloatProperty) else rgba_outputs[socket_index]
+
+            return *link.from_node.export(), output_type
         elif hasattr(self, "default_value"):
-            return *self.export_default(), 0
+            return *self.export_default(), ''
         else:
             return None

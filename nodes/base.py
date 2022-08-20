@@ -235,11 +235,11 @@ class ArnoldNode:
         self.sub_export(node)
 
         for i in self.inputs:
-            socket_value, value_type, socket_index = i.export()
+            socket_value, value_type, output_type = i.export()
             
             if socket_value is not None and value_type is not None:
                 if value_type == 'BTNODE':
-                    socket_value.link(i.identifier, node, socket_index)
+                    socket_value.link(i.identifier, node, output_type)
                 else:
                     btoa.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
 
