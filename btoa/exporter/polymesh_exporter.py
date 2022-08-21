@@ -380,7 +380,7 @@ class PolymeshExporter(ObjectExporter):
 
         # Remove camera visibility if object is indirect only
         if (self.datablock_eval.indirect_only_get(view_layer=self.cache.view_layer)
-            or self.datablock.is_instance
+            or hasattr(self.datablock, 'is_instance') and self.datablock.is_instance
             and self.datablock.parent.indirect_only_get(view_layer=self.cache.view_layer)
             ):
             visibility -= 1
@@ -390,7 +390,7 @@ class PolymeshExporter(ObjectExporter):
         self.node.set_bool(
             "matte",
             (self.datablock_eval.holdout_get(view_layer=self.cache.view_layer)
-            or self.datablock.is_instance
+            or hasattr(self.datablock, 'is_instance') and self.datablock.is_instance
             and self.datablock.parent.holdout_get(view_layer=self.cache.view_layer)
             )
         )

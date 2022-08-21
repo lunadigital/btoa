@@ -312,7 +312,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             polymesh_data_needs_update = False
 
             for update in reversed(depsgraph.updates):
-                if isinstance(update.id, bpy.types.Light) or hasattr(update.id, "data") and isinstance(update.id.data.arnold, ArnoldLight):
+                if isinstance(update.id, bpy.types.Light):
                     light_data_needs_update = True
                 elif isinstance(update.id, btoa.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
                     polymesh_data_needs_update = True
