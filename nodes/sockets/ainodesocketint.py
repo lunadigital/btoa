@@ -28,9 +28,14 @@ class AiNodeSocketIntAboveOne(NodeSocket, AiNodeSocketInt):
         soft_max=5
     )
 
+class AiNodeSocketSkydomeResolution(NodeSocket, AiNodeSocketInt):
+    default_value: IntProperty(min=4, default=1000)
+    slider = False
+
 classes = (
     AiNodeSocketIntUnbounded,
     AiNodeSocketIntPositive,
     AiNodeSocketIntAboveOne,
+    AiNodeSocketSkydomeResolution
 )
 register, unregister = bpy.utils.register_classes_factory(classes)

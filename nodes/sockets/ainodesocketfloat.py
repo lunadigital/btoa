@@ -85,6 +85,14 @@ class AiNodeSocketFloatFullRotation(NodeSocket, AiNodeSocketFloat):
         value = math.degrees(self.default_value)
         return value, self.default_type
 
+class AiNodeSocketSkydomeIntensity(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(min=0, default=1)
+    slider = False
+
+class AiNodeSocketSkydomeExposure(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty(min=0)
+    slider = False
+
 classes = (
     AiNodeSocketFloatUnbounded,
     AiNodeSocketFloatPositive,
@@ -97,6 +105,8 @@ classes = (
     AiNodeSocketFloatPositiveToTen,
     AiNodeSocketUVOffset,
     AiNodeSocketUVScale,
+    AiNodeSocketSkydomeIntensity,
+    AiNodeSocketSkydomeExposure
 )
 
 def register():
