@@ -161,9 +161,9 @@ class AiCurvature(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatPositiveToTen', "Multiply", identifier="multiply").default_value = 1
 
         self.outputs.new('AiNodeSocketRGB', "RGB")
-        self.outputs.new('AiNodeSocketBW', "R")
-        self.outputs.new('AiNodeSocketBW', "G")
-        self.outputs.new('AiNodeSocketBW', "B")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "R")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "G")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "B")
 
     def sub_export(self, node):
         node.set_string('output', self.output)

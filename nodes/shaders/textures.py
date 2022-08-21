@@ -175,10 +175,10 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         self.inputs.new("AiNodeSocketUVScale", "Scale V", identifier="tscale")
 
         self.outputs.new("AiNodeSocketRGBA", "RGBA")
-        self.outputs.new("AiNodeSocketBW", "R")
-        self.outputs.new("AiNodeSocketBW", "G")
-        self.outputs.new("AiNodeSocketBW", "B")
-        self.outputs.new("AiNodeSocketBW", "A")
+        self.outputs.new("AiNodeSocketFloatUnbounded", "R")
+        self.outputs.new("AiNodeSocketFloatUnbounded", "G")
+        self.outputs.new("AiNodeSocketFloatUnbounded", "B")
+        self.outputs.new("AiNodeSocketFloatUnbounded", "A")
 
     def draw_label(self):
         if self.image:

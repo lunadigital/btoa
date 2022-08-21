@@ -39,21 +39,9 @@ class AiNodeSocketRGBA(NodeSocket, AiNodeSocketColor):
         max=1
     )
 
-class AiNodeSocketBW(NodeSocket, AiNodeSocketColor):
-    color = SocketColor.VALUE
-    default_type = 'RGB'
-    default_value: FloatVectorProperty(
-        name="Color",
-        subtype='COLOR',
-        default=(0.8, 0.8, 0.8),
-        min=0,
-        max=1
-    )
-
 classes = (
     AiNodeSocketRGB,
     AiNodeSocketRGBA,
-    AiNodeSocketBW,
 )
 
 def register():
