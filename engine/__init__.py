@@ -101,6 +101,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         self.progress = 0
         self._progress_increment = 0
         self.session = btoa.Session()
+        self.total_objects_in_ipr = 0
 
     def __del__(self):
         global AI_SESSION
@@ -229,6 +230,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
 
         if not AI_SESSION or not AI_SESSION.is_running:
+            self.total_objects_in_ipr = len(context.scene.objects)
+
             AI_FRAMEBUFFER = btoa.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
 
             AI_SESSION = self.session
@@ -312,6 +315,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             polymesh_data_needs_update = False
 
             for update in reversed(depsgraph.updates):
+                print()
+                print()
+                print(update.id.name)
+                print()
+                print()
                 if isinstance(update.id, bpy.types.Light):
                     light_data_needs_update = True
                 elif isinstance(update.id, btoa.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
@@ -345,6 +353,22 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                         AI_SESSION.replace_node(old_node, new_node)
 
                         new_node.set_string("name", unique_name)
+
+        # Check for deleted objects
+        if len(context.scene.objects) < self.total_objects_in_ipr:
+            unique_names = [utils.get_unique_name(ob) for ob in context.scene.objects]
+
+            iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
+
+            while not arnold.AiNodeIteratorFinished(iterator):
+                node = arnold.AiNodeIteratorGetNext(iterator)
+                
+                if arnold.AiNodeGetStr(node, 'name') not in unique_names and not arnold.AiNodeIs(node, 'skydome_light'):
+                    arnold.AiNodeDestroy(node)
+
+            arnold.AiNodeIteratorDestroy(iterator)
+        
+        self.total_objects_in_ipr = len(context.scene.objects)
 
         AI_SESSION.restart()
 
