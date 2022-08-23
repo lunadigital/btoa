@@ -1,3 +1,4 @@
+import arnold
 import bpy
 import bmesh
 import math
@@ -60,12 +61,12 @@ def make_key(datablock):
 def persistent_id_to_str(persistent_id):
     return ''.join(map(str, persistent_id))
 
-def get_unique_name(datablock):
+def generate_uuid(datablock):
     if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
         if datablock.is_instance:
             key = make_key(datablock.object)
-            key += '_' + make_key(datablock.parent)
-            key += '_' + persistent_id_to_str(datablock.persistent_id)
+            key += '-' + make_key(datablock.parent)
+            key += '-' + persistent_id_to_str(datablock.persistent_id)
         else:
             key = make_key(datablock.object.original)
     else:

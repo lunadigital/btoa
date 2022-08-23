@@ -16,9 +16,10 @@ class InstanceExporter(ObjectExporter):
         else:
             self.instance_transform.convert_from_buffer(matrix)
 
-    def export(self, node, name):
+    def export(self, node, uuid):
         self.node = ArnoldNode("instancer")
-        self.node.set_string("name", name)
+        #self.node.set_string("name", name)
+        self.node.set_uuid(uuid)
 
         nodes = ArnoldArray()
         nodes.allocate(1, 1, 'POINTER')

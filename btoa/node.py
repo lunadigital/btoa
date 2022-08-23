@@ -26,6 +26,14 @@ class ArnoldNode(AiTemplateClass):
         if self.is_valid():
             arnold.AiNodeDestroy(self.data)
             self.data = None
+
+    # Sets UUID to track nodes during render session.
+    # Not an internal Arnold parameter, we need to
+    # create it ourselves.
+    def set_uuid(self, uuid):
+        if self.is_valid():
+            self.declare("btoa_id", "constant STRING")
+            self.set_string("btoa_id", uuid)
     
     def set_byte(self, param, val):
         if self.is_valid():

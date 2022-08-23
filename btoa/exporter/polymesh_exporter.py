@@ -18,16 +18,18 @@ class PolymeshExporter(ObjectExporter):
         material_override = self.cache.view_layer.material_override
 
         if material_override:
-            unique_name = export_utils.get_unique_name(material_override)
+            uuid = export_utils.generate_uuid(material_override)
 
             if material_override.arnold.node_tree:
-                shader = self.session.get_node_by_name(unique_name)
+                shader = self.session.get_node_by_uuid(uuid)
 
                 if shader.is_valid():
                     self.node.set_pointer("shader", shader)
                 else:
                     surface, volume, displacement = material_override.arnold.node_tree.export()
-                    surface[0].set_string("name", unique_name)
+                    surface[0].set_string("name", material_override.name)
+                    surface[0].set_uuid(uuid)
+
                     self.node.set_pointer("shader", surface[0])
 
         else:
@@ -37,22 +39,22 @@ class PolymeshExporter(ObjectExporter):
                 if slot.material:
                     mat = [None, None]
                     node_tree = slot.material.arnold.node_tree
+                    uuid = export_utils.generate_uuid(slot.material)
 
                     if node_tree and node_tree.has_surface():
-                        unique_name = export_utils.get_unique_name(slot.material)
+                        shader = self.session.get_node_by_uuid(uuid)
 
-                        shader = self.session.get_node_by_name(unique_name)
                         if not shader.is_valid():
                             shader = node_tree.export_active_surface()
-                            shader.set_string("name", unique_name)
+                            shader.set_string("name", slot.material.name)
+                            shader.set_uuid(uuid)
 
                         mat[0] = shader
 
                     if node_tree and node_tree.has_displacement():
-                        unique_name = export_utils.get_unique_name(slot.material)
-                        unique_name = "{}_disp".format(unique_name)
+                        uuid = f"{uuid}_disp"
+                        shader = self.session.get_node_by_uuid(uuid)
 
-                        shader = self.session.get_node_by_name(unique_name)
                         if not shader.is_valid():
                             node = node_tree.export_active_displacement()
 
@@ -68,7 +70,8 @@ class PolymeshExporter(ObjectExporter):
                                 self.node.set_float("disp_zero_value", node[3])
                                 self.node.set_bool("disp_autobump", node[4])
 
-                            shader.set_string("name", unique_name)
+                            shader.set_string("name", f'{slot.material.name}_displ')
+                            shader.set_uuid(uuid)
 
                         mat[1] = shader
 
@@ -246,16 +249,16 @@ class PolymeshExporter(ObjectExporter):
             is_instance = isinstance(instance, bpy.types.DepsgraphObjectInstance) and self.datablock.is_instance
             db = self.datablock.object.original if is_instance else self.datablock
 
-            name = export_utils.get_unique_name(db)
-            existing_node = self.session.get_node_by_name(name)
+            uuid = export_utils.generate_uuid(db)
+            existing_node = self.session.get_node_by_uuid(uuid)
 
             if existing_node.is_valid():
                 instancer = InstanceExporter(self.session)
                 instancer.set_transform(self.get_transform_matrix())
-                name = export_utils.get_unique_name(self.datablock)
-                return instancer.export(existing_node, name)
+                uuid = export_utils.generate_uuid(self.datablock)
+                return instancer.export(existing_node, uuid)
             else:
-                self.node = ArnoldPolymesh(name)
+                self.node = ArnoldPolymesh(self.datablock_eval.name)
 
         self.evaluate_mesh()
 

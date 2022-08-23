@@ -119,6 +119,19 @@ class Session:
 
         return node
 
+    def get_node_by_uuid(self, uuid):
+        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
+        node = ArnoldNode()
+
+        while not arnold.AiNodeIteratorFinished(iterator):
+            ainode = arnold.AiNodeIteratorGetNext(iterator)
+            
+            if arnold.AiNodeGetStr(ainode, 'btoa_id'):
+                node.set_data(ainode)
+                break
+        
+        return node
+
     def pause(self):
         self.is_running = False
         arnold.AiRenderInterrupt(arnold.AI_BLOCKING)

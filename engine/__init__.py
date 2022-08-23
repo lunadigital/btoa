@@ -283,8 +283,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 world_ntree = scene.world.arnold.node_tree
 
                 if material:
-                    unique_name = utils.get_unique_name(material)
-                    old_node = AI_SESSION.get_node_by_name(unique_name)
+                    uuid = utils.generate_uuid(material)
+                    old_node = AI_SESSION.get_node_by_uuid(uuid)
 
                     if old_node.is_valid():
                         surface, volume, displacement = update.id.export()
@@ -294,20 +294,18 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
                         # We have to rename the node AFTER we swap them to
                         # avoid memory and session.get_node_by_name() issues
-                        new_node.set_string("name", unique_name)
+                        new_node.set_string("name", material.name)
 
                 elif world_ntree and update.id.name == world_ntree.name:
                     # This code is repeated in view_draw() below
                     # Consider cleaning this up
-                    unique_name = utils.get_unique_name(scene.world)
-                    old_node = AI_SESSION.get_node_by_name(unique_name)
+                    uuid = utils.generate_uuid(scene.world)
+                    old_node = AI_SESSION.get_node_by_uuid(uuid)
 
                     if old_node.is_valid():
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
-
                         AI_SESSION.replace_node(old_node, new_node)
-
-                        new_node.set_string("name", unique_name)
+                        new_node.set_string("name", scene.world.name)
 
         # Update everything else
         if depsgraph.id_type_updated("OBJECT"):
@@ -321,8 +319,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     polymesh_data_needs_update = True
 
                 if isinstance(update.id, bpy.types.Object):
-                    unique_name = utils.get_unique_name(update.id)
-                    node = AI_SESSION.get_node_by_name(unique_name)
+                    uuid = utils.generate_uuid(update.id)
+                    node = AI_SESSION.get_node_by_uuid(uuid)
 
                     if update.id.type == 'LIGHT':
                         if update.is_updated_transform or light_data_needs_update:
@@ -339,26 +337,24 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 # Update world material if rotation controller changed
                 rotation_controller = scene.world.arnold.rotation_controller
                 if rotation_controller and update.id.name == rotation_controller.name:
-                    unique_name = utils.get_unique_name(scene.world)
-                    old_node = AI_SESSION.get_node_by_name(unique_name)
+                    uuid = utils.generate_uuid(scene.world)
+                    old_node = AI_SESSION.get_node_by_uuid(uuid)
 
                     if old_node.is_valid():
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
-
                         AI_SESSION.replace_node(old_node, new_node)
-
-                        new_node.set_string("name", unique_name)
+                        new_node.set_string("name", scene.world.name)
 
         # Check for deleted objects
         if len(context.scene.objects) < self.total_objects_in_ipr:
-            unique_names = [utils.get_unique_name(ob) for ob in context.scene.objects]
+            uuids = [utils.generate_uuid(ob) for ob in context.scene.objects]
 
             iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
 
             while not arnold.AiNodeIteratorFinished(iterator):
                 node = arnold.AiNodeIteratorGetNext(iterator)
                 
-                if arnold.AiNodeGetStr(node, 'name') not in unique_names and not arnold.AiNodeIs(node, 'skydome_light'):
+                if arnold.AiNodeGetStr(node, 'name') not in uuids and not arnold.AiNodeIs(node, 'skydome_light'):
                     arnold.AiNodeDestroy(node)
 
             arnold.AiNodeIteratorDestroy(iterator)

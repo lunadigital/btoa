@@ -23,8 +23,8 @@ class LightExporter(ObjectExporter):
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            name = export_utils.get_unique_name(self.datablock)
-            existing_node = self.session.get_node_by_name(name)
+            uuid = export_utils.generate_uuid(self.datablock)
+            existing_node = self.session.get_node_by_uuid(uuid)
 
             if existing_node.is_valid():
                 instancer = InstanceExporter(self.session)
@@ -33,7 +33,7 @@ class LightExporter(ObjectExporter):
             else:
                 ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
                 self.node = ArnoldNode(ntype)
-                self.node.set_string("name", name)
+                self.node.set_string("name", self.datablock_eval.name)
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
