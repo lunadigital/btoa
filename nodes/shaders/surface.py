@@ -293,6 +293,7 @@ Provides bump mapping based on a 2d texture map.
 '''
 class AiNormalMap(bpy.types.Node, base.ArnoldNode):
     bl_label = "Normal Map"
+    bl_width_default = 160
     ai_name = "normal_map"
 
     invert_x: BoolProperty(name="Invert X")
@@ -300,10 +301,11 @@ class AiNormalMap(bpy.types.Node, base.ArnoldNode):
     invert_z: BoolProperty(name="Invert Z")
 
     color_to_signed: BoolProperty(
-        name="Color to signed",
+        name="Color To Signed",
         description="For 8-bit maps. If enabled, the input is remapped to the [-1,1] range"
     )
 
+    tangent_space: BoolProperty(name="Tangent Space")
     normalize: BoolProperty(name="Normalize")
 
     def init(self, context):
@@ -315,20 +317,22 @@ class AiNormalMap(bpy.types.Node, base.ArnoldNode):
         self.outputs.new('AiNodeSocketVector', name="Vector", identifier="output")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "invert_x")
-        layout.prop(self, "invert_y")
-        layout.prop(self, "invert_z")
-
-        layout.separator()
-
-        layout.prop(self, "color_to_signed")
-        layout.prop(self, "normalize")
+        row = layout.row(heading="Invert")
+        row.prop(self, "invert_x", text="X")
+        row.prop(self, "invert_y", text="Y")
+        row.prop(self, "invert_z", text="Z")
+        
+        col = layout.column()
+        col.prop(self, "color_to_signed")
+        col.prop(self, "tangent_space")
+        col.prop(self, "normalize")
 
     def sub_export(self, node):
         node.set_bool("invert_x", self.invert_x)
         node.set_bool("invert_y", self.invert_y)
         node.set_bool("invert_z", self.invert_z)
         node.set_bool("color_to_signed", self.color_to_signed)
+        node.set_bool("tangent_space", self.tangent_space)
         node.set_bool("normalize", self.normalize)
 
 '''
