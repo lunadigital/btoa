@@ -243,13 +243,17 @@ class PolymeshExporter(ObjectExporter):
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            name = export_utils.get_unique_name(self.datablock_eval)
+            is_instance = isinstance(instance, bpy.types.DepsgraphObjectInstance) and self.datablock.is_instance
+            db = self.datablock.object.original if is_instance else self.datablock
+
+            name = export_utils.get_unique_name(db)
             existing_node = self.session.get_node_by_name(name)
 
             if existing_node.is_valid():
                 instancer = InstanceExporter(self.session)
                 instancer.set_transform(self.get_transform_matrix())
-                return instancer.export(existing_node)
+                name = export_utils.get_unique_name(self.datablock)
+                return instancer.export(existing_node, name)
             else:
                 self.node = ArnoldPolymesh(name)
 

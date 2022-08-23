@@ -18,6 +18,10 @@ class ArnoldNode(AiTemplateClass):
         if self.is_valid():
             arnold.AiNodeLinkOutput(self.data, output_type, val.data, param)
 
+    def declare(self, param, param_type):
+        if self.is_valid():
+            arnold.AiNodeDeclare(self.data, param, param_type)
+
     def destroy(self):
         if self.is_valid():
             arnold.AiNodeDestroy(self.data)

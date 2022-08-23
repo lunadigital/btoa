@@ -23,7 +23,7 @@ class LightExporter(ObjectExporter):
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            name = export_utils.get_unique_name(self.datablock_eval)
+            name = export_utils.get_unique_name(self.datablock)
             existing_node = self.session.get_node_by_name(name)
 
             if existing_node.is_valid():

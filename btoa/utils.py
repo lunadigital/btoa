@@ -54,29 +54,24 @@ def get_position_along_local_vector(ob, distance, axis):
     result = translation_matrix @ ob.matrix_world
     return result.to_translation()
 
+def make_key(datablock):
+    return str(datablock.original.as_pointer())
+
+def persistent_id_to_str(persistent_id):
+    return ''.join(map(str, persistent_id))
+
 def get_unique_name(datablock):
-    db = datablock
-
     if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
-        db = datablock.instance_object
-
-    if hasattr(db, "data"):
-        if isinstance(db.data, bpy.types.Light):
-            t = db.data.type
-            n = db.data.name
+        if datablock.is_instance:
+            key = make_key(datablock.object)
+            key += '_' + make_key(datablock.parent)
+            key += '_' + persistent_id_to_str(datablock.persistent_id)
         else:
-            t = db.type
-            n = db.name
-    elif isinstance(db, (bpy.types.Material, bpy.types.World)):
-        t = "SHADER"
-        n = db.arnold.node_tree.name
-
-        # For backwards compatibility with previous BtoA versions that
-        # don't use UUIDs in the node tree name
-        if len(db.arnold.node_tree.name.split("_")) == 2:
-            n = "{}_{}".format(db.arnold.node_tree.name, db.name)
-
-    return "{}_{}".format(t, n)
+            key = make_key(datablock.object.original)
+    else:
+        key = make_key(datablock)
+        
+    return key
 
 def get_render_resolution(session_cache, interactive=False):
     if interactive:

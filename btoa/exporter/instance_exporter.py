@@ -2,6 +2,7 @@ from .object_exporter import ObjectExporter
 from ..array import ArnoldArray
 from ..node import ArnoldNode
 from ..matrix import ArnoldMatrix
+from .. import utils as export_utils
 
 class InstanceExporter(ObjectExporter):
     def __init__(self, session):
@@ -15,8 +16,9 @@ class InstanceExporter(ObjectExporter):
         else:
             self.instance_transform.convert_from_buffer(matrix)
 
-    def export(self, node):
+    def export(self, node, name):
         self.node = ArnoldNode("instancer")
+        self.node.set_string("name", name)
 
         nodes = ArnoldArray()
         nodes.allocate(1, 1, 'POINTER')
