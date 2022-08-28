@@ -97,7 +97,7 @@ class AiValue(bpy.types.Node):
         self.outputs.new('AiNodeSocketFloatUnbounded', "Value", identifier="value")
     
     def draw_buttons(self, context, layout):
-        layout.prop(self, "value")
+        layout.prop(self, "value", text="")
     
     # Overriding export() because this isn't a native Arnold struct
     def export(self):
