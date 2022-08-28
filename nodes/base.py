@@ -394,6 +394,13 @@ world_node_categories = [
             NodeItem("AiPhysicalSky")
         ]
     ),
+    ArnoldWorldNodeCategory(
+        'ARNOLD_NODES_WORLD_UTILITY',
+        "Utility",
+        items=[
+            NodeItem("AiValue"),
+        ]
+    ),
 ]
 
 object_node_categories = [
@@ -473,7 +480,8 @@ object_node_categories = [
         items=[
             NodeItem("AiCoordSpace"),
             NodeItem("AiFacingRatio"),
-            NodeItem("AiUVProjection")
+            NodeItem("AiUVProjection"),
+            NodeItem("AiValue"),
         ]
     ),
 ]
