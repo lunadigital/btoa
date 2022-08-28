@@ -63,20 +63,16 @@ class InstanceExporter(ObjectExporter):
             array.set_pointer(i, node)
         
         self.node.set_array("nodes", array)
-        
-        if self.cache.scene["enable_motion_blur"]:
-            node_matricies = node.get_array("matrix", copy=True)
 
-            for i in range(0, node_matricies.get_num_keys()):
-                node_mtx = node_matricies.get_matrix(i)
-                instance_mtx = self.instance_transform.get_matrix(i)
+        # Per instance matrices
+        array = ArnoldArray()
+        array.allocate(len(nodes), 1, 'MATRIX')
 
-                node_mtx.multiply(instance_mtx)
+        for i, ob in enumerate(objects):
+            matrix = ob.get_matrix("matrix")
+            array.set_matrix(i, matrix)
 
-                node_matricies.set_matrix(i, node_mtx)
-                
-            self.node.set_array("instance_matrix", node_matricies)
-        else:
-            self.node.set_matrix("instance_matrix", self.instance_transform)
+        self.node.set_array("instance_matrix", array)
+        self.node.set_matrix("matrix", self.instance_transform)
 
         return self.node
