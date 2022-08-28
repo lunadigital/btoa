@@ -285,7 +285,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 if material:
                     old_node = AI_SESSION.get_node_by_uuid(material.uuid)
 
-                    if old_node.is_valid():
+                    if old_node.is_valid:
                         surface, volume, displacement = update.id.export()
                         new_node = surface[0]
 
@@ -300,7 +300,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     # Consider cleaning this up
                     old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
 
-                    if old_node.is_valid():
+                    if old_node.is_valid:
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
                         AI_SESSION.replace_node(old_node, new_node)
                         new_node.set_string("name", scene.world.name)
@@ -336,7 +336,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 if rotation_controller and update.id.name == rotation_controller.name:
                     old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
 
-                    if old_node.is_valid():
+                    if old_node.is_valid:
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
                         AI_SESSION.replace_node(old_node, new_node)
                         new_node.set_string("name", scene.world.name)

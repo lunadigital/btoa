@@ -18,7 +18,7 @@ class CameraExporter(ObjectExporter):
 
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
-        if not self.node.is_valid():
+        if not self.node.is_valid:
             self.node = ArnoldNode(self.datablock_eval.data.arnold.camera_type)
 
         self.node.set_string("name", self.datablock_eval.name)

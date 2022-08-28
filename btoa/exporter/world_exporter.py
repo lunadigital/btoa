@@ -18,7 +18,7 @@ class WorldExporter(Exporter):
         # Flip image textures in the U direction
         image = self.node.get_link("color")
 
-        if image.is_valid() and image.type_is("image"):
+        if image.is_valid and image.type_is("image"):
             sflip = image.get_bool("sflip")
             image.set_bool("sflip", not sflip)
 

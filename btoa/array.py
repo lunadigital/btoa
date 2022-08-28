@@ -21,37 +21,37 @@ class ArnoldArray(AiTemplateClass):
         )
 
     def set_string(self, param, val):
-        if self.is_valid():
+        if self.is_valid:
             arnold.AiArraySetStr(self.data, param, val)
 
     def set_array(self, i, array):
-        if self.is_valid():
+        if self.is_valid:
             arnold.AiArraySetArray(self.data, i, array.data)
 
     def set_matrix(self, i, val):
-        if self.is_valid():
+        if self.is_valid:
             if isinstance(val, ArnoldMatrix):
                 arnold.AiArraySetMtx(self.data, i, val.data)
             else:
                 arnold.AiArraySetMtx(self.data, i, arnold.AtMatrix(*val))
 
     def set_vector(self, i, array):
-        if self.is_valid():
+        if self.is_valid:
             arnold.AiArraySetVec(self.data, i, array.data)
 
     def set_pointer(self, i, val):
-        if self.is_valid():
+        if self.is_valid:
             ptr = val.data if hasattr(val, "data") else val
             arnold.AiArraySetPtr(self.data, i, ptr)
             
     def get_num_keys(self):
-        if not self.is_valid():
+        if not self.is_valid:
             return None
         
         return arnold.AiArrayGetNumKeys(self.data)
     
     def get_matrix(self, i):
-        if not self.is_valid():
+        if not self.is_valid:
             return None
 
         node = ArnoldMatrix()

@@ -21,7 +21,7 @@ class LightExporter(ObjectExporter):
 
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
-        if not self.node.is_valid():
+        if not self.node.is_valid:
             ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
             self.node = ArnoldNode(ntype)
             self.node.set_string("name", self.datablock_eval.name)

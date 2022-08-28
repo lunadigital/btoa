@@ -20,7 +20,7 @@ class PolymeshExporter(ObjectExporter):
             if material_override.arnold.node_tree:
                 shader = self.session.get_node_by_uuid(material_override.uuid)
 
-                if shader.is_valid():
+                if shader.is_valid:
                     self.node.set_pointer("shader", shader)
                 else:
                     surface, volume, displacement = material_override.arnold.node_tree.export()
@@ -40,7 +40,7 @@ class PolymeshExporter(ObjectExporter):
                     if node_tree and node_tree.has_surface():
                         shader = self.session.get_node_by_uuid(slot.material.uuid)
 
-                        if not shader.is_valid():
+                        if not shader.is_valid:
                             shader = node_tree.export_active_surface()
                             shader.set_string("name", slot.material.name)
                             shader.set_uuid(slot.material.uuid)
@@ -51,7 +51,7 @@ class PolymeshExporter(ObjectExporter):
                         uuid = f"{slot.material.uuid}_disp"
                         shader = self.session.get_node_by_uuid(uuid)
 
-                        if not shader.is_valid():
+                        if not shader.is_valid:
                             node = node_tree.export_active_displacement()
 
                             # Check if we're using a displacment node or not. If we are, the export won't have the
@@ -245,11 +245,11 @@ class PolymeshExporter(ObjectExporter):
 
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node.
-        if not self.node.is_valid():
+        if not self.node.is_valid:
             # Check for node by UUID first and return if it exists, marked as instance
             node = self.session.get_node_by_uuid(self.datablock.uuid)
 
-            if node.is_valid():
+            if node.is_valid:
                 node.is_instance = True
                 return node
 
