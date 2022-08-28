@@ -283,7 +283,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 world_ntree = scene.world.arnold.node_tree
 
                 if material:
-                    old_node = AI_SESSION.get_node_by_uuid(material.uuid)
+                    old_node = AI_SESSION.get_node_by_uuid(material.original.uuid)
 
                     if old_node.is_valid:
                         surface, volume, displacement = update.id.export()
@@ -294,6 +294,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                         # We have to rename the node AFTER we swap them to
                         # avoid memory and session.get_node_by_name() issues
                         new_node.set_string("name", material.name)
+                        new_node.set_uuid(material.original.uuid)
 
                 elif world_ntree and update.id.name == world_ntree.name:
                     # This code is repeated in view_draw() below

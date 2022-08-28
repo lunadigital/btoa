@@ -18,14 +18,14 @@ class PolymeshExporter(ObjectExporter):
 
         if material_override:
             if material_override.arnold.node_tree:
-                shader = self.session.get_node_by_uuid(material_override.uuid)
+                shader = self.session.get_node_by_uuid(material_override.original.uuid)
 
                 if shader.is_valid:
                     self.node.set_pointer("shader", shader)
                 else:
                     surface, volume, displacement = material_override.arnold.node_tree.export()
                     surface[0].set_string("name", material_override.name)
-                    surface[0].set_uuid(material_override.uuid)
+                    surface[0].set_uuid(material_override.original.uuid)
 
                     self.node.set_pointer("shader", surface[0])
 
@@ -38,17 +38,17 @@ class PolymeshExporter(ObjectExporter):
                     node_tree = slot.material.arnold.node_tree
 
                     if node_tree and node_tree.has_surface():
-                        shader = self.session.get_node_by_uuid(slot.material.uuid)
+                        shader = self.session.get_node_by_uuid(slot.material.original.uuid)
 
                         if not shader.is_valid:
                             shader = node_tree.export_active_surface()
                             shader.set_string("name", slot.material.name)
-                            shader.set_uuid(slot.material.uuid)
+                            shader.set_uuid(slot.material.original.uuid)
 
                         mat[0] = shader
 
                     if node_tree and node_tree.has_displacement():
-                        uuid = f"{slot.material.uuid}_disp"
+                        uuid = f"{slot.material.original.uuid}_disp"
                         shader = self.session.get_node_by_uuid(uuid)
 
                         if not shader.is_valid:

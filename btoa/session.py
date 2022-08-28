@@ -136,7 +136,7 @@ class Session:
         return node
 
     def get_all_by_uuid(self, uuid):
-        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
+        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHADER)
         result = []
 
         while not arnold.AiNodeIteratorFinished(iterator):
@@ -150,13 +150,14 @@ class Session:
         return result
 
     def get_node_by_uuid(self, uuid):
-        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
+        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHADER)
         node = ArnoldNode()
 
         while not arnold.AiNodeIteratorFinished(iterator):
             ainode = arnold.AiNodeIteratorGetNext(iterator)
+            btoa_id = arnold.AiNodeGetStr(ainode, 'btoa_id')
             
-            if arnold.AiNodeGetStr(ainode, 'btoa_id') == uuid:
+            if btoa_id == uuid:
                 node.set_data(ainode)
                 break
         
