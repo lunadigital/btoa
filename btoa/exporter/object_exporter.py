@@ -20,10 +20,8 @@ class ObjectExporter(Exporter):
             frame, subframe = self.get_target_frame(motion_steps[i])
             self.cache.frame_set(frame, subframe=subframe)
 
-            matrix = self.datablock.parent.matrix_world if self.datablock.is_instance else self.datablock.matrix_world
-
-            m = export_utils.flatten_matrix(matrix)
-            marray.set_matrix(i, m)
+            matrix = export_utils.flatten_matrix(self.datablock_eval.matrix_world)
+            marray.set_matrix(i, matrix)
         
         self.cache.frame_set(self.cache.scene["frame_current"], subframe=0)
 
@@ -35,7 +33,7 @@ class ObjectExporter(Exporter):
         if scene["enable_motion_blur"]:
             matrix = self.get_blur_matrices()
         else:
-            matrix = export_utils.flatten_matrix(self.datablock.matrix_world)
+            matrix = export_utils.flatten_matrix(self.datablock_eval.matrix_world)
 
         return matrix
     

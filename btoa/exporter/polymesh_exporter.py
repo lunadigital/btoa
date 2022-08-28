@@ -5,7 +5,6 @@ import math
 import numpy
 
 from .object_exporter import ObjectExporter
-from .instance_exporter import InstanceExporter
 
 from ..node import ArnoldNode
 from ..array import ArnoldArray
@@ -18,17 +17,15 @@ class PolymeshExporter(ObjectExporter):
         material_override = self.cache.view_layer.material_override
 
         if material_override:
-            uuid = export_utils.generate_uuid(material_override)
-
             if material_override.arnold.node_tree:
-                shader = self.session.get_node_by_uuid(uuid)
+                shader = self.session.get_node_by_uuid(material_override.uuid)
 
                 if shader.is_valid():
                     self.node.set_pointer("shader", shader)
                 else:
                     surface, volume, displacement = material_override.arnold.node_tree.export()
                     surface[0].set_string("name", material_override.name)
-                    surface[0].set_uuid(uuid)
+                    surface[0].set_uuid(material_override.uuid)
 
                     self.node.set_pointer("shader", surface[0])
 
@@ -39,20 +36,19 @@ class PolymeshExporter(ObjectExporter):
                 if slot.material:
                     mat = [None, None]
                     node_tree = slot.material.arnold.node_tree
-                    uuid = export_utils.generate_uuid(slot.material)
 
                     if node_tree and node_tree.has_surface():
-                        shader = self.session.get_node_by_uuid(uuid)
+                        shader = self.session.get_node_by_uuid(slot.material.uuid)
 
                         if not shader.is_valid():
                             shader = node_tree.export_active_surface()
                             shader.set_string("name", slot.material.name)
-                            shader.set_uuid(uuid)
+                            shader.set_uuid(slot.material.uuid)
 
                         mat[0] = shader
 
                     if node_tree and node_tree.has_displacement():
-                        uuid = f"{uuid}_disp"
+                        uuid = f"{slot.material.uuid}_disp"
                         shader = self.session.get_node_by_uuid(uuid)
 
                         if not shader.is_valid():
@@ -235,31 +231,32 @@ class PolymeshExporter(ObjectExporter):
 
         return vlist, nlist, nsides, vidxs, nidxs
 
-    def export(self, instance, interactive=False):
-        super().export(instance)
+    '''
+    NOTE: This method only works on objects that are of type DepsgraphObjectInstance
+    or DepsgraphUpdate.
+    '''
+    def export(self, depsgraph_object):
+        super().export(depsgraph_object)
 
-        if isinstance(instance, bpy.types.DepsgraphObjectInstance):
-            self.datablock_eval = export_utils.get_object_data_from_instance(instance)
-        else:
-            self.datablock_eval = instance
+        if isinstance(depsgraph_object, bpy.types.DepsgraphObjectInstance):
+            self.datablock_eval = export_utils.get_object_data_from_instance(depsgraph_object)
+        elif isinstance(depsgraph_object, bpy.types.DepsgraphUpdate):
+            self.datablock_eval = depsgraph_object.id
 
         # If self.node already exists, it will sync all new
-        # data with the existing BtoA node
+        # data with the existing BtoA node.
         if not self.node.is_valid():
-            is_instance = isinstance(instance, bpy.types.DepsgraphObjectInstance) and self.datablock.is_instance
-            db = self.datablock.object.original if is_instance else self.datablock
+            # Check for node by UUID first and return if it exists, marked as instance
+            node = self.session.get_node_by_uuid(self.datablock.uuid)
 
-            uuid = export_utils.generate_uuid(db)
-            existing_node = self.session.get_node_by_uuid(uuid)
+            if node.is_valid():
+                node.is_instance = True
+                return node
 
-            if existing_node.is_valid():
-                instancer = InstanceExporter(self.session)
-                instancer.set_transform(self.get_transform_matrix())
-                uuid = export_utils.generate_uuid(self.datablock)
-                return instancer.export(existing_node, uuid)
-            else:
-                self.node = ArnoldPolymesh(self.datablock_eval.name)
-
+            # If no node exists, create a new one and move on
+            self.node = ArnoldPolymesh(self.datablock_eval.name)
+            self.node.set_uuid(self.datablock_eval.uuid)
+        
         self.evaluate_mesh()
 
         if not self.mesh:
@@ -286,7 +283,6 @@ class PolymeshExporter(ObjectExporter):
         self.generate_polymesh_data()
         self.generate_uv_map_data()
         self.build_shaders()
-
         self.set_visibility_options()
 
         return self.node
@@ -394,10 +390,10 @@ class PolymeshExporter(ObjectExporter):
 
         self.node.set_byte("visibility", visibility)
 
-        self.node.set_bool(
-            "matte",
-            (self.datablock_eval.holdout_get(view_layer=self.cache.view_layer)
-            or hasattr(self.datablock, 'is_instance') and self.datablock.is_instance
-            and self.datablock.parent.holdout_get(view_layer=self.cache.view_layer)
-            )
-        )
+        #self.node.set_bool(
+        #    "matte",
+        #    (self.datablock_eval.holdout_get(view_layer=self.cache.view_layer)
+        #    or hasattr(self.datablock, 'is_instance') and self.datablock.is_instance
+        #    and self.datablock.parent.holdout_get(view_layer=self.cache.view_layer)
+        #    )
+        #)

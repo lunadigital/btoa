@@ -3,43 +3,35 @@ import math
 import mathutils
 
 from .object_exporter import ObjectExporter
-from .instance_exporter import InstanceExporter
 
 from ..node import ArnoldNode
 from ..constants import BTOA_LIGHT_CONVERSIONS, BTOA_LIGHT_SHAPE_CONVERSIONS
 from .. import utils as export_utils
 
 class LightExporter(ObjectExporter):
-    def export(self, instance):
-        super().export(instance)
+    def export(self, depsgraph_object):
+        super().export(depsgraph_object)
         
-        if isinstance(instance, bpy.types.DepsgraphObjectInstance):
-            self.datablock_eval = export_utils.get_object_data_from_instance(instance)
-        else:
-            self.datablock_eval = instance
+        if isinstance(depsgraph_object, bpy.types.DepsgraphObjectInstance):
+            self.datablock_eval = export_utils.get_object_data_from_instance(depsgraph_object)
+        elif isinstance(depsgraph_object, bpy.types.DepsgraphUpdate):
+            self.datablock_eval = depsgraph_object.id
 
         data = self.datablock_eval.data
 
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
         if not self.node.is_valid():
-            uuid = export_utils.generate_uuid(self.datablock)
-            existing_node = self.session.get_node_by_uuid(uuid)
-
-            if existing_node.is_valid():
-                instancer = InstanceExporter(self.session)
-                instancer.set_transform(self.get_transform_matrix())
-                return instancer.export(existing_node)
-            else:
-                ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
-                self.node = ArnoldNode(ntype)
-                self.node.set_string("name", self.datablock_eval.name)
+            ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
+            self.node = ArnoldNode(ntype)
+            self.node.set_string("name", self.datablock_eval.name)
+            self.node.set_uuid(self.datablock.uuid)
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
             self.node.set_matrix(
                 "matrix",
-                export_utils.flatten_matrix(self.datablock.matrix_world)
+                export_utils.flatten_matrix(self.datablock_eval.matrix_world)
             )
 
         self.node.set_rgb("color", *data.color)
@@ -82,7 +74,7 @@ class LightExporter(ObjectExporter):
             self.node.set_float("soft_edge", data.arnold.soft_edge)
 
             if data.shape == 'SQUARE':
-                tmatrix = self.datablock.matrix_world @ \
+                tmatrix = self.datablock_eval.matrix_world @ \
                           mathutils.Matrix.Scale(0.5, 4) @ \
                           mathutils.Matrix.Scale(data.size, 4)
 
@@ -93,7 +85,7 @@ class LightExporter(ObjectExporter):
 
                 self.node.set_bool("portal", data.arnold.portal)
             elif data.shape == 'DISK':
-                s = self.datablock.scale.x if self.datablock.scale.x > 0 else self.datablock.scale.y
+                s = self.datablock_eval.scale.x if self.datablock_eval.scale.x > 0 else self.datablock_eval.scale.y
                 self.node.set_float("radius", 0.5 * data.size * s)
             elif data.shape == 'RECTANGLE':
                 d = 0.5 * data.size_y * self.datablock_eval.scale.y

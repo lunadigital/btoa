@@ -11,10 +11,9 @@ class WorldExporter(Exporter):
 
         # Because of how we're manipulating the rotation of the skydome, we have to create a new
         # one every time and replace the node. Otherwise, things get weird.
-        uuid = export_utils.generate_uuid(world)
         surface, volume, displacement = self.datablock.arnold.node_tree.export()
         self.node = surface[0]
-        self.node.set_uuid(uuid)
+        self.node.set_uuid(world.uuid)
 
         # Flip image textures in the U direction
         image = self.node.get_link("color")

@@ -6,7 +6,7 @@ import numpy
 import time
 import os
 
-from .exporter import PolymeshExporter, CameraExporter, OptionsExporter, LightExporter, WorldExporter
+from .exporter import *
 
 from .array import ArnoldArray
 from .colormanager import ArnoldColorManager
@@ -45,11 +45,27 @@ class Session:
         OptionsExporter(self).export(interactive=self.is_interactive)
 
         # Geometry and lights
-        for instance in depsgraph.object_instances:
-            if isinstance(instance.object.data, BTOA_CONVERTIBLE_TYPES):
-                PolymeshExporter(self).export(instance)
-            elif isinstance(instance.object.data, bpy.types.Light):
-                LightExporter(self).export(instance)
+        instances = {}
+        for object_instance in depsgraph.object_instances:
+            node = None
+
+            if isinstance(object_instance.object.data, BTOA_CONVERTIBLE_TYPES):
+                node = PolymeshExporter(self).export(object_instance)
+            elif isinstance(object_instance.object.data, bpy.types.Light):
+                node = LightExporter(self).export(object_instance)
+
+            # We only care if the original datablock is `is_instance`, not the node itself
+            if node and object_instance.is_instance:
+                parent = InstancerCache(object_instance.parent)
+
+                if parent not in instances.keys():
+                    instances[parent] = [node]
+                else:
+                    instances[parent].append(node)
+
+        # Create instances
+        for key in instances.keys():
+            InstanceExporter(self).export(key, instances[key])
 
         options = UniverseOptions()
 
@@ -119,6 +135,20 @@ class Session:
 
         return node
 
+    def get_all_by_uuid(self, uuid):
+        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
+        result = []
+
+        while not arnold.AiNodeIteratorFinished(iterator):
+            ainode = arnold.AiNodeIteratorGetNext(iterator)
+            
+            if arnold.AiNodeGetStr(ainode, 'btoa_id') == uuid:
+                node = ArnoldNode()
+                node.set_data(ainode)
+                result.append(node)
+        
+        return result
+
     def get_node_by_uuid(self, uuid):
         iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
         node = ArnoldNode()
@@ -126,7 +156,7 @@ class Session:
         while not arnold.AiNodeIteratorFinished(iterator):
             ainode = arnold.AiNodeIteratorGetNext(iterator)
             
-            if arnold.AiNodeGetStr(ainode, 'btoa_id'):
+            if arnold.AiNodeGetStr(ainode, 'btoa_id') == uuid:
                 node.set_data(ainode)
                 break
         

@@ -55,25 +55,6 @@ def get_position_along_local_vector(ob, distance, axis):
     result = translation_matrix @ ob.matrix_world
     return result.to_translation()
 
-def make_key(datablock):
-    return str(datablock.original.as_pointer())
-
-def persistent_id_to_str(persistent_id):
-    return ''.join(map(str, persistent_id))
-
-def generate_uuid(datablock):
-    if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
-        if datablock.is_instance:
-            key = make_key(datablock.object)
-            key += '-' + make_key(datablock.parent)
-            key += '-' + persistent_id_to_str(datablock.persistent_id)
-        else:
-            key = make_key(datablock.object.original)
-    else:
-        key = make_key(datablock)
-        
-    return key
-
 def get_render_resolution(session_cache, interactive=False):
     if interactive:
         scene = session_cache.scene

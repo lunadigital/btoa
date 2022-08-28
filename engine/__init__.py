@@ -283,8 +283,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 world_ntree = scene.world.arnold.node_tree
 
                 if material:
-                    uuid = utils.generate_uuid(material)
-                    old_node = AI_SESSION.get_node_by_uuid(uuid)
+                    old_node = AI_SESSION.get_node_by_uuid(material.uuid)
 
                     if old_node.is_valid():
                         surface, volume, displacement = update.id.export()
@@ -299,8 +298,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 elif world_ntree and update.id.name == world_ntree.name:
                     # This code is repeated in view_draw() below
                     # Consider cleaning this up
-                    uuid = utils.generate_uuid(scene.world)
-                    old_node = AI_SESSION.get_node_by_uuid(uuid)
+                    old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
 
                     if old_node.is_valid():
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
@@ -319,15 +317,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     polymesh_data_needs_update = True
 
                 if isinstance(update.id, bpy.types.Object):
-                    uuid = utils.generate_uuid(update.id)
-                    node = AI_SESSION.get_node_by_uuid(uuid)
-
+                    node = AI_SESSION.get_node_by_uuid(update.id.uuid)
+                    
                     if update.id.type == 'LIGHT':
                         if update.is_updated_transform or light_data_needs_update:
-                            btoa.LightExporter(AI_SESSION, node).export(update.id)
+                            btoa.LightExporter(AI_SESSION, node).export(update)
 
                     elif polymesh_data_needs_update:
-                        btoa.PolymeshExporter(AI_SESSION, node).export(update.id, interactive=True)
+                        btoa.PolymeshExporter(AI_SESSION, node).export(update)
 
                     # Transforms for lights have to be handled brute-force by the LightExporter to
                     # account for size and other parameters
@@ -337,8 +334,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 # Update world material if rotation controller changed
                 rotation_controller = scene.world.arnold.rotation_controller
                 if rotation_controller and update.id.name == rotation_controller.name:
-                    uuid = utils.generate_uuid(scene.world)
-                    old_node = AI_SESSION.get_node_by_uuid(uuid)
+                    old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
 
                     if old_node.is_valid():
                         new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
@@ -346,15 +342,15 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                         new_node.set_string("name", scene.world.name)
 
         # Check for deleted objects
-        if len(context.scene.objects) < self.total_objects_in_ipr:
-            uuids = [utils.generate_uuid(ob) for ob in context.scene.objects]
+        if len(depsgraph.object_instances) < self.total_objects_in_ipr:
+            uuids = [instance.uuid for instance in depsgraph.object_instances]
 
             iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
 
             while not arnold.AiNodeIteratorFinished(iterator):
                 node = arnold.AiNodeIteratorGetNext(iterator)
                 
-                if arnold.AiNodeGetStr(node, 'name') not in uuids and not arnold.AiNodeIs(node, 'skydome_light'):
+                if arnold.AiNodeGetStr(node, 'btoa_id') not in uuids and not arnold.AiNodeIs(node, 'skydome_light'):
                     arnold.AiNodeDestroy(node)
 
             arnold.AiNodeIteratorDestroy(iterator)

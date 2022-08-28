@@ -7,6 +7,7 @@ import arnold
 class ArnoldNode(AiTemplateClass):
     def __init__(self, node_type=None):
         super().__init__()
+        self.is_instance = False
 
         if node_type is not None:
             self.data = arnold.AiNode(node_type)
