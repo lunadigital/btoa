@@ -39,6 +39,34 @@ class AiFloatToRGBA(bpy.types.Node, base.ArnoldNode):
         self.outputs.new('AiNodeSocketRGB', name="RGBA", identifier="output")
 
 '''
+AiRGBToVector
+https://docs.arnoldrenderer.com/display/A5NodeRef/rgb_to_vector
+
+Converts RGB color to vector.
+'''
+class AiRGBToVector(bpy.types.Node, base.ArnoldNode):
+    bl_label = "RGB to Vector"
+    ai_name = "rgb_to_vector"
+
+    mode: EnumProperty(
+        name="Mode",
+        items=[
+            ('raw', "Raw", "Map XYZ values to RGB channels directly"),
+            ('canonical', "Canonical", "Map -1..1 XYZ values to 0..1 RGB channels")
+        ]
+    )
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'mode', text="")
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="input").default_value = (0, 0, 0)
+        self.outputs.new('AiNodeSocketVector', "Vector")
+
+    def sub_export(self, node):
+        node.set_string('mode', self.mode)
+
+'''
 AiVectorToRGB
 https://docs.arnoldrenderer.com/display/A5NodeRef/vector_to_rgb
 
@@ -70,6 +98,7 @@ class AiVectorToRGB(bpy.types.Node, base.ArnoldNode):
 classes = (
     AiFloatToRGB,
     AiFloatToRGBA,
+    AiRGBToVector,
     AiVectorToRGB,
 )
 
