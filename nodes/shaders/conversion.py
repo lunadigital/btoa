@@ -1,6 +1,7 @@
 import bpy
 from bpy.props import *
 from .. import base
+from ..sockets import utils as socket_utils
 from ... import utils
 
 '''
@@ -67,6 +68,36 @@ class AiRGBToVector(bpy.types.Node, base.ArnoldNode):
         node.set_string('mode', self.mode)
 
 '''
+AiSeparateRGBA
+
+This is a dummy node to separate RGBA inputs into their component R/G/B/A outputs.
+'''
+class AiSeparateRGBA(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Separate RGBA"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketRGBA', "Color").default_value = (1, 1, 1, 1)
+        
+        # The first socket is always the default output. For the other sockets
+        # to return the proper values, we'll create an RGBA output but hide it
+        # in the UI.
+        self.outputs.new('AiNodeSocketRGBA', "RGBA").hide = True
+        self.outputs.new('AiNodeSocketFloatUnbounded', "R")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "G")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "B")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "A")
+
+    def export(self):
+        socket_value, value_type, output_type = self.inputs[0].export()
+
+        if socket_value is not None and value_type is not None:
+            if value_type == 'BTNODE':
+                return socket_value, value_type
+            else:
+                btoa.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
+                return socket_value, value_type
+
+'''
 AiVectorToRGB
 https://docs.arnoldrenderer.com/display/A5NodeRef/vector_to_rgb
 
@@ -99,6 +130,7 @@ classes = (
     AiFloatToRGB,
     AiFloatToRGBA,
     AiRGBToVector,
+    AiSeparateRGBA,
     AiVectorToRGB,
 )
 

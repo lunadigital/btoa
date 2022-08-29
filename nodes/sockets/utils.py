@@ -45,3 +45,6 @@ def get_link(socket):
                 return None
 
     return link
+
+def get_socket_index(socket):
+    return int(socket.path_from_id()[-2:-1])
