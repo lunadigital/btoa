@@ -35,7 +35,7 @@ class AiSkydome(bpy.types.Node, base.ArnoldNode):
     )
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color").default_value = (0.050876, 0.050876, 0.050876)
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketSkydomeIntensity', "Intensity", identifier="intensity")
         self.inputs.new('AiNodeSocketSkydomeExposure', "Exposure", identifier="exposure")
         self.inputs.new('AiNodeSocketSkydomeResolution', "Resolution", identifier="resolution")
