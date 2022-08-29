@@ -356,6 +356,7 @@ world_node_categories = [
         items=[
             NodeItem("AiFloatToRGB"),
             NodeItem("AiFloatToRGBA"),
+            NodeItem("AiVectorToRGB"),
         ]
     ),
     ArnoldWorldNodeCategory(
@@ -427,6 +428,7 @@ object_node_categories = [
         items=[
             NodeItem("AiFloatToRGB"),
             NodeItem("AiFloatToRGBA"),
+            NodeItem("AiVectorToRGB"),
         ]
     ),
     ArnoldObjectNodeCategory(

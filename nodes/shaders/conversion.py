@@ -1,4 +1,5 @@
 import bpy
+from bpy.props import *
 from .. import base
 from ... import utils
 
@@ -37,9 +38,39 @@ class AiFloatToRGBA(bpy.types.Node, base.ArnoldNode):
         
         self.outputs.new('AiNodeSocketRGB', name="RGBA", identifier="output")
 
+'''
+AiVectorToRGB
+https://docs.arnoldrenderer.com/display/A5NodeRef/vector_to_rgb
+
+Converts vector to RGB color.
+'''
+class AiVectorToRGB(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Vector to RGB"
+    ai_name = "vector_to_rgb"
+
+    mode: EnumProperty(
+        name="Mode",
+        items=[
+            ('raw', "Raw", "Map XYZ values to RGB channels directly"),
+            ('normalized', "Normalized", "Normalize vector, then map XYZ values to RGB channels"),
+            ('canonical', "Canonical", "Map -1..1 XYZ values to 0..1 RGB channels")
+        ]
+    )
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'mode', text="")
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketVector', "Vector", identifier="input").show_socket_value = True
+        self.outputs.new('AiNodeSocketRGB', "RGB")
+
+    def sub_export(self, node):
+        node.set_string('mode', self.mode)
+
 classes = (
     AiFloatToRGB,
     AiFloatToRGBA,
+    AiVectorToRGB,
 )
 
 def register():
