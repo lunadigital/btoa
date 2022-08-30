@@ -3,7 +3,7 @@ from .ainodesocket import AiNodeSocket, SocketColor
 
 class AiNodeSocketSurface(NodeSocket, AiNodeSocket):
     bl_label = "Surface"
-    color = SocketColor.SHADER
+    color = SocketColor.COLOR
     default_value: None
 
     def draw_prop(self, context, layout, node, text):
