@@ -183,20 +183,38 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
             return self.bl_label
 
     def draw_buttons(self, context, layout):
-        layout.template_ID(self, "image", open="image.open")
+        layout.template_ID(self, "image", new="image.new", open="image.open")
 
         layout.separator()
 
         if self.image:
-            layout.prop(self.image.colorspace_settings, "name")
+            split = layout.split(factor=0.3)
+            split.label(text="Color Space")
+            split.prop(self.image.colorspace_settings, "name", text="")
 
-        layout.prop(self, "image_filter")
-        layout.prop(self, "swrap")
-        layout.prop(self, "twrap")
-        layout.prop(self, "sflip")
-        layout.prop(self, "tflip")
-        layout.prop(self, "swap_st")
-        #layout.prop(self, "uvset")
+            split = layout.split(factor=0.3)
+            split.label(text="Filter")
+            split.prop(self, "image_filter", text="")
+
+            split = layout.split(factor=0.3)
+            split.label(text="Wrap U")
+            split.prop(self, "swrap", text="")
+
+            split = layout.split(factor=0.3)
+            split.label(text="Wrap V")
+            split.prop(self, "twrap", text="")
+
+            split = layout.split(factor=0.3)
+            split.label(text="")
+
+            row = split.row()
+            row.prop(self, "sflip")
+            row.prop(self, "tflip")
+            
+            split = layout.split(factor=0.3)
+            split.label(text="")
+            split.prop(self, "swap_st")
+            #layout.prop(self, "uvset")
 
     def sub_export(self, node):
         if self.image:
