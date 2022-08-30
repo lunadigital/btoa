@@ -5,6 +5,36 @@ from ..sockets import utils as socket_utils
 from ... import utils
 
 '''
+AiFloatToInteger
+https://docs.arnoldrenderer.com/display/A5NodeRef/float_to_int
+
+Converts float to an integer value.
+'''
+class AiFloatToInteger(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Float to Integer"
+    ai_name = "float_to_int"
+
+    mode: EnumProperty(
+        name="Mode",
+        items=[
+            ('round', "Round", "Round to nearest"),
+            ('truncate', "Truncate", "Drop the fractional part"),
+            ('floor', "Floor", "Round down"),
+            ('ceil', "Ceiling", "Round up")
+        ]
+    )
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'mode', text="")
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketFloatUnbounded', "Value", identifier="input")
+        self.outputs.new('AiNodeSocketIntUnbounded', "Integer")
+
+    def sub_export(self, node):
+        node.set_string('mode', self.mode)
+
+'''
 AiFloatToRGB
 https://docs.arnoldrenderer.com/display/A5NodeRef/float_to_rgb
 
@@ -127,6 +157,7 @@ class AiVectorToRGB(bpy.types.Node, base.ArnoldNode):
         node.set_string('mode', self.mode)
 
 classes = (
+    AiFloatToInteger,
     AiFloatToRGB,
     AiFloatToRGBA,
     AiRGBToVector,

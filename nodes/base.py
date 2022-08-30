@@ -354,6 +354,7 @@ world_node_categories = [
         'ARNOLD_NODES_WORLD_CONVERSION',
         "Conversion",
         items=[
+            NodeItem("AiFloatToInteger"),
             NodeItem("AiFloatToRGB"),
             NodeItem("AiFloatToRGBA"),
             NodeItem("AiRGBToVector"),
@@ -428,6 +429,7 @@ object_node_categories = [
         'ARNOLD_NODES_OBJECT_CONVERSION',
         "Conversion",
         items=[
+            NodeItem("AiFloatToInteger"),
             NodeItem("AiFloatToRGB"),
             NodeItem("AiFloatToRGBA"),
             NodeItem("AiRGBToVector"),
