@@ -401,7 +401,7 @@ world_node_categories = [
         'ARNOLD_NODES_WORLD_UTILITY',
         "Utility",
         items=[
-            NodeItem("AiValue"),
+            NodeItem("AiFloat"),
         ]
     ),
 ]
@@ -487,7 +487,7 @@ object_node_categories = [
             NodeItem("AiCoordSpace"),
             NodeItem("AiFacingRatio"),
             NodeItem("AiUVProjection"),
-            NodeItem("AiValue"),
+            NodeItem("AiFloat"),
         ]
     ),
 ]

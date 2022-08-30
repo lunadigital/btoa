@@ -84,17 +84,17 @@ class AiUVProjection(bpy.types.Node, base.ArnoldNode):
         node.set_string("projection_type", self.projection_type)
 
 '''
-AiValue
+AiFloat
 
 This is a dummy node that mimics the Cycles/EEVEE "Value" node for outputing a single float value.
 '''
-class AiValue(bpy.types.Node):
-    bl_label = "Value"
+class AiFloat(bpy.types.Node):
+    bl_label = "Float"
 
-    value: FloatProperty(name="Value")
+    value: FloatProperty(name="Float")
 
     def init(self, context):
-        self.outputs.new('AiNodeSocketFloatUnbounded', "Value", identifier="value")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Float")
     
     def draw_buttons(self, context, layout):
         layout.prop(self, "value", text="")
@@ -107,7 +107,7 @@ classes = (
     AiCoordSpace,
     AiFacingRatio,
     AiUVProjection,
-    AiValue
+    AiFloat
 )
 
 def register():
