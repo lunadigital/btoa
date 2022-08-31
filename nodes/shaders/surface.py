@@ -224,11 +224,12 @@ class AiLambert(bpy.types.Node, base.ArnoldNode):
     ai_name = "lambert"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', "Color", identifier="Kd_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Weight", identifier="Kd").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="Kd_color").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Opacity", identifier="opacity").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="Shader")
 
 '''
 AiMatte
