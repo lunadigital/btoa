@@ -9,12 +9,12 @@ class AiNodeSocketVector(NodeSocket, AiNodeSocket):
     default_type = "VECTOR"
 
     default_value: FloatVectorProperty()
-    show_socket_value = BoolProperty()
+    show_value: BoolProperty(default=False)
 
     def draw_prop(self, context, layout, node, text):
-        if self.show_socket_value:
+        if self.show_value:
             col = layout.column()
-            col.prop(self, "default_value", text=text)            
+            col.prop(self, "default_value", text=text)
         else:
             row = layout.row(align=True)
             row.label(text=text)

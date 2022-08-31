@@ -150,7 +150,7 @@ class AiVectorToRGB(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, 'mode', text="")
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketVector', "Vector", identifier="input").show_socket_value = True
+        self.inputs.new('AiNodeSocketVector', "Vector", identifier="input").show_value = True
         self.outputs.new('AiNodeSocketRGB', "RGB")
 
     def sub_export(self, node):
