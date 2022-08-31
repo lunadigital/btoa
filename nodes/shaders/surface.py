@@ -210,8 +210,8 @@ class AiFlat(bpy.types.Node, base.ArnoldNode):
     ai_name = "flat"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color")
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color").default_value = (1, 1, 1)
+        self.outputs.new('AiNodeSocketRGB', name="RGB")
 
 '''
 AiLambert
