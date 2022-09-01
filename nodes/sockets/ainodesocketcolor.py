@@ -6,13 +6,11 @@ class AiNodeSocketColor(AiNodeSocket):
     bl_label = "Color"
     color = SocketColor.COLOR
 
-    hide_color: BoolProperty()
-
     def draw_prop(self, context, layout, node, text):
         row = layout.row(align=True)
         row.label(text=text)
 
-        if not self.hide_color:
+        if not self.hide_value:
             row.prop(self, "default_value", text="")
     
     def export_default(self):

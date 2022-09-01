@@ -460,6 +460,8 @@ object_node_categories = [
             NodeItem("AiMatte"),
             NodeItem("AiMixShader"),
             NodeItem("AiNormalMap"),
+            NodeItem("AiRaySwitchRGBA"),
+            NodeItem("AiRaySwitchShader"),
             NodeItem("AiShadowMatte"),
             NodeItem("AiStandardHair"),
             NodeItem("AiStandardSurface"),

@@ -47,7 +47,7 @@ class AiBump2d(bpy.types.Node, base.ArnoldNode):
     ai_name = "bump2d"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', name="Bump Map", identifier="bump_map").hide_color = True
+        self.inputs.new('AiNodeSocketRGB', name="Bump Map", identifier="bump_map").hide_value = True
         self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Height", identifier="bump_height").default_value = 1
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
@@ -340,6 +340,52 @@ class AiNormalMap(bpy.types.Node, base.ArnoldNode):
         node.set_bool("normalize", self.normalize)
 
 '''
+AiRaySwitchRGBA
+https://docs.arnoldrenderer.com/display/A5NodeRef/ray_switch_rgba
+
+This shader makes it possible to evaluate different color trees per ray.
+'''
+class AiRaySwitchRGBA(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Ray Switch RGBA"
+    ai_name = "ray_switch_rgba"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketRGBA', "Camera", identifier="camera").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Shadow", identifier="shadow").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Diffuse Reflection", identifier="diffuse_reflection").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Diffuse Transmission", identifier="diffuse_transmission").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Specular Reflection", identifier="specular_reflection").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Specular Transmission", identifier="specular_transmission").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Volume", identifier="volume").hide_value = True
+
+        self.outputs.new('AiNodeSocketRGBA', "RGBA")
+
+'''
+AiRaySwitchShader
+https://docs.arnoldrenderer.com/display/A5NodeRef/ray_switch_shader
+
+This shader makes it possible to evaluate different shader trees per ray. This decreases
+the shading complexity of a scene and thus the render times, and increases artistic control.
+It can be used to remove unnecessary secondary rays (specular/sss), make speculars even more
+glossy in specular rays, control the color of opacity in shadow rays to fake light scattering
+through tissue or add a second specular lobe in-camera rays only.
+'''
+class AiRaySwitchShader(bpy.types.Node, base.ArnoldNode):
+    bl_label = "Ray Switch Shader"
+    ai_name = "ray_switch_shader"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketSurface', "Camera", identifier="camera")
+        self.inputs.new('AiNodeSocketSurface', "Shadow", identifier="shadow")
+        self.inputs.new('AiNodeSocketSurface', "Diffuse Reflection", identifier="diffuse_reflection")
+        self.inputs.new('AiNodeSocketSurface', "Diffuse Transmission", identifier="diffuse_transmission")
+        self.inputs.new('AiNodeSocketSurface', "Specular Reflection", identifier="specular_reflection")
+        self.inputs.new('AiNodeSocketSurface', "Specular Transmission", identifier="specular_transmission")
+        self.inputs.new('AiNodeSocketSurface', "Volume", identifier="volume")
+
+        self.outputs.new('AiNodeSocketSurface', "Shader")
+
+'''
 AiShadowMatte
 
 Typically used on floor planes to 'catch' shadows from lighting within
@@ -607,6 +653,8 @@ classes = (
     AiMatte,
     AiMixShader,
     AiNormalMap,
+    AiRaySwitchRGBA,
+    AiRaySwitchShader,
     AiShadowMatte,
     AiStandardHair,
     AiStandardSurface,
