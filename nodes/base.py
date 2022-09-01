@@ -357,7 +357,9 @@ world_node_categories = [
             NodeItem("AiFloatToInteger"),
             NodeItem("AiFloatToRGB"),
             NodeItem("AiFloatToRGBA"),
+            NodeItem("AiRGBToFloat"),
             NodeItem("AiRGBToVector"),
+            NodeItem("AiRGBAToFloat"),
             NodeItem("AiSeparateRGBA"),
             NodeItem("AiVectorToRGB"),
         ]
@@ -432,7 +434,9 @@ object_node_categories = [
             NodeItem("AiFloatToInteger"),
             NodeItem("AiFloatToRGB"),
             NodeItem("AiFloatToRGBA"),
+            NodeItem("AiRGBToFloat"),
             NodeItem("AiRGBToVector"),
+            NodeItem("AiRGBAToFloat"),
             NodeItem("AiSeparateRGBA"),
             NodeItem("AiVectorToRGB"),
         ]

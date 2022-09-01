@@ -70,6 +70,41 @@ class AiFloatToRGBA(bpy.types.Node, base.ArnoldNode):
         self.outputs.new('AiNodeSocketRGB', name="RGBA", identifier="output")
 
 '''
+AiRGBToFloat
+https://docs.arnoldrenderer.com/display/A5NodeRef/rgb_to_float
+
+Converts RGB color to float value.
+'''
+class AiRGBToFloat(bpy.types.Node, base.ArnoldNode):
+    bl_label = "RGB to Float"
+    ai_name = "rgb_to_float"
+
+    mode: EnumProperty(
+        name="Mode",
+        items=[
+            ('min', "Min", "Minimum of the color and alpha channels"),
+            ('max', "Max", "Maximum of the color and alpha channels"),
+            ('average', "Average", "Average of the color and alpha channels"),
+            ('sum', "Sum", "Sum of the color and alpha channels"),
+            ('luminance', "Luminance", "sRGB luminance mix, multiplied by alpha"),
+            ('r', "R", "Red channel only"),
+            ('g', "G", "Green channel only"),
+            ('b', "B", "Blue channel only")
+        ],
+        default="average"
+    )
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "mode", text="")
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="input").default_value = (0, 0, 0)
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Float")
+
+    def sub_export(self, node):
+        node.set_string("mode", self.mode)
+
+'''
 AiRGBToVector
 https://docs.arnoldrenderer.com/display/A5NodeRef/rgb_to_vector
 
@@ -96,6 +131,42 @@ class AiRGBToVector(bpy.types.Node, base.ArnoldNode):
 
     def sub_export(self, node):
         node.set_string('mode', self.mode)
+
+'''
+AiRGBAToFloat
+https://docs.arnoldrenderer.com/display/A5NodeRef/rgba_to_float
+
+Converts RGB color and alpha value to float.
+'''
+class AiRGBAToFloat(bpy.types.Node, base.ArnoldNode):
+    bl_label = "RGBA to Float"
+    ai_name = "rgba_to_float"
+
+    mode: EnumProperty(
+        name="Mode",
+        items=[
+            ('min', "Min", "Minimum of the color and alpha channels"),
+            ('max', "Max", "Maximum of the color and alpha channels"),
+            ('average', "Average", "Average of the color and alpha channels"),
+            ('sum', "Sum", "Sum of the color and alpha channels"),
+            ('luminance', "Luminance", "sRGB luminance mix, multiplied by alpha"),
+            ('r', "R", "Red channel only"),
+            ('g', "G", "Green channel only"),
+            ('b', "B", "Blue channel only"),
+            ('a', "A", "Alpha channel only")
+        ],
+        default="average"
+    )
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "mode", text="")
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketRGBA', "Color", identifier="input").default_value = (0, 0, 0, 1)
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Float")
+
+    def sub_export(self, node):
+        node.set_string("mode", self.mode)
 
 '''
 AiSeparateRGBA
@@ -160,7 +231,9 @@ classes = (
     AiFloatToInteger,
     AiFloatToRGB,
     AiFloatToRGBA,
+    AiRGBToFloat,
     AiRGBToVector,
+    AiRGBAToFloat,
     AiSeparateRGBA,
     AiVectorToRGB,
 )
