@@ -257,13 +257,17 @@ class AiMixShader(bpy.types.Node, base.ArnoldNode):
     bl_label = "Mix Shader"
     ai_name = "mix_shader"
 
+    def toggle_mix(self, context):
+        self.inputs[0].hide = self.mode == 'add'
+
     mode: EnumProperty(
         name="Mode",
         description="",
         items=[
-            ('0', "Blend", "Blend"),
-            ('1', "Add", "Add")
-        ]
+            ('blend', "Blend", "Blend"),
+            ('add', "Add", "Add")
+        ],
+        update=toggle_mix
     )
 
     add_transparency: BoolProperty(name="Add Transparency")
@@ -273,15 +277,17 @@ class AiMixShader(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketSurface', name="Shader", identifier="shader1")
         self.inputs.new('AiNodeSocketSurface', name="Shader", identifier="shader2")
 
-        self.outputs.new('AiNodeSocketSurface', name="Closure", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="Shader")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "mode")
-        layout.prop(self, "add_transparency")
+        layout.prop(self, "mode", text="")
+
+        if self.mode == 'add':
+            layout.prop(self, "add_transparency")
         
     def sub_export(self, node):
-        node.set_int("mode", int(self.mode))
-        node.set_bool("add_transparency", self.add_transparency)
+        node.set_string("mode", self.mode)
+        node.set_bool("add_transparency", self.add_transparency) 
 
 '''
 AiNormalMap
