@@ -17,7 +17,7 @@ class AiNodeSocketCoord(NodeSocket, AiNodeSocket):
         row.label(text=text)
 
     def export_default(self):
-        return self.default_value, self.default_type
+        return self.default_value, self.default_type, ''
 
     # We're overriding the main export method because Arnold has no "coordinate space" node
     # Just need to get the default value instead
