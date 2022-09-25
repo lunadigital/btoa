@@ -37,6 +37,7 @@ class InstanceExporter(ObjectExporter):
         '''
         for ob in objects:
             node = ob
+            visibility = 255
             
             if not node.is_instance:
                 if isinstance(ob.data, BTOA_CONVERTIBLE_TYPES):
@@ -45,11 +46,10 @@ class InstanceExporter(ObjectExporter):
                     #node = LightExporter(self.session).export(ob)
                     pass
 
-                #visibility = node.get_byte("visibility")
-                #visibility = max(visibility - 3, 0)
-                #node.set_byte("visibility", visibility)
+                visibility = node.get_byte("visibility")
+                node.set_byte("visibility", 0)
             
-            nodes.append(node)
+            nodes.append([node, visibility])
 
         # Set up instancer node
         self.node = ArnoldNode('instancer')
@@ -59,10 +59,15 @@ class InstanceExporter(ObjectExporter):
         self.node.set_string("name", parent.name)
         self.node.set_uuid(parent.uuid)
 
+        visibility_array = ArnoldArray()
+        visibility_array.allocate(len(nodes), 1, 'BYTE')
+
         for i, node in enumerate(nodes):
-            array.set_pointer(i, node)
+            array.set_pointer(i, node[0])
+            visibility_array.set_byte(i, node[1])
         
         self.node.set_array("nodes", array)
+        self.node.set_array("instance_visibility", visibility_array)
 
         # Per instance matrices
         array = ArnoldArray()

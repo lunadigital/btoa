@@ -118,6 +118,12 @@ class ArnoldNode(AiTemplateClass):
         
         return arnold.AiNodeGetBool(self.data, param)
 
+    def get_byte(self, param):
+        if not self.is_valid:
+            return None
+
+        return arnold.AiNodeGetByte(self.data, param)
+
     def get_link(self, param, comp=None):
         if not self.is_valid:
             return None

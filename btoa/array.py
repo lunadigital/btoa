@@ -28,6 +28,10 @@ class ArnoldArray(AiTemplateClass):
         if self.is_valid:
             arnold.AiArraySetArray(self.data, i, array.data)
 
+    def set_byte(self, i, val):
+        if self.is_valid:
+            arnold.AiArraySetByte(self.data, i, val)
+
     def set_matrix(self, i, val):
         if self.is_valid:
             if isinstance(val, ArnoldMatrix):
