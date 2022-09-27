@@ -26,30 +26,15 @@ class InstanceExporter(ObjectExporter):
         # originals and turn off visibility.
         nodes = []
 
-        '''
-        We know the `objects` variable is a pre-validated list
-        of ArnoldNode types.
-
-        If the node is marked as `is_instance`, it means there's already
-        another node in the Arnold scene graph we want to point to. If it's
-        not, it means the original objects aren't currently visible in the
-        scene so we need to create them and hide them.
-        '''
         for ob in objects:
-            node = ob
-            visibility = 255
+            node = ob[0]
+            bl_visible = ob[1]
+            ai_visible = node.get_byte("visibility")
             
-            if not node.is_instance:
-                if isinstance(ob.data, BTOA_CONVERTIBLE_TYPES):
-                    node = PolymeshExporter(self.session).export(ob)
-                elif isinstance(ob.data, bpy.types.Light):
-                    #node = LightExporter(self.session).export(ob)
-                    pass
-
-                visibility = node.get_byte("visibility")
+            if not bl_visible:
                 node.set_byte("visibility", 0)
             
-            nodes.append([node, visibility])
+            nodes.append(node)
 
         # Set up instancer node
         self.node = ArnoldNode('instancer')
@@ -63,8 +48,8 @@ class InstanceExporter(ObjectExporter):
         visibility_array.allocate(len(nodes), 1, 'BYTE')
 
         for i, node in enumerate(nodes):
-            array.set_pointer(i, node[0])
-            visibility_array.set_byte(i, node[1])
+            array.set_pointer(i, node)
+            visibility_array.set_byte(i, 255)
         
         self.node.set_array("nodes", array)
         self.node.set_array("instance_visibility", visibility_array)
@@ -74,7 +59,7 @@ class InstanceExporter(ObjectExporter):
         array.allocate(len(nodes), 1, 'MATRIX')
 
         for i, ob in enumerate(objects):
-            matrix = ob.get_matrix("matrix")
+            matrix = ob[0].get_matrix("matrix")
             array.set_matrix(i, matrix)
 
         self.node.set_array("instance_matrix", array)

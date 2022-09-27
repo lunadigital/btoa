@@ -54,14 +54,17 @@ class Session:
             elif isinstance(object_instance.object.data, bpy.types.Light):
                 node = LightExporter(self).export(object_instance)
 
-            # We only care if the original datablock is `is_instance`, not the node itself
             if node and object_instance.is_instance:
                 parent = InstancerCache(object_instance.parent)
+                result = [
+                    node,
+                    object_instance.instance_object.visible_get(view_layer=self.cache.view_layer)
+                ]
 
                 if parent not in instances.keys():
-                    instances[parent] = [node]
+                    instances[parent] = [result]
                 else:
-                    instances[parent].append(node)
+                    instances[parent].append(result)
                 
         # Create instances
         for key in instances.keys():
