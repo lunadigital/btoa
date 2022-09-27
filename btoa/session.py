@@ -62,7 +62,7 @@ class Session:
                     instances[parent] = [node]
                 else:
                     instances[parent].append(node)
-
+                
         # Create instances
         for key in instances.keys():
             InstanceExporter(self).export(key, instances[key])
@@ -77,7 +77,7 @@ class Session:
 
             camera = CameraExporter(self).export(bl_camera)
         else:
-            camera = CameraExporter(self).export(depsgraph.scene.camera)
+            camera = CameraExporter(self).export(depsgraph.scene.camera.evaluated_get(depsgraph))
 
         options.set_pointer("camera", camera)
 
