@@ -401,10 +401,10 @@ class PolymeshExporter(ObjectExporter):
 
         self.node.set_byte("visibility", visibility)
 
-        #self.node.set_bool(
-        #    "matte",
-        #    (self.datablock_eval.holdout_get(view_layer=self.cache.view_layer)
-        #    or hasattr(self.datablock, 'is_instance') and self.datablock.is_instance
-        #    and self.datablock.parent.holdout_get(view_layer=self.cache.view_layer)
-        #    )
-        #)
+        self.node.set_bool(
+            "matte",
+            (self.datablock_eval.holdout_get(view_layer=self.cache.view_layer)
+            or hasattr(self.datablock, 'is_instance') and self.datablock.is_instance
+            and self.datablock.parent.holdout_get(view_layer=self.cache.view_layer)
+            )
+        )
