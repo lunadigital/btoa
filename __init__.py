@@ -10,19 +10,27 @@ bl_info = {
 }
 
 def register():
-    from . import preferences #, nodes, props, engine, operators, ui
+    #from . import preferences, nodes, props, engine, operators, ui
+    from . import preferences
+    from . import handlers
+    from . import operators
     preferences.register()
+    handlers.register()
     #nodes.register()
     #props.register()
     #engine.register()
-    #operators.register()
+    operators.register()
     #ui.register()
 
 def unregister():
-    from . import preferences #, nodes, props, engine, operators, ui
+    #from . import preferences, nodes, props, engine, operators, ui
+    from . import preferences
+    from . import handlers
+    from . import operators
     preferences.unregister()
+    handlers.unregister()
     #nodes.unregister()
     #props.unregister()
     #engine.unregister()
-    #operators.unregister()
+    operators.unregister()
     #ui.unregister()

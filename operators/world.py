@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty
 
-from . import utils
+from ..utils import ops_utils
 
 class ARNOLD_OT_world_new(Operator):
     bl_idname = 'arnold.world_new'
@@ -15,7 +15,7 @@ class ARNOLD_OT_world_new(Operator):
         tree_name = utils.make_nodetree_name(world.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
         
-        utils.init_world_node_tree(node_tree)
+        ops_utils.init_world_nodetree(node_tree)
         world.arnold.node_tree = node_tree
 
         context.scene.world = world

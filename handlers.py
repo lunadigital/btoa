@@ -1,6 +1,6 @@
 import bpy
 from bpy.app.handlers import persistent
-from . import utils
+from .utils import ops_utils
 
 def ensure_node_tree_exists(datablock):
     if not datablock.arnold.node_tree:
@@ -9,9 +9,9 @@ def ensure_node_tree_exists(datablock):
         datablock.arnold.node_tree = ntree
 
         if isinstance(datablock, bpy.types.Material):
-            utils.init_mat_node_tree(ntree)
+            ops_utils.init_material_nodetree(ntree)
         elif isinstance(datablock, bpy.types.World):
-            utils.init_world_node_tree(ntree)
+            ops_utils.init_world_nodetree(ntree)
 
 @persistent
 def initialize_shader_graphs(dummy):

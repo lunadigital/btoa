@@ -2,7 +2,7 @@ import bpy
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty
 
-from . import utils
+from ..utils import ops_utils
 
 class ARNOLD_OT_material_new(Operator):
     bl_idname = 'arnold.material_new'
@@ -19,7 +19,7 @@ class ARNOLD_OT_material_new(Operator):
         tree_name = utils.make_nodetree_name(mat.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
         
-        utils.init_mat_node_tree(node_tree)
+        ops_utils.init_material_nodetree(node_tree)
         mat.arnold.node_tree = node_tree
         mat.use_nodes = True
 
