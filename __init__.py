@@ -12,14 +12,16 @@ bl_info = {
 def register():
     #from . import preferences, nodes, props, engine, operators, ui
     from . import preferences
-    from . import handlers
-    from . import operators
     preferences.register()
+    from . import handlers
     handlers.register()
-    #nodes.register()
+    from . import nodes
+    nodes.register()
     #props.register()
     #engine.register()
+    from . import operators
     operators.register()
+    #from . import ui
     #ui.register()
 
 def unregister():
@@ -27,9 +29,11 @@ def unregister():
     from . import preferences
     from . import handlers
     from . import operators
+    from . import nodes
+    #from . import ui
     preferences.unregister()
     handlers.unregister()
-    #nodes.unregister()
+    nodes.unregister()
     #props.unregister()
     #engine.unregister()
     operators.unregister()

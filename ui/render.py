@@ -1,5 +1,4 @@
 import bpy
-from .. import utils
 
 class ArnoldRenderPanel(bpy.types.Panel):
     bl_space_type = 'PROPERTIES'
@@ -238,7 +237,9 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    from ..utils import register_utils
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    from ..utils import register_utils
+    register_utils.unregister_classes(classes)

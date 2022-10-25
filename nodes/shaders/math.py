@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import *
-from .. import base
-from ... import utils
+from .. import core
+from ...utils import register_utils
 
 '''
 AiMultiply
@@ -9,7 +9,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/multiply
 
 Returns input1 x input2.
 '''
-class AiMultiply(bpy.types.Node, base.ArnoldNode):
+class AiMultiply(bpy.types.Node, core.ArnoldNode):
     bl_label = "Multiply"
     ai_name = "multiply"
 
@@ -29,7 +29,7 @@ clamped unless smoothstep is on, and the result is
 interpolated smoothly and the result is clamped in the
 [output_min, output_max] range.
 '''
-class AiRange(bpy.types.Node, base.ArnoldNode):
+class AiRange(bpy.types.Node, core.ArnoldNode):
     bl_label = "Range"
     ai_name = "range"
 
@@ -60,7 +60,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

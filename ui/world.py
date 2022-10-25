@@ -2,8 +2,8 @@ import bpy
 from bl_ui.properties_world import WorldButtonsPanel
 from bpy.types import Panel
 
-from . import utils
 from .. import engine
+from ..utils import ui_utils
 
 class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
     COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
@@ -22,7 +22,7 @@ class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
         space = context.space_data
 
         if scene:
-            row = utils.aiworld_template_ID(layout, context.scene.world)
+            row = ui_utils.aiworld_template_ID(layout, context.scene.world)
         elif world:
             layout.template_ID(space, "pin_id")
 
@@ -47,7 +47,7 @@ class ARNOLD_WORLD_PT_surface(WorldButtonsPanel, Panel):
         layout.use_property_split = True
 
         if world.use_nodes:
-            utils.panel_node_draw(layout, world.arnold.node_tree, 'OUTPUT_WORLD', "Surface")
+            ui_utils.panel_node_draw(layout, world.arnold.node_tree, 'OUTPUT_WORLD', "Surface")
         else:
             layout.prop(world, "color", text="Color")
 
@@ -122,11 +122,9 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    from ..utils import register_utils
+    register_utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    from ..utils import register_utils
+    register_utils.unregister_classes(classes)

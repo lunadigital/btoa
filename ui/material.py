@@ -1,9 +1,9 @@
 from bl_ui.properties_material import MaterialButtonsPanel
 from bpy.types import Panel
 
-from . import utils
 from . import presets
 from .. import engine
+from ..utils import ui_utils
 
 class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
     COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
@@ -54,7 +54,7 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
             # Note that we don't use layout.template_ID() because we can't
             # control the copy operator in that template.
             # So we mimic our own template_ID.
-            split = utils.aishader_template_ID(layout, ob.active_material)
+            split = ui_utils.aishader_template_ID(layout, ob.active_material)
             row = split.row()
 
             if slot:
@@ -98,7 +98,7 @@ class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
         layout.use_property_split = True
 
         if mat.use_nodes:
-            utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
+            ui_utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
         else:
             layout.prop(mat, "diffuse_color", text="Base Color")
             layout.prop(mat, "metallic")

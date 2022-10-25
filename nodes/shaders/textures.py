@@ -3,8 +3,8 @@ import math
 import mathutils
 import os
 from bpy.props import *
-from .. import base, constants
-from ... import utils
+from .. import core, constant
+from ...utils import register_utils
 
 '''
 AiCellNoise
@@ -12,7 +12,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/cell_noise
 
 A cell noise pattern generator.
 '''
-class AiCellNoise(bpy.types.Node, base.ArnoldNode):
+class AiCellNoise(bpy.types.Node, core.ArnoldNode):
     bl_label = "Cell Noise"
     ai_name = "cell_noise"
 
@@ -60,7 +60,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/checkerboard
 
 Represents a checkerboard pattern.
 '''
-class AiCheckerboard(bpy.types.Node, base.ArnoldNode):
+class AiCheckerboard(bpy.types.Node, core.ArnoldNode):
     bl_label = "Checkerboard"
     ai_name = "checkerboard"
 
@@ -84,7 +84,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/Flakes
 Creates a procedural flake normal map that can be used for materials
 such as car paint.
 '''
-class AiFlakes(bpy.types.Node, base.ArnoldNode):
+class AiFlakes(bpy.types.Node, core.ArnoldNode):
     bl_label = "Flakes"
     ai_name = "flakes"
 
@@ -131,9 +131,9 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/image
 
 Performs texture mapping using a specified image file.
 '''
-class AiImage(bpy.types.Node, base.ArnoldNode):
+class AiImage(bpy.types.Node, core.ArnoldNode):
     bl_label = "Image"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "image"
 
     AI_WRAP_OPTIONS = [
@@ -312,11 +312,11 @@ class LayerProperties(bpy.types.PropertyGroup):
 '''
 AiLayer
 
-A base class for layered Arnold texture nodes (layer_float,
+A core class for layered Arnold texture nodes (layer_float,
 layer_rgba). This is NOT a public-facing class.
 '''
-class AiLayer(bpy.types.Node, base.ArnoldNode):
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+class AiLayer(bpy.types.Node, core.ArnoldNode):
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
 
     layers: CollectionProperty(type=LayerProperties)
 
@@ -420,7 +420,7 @@ the mix_weight attribute. A mix_weight value of 0 outputs input1,
 a value of 1 outputs input2, and a value of 0.5 mixes evenly
 between input1 and input2.
 '''
-class AiMixRGBA(bpy.types.Node, base.ArnoldNode):
+class AiMixRGBA(bpy.types.Node, core.ArnoldNode):
     bl_label = "Mix RGBA"
     ai_name = "mix_rgba"
 
@@ -437,7 +437,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/noise
 
 Evaluates a coherent noise function.
 '''
-class AiNoise(bpy.types.Node, base.ArnoldNode):
+class AiNoise(bpy.types.Node, core.ArnoldNode):
     bl_label = "Noise"
     ai_name = "noise"
 
@@ -477,7 +477,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/physical_sky
 This shader implements a variation of the Hosek-Wilkie sky radiance
 model, including the direct solar radiance function.
 '''
-class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
+class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
     bl_label = "Physical Sky"
     ai_name = "physical_sky"
 
@@ -540,7 +540,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/round_corners
 Modifies the shading normals near edges to give the appearance
 of a round corner.
 '''
-class AiRoundCorners(bpy.types.Node, base.ArnoldNode):
+class AiRoundCorners(bpy.types.Node, core.ArnoldNode):
     bl_label = "Round Corners"
     ai_name = "round_corners"
 
@@ -581,7 +581,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

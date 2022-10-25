@@ -1,8 +1,8 @@
 import bpy
 from bpy.props import *
-from .. import base
+from .. import core
 from ... import btoa
-from ... import utils
+from ...utils import register_utils
 
 '''
 AiColorCorrect
@@ -12,7 +12,7 @@ Allows you to adjust the gamma, hue, saturation, contrast, and exposure of
 an image. Alters the Input color with the following operator, applied in
 the same order as the parameters.
 '''
-class AiColorCorrect(bpy.types.Node, base.ArnoldNode):
+class AiColorCorrect(bpy.types.Node, core.ArnoldNode):
     bl_label = "Color Correct"
     ai_name = "color_correct"
 
@@ -66,7 +66,7 @@ This shader enables you to alter the input color by applying a random
     the range of hue, saturation, and gain (HSV) for the random colors.
     The seed is used to get a different random variation.
 '''
-class AiColorJitter(bpy.types.Node, base.ArnoldNode):
+class AiColorJitter(bpy.types.Node, core.ArnoldNode):
     bl_label = "Color Jitter"
     ai_name = "color_jitter"
 
@@ -135,7 +135,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/composite
 
 The composite shader mixes two RGBA inputs according to a blend mode.
 '''
-class AiComposite(bpy.types.Node, base.ArnoldNode):
+class AiComposite(bpy.types.Node, core.ArnoldNode):
     bl_label = "Composite"
     ai_name = "composite"
 
@@ -205,7 +205,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/shuffle
 Combines RGB and alpha inputs to output an RGBA by default.
 Additionally, there are parameters to shuffle the channels.
 '''
-class AiShuffle(bpy.types.Node, base.ArnoldNode):
+class AiShuffle(bpy.types.Node, core.ArnoldNode):
     bl_label = "Shuffle"
     ai_name = "shuffle"
 
@@ -304,7 +304,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

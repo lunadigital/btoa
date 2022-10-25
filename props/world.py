@@ -1,7 +1,7 @@
 from bpy.types import World, Object, PropertyGroup
 from bpy.props import PointerProperty
 
-from ..nodes.base import ArnoldShaderTree
+from ..nodes.core import ArnoldShaderTree
 from .light import ArnoldLight
 
 class ArnoldWorld(PropertyGroup):

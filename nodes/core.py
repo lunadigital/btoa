@@ -5,9 +5,8 @@ from bpy.props import BoolProperty
 from bl_ui.space_node import NODE_HT_header, NODE_MT_editor_menus
 from nodeitems_utils import NodeCategory, NodeItem
 
-from .. import engine
 from .. import btoa
-from ..ui import utils
+from ..utils import ui_utils
 
 class ArnoldShaderTree(ShaderNodeTree):
     bl_idname = "ArnoldShaderTree"
@@ -36,7 +35,7 @@ class ArnoldShaderTree(ShaderNodeTree):
 
     @classmethod
     def poll(cls, context):
-        return engine.ArnoldRenderEngine.is_active(context)
+        return ui_utils.arnold_is_active(context)
 
     @classmethod
     def get_from_context(cls,  context):
@@ -64,7 +63,7 @@ class ArnoldShaderTree(ShaderNodeTree):
             tailor it to Arnold instead.
             '''
             def draw(self, context):
-                if engine.ArnoldRenderEngine.is_active(context):
+                if ui_utils.arnold_is_active(context):
                     layout = self.layout
 
                     scene = context.scene
@@ -95,7 +94,7 @@ class ArnoldShaderTree(ShaderNodeTree):
                             has_material_slots = not snode.pin and ob_type in types_that_support_material
 
                             if ob_type not in ('LIGHT', 'CAMERA'):
-                                row = utils.aishader_template_ID(layout, ob.active_material)
+                                row = ui_utils.aishader_template_ID(layout, ob.active_material)
                                 row.enabled = has_material_slots
 
                         if arnold_space_data.shader_type == 'WORLD':
@@ -103,7 +102,7 @@ class ArnoldShaderTree(ShaderNodeTree):
 
                             layout.separator_spacer()
 
-                            row = utils.aiworld_template_ID(layout, scene.world)
+                            row = ui_utils.aiworld_template_ID(layout, scene.world)
                             row.enabled = not snode.pin
 
                     elif snode.tree_type == 'TextureNodeTree':
@@ -311,7 +310,7 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
 class ArnoldNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
-        return engine.ArnoldRenderEngine.is_active(context)
+        return ui_utils.arnold_is_active(context)
 
 class ArnoldWorldNodeCategory(ArnoldNodeCategory):
     @classmethod

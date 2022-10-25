@@ -1,13 +1,11 @@
 import bpy
 from bl_ui.properties_object import ObjectButtonsPanel
-from .. import utils
 
 class ArnoldObjectPanel(ObjectButtonsPanel, bpy.types.Panel):
     @classmethod
     def poll(self, context):
         return context.engine in {'ARNOLD'} and context.object.type == 'MESH'
     
-
 class OBJECT_PT_arnold_shape_visibility(ArnoldObjectPanel):
     bl_parent_id = "OBJECT_PT_visibility"
     bl_label = "Arnold"
@@ -78,7 +76,9 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    from ..utils import register_utils
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    from ..utils import register_utils
+    register_utils.unregister_classes(classes)

@@ -1,14 +1,14 @@
 import bpy
 from bpy.props import *
-from .. import base
-from ... import utils
+from .. import core
+from ...utils import register_utils
 
 '''
 AiCoordSpace
 
 A dummy node for passing coordinate space data to another shader.
 '''
-class AiCoordSpace(bpy.types.Node, base.ArnoldNode):
+class AiCoordSpace(bpy.types.Node, core.ArnoldNode):
     bl_label = "Coordinate Space"
 
     def init(self, context):
@@ -25,7 +25,7 @@ This shader returns the absolute value of the dot product between
 the shading normal and the incoming ray direction. It is also named
 incidence in other renderers. 
 '''
-class AiFacingRatio(bpy.types.Node, base.ArnoldNode):
+class AiFacingRatio(bpy.types.Node, core.ArnoldNode):
     bl_label = "Facing Ratio"
     ai_name = "facing_ratio"
 
@@ -54,7 +54,7 @@ Turns any 2D texture into a 3D texture that you can place on the
 surface using one of the available projection types. Use to adjust
 the texture placement on the surface.
 '''
-class AiUVProjection(bpy.types.Node, base.ArnoldNode):
+class AiUVProjection(bpy.types.Node, core.ArnoldNode):
     bl_label = "UV Projection"
     ai_name = "uv_projection"
 
@@ -111,7 +111,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

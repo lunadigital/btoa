@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import *
-from .. import base, constants
-from ... import utils
+from .. import core, constant
+from ...utils import register_utils
 
 '''
 AiAmbientOcclusion
@@ -9,7 +9,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/ambient_occlusion
 
 Ambient occlusion shader. Outputs RGB.
 '''
-class AiAmbientOcclusion(bpy.types.Node, base.ArnoldNode):
+class AiAmbientOcclusion(bpy.types.Node, core.ArnoldNode):
     bl_label = "Ambient Occlusion"
     ai_name = "ambient_occlusion"
 
@@ -40,9 +40,9 @@ class AiAmbientOcclusion(bpy.types.Node, base.ArnoldNode):
 AiBump2d
 https://docs.arnoldrenderer.com/display/A5NodeRef/bump2d
 
-Provides bump mapping based on a 2d texture map.
+Provides bump mapping cored on a 2d texture map.
 '''
-class AiBump2d(bpy.types.Node, base.ArnoldNode):
+class AiBump2d(bpy.types.Node, core.ArnoldNode):
     bl_label = "Bump 2D"
     ai_name = "bump2d"
 
@@ -59,9 +59,9 @@ class AiBump2d(bpy.types.Node, base.ArnoldNode):
 AiBump3d
 https://docs.arnoldrenderer.com/display/A5NodeRef/bump3d
 
-Provides bump mapping based on a 3d input.
+Provides bump mapping cored on a 3d input.
 '''
-class AiBump3d(bpy.types.Node, base.ArnoldNode):
+class AiBump3d(bpy.types.Node, core.ArnoldNode):
     bl_label = "Bump 3D"
     bl_width_default = 160
     ai_name = "bump3d"
@@ -83,15 +83,15 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/car_paint
 
 A simple-to-use car paint shader. Outputs RGB.
 '''
-class AiCarPaint(bpy.types.Node, base.ArnoldNode):
+class AiCarPaint(bpy.types.Node, core.ArnoldNode):
     bl_label = "Car Paint"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "car_paint"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
-        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Roughness", identifier="base_roughness")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="core").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="core_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Roughness", identifier="core_roughness")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
         self.inputs.new('AiNodeSocketRGB', "Specular Color", identifier="specular_color").default_value = (1, 1, 1)
@@ -132,7 +132,7 @@ and spread of the curvature sampling as well as specify a trace set
 to exclude or include objects. This shader is useful for creating
 procedural wear or dirt maps in conjunction with a noise shader.
 '''
-class AiCurvature(bpy.types.Node, base.ArnoldNode):
+class AiCurvature(bpy.types.Node, core.ArnoldNode):
     bl_label = "Curvature"
     ai_name = "curvature"
 
@@ -173,7 +173,7 @@ AiDisplacement
 This is a dummy node that exports displacement data to Arnold by
 hijacking the polymesh node.
 '''
-class AiDisplacement(bpy.types.Node, base.ArnoldNode):
+class AiDisplacement(bpy.types.Node, core.ArnoldNode):
     bl_label = "Displacement"
 
     disp_autobump: BoolProperty(name="Auto Bump")
@@ -205,7 +205,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/flat
 
 A simple color shader node which just allows a color with no other effects.
 '''
-class AiFlat(bpy.types.Node, base.ArnoldNode):
+class AiFlat(bpy.types.Node, core.ArnoldNode):
     bl_label = "Flat"
     ai_name = "flat"
 
@@ -219,7 +219,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/lambert
 
 Simple Lambertian reflectance model. Outputs a simple color (RGB).
 '''
-class AiLambert(bpy.types.Node, base.ArnoldNode):
+class AiLambert(bpy.types.Node, core.ArnoldNode):
     bl_label = "Lambert"
     ai_name = "lambert"
 
@@ -237,7 +237,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/matte
 
 Enables you to create holdout effects by rendering the alpha as zero.
 '''
-class AiMatte(bpy.types.Node, base.ArnoldNode):
+class AiMatte(bpy.types.Node, core.ArnoldNode):
     bl_label = "Matte"
     ai_name = "matte"
 
@@ -253,7 +253,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/mix_shader
 
 Used to blend two shaders together.
 '''
-class AiMixShader(bpy.types.Node, base.ArnoldNode):
+class AiMixShader(bpy.types.Node, core.ArnoldNode):
     bl_label = "Mix Shader"
     ai_name = "mix_shader"
 
@@ -293,9 +293,9 @@ class AiMixShader(bpy.types.Node, base.ArnoldNode):
 AiNormalMap
 https://docs.arnoldrenderer.com/display/A5NodeRef/normal_map
 
-Provides bump mapping based on a 2d texture map.
+Provides bump mapping cored on a 2d texture map.
 '''
-class AiNormalMap(bpy.types.Node, base.ArnoldNode):
+class AiNormalMap(bpy.types.Node, core.ArnoldNode):
     bl_label = "Normal Map"
     bl_width_default = 160
     ai_name = "normal_map"
@@ -345,7 +345,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/ray_switch_rgba
 
 This shader makes it possible to evaluate different color trees per ray.
 '''
-class AiRaySwitchRGBA(bpy.types.Node, base.ArnoldNode):
+class AiRaySwitchRGBA(bpy.types.Node, core.ArnoldNode):
     bl_label = "Ray Switch RGBA"
     ai_name = "ray_switch_rgba"
 
@@ -370,7 +370,7 @@ It can be used to remove unnecessary secondary rays (specular/sss), make specula
 glossy in specular rays, control the color of opacity in shadow rays to fake light scattering
 through tissue or add a second specular lobe in-camera rays only.
 '''
-class AiRaySwitchShader(bpy.types.Node, base.ArnoldNode):
+class AiRaySwitchShader(bpy.types.Node, core.ArnoldNode):
     bl_label = "Ray Switch Shader"
     ai_name = "ray_switch_shader"
 
@@ -392,9 +392,9 @@ Typically used on floor planes to 'catch' shadows from lighting within
 the scene. It is useful for integrating a rendered object onto a
 photographic background.
 '''
-class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
+class AiShadowMatte(bpy.types.Node, core.ArnoldNode):
     bl_label = "Shadow Matte"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "shadow_matte"
 
     background: EnumProperty(
@@ -444,19 +444,19 @@ class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
 AiStandardHair
 https://docs.arnoldrenderer.com/display/A5NodeRef/standard_hair
 
-Standard_hair is a physically-based shader to render hair and fur,
-based on the d'Eon model for specular and Zinke model for diffuse.
+Standard_hair is a physically-cored shader to render hair and fur,
+cored on the d'Eon model for specular and Zinke model for diffuse.
 '''
-class AiStandardHair(bpy.types.Node, base.ArnoldNode):
+class AiStandardHair(bpy.types.Node, core.ArnoldNode):
     bl_label = "Standard Hair"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "standard_hair"
 
     roughness_anisotropic: BoolProperty(name="Anisotropic Roughness")
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
-        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="core").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="core_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Melanin", identifier="melanin").default_value = 1
         self.inputs.new('AiNodeSocketFloatNormalized', "Melanin Redness", identifier="melanin_redness").default_value = 0.5
         self.inputs.new('AiNodeSocketFloatNormalized', "Melanin Randomize", identifier="melanin_randomize")
@@ -496,11 +496,11 @@ class AiStandardHair(bpy.types.Node, base.ArnoldNode):
 AiStandardSurface
 https://docs.arnoldrenderer.com/display/A5NodeRef/standard_surface
 
-A physically-based shader. Outputs a simple color (RGB).
+A physically-cored shader. Outputs a simple color (RGB).
 '''
-class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
+class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
     bl_label = "Standard Surface"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "standard_surface"
 
     transmit_aovs: BoolProperty(name="Transmit AOVs")
@@ -519,8 +519,8 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
     )
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
-        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="core").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="core_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse Roughness", identifier="diffuse_roughness")
         self.inputs.new('AiNodeSocketFloatNormalized', "Metalness", identifier="metalness")
 
@@ -595,7 +595,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/two_sided
 
 Applies two shaders on either side of a double sided surface.
 '''
-class AiTwoSided(bpy.types.Node, base.ArnoldNode):
+class AiTwoSided(bpy.types.Node, core.ArnoldNode):
     bl_label = "Two Sided"
     ai_name = "two_sided"
 
@@ -611,7 +611,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/wireframe
 
 Color shader which produces a wire-frame style output (as RGB).
 '''
-class AiWireframe(bpy.types.Node, base.ArnoldNode):
+class AiWireframe(bpy.types.Node, core.ArnoldNode):
     bl_label = "Wireframe"
     ai_name = "wireframe"
 
@@ -663,7 +663,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

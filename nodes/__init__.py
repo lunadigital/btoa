@@ -1,13 +1,13 @@
-from . import base
+from . import core
 from . import sockets
 from . import shaders
 
 def register():
-    base.register()
+    core.register()
     sockets.register()
     shaders.register()
 
 def unregister():
-    base.unregister()
+    core.unregister()
     sockets.unregister()
     shaders.unregister()

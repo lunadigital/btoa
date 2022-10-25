@@ -117,10 +117,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         AI_FRAMEBUFFER = None
 
     @classmethod
-    def is_active(cls, context):
-        return context.scene.render.engine == cls.bl_idname
-
-    @classmethod
     def register(cls):
         if cls._outliner_context_menu_draw is None:
 

@@ -1,8 +1,9 @@
 import bpy
 import math, mathutils
 from bpy.props import *
-from .. import base
-from ... import btoa, utils
+from .. import core
+from ... import btoa
+from ...utils import register_utils
 
 '''
 AiSkydome
@@ -10,7 +11,7 @@ https://docs.arnoldrenderer.com/display/A5NodeRef/skydome_light
 
 Returns a skydome light for World rendering.
 '''
-class AiSkydome(bpy.types.Node, base.ArnoldNode):
+class AiSkydome(bpy.types.Node, core.ArnoldNode):
     bl_label = "Skydome"
     ai_name = "skydome_light"
 
@@ -73,7 +74,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)
