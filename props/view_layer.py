@@ -1,6 +1,6 @@
 from bpy.types import ViewLayer, PropertyGroup
 from bpy.props import *
-from .. import utils
+from ..utils import register_utils
 
 '''
 RenderPassConfig is a simple helper class to manage AOV data
@@ -101,9 +101,9 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
     ViewLayer.arnold = PointerProperty(type=ArnoldRenderLayer)
 
 def unregister():
     del ViewLayer.arnold
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)
