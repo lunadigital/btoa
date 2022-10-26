@@ -1,7 +1,8 @@
 from bpy.types import VIEW3D_HT_header
+from ..utils import ui_utils
 
 def viewport_mult_func(self, context):
-    if context.scene.render.engine == 'ARNOLD':
+    if ui_utils.arnold_is_active(context):
         self.layout.prop(context.scene.arnold, "viewport_scale", text="")
 
 def register():

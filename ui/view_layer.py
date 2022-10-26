@@ -1,12 +1,10 @@
 import bpy
 from bl_ui.properties_view_layer import ViewLayerButtonsPanel
+from ..preferences import ENGINE_ID
 
 class ArnoldViewLayerPanel(ViewLayerButtonsPanel, bpy.types.Panel):
     bl_context = "view_layer"
-
-    @classmethod
-    def poll(cls, context):
-        return context.engine in {'ARNOLD'}
+    COMPAT_ENGINES = {ENGINE_ID}
 
 class ARNOLD_RENDER_PT_aovs(ArnoldViewLayerPanel):
     bl_label = "AOVs"
@@ -87,11 +85,9 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)

@@ -1,13 +1,11 @@
 import bpy
+from ..preferences import ENGINE_ID
 
 class ArnoldRenderPanel(bpy.types.Panel):
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'render'
-
-    @classmethod
-    def poll(cls, context):
-        return context.engine in {'ARNOLD'}
+    COMPAT_ENGINES = {ENGINE_ID}
 
 class ARNOLD_PT_sampling(ArnoldRenderPanel):
     bl_label = "Sampling"
@@ -237,9 +235,9 @@ classes = (
 )
 
 def register():
-    from ..utils import register_utils
-    register_utils.register_classes(classes)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from ..utils import register_utils
-    register_utils.unregister_classes(classes)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)

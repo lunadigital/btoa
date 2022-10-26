@@ -1,11 +1,13 @@
 import bpy
 from bl_ui.properties_data_light import DataButtonsPanel
-from .. import engine
+from ..preferences import ENGINE_ID
 
-class DATA_PT_arnold_light(DataButtonsPanel, bpy.types.Panel):
+class ArnoldLightPanel(DataButtonsPanel, bpy.types.Panel):
+    COMPAT_ENGINES = {ENGINE_ID}
+
+class DATA_PT_arnold_light(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light"
     bl_label = "Light"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -36,11 +38,10 @@ class DATA_PT_arnold_light(DataButtonsPanel, bpy.types.Panel):
         if light.type == 'SUN':
             col.prop(light.arnold, "angle")
 
-class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
+class DATA_PT_arnold_light_shape(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_shape"
     bl_label = "Shape"
     bl_parent_id = DATA_PT_arnold_light.bl_idname
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     @classmethod
     def poll(self, context):
@@ -86,10 +87,9 @@ class DATA_PT_arnold_light_shape(DataButtonsPanel, bpy.types.Panel):
                 col.prop(light.arnold, "area_roundness")
                 col.prop(light.arnold, "soft_edge")
 
-class DATA_PT_arnold_light_shadows(DataButtonsPanel, bpy.types.Panel):
+class DATA_PT_arnold_light_shadows(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_shadows"
     bl_label = "Shadows"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -106,10 +106,9 @@ class DATA_PT_arnold_light_shadows(DataButtonsPanel, bpy.types.Panel):
         col.prop(light.arnold, "cast_shadows")
         col.prop(light.arnold, "cast_volumetric_shadows")
 
-class DATA_PT_arnold_light_advanced(DataButtonsPanel, bpy.types.Panel):
+class DATA_PT_arnold_light_advanced(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_advanced"
     bl_label = "Advanced"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -122,10 +121,9 @@ class DATA_PT_arnold_light_advanced(DataButtonsPanel, bpy.types.Panel):
         col.prop(light.arnold, "samples")
         col.prop(light.arnold, "normalize")
 
-class DATA_PT_arnold_light_visibility(DataButtonsPanel, bpy.types.Panel):
+class DATA_PT_arnold_light_visibility(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_visibility"
     bl_label = "Visibility"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
@@ -153,11 +151,9 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)

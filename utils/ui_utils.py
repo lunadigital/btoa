@@ -1,8 +1,9 @@
 import bpy
 from bpy_extras.node_utils import find_node_input
+from ..preferences import ENGINE_ID
 
 def arnold_is_active(context):
-    return context.scene.render.engine == 'ARNOLD'
+    return context.scene.render.engine == ENGINE_ID
 
 def aishader_template_ID(layout, material):
     row = layout.row(align=True)

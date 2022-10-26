@@ -10,24 +10,27 @@ bl_info = {
 }
 
 def register():
+    '''
+    We need to register preferences before importing any other modules so
+    anything that requires `import arnoldserver` will work properly.
+    '''
     from . import preferences
     preferences.register()
 
-    from . import handlers, props, nodes, operators
+    from . import handlers, props, nodes, operators, ui
     handlers.register()
     nodes.register()
     props.register()
     operators.register()
-
+    ui.register()
     #engine.register()
-    #ui.register()
 
 def unregister():
-    from . import preferences, handlers, nodes, operators
+    from . import preferences, handlers, nodes, operators, ui
     preferences.unregister()
     handlers.unregister()
     nodes.unregister()
     props.unregister()
-    #engine.unregister()
     operators.unregister()
-    #ui.unregister()
+    ui.unregister()
+    #engine.unregister()

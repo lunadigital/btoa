@@ -5,6 +5,7 @@ from bpy.props import *
 from pathlib import Path
 
 ADDON_NAME = 'btoa'
+ENGINE_ID = 'ARNOLD'
 ADDON_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 ARNOLD_INSTALL_PATH = os.path.join(ADDON_ROOT_PATH, 'arnold')
 ARNOLD_PLUGIN_PATH = os.path.join(ADDON_ROOT_PATH, 'drivers', 'build')

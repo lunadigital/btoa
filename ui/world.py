@@ -1,18 +1,14 @@
 import bpy
 from bl_ui.properties_world import WorldButtonsPanel
-from bpy.types import Panel
-
-from .. import engine
+from ..preferences import ENGINE_ID
 from ..utils import ui_utils
 
-class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
+class ArnoldWorldPanel(WorldButtonsPanel, bpy.types.Panel):
+    COMPAT_ENGINES = {ENGINE_ID}
+
+class ARNOLD_WORLD_PT_context_world(ArnoldWorldPanel):
     bl_label = ""
     bl_options = {'HIDE_HEADER'}
-
-    @classmethod
-    def poll(cls, context):
-        return engine.ArnoldRenderEngine.is_active(context)
 
     def draw(self, context):
         layout = self.layout
@@ -29,16 +25,11 @@ class ARNOLD_WORLD_PT_context_world(WorldButtonsPanel, Panel):
         if not world.arnold.node_tree:
             layout.operator("arnold.world_init", icon='NODETREE')
 
-class ARNOLD_WORLD_PT_surface(WorldButtonsPanel, Panel):
+class ARNOLD_WORLD_PT_surface(ArnoldWorldPanel):
     bl_label = "Surface"
-
-    @classmethod
-    def poll(cls, context):
-        return engine.ArnoldRenderEngine.is_active(context)
 
     def draw(self, context):
         layout = self.layout
-
         world = context.world
         
         layout.prop(world, "use_nodes", icon='NODETREE')
@@ -51,10 +42,9 @@ class ARNOLD_WORLD_PT_surface(WorldButtonsPanel, Panel):
         else:
             layout.prop(world, "color", text="Color")
 
-class ARNOLD_WORLD_PT_shadows(WorldButtonsPanel, bpy.types.Panel):
+class ARNOLD_WORLD_PT_shadows(ArnoldWorldPanel):
     bl_idname = "ARNOLD_WORLD_PT_shadows"
     bl_label = "Shadows"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -73,10 +63,9 @@ class ARNOLD_WORLD_PT_shadows(WorldButtonsPanel, bpy.types.Panel):
             col.prop(data, "cast_shadows")
             col.prop(data, "cast_volumetric_shadows")
 
-class ARNOLD_WORLD_PT_advanced(WorldButtonsPanel, bpy.types.Panel):
+class ARNOLD_WORLD_PT_advanced(ArnoldWorldPanel):
     bl_idname = "ARNOLD_WORLD_PT_advanced"
     bl_label = "Advanced"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -90,10 +79,9 @@ class ARNOLD_WORLD_PT_advanced(WorldButtonsPanel, bpy.types.Panel):
             col.prop(data, "samples")
             col.prop(data, "normalize")
 
-class ARNOLD_WORLD_PT_visibility(WorldButtonsPanel, bpy.types.Panel):
+class ARNOLD_WORLD_PT_visibility(ArnoldWorldPanel):
     bl_idname = "ARNOLD_WORLD_PT_visibility"
     bl_label = "Visibility"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -122,9 +110,9 @@ classes = (
 )
 
 def register():
-    from ..utils import register_utils
-    register_utils.register_classes(classes)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from ..utils import register_utils
-    register_utils.unregister_classes(classes)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)
