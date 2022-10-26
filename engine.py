@@ -7,9 +7,9 @@ import os
 import gpu
 import arnold
 
-from .. import btoa
-from ..btoa import utils, OptionsExporter
-from ..props.light import ArnoldLight
+from . import btoa
+from .btoa import utils, OptionsExporter
+from .props.light import ArnoldLight
 
 from bl_ui.properties_render import RENDER_PT_color_management
 from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer

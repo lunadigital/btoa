@@ -17,20 +17,20 @@ def register():
     from . import preferences
     preferences.register()
 
-    from . import handlers, props, nodes, operators, ui
+    from . import handlers, props, nodes, operators, ui, engine
     handlers.register()
     nodes.register()
     props.register()
     operators.register()
     ui.register()
-    #engine.register()
+    engine.register()
 
 def unregister():
-    from . import preferences, handlers, nodes, operators, ui
+    from . import preferences, handlers, nodes, operators, ui, engine
     preferences.unregister()
     handlers.unregister()
     nodes.unregister()
     props.unregister()
     operators.unregister()
     ui.unregister()
-    #engine.unregister()
+    engine.unregister()
