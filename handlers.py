@@ -4,7 +4,7 @@ from .utils import ops_utils
 
 def ensure_node_tree_exists(datablock):
     if not datablock.arnold.node_tree:
-        name = utils.make_nodetree_name(datablock.name)
+        name = ops_utils.make_nodetree_name(datablock.name)
         ntree = bpy.data.node_groups.new(name=name, type='ArnoldShaderTree')
         datablock.arnold.node_tree = ntree
 

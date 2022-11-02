@@ -3,11 +3,12 @@ import os
 import sys
 from bpy.props import *
 from pathlib import Path
+from .utils import sdk_utils
 
 ADDON_NAME = 'btoa'
 ENGINE_ID = 'ARNOLD'
 ADDON_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-ARNOLD_INSTALL_PATH = os.path.join(ADDON_ROOT_PATH, 'arnold')
+ARNOLD_INSTALL_PATH = sdk_utils.get_arnold_install_root()
 ARNOLD_PLUGIN_PATH = os.path.join(ADDON_ROOT_PATH, 'drivers', 'build')
 
 # TODO: Move to `operators.py`?
@@ -41,6 +42,17 @@ class ARNOLD_OT_reset_log_flags(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class ARNOLD_OT_open_license_manager(bpy.types.Operator):
+    bl_idname = 'arnold.open_license_manager'
+    bl_label = "Open License Manager"
+    bl_description = 'Open the Arnold License Manager application'
+
+    def execute(self, context):
+        import subprocess
+        subprocess.run([sdk_utils.get_license_manager_path()])
+        
+        return {'FINISHED'}
+
 class ArnoldAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = ADDON_NAME
 
@@ -66,6 +78,8 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+
+        layout.operator('arnold.open_license_manager')
 
         # OCIO config
         profile = 'OCIO' if 'OCIO' in os.environ else 'Filmic'
@@ -140,6 +154,7 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
 
 classes = (
     ARNOLD_OT_reset_log_flags,
+    ARNOLD_OT_open_license_manager,
     ArnoldAddonPreferences
 )
 
