@@ -1,22 +1,22 @@
 import bpy
-from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty
 
 from ..utils import ops_utils
 
-class ARNOLD_OT_material_new(Operator):
+class ArnoldMaterialOperator(bpy.types.Operator):
+    @classmethod
+    def poll(cls, context):
+        return ops_utils.poll_object(context)
+
+class ARNOLD_OT_material_new(ArnoldMaterialOperator):
     bl_idname = 'arnold.material_new'
     bl_label = "New"
     bl_description = "Create a new material and node tree"
     bl_options = {'UNDO'}
 
-    @classmethod
-    def poll(cls, context):
-        return utils.poll_object(context)
-
     def execute(self, context):
         mat = bpy.data.materials.new(name="Material")
-        tree_name = utils.make_nodetree_name(mat.name)
+        tree_name = ops_utils.make_nodetree_name(mat.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
         
         ops_utils.init_material_nodetree(node_tree)
@@ -35,15 +35,11 @@ class ARNOLD_OT_material_new(Operator):
 
         return {'FINISHED'}
     
-class ARNOLD_OT_material_unlink(Operator):
+class ARNOLD_OT_material_unlink(ArnoldMaterialOperator):
     bl_idname = "arnold.material_unlink"
     bl_label = ""
     bl_description = "Unlink data-block"
     bl_options = {'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        return utils.poll_object(context)
     
     def execute(self, context):
         ob = context.object
@@ -51,15 +47,11 @@ class ARNOLD_OT_material_unlink(Operator):
             ob.material_slots[ob.active_material_index].material = None
         return {'FINISHED'}
 
-class ARNOLD_OT_material_copy(Operator):
+class ARNOLD_OT_material_copy(ArnoldMaterialOperator):
     bl_idname = "arnold.material_copy"
     bl_label = "Copy"
     bl_description = "Create a copy of the material and node tree"
     bl_options = {'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        return utils.poll_object(context)
     
     def execute(self, context):
         current_mat = context.object.active_material
@@ -68,7 +60,7 @@ class ARNOLD_OT_material_copy(Operator):
 
         if current_node_tree:
             new_node_tree = current_node_tree.copy()
-            new_node_tree.name = utils.make_nodetree_name(new_mat.name)
+            new_node_tree.name = ops_utils.make_nodetree_name(new_mat.name)
             new_node_tree.use_fake_user = True
 
             new_mat.arnold.node_tree = new_node_tree
@@ -77,7 +69,7 @@ class ARNOLD_OT_material_copy(Operator):
 
         return {'FINISHED'}
 
-class ARNOLD_OT_material_set(Operator):
+class ARNOLD_OT_material_set(ArnoldMaterialOperator):
     bl_idname = "arnold.material_set"
     bl_label = ""
     bl_description = "Assign this node tree"
@@ -85,17 +77,13 @@ class ARNOLD_OT_material_set(Operator):
 
     material_index: IntProperty()
 
-    @classmethod
-    def poll(cls, context):
-        return utils.poll_object(context)
-
     def execute(self, context):
         mat = bpy.data.materials[self.material_index]
         context.object.active_material = mat
 
         return {'FINISHED'}
 
-class ARNOLD_OT_material_select(Operator):
+class ARNOLD_OT_material_select(ArnoldMaterialOperator):
     ''' Material selection dropdown with search '''
     bl_idname = "arnold.material_select"
     bl_label = ""
@@ -107,7 +95,7 @@ class ARNOLD_OT_material_select(Operator):
         items = []
 
         for index, mat in enumerate(bpy.data.materials):
-            name = utils.get_name_with_lib(mat)
+            name = ops_utils.get_name_with_lib(mat)
             items.append((str(index), name, ""))
 
         # There is a known bug with using a callback,
@@ -121,10 +109,6 @@ class ARNOLD_OT_material_select(Operator):
         name="Materials",
         items=callback
     )
-
-    @classmethod
-    def poll(cls, context):
-        return utils.poll_object(context)
 
     def execute(self, context):
         index = int(self.material)
@@ -145,11 +129,9 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)
