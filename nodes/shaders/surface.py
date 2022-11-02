@@ -89,9 +89,9 @@ class AiCarPaint(bpy.types.Node, core.ArnoldNode):
     ai_name = "car_paint"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="core").default_value = 1
-        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="core_color")
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Roughness", identifier="core_roughness")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Roughness", identifier="base_roughness")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
         self.inputs.new('AiNodeSocketRGB', "Specular Color", identifier="specular_color").default_value = (1, 1, 1)
@@ -455,8 +455,8 @@ class AiStandardHair(bpy.types.Node, core.ArnoldNode):
     roughness_anisotropic: BoolProperty(name="Anisotropic Roughness")
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="core").default_value = 1
-        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="core_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Melanin", identifier="melanin").default_value = 1
         self.inputs.new('AiNodeSocketFloatNormalized', "Melanin Redness", identifier="melanin_redness").default_value = 0.5
         self.inputs.new('AiNodeSocketFloatNormalized', "Melanin Randomize", identifier="melanin_randomize")
@@ -519,8 +519,8 @@ class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
     )
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="core").default_value = 1
-        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="core_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Diffuse Roughness", identifier="diffuse_roughness")
         self.inputs.new('AiNodeSocketFloatNormalized', "Metalness", identifier="metalness")
 
