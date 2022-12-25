@@ -1,4 +1,5 @@
 import bpy
+from .utils import sdk_utils
 
 bl_info = {
     "name": "Arnold Render Engine (BtoA)",
@@ -17,20 +18,24 @@ def register():
     from . import preferences
     preferences.register()
 
-    from . import handlers, props, nodes, operators, ui, engine
-    handlers.register()
-    nodes.register()
-    props.register()
-    operators.register()
-    ui.register()
-    engine.register()
+    if sdk_utils.is_arnoldserver_installed():
+        from . import handlers, props, nodes, operators, ui, engine
+        handlers.register()
+        nodes.register()
+        props.register()
+        operators.register()
+        ui.register()
+        engine.register()
 
 def unregister():
-    from . import preferences, handlers, nodes, operators, ui, engine
+    from . import preferences
     preferences.unregister()
-    handlers.unregister()
-    nodes.unregister()
-    props.unregister()
-    operators.unregister()
-    ui.unregister()
-    engine.unregister()
+    
+    if sdk_utils.is_arnoldserver_installed():
+        import handlers, nodes, operators, ui, engine
+        handlers.unregister()
+        nodes.unregister()
+        props.unregister()
+        operators.unregister()
+        ui.unregister()
+        engine.unregister()

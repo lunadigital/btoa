@@ -1,6 +1,11 @@
 import bpy
 import os
 import sys
+import urllib.request
+import zipfile
+import threading
+import math
+
 from bpy.props import *
 from pathlib import Path
 from .utils import sdk_utils
@@ -8,8 +13,16 @@ from .utils import sdk_utils
 ADDON_NAME = 'btoa'
 ENGINE_ID = 'ARNOLD'
 ADDON_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-ARNOLD_INSTALL_PATH = sdk_utils.get_arnold_install_root()
+ARNOLD_INSTALL_PATH = sdk_utils.get_server_path()
 ARNOLD_PLUGIN_PATH = os.path.join(ADDON_ROOT_PATH, 'drivers', 'build')
+INSTALL_PROGRESS_LABEL = ''
+INSTALL_IN_PROGRESS = False
+
+def update_progress_percent(block_num, block_size, total_size):
+    global INSTALL_PROGRESS_LABEL
+
+    percent = math.floor(((block_num * block_size) / total_size) * 100)
+    INSTALL_PROGRESS_LABEL = f'Downloading, please wait... ({percent}%)'
 
 # TODO: Move to `operators.py`?
 class ARNOLD_OT_reset_log_flags(bpy.types.Operator):
@@ -53,6 +66,82 @@ class ARNOLD_OT_open_license_manager(bpy.types.Operator):
         
         return {'FINISHED'}
 
+class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
+    bl_idname = 'arnold.install_arnold_server'
+    bl_label = "Install Arnold Server"
+    bl_description = 'Install the Arnold Server application'
+
+    active = False
+    timer = None
+    terminated = False
+    worker = None
+
+    @classmethod
+    def poll(cls, context):
+        return not INSTALL_IN_PROGRESS
+
+    def download_arnold_server(self):
+        global INSTALL_PROGRESS_LABEL
+        global INSTALL_IN_PROGRESS
+
+        INSTALL_IN_PROGRESS = True
+
+        install_dir = sdk_utils.get_arnold_install_root()
+        zip_path = os.path.join(install_dir, 'arnoldserver.zip')
+
+        if sys.platform == 'win32':
+            INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
+
+            urllib.request.urlretrieve(
+                'https://wdown.solidangle.com/arnold/Arnold-7.1.4.1-windows.zip',
+                zip_path,
+                update_progress_percent
+            )
+
+            INSTALL_PROGRESS_LABEL = 'Installing Arnold Server...'
+
+            with zipfile.ZipFile(zip_path, 'r') as f:
+                f.extractall(os.path.join(install_dir, 'ArnoldServer'))
+
+            os.remove(zip_path)
+
+        INSTALL_PROGRESS_LABEL = 'Successfully installed Arnold Server. Please restart Blender.'
+        self.active = False
+
+    def execute(self, context):
+        self.active = True
+
+        wm = context.window_manager
+        self.timer = wm.event_timer_add(0.1, window=context.window)
+        wm.modal_handler_add(self)
+
+        self.worker = threading.Thread(target=self.download_arnold_server, args=())
+        self.worker.start()
+
+        return {'RUNNING_MODAL'}
+
+    def modal(self, context, event):
+        context.area.tag_redraw()
+
+        if event.type == 'ESC':
+            self.terminated = True
+            self.finish(context)
+
+            global INSTALL_IN_PROGRESS
+            INSTALL_IN_PROGRESS = False
+
+            return {'CANCELLED'}
+
+        if not self.worker.is_alive():
+            self.finish(context)
+            return {'FINISHED'}
+
+        return {'PASS_THROUGH'}
+
+    def finish(self, context):
+        wm = context.window_manager
+        wm.event_timer_remove(self.timer)
+
 class ArnoldAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = ADDON_NAME
 
@@ -79,82 +168,96 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
     def draw(self, context):
         layout = self.layout
 
-        layout.operator('arnold.open_license_manager')
+        # Arnold install
+        if sdk_utils.is_arnoldserver_installed():
+            import arnold
 
-        # OCIO config
-        profile = 'OCIO' if 'OCIO' in os.environ else 'Filmic'
+            arch, major, minor, fix = arnold.AiGetVersion()
+            arch, major, minor, fix = arch.decode('utf-8'), major.decode('utf-8'), minor.decode('utf-8'), fix.decode('utf-8')
 
-        box = layout.box()
-        box.label(text='Color Management')
-        box.separator()
+            layout.label(text="Arnold Server Configuration")
 
-        box.label(text=f'OCIO Config: {profile}')
-
-        if profile == 'Filmic':
-            box.separator()
-            box.label(text='To use a config other than Filmic, point the `OCIO` environment variable to a valid OCIO config.')
+            box = layout.box()
+            box.label(text=f'Version: {arch}.{major}.{minor}.{fix}')
         else:
-            box.label(text='Path: {}'.format(os.getenv('OCIO')))
+            layout.operator('arnold.install_arnold_server')
 
-        # Licensing
-        box = layout.box()
-        box.label(text='Licensing')
-        box.separator()
+            global INSTALL_PROGRESS_LABEL
+            if INSTALL_PROGRESS_LABEL:
+                layout.label(text=INSTALL_PROGRESS_LABEL)
 
-        # TODO: Add operator that opens ArnoldLicensingManager
+        if sdk_utils.is_arnoldserver_installed():
+            # OCIO config
+            layout.label(text='Color Management')
 
-        box.prop(self, 'abort_on_license_fail')
-        box.prop(self, 'skip_license_check', text='Render with Watermarks (Skip License Check)')
+            box = layout.box()
 
-        # Error Handling
-        box = layout.box()
-        box.label(text='Error Handling')
-        box.separator()
+            profile = 'OCIO' if 'OCIO' in os.environ else 'Filmic'
+            box.label(text=f'OCIO Config: {profile}')
 
-        row = box.row()
-        row.prop(self, 'ignore_missing_textures')
-        row.prop(self, 'missing_texture_color', text='')
+            if profile == 'Filmic':
+                box.separator()
+                box.label(text='To use a config other than Filmic, point the `OCIO` environment variable to a valid OCIO config.')
+            else:
+                box.label(text='Path: {}'.format(os.getenv('OCIO')))
 
-        # Logging
-        box = layout.box()
-        box.label(text='Logging')
-        box.separator()
+            # Licensing
+            layout.label(text='Licensing')
 
-        box.prop(self, 'log_to_file')
+            box = layout.box()
+            box.operator('arnold.open_license_manager')
+            box.prop(self, 'abort_on_license_fail')
+            box.prop(self, 'skip_license_check', text='Render with Watermarks (Skip License Check)')
 
-        col = box.column()
-        col.enabled = self.log_to_file
-        col.prop(self, 'log_path')
+            # Error Handling
+            layout.label(text='Error Handling')
 
-        box.separator()
-        box.prop(self, 'log_all')
+            box = layout.box()
 
-        inner_box = box.box()
-        inner_box.enabled = not self.log_all
+            row = box.row()
+            row.prop(self, 'ignore_missing_textures')
+            row.prop(self, 'missing_texture_color', text='')
 
-        row = inner_box.row()
-        row.prop(self, 'log_info')
-        row.prop(self, 'log_warnings')
-        row.prop(self, 'log_errors')
-        row.prop(self, 'log_debug')
+            # Logging
+            layout.label(text='Logging')
 
-        row = inner_box.row()
-        row.prop(self, 'log_stats')
-        row.prop(self, 'log_plugins')
-        row.prop(self, 'log_progress')
-        row.prop(self, 'log_nan')
+            box = layout.box()
+            box.prop(self, 'log_to_file')
 
-        row = inner_box.row()
-        row.prop(self, 'log_timestamp')
-        row.prop(self, 'log_backtrace')
-        row.prop(self, 'log_memory')
-        row.prop(self, 'log_color')
+            col = box.column()
+            col.enabled = self.log_to_file
+            col.prop(self, 'log_path')
 
-        box.operator('arnold.reset_log_flags')
+            box.separator()
+            box.prop(self, 'log_all')
+
+            inner_box = box.box()
+            inner_box.enabled = not self.log_all
+
+            row = inner_box.row()
+            row.prop(self, 'log_info')
+            row.prop(self, 'log_warnings')
+            row.prop(self, 'log_errors')
+            row.prop(self, 'log_debug')
+
+            row = inner_box.row()
+            row.prop(self, 'log_stats')
+            row.prop(self, 'log_plugins')
+            row.prop(self, 'log_progress')
+            row.prop(self, 'log_nan')
+
+            row = inner_box.row()
+            row.prop(self, 'log_timestamp')
+            row.prop(self, 'log_backtrace')
+            row.prop(self, 'log_memory')
+            row.prop(self, 'log_color')
+
+            box.operator('arnold.reset_log_flags')
 
 classes = (
     ARNOLD_OT_reset_log_flags,
     ARNOLD_OT_open_license_manager,
+    ARNOLD_OT_install_arnold_server,
     ArnoldAddonPreferences
 )
 
