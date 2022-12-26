@@ -91,6 +91,8 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
         install_dir = sdk_utils.get_arnold_install_root()
         zip_path = os.path.join(install_dir, 'arnoldserver.zip')
 
+        Path(install_dir).mkdir(parents=True, exist_ok=True)
+
         if sys.platform == 'win32':
             INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
 
