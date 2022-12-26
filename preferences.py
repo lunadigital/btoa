@@ -1,13 +1,15 @@
-import bpy
+import math
 import os
+from pathlib import Path
+import shutil
 import sys
+import threading
 import urllib.request
 import zipfile
-import threading
-import math
 
+import bpy
 from bpy.props import *
-from pathlib import Path
+
 from .utils import sdk_utils
 
 ADDON_NAME = 'btoa'
