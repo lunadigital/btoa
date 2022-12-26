@@ -122,10 +122,11 @@ class Session:
             ocio = os.getenv('OCIO')
         else:
             install_dir = os.path.dirname(bpy.app.binary_path)
-            ocio = os.path.join(install_dir, "3.2", "datafiles", "colormanagement", "config.ocio")
+            major, minor, fix = bpy.app.version
+            ocio = os.path.join(install_dir, f'{major}.{minor}', 'datafiles', 'colormanagement', 'config.ocio')
         
-        color_manager.set_string("config", ocio)
-        options.set_pointer("color_manager", color_manager)
+        color_manager.set_string('config', ocio)
+        options.set_pointer('color_manager', color_manager)
 
     def free_buffer(self, buffer):
         arnold.AiFree(buffer)
