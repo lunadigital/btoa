@@ -12,9 +12,9 @@ from bpy.props import *
 
 from .utils import sdk_utils
 
-ADDON_NAME = 'btoa'
-ENGINE_ID = 'ARNOLD'
 ADDON_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+ADDON_NAME = os.path.basename(ADDON_ROOT_PATH)
+ENGINE_ID = 'ARNOLD'
 ARNOLD_INSTALL_PATH = sdk_utils.get_server_path()
 ARNOLD_PLUGIN_PATH = os.path.join(ADDON_ROOT_PATH, 'drivers', 'build')
 INSTALL_PROGRESS_LABEL = ''
