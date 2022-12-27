@@ -1,9 +1,12 @@
-import bpy
 import math
 import mathutils
 import os
+
+import bpy
 from bpy.props import *
+
 from .. import core, constant
+from ...preferences import ADDON_NAME
 from ...utils import register_utils
 
 '''
@@ -240,7 +243,7 @@ class AiImage(bpy.types.Node, core.ArnoldNode):
         node.set_bool("swap_st", self.swap_st)
         node.set_string("uvset", self.uvset)
 
-        prefs = bpy.context.preferences.addons["btoa"].preferences
+        prefs = bpy.context.preferences.addons[ADDON_NAME].preferences
         node.set_bool("ignore_missing_textures", prefs.ignore_missing_textures)
         node.set_rgba("missing_texture_color", *prefs.missing_texture_color)
 
