@@ -1,11 +1,17 @@
 import bpy
+
 from ..preferences import ENGINE_ID
+from ..utils import ui_utils
 
 class ArnoldRenderPanel(bpy.types.Panel):
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'render'
     COMPAT_ENGINES = {ENGINE_ID}
+
+    @classmethod
+    def poll(cls, context):
+        return ui_utils.arnold_is_active(context)
 
 class ARNOLD_PT_sampling(ArnoldRenderPanel):
     bl_label = "Sampling"
