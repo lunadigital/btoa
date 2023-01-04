@@ -32,7 +32,7 @@ def unregister():
     preferences.unregister()
     
     if sdk_utils.is_arnoldserver_installed():
-        import handlers, nodes, operators, ui, engine
+        from . import handlers, nodes, operators, ui, engine
         handlers.unregister()
         nodes.unregister()
         props.unregister()
