@@ -129,6 +129,13 @@ class Session:
         options.set_pointer('color_manager', color_manager)
 
     def free_buffer(self, buffer):
+        rdata = buffer.contents
+
+        for i in range(0, rdata.count):
+            aov = rdata.aovs[i]
+            arnold.AiFree(aov.data)
+            
+        arnold.AiFree(rdata.aovs)
         arnold.AiFree(buffer)
 
     def get_node_by_name(self, name):
