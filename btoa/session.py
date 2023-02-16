@@ -175,7 +175,6 @@ class Session:
         return node
 
     def pause(self):
-        self.is_running = False
         arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
 
     def render(self):

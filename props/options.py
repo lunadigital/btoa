@@ -291,6 +291,9 @@ class ArnoldOptions(PropertyGroup):
     ignore_imagers: BoolProperty(name="Ignore Imagers")
     # force_shader_assignments
 
+    # IPR preview
+    preview_pause: BoolProperty(name="Pause Preview")
+
 classes = (
     AiSpaceDataProperties,
     ArnoldOptions,

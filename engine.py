@@ -245,6 +245,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         AI_SESSION.pause()
 
+        if scene.arnold.preview_pause:
+            return
+
         AI_SESSION.cache.sync(self, depsgraph, prefs, context)
         OptionsExporter(AI_SESSION).export(interactive=True)
 
