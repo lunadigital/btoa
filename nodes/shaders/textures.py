@@ -532,9 +532,9 @@ class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
             else:
                 direction = self.direction_vector.copy()
                 direction.negate()
+                direction = mathutils.Vector((direction.x, direction.y, -direction.z))
     
-            vec = mathutils.Vector((direction.x, direction.z, direction.y)) # Swap coordinates to match Arnold
-            node.set_vector("sun_direction", *vec)
+            node.set_vector("sun_direction", *direction)
 
 '''
 AiRoundCorners
