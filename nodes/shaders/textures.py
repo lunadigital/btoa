@@ -528,12 +528,13 @@ class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
             if self.direction_object:
                 neg_z_axis = mathutils.Vector((0, 0, -1))
                 mw = self.direction_object.matrix_world
-                direction = (mw @ neg_z_axis - mw.translation).normalized()  
+                direction = (mw @ neg_z_axis - mw.translation).normalized()
+                direction = mathutils.Vector((direction.x, direction.z, direction.y))
             else:
                 direction = self.direction_vector.copy()
                 direction.negate()
                 direction = mathutils.Vector((direction.x, direction.y, -direction.z))
-    
+
             node.set_vector("sun_direction", *direction)
 
 '''
