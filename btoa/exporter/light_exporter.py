@@ -17,15 +17,22 @@ class LightExporter(ObjectExporter):
         elif isinstance(depsgraph_object, bpy.types.DepsgraphUpdate):
             self.datablock_eval = depsgraph_object.id
 
-        data = self.datablock_eval.data
+        self.node.declare("btoa_light_type", "constant STRING")
 
+        data = self.datablock_eval.data
+    
         # If self.node already exists, it will sync all new
         # data with the existing BtoA node
+        ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
+
+        if ntype != self.node.get_string("btoa_light_type"):
+            self.node.destroy()
+
         if not self.node.is_valid:
-            ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
             self.node = ArnoldNode(ntype)
             self.node.set_string("name", self.datablock_eval.name)
             self.node.set_uuid(self.datablock.uuid)
+            self.node.set_string("btoa_light_type", ntype)
 
         # Set matrix for everything except cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
