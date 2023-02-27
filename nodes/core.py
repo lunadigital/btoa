@@ -468,6 +468,7 @@ object_node_categories = [
             NodeItem("AiShadowMatte"),
             NodeItem("AiStandardHair"),
             NodeItem("AiStandardSurface"),
+            NodeItem("AiToon"),
             NodeItem("AiTwoSided"),
             NodeItem("AiWireframe")
         ]

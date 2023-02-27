@@ -590,6 +590,83 @@ class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
         node.set_int("subsurface_type", int(self.subsurface_type))
 
 '''
+AiToon
+https://help.autodesk.com/view/ARNOL/ENU/?guid=arnold_user_guide_ac_surface_shaders_ac_toon_html
+
+The toon shader is part of a non-photorealistic rendering (NPR) solution that is provided in
+combination with the contour_filter.
+'''
+class AiToon(bpy.types.Node, core.ArnoldNode):
+    bl_label = "Toon"
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
+    ai_name = "toon"
+
+    lights: StringProperty(name="Highlight Lights", description="")
+    rim_light: StringProperty(name="Rim Light", description="")
+    # ENUM          bump_mode                         both
+    # BOOL          energy_conserving                 true
+
+    def init(self, context):
+        # Base
+        self.inputs.new('AiNodeSocketFloatNormalized', "Base Weight", identifier="base").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Base Color", identifier="base_color")
+        self.inputs.new('AiNodeSocketRGB', "Base Tonemap", identifier="base_tonemap")
+
+        # Specular
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Weight", identifier="specular").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Specular Color", identifier="specular_color")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.2
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Anisotropy", identifier="specular_anisotropy")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Specular Rotation", identifier="specular_rotation")
+        self.inputs.new('AiNodeSocketRGB', "Specular Tonemap", identifier="specular_tonemap")
+
+        # Stylized Highlight
+        self.inputs.new('AiNodeSocketRGB', "Highlight Color", identifier="highlight_color")
+        self.inputs.new('AiNodeSocketFloatPositive', "Highlight Size", identifier="highlight_size")
+
+        # Rim Lighting
+        self.inputs.new('AiNodeSocketRGB', "Rim Light Color", identifier="rim_light_color")
+        self.inputs.new('AiNodeSocketFloatPositive', "Rim Light Width", identifier="rim_light_width").default_value = 1
+        self.inputs.new('AiNodeSocketFloatPositive', "Rim Light Tint", identifier="rim_light_tint")
+
+        # Transmission
+        self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
+        self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Roughness", identifier="transmission_roughness")
+        self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Anisotropy", identifier="transmission_anisotropy")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Rotation", identifier="transmission_rotation")
+        self.inputs.new('AiNodeSocketFloatAboveOne', "IOR", identifier="IOR").default_value = 1.52
+
+        # Sheen
+        self.inputs.new('AiNodeSocketFloatPositive', "Sheen", identifier="sheen")
+        self.inputs.new('AiNodeSocketRGB', "Sheen Color", identifier="sheen_color").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketFloatNormalized', "Sheen Roughness", identifier="sheen_roughness").default_value = 0.3
+        
+        # Emission
+        self.inputs.new('AiNodeSocketFloatPositive', "Emission", identifier="emission")
+        self.inputs.new('AiNodeSocketRGB', "Emission Color", identifier="emission_color").default_value = (1, 1, 1)
+
+        # Geometry
+        self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
+        self.inputs.new('AiNodeSocketVector', "Tangent", identifier="tangent")
+        # Bump Mapping
+
+        # Advanced
+        self.inputs.new('AiNodeSocketFloatNormalized', "Indirect Diffuse", identifier="indirect_diffuse")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Indirect Specular", identifier="indirect_specular").default_value = 1
+
+        # Outputs
+        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "lights")
+        layout.prop(self, "rim_light")
+
+    def sub_export(self, node):
+        node.set_string("lights", self.lights)
+        node.set_string("rim_light", self.rim_light)
+
+'''
 AiTwoSided
 https://docs.arnoldrenderer.com/display/A5NodeRef/two_sided
 
@@ -658,6 +735,7 @@ classes = (
     AiShadowMatte,
     AiStandardHair,
     AiStandardSurface,
+    AiToon,
     AiTwoSided,
     AiWireframe,
 )
