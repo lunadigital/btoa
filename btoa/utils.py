@@ -88,6 +88,7 @@ def get_viewport_camera_object(context):
 
     if context.region_data.view_perspective == 'CAMERA':
         camera.data.arnold.camera_type = context.space_data.camera.data.arnold.camera_type
+        camera.data.arnold.exposure = context.space_data.camera.data.arnold.exposure
         camera.data.is_render_view = True
 
         camera.data.zoom = 4.0 / ((math.sqrt(2) + context.region_data.view_camera_zoom / 50.0) ** 2)

@@ -1,5 +1,6 @@
 import bpy
 from bl_ui.properties_material import MaterialButtonsPanel
+
 from . import presets
 from ..preferences import ENGINE_ID
 from ..utils import ui_utils
@@ -9,7 +10,7 @@ class ArnoldMaterialPanel(MaterialButtonsPanel, bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.material or context.object
+        return ui_utils.arnold_is_active(context) and (context.material or context.object)
 
 class ARNOLD_MATERIAL_PT_context_material(ArnoldMaterialPanel):
     bl_label = ""

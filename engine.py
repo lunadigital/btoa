@@ -245,6 +245,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         AI_SESSION.pause()
 
+        if scene.arnold.preview_pause:
+            return
+
         AI_SESSION.cache.sync(self, depsgraph, prefs, context)
         OptionsExporter(AI_SESSION).export(interactive=True)
 
@@ -328,15 +331,14 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     if update.is_updated_transform and update.id.type != 'LIGHT':
                         node.set_matrix("matrix", utils.flatten_matrix(update.id.matrix_world))
 
-                # Update world material if rotation controller changed
-                rotation_controller = scene.world.arnold.rotation_controller
-                if rotation_controller and update.id.name == rotation_controller.name:
-                    old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
+                # Force update world material in case we have any physical sky textures that
+                # reference the rotation of an object in the scene.
+                old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
 
-                    if old_node.is_valid:
-                        new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
-                        AI_SESSION.replace_node(old_node, new_node)
-                        new_node.set_string("name", scene.world.name)
+                if old_node.is_valid:
+                    new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
+                    AI_SESSION.replace_node(old_node, new_node)
+                    new_node.set_string("name", scene.world.name)
 
         # Check for deleted objects
         if len(depsgraph.object_instances) < self.total_objects_in_ipr:

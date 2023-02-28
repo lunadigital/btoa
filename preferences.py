@@ -1,18 +1,20 @@
-import bpy
+import math
 import os
+from pathlib import Path
+import shutil
 import sys
+import threading
 import urllib.request
 import zipfile
-import threading
-import math
 
+import bpy
 from bpy.props import *
-from pathlib import Path
+
 from .utils import sdk_utils
 
-ADDON_NAME = 'btoa'
-ENGINE_ID = 'ARNOLD'
 ADDON_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
+ADDON_NAME = os.path.basename(ADDON_ROOT_PATH)
+ENGINE_ID = 'ARNOLD'
 ARNOLD_INSTALL_PATH = sdk_utils.get_server_path()
 ARNOLD_PLUGIN_PATH = os.path.join(ADDON_ROOT_PATH, 'drivers', 'build')
 INSTALL_PROGRESS_LABEL = ''
@@ -88,6 +90,8 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
 
         install_dir = sdk_utils.get_arnold_install_root()
         zip_path = os.path.join(install_dir, 'arnoldserver.zip')
+
+        Path(install_dir).mkdir(parents=True, exist_ok=True)
 
         if sys.platform == 'win32':
             INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'

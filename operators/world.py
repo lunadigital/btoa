@@ -12,7 +12,7 @@ class ARNOLD_OT_world_new(Operator):
 
     def execute(self, context):
         world = bpy.data.worlds.new(name="World")
-        tree_name = utils.make_nodetree_name(world.name)
+        tree_name = ops_utils.make_nodetree_name(world.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
         
         ops_utils.init_world_nodetree(node_tree)
@@ -46,7 +46,7 @@ class ARNOLD_OT_world_copy(Operator):
 
         if current_node_tree:
             new_node_tree = current_node_tree.copy()
-            new_node_tree.name = utils.make_nodetree_name(new_world.name)
+            new_node_tree.name = ops_utils.make_nodetree_name(new_world.name)
             new_node_tree.use_fake_user = True
 
             new_world.arnold.node_tree = new_node_tree
@@ -67,7 +67,7 @@ class ARNOLD_OT_world_select(Operator):
         items = []
 
         for index, world in enumerate(bpy.data.worlds):
-            name = utils.get_name_with_lib(world)
+            name = ops_utils.get_name_with_lib(world)
             items.append((str(index), name, ""))
 
         # There is a known bug with using a callback,

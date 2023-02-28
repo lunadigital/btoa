@@ -141,3 +141,9 @@ class ArnoldNode(AiTemplateClass):
         node.data = data # We pass the data directly because it's already an AtMatrix object
 
         return node
+    
+    def get_string(self, param):
+        if not self.is_valid:
+            return None
+            
+        return arnold.AiNodeGetStr(self.data, param)
