@@ -2,7 +2,9 @@ import math
 import os
 from pathlib import Path
 import shutil
+import ssl
 import sys
+import tarfile
 import threading
 import urllib.request
 import zipfile
@@ -70,7 +72,7 @@ class ARNOLD_OT_open_license_manager(bpy.types.Operator):
 
 class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
     bl_idname = 'arnold.install_arnold_server'
-    bl_label = "Install Arnold Server"
+    bl_label = "Install Arnold"
     bl_description = 'Install the Arnold Server application'
 
     active = False
@@ -89,27 +91,47 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
         INSTALL_IN_PROGRESS = True
 
         install_dir = sdk_utils.get_arnold_install_root()
-        zip_path = os.path.join(install_dir, 'arnoldserver.zip')
+        archive_path = os.path.join(install_dir, 'arnoldserver.zip' if sys.platform == 'win32' else 'arnoldserver.tgz')
 
         Path(install_dir).mkdir(parents=True, exist_ok=True)
 
         if sys.platform == 'win32':
-            INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
+            package = 'Arnold-7.1.4.3-windows.zip'
+        elif sys.platform.startswith('linux'):
+            package = 'Arnold-7.1.4.3-linux.tgz'
+        elif sys.platform == 'darwin':
+            package == 'Arnold-7.1.4.3-darwin.tgz'
 
-            urllib.request.urlretrieve(
-                'https://wdown.solidangle.com/arnold/Arnold-7.1.4.1-windows.zip',
-                zip_path,
-                update_progress_percent
-            )
+        INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
 
-            INSTALL_PROGRESS_LABEL = 'Installing Arnold Server...'
+        '''
+        urllib returns a CERTIFICATE_VERIFY_FAILED error on Linux and
+        macOS because of how the OSes handle SSL certs. I don't want
+        to force users to do any additional noodling with their systems
+        to get BtoA to install so we're going to create a temporary SSL
+        context instead.
+        '''
+        ssl._create_default_https_context = ssl._create_unverified_context
 
-            with zipfile.ZipFile(zip_path, 'r') as f:
+        urllib.request.urlretrieve(
+            f'https://wdown.solidangle.com/arnold/{package}',
+            archive_path,
+            update_progress_percent
+        )
+
+        INSTALL_PROGRESS_LABEL = 'Installing Arnold...'
+
+        if sys.platform == 'win32':
+            with zipfile.ZipFile(archive_path, 'r') as f:
                 f.extractall(os.path.join(install_dir, 'ArnoldServer'))
+        else:
+            f = tarfile.open(archive_path)
+            f.extractall(os.path.join(install_dir, 'ArnoldServer'))
+            f.close()
 
-            os.remove(zip_path)
+        os.remove(archive_path)
 
-        INSTALL_PROGRESS_LABEL = 'Successfully installed Arnold Server. Please restart Blender.'
+        INSTALL_PROGRESS_LABEL = 'Successfully installed Arnold. Please restart Blender.'
         self.active = False
 
     def execute(self, context):
