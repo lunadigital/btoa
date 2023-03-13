@@ -44,8 +44,8 @@ class ARNOLD_PT_denoising(ArnoldRenderPanel):
 
         layout.use_property_split = True
 
-        col = layout.column()
-        col.prop(context.scene.arnold, "enable_render_denoising")
+        #col = layout.column()
+        #col.prop(context.scene.arnold, "enable_render_denoising")
 
         heading = layout.column(align=True, heading="Viewport")
         row = heading.row(align=True)
