@@ -12,6 +12,10 @@ def get_license_manager_path():
     
     if sys.platform == 'win32':
         return os.path.join(root, 'ArnoldLicenseManager.exe')
+    elif sys.platform.startswith('linux'):
+        return os.path.join(root, 'ArnoldLicenseManager')
+    elif sys.platform == 'darwin':
+        return None
 
 def is_arnoldserver_installed():
     try:
