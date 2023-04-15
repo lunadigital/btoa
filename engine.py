@@ -40,7 +40,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         outputs = arnold.AiArrayAllocate(len(enabled_aovs), 1, arnold.AI_TYPE_STRING)
         
-        for aov in enabled_aovs:
+        for i, aov in enumerate(enabled_aovs):
             filter_type = 'btoa_default_filter'
 
             if aov.name == 'Z':
@@ -50,7 +50,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
                 filter_type = 'btoa_closest_filter'
             
-            arnold.AiArraySetStr(outputs, enabled_aovs.index(aov), f'{aov.ainame} {aov.pixel_type} {filter_type} btoa_driver')
+            arnold.AiArraySetStr(outputs, i, f'{aov.ainame} {aov.pixel_type} {filter_type} btoa_driver')
 
         options = arnold.AiUniverseGetOptions()
         arnold.AiNodeSetArray(options, 'outputs', outputs)
