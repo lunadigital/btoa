@@ -2,32 +2,10 @@ import arnold
 import bpy
 import numpy as np
 
-from .bridge import export, session, utils
-
-from ctypes import *
-
-class AtAOV(Structure):
-    _fields_ = [
-        ("name", c_char_p),
-        ("channels", c_int),
-        ("data", POINTER(c_float))
-    ]
-
-class AtRenderData(Structure):
-    _fields_ = [
-        ("x", c_int),
-        ("y", c_int),
-        ("width", c_int),
-        ("height", c_int),
-        ("size", c_int),
-        ("count", c_int),
-        ("aovs", POINTER(AtAOV))
-    ]
-
-ArnoldDisplayCallback = CFUNCTYPE(
-    None,
-    POINTER(AtRenderData)
-)
+from .bridge.driver import *
+from .bridge import export
+from .bridge import session
+from .bridge import utils
 
 class ArnoldRenderEngine(bpy.types.RenderEngine):
     bl_idname = 'ARNOLD'
