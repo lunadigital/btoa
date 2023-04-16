@@ -85,16 +85,16 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 result.layers[0].passes[name].rect = pixels
 
             engine.end_result(result)
-            engine.session.free_buffer(buffer)
+            session.free(buffer)
 
             engine.update_result(result)
 
             # Update progress counter
-            engine.progress += engine._progress_increment
-            engine.update_progress(engine.progress)
+            #engine.progress += engine._progress_increment
+            #engine.update_progress(engine.progress)
 
             if engine.test_break():
-                engine.session.abort()
+                session.abort()
                 engine.end_result(result, cancel=True)
 
         cb = ArnoldDisplayCallback(update_render_result)
