@@ -87,7 +87,8 @@ class MeshData:
             mesh_data_steps.append(MeshData.init_from_mesh(ob.data))
 
         # Set matrix transform
-
+        ObjectData.to_arnold(node, ob_data_steps, len(steps))
+        
         # Set mesh data
         vlist = np.concatenate(tuple(m.vertices for m in mesh_data_steps))
         vlist = arnold.AiArrayConvert(
