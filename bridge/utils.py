@@ -36,3 +36,13 @@ def get_data_from_collection(collection, attribute, size, dtype=np.float32):
 def get_frame_target(frame_current, step):
     target = frame_current + step
     return math.floor(target), target - target # frame, subframe
+
+def get_motion_blur_params(scene):
+    start, end, keys = 0, 0, 1
+
+    if scene.arnold.enable_motion_blur:
+        start = scene.arnold.shutter_start
+        end = scene.arnold.shutter_end
+        keys = scene.arnold.motion_keys
+
+    return np.linspace(start, end, keys)

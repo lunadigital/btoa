@@ -16,6 +16,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         session.start()
 
     def export(self, depsgraph, ipr=False, region=None):
+        scene = depsgraph.scene
+
         # Export universe options
 
         # Export scene objects
@@ -24,13 +26,24 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 if isinstance(inst.object.data, bpy.types.Mesh):
                     export.MeshData.to_arnold(inst.object, depsgraph.scene)
                 else:
-                    import arnold
                     camera = arnold.AiNode('persp_camera')
                     camdata = export.ObjectData.init_from_object(inst.object)
                     arnold.AiNodeSetMatrix(camera, 'matrix', arnold.AtMatrix(*camdata.transform))
         
+        # Create instances if needed
+
+        # Export camera
+        if ipr:
+            # In viewport so we must reconstruct the camera ourselves
+            # See old code for implementation
+        else:
+            export.CameraData.init_from_object(
+                scene.camera.evaluated_get(depsgraph)
+            )
+
+        # Export world settings
+
         # Set up AOVs
-        scene = depsgraph.scene
         aovs = depsgraph.view_layer.arnold.aovs
         enabled_aovs = [aovs.beauty] # if ipr else aovs.enabled_aovs
 
@@ -56,6 +69,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         arnold.AiNodeSetArray(options, 'outputs', outputs)
 
         arnold.AiRenderAddInteractiveOutput(None, 0)
+
+        # Configure color management
     
     def update(self, data, depsgraph):
         self.export(depsgraph)

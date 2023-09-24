@@ -15,36 +15,6 @@ def end(ipr=False):
     arnold.AiRenderEnd()
     arnold.AiEnd()
 
-def export(engine, depsgraph, ipr=False, region=None):
-    # Export universe options
-    exporter.export_options(depsgraph, ipr, region)
-
-    # Export scene objects
-    for inst in depsgraph.object_instances:
-        '''data = object_instance.object.data
-
-        if isinstance(data, config.BTOA_POLYMESH_COMPATIBLE):
-            exporter.export_polymesh(engine, depsgraph, object_instance)
-        elif isinstance(data, bpy.types.Light):
-            exporter.export_light()'''
-
-        if not inst.is_instance:
-            ob = export.ObjectData.init_from_object(inst.object)
-            mesh = export.MeshData.init_from_mesh(inst.object.data)
-
-        #else:
-            # Export instanced object
-
-    # Create instances if needed
-
-    # Export camera
-
-    # Export world settings
-
-    
-
-    # Configure color management
-
 def free(buffer):
     contents = buffer.contents
 

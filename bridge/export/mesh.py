@@ -58,20 +58,12 @@ class MeshData:
         arnold.AiNodeSetStr(node, 'name', ob.name)
         # set uuid
 
-        # Determine params for motion blur
-        start, end, keys = 0, 0, 1
-
-        if scene.arnold.enable_motion_blur:
-            start = scene.arnold.shutter_start
-            end = scene.arnold.shutter_end
-            keys = scene.arnold.motion_keys
-
-        steps = np.linspace(start, end, keys)
-
         # Export mesh data for each motion key
+        steps = utils.get_motion_blur_params(scene)
         ob_data_steps = []
         mesh_data_steps = []
 
+        # THIS SHOULD MOVE INTO OBJECTDATA class
         for step in steps:
             frame, sub = utils.get_frame_target(scene.frame_current, step)
             scene.frame_set(frame, subframe=sub)
