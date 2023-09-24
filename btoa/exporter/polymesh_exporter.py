@@ -10,117 +10,102 @@ from ..node import ArnoldNode
 from ..array import ArnoldArray
 from ..constants import BTOA_VISIBILITY
 from ..polymesh import ArnoldPolymesh
+from ..universe_options import UniverseOptions
 from .. import utils as export_utils
 
 class PolymeshExporter(ObjectExporter):
     def build_shaders(self):
-        material_override = self.cache.view_layer.material_override
+        materials = []
 
-        if material_override:
-            if material_override.arnold.node_tree:
-                shader = self.session.get_node_by_uuid(material_override.uuid)
+        for slot in self.datablock_eval.material_slots:
+            if slot.material:
+                mat = [None, None]
+                node_tree = slot.material.arnold.node_tree
 
-                if shader.is_valid:
-                    self.node.set_pointer("shader", shader)
-                else:
-                    surface, volume, displacement = material_override.arnold.node_tree.export()
-                    surface[0].set_string("name", material_override.name)
-                    surface[0].set_uuid(material_override.uuid)
+                if node_tree and node_tree.has_surface():
+                    shader = self.session.get_node_by_uuid(slot.material.uuid)
 
-                    self.node.set_pointer("shader", surface[0])
+                    if not shader.is_valid:
+                        shader = node_tree.export_active_surface()
+                        shader.set_string("name", slot.material.name)
+                        shader.set_uuid(slot.material.uuid)
 
-        else:
-            materials = []
+                    mat[0] = shader
 
-            for slot in self.datablock_eval.material_slots:
-                if slot.material:
-                    mat = [None, None]
-                    node_tree = slot.material.arnold.node_tree
+                if node_tree and node_tree.has_displacement():
+                    uuid = f"{slot.material.uuid}_disp"
+                    shader = self.session.get_node_by_uuid(uuid)
 
-                    if node_tree and node_tree.has_surface():
-                        shader = self.session.get_node_by_uuid(slot.material.uuid)
+                    if not shader.is_valid:
+                        node = node_tree.export_active_displacement()
 
-                        if not shader.is_valid:
-                            shader = node_tree.export_active_surface()
-                            shader.set_string("name", slot.material.name)
-                            shader.set_uuid(slot.material.uuid)
+                        # Check if we're using a displacment node or not. If we are, the export won't have the
+                        # BTNODE type in the export tuple
+                        shader = node[0]
 
-                        mat[0] = shader
-
-                    if node_tree and node_tree.has_displacement():
-                        uuid = f"{slot.material.uuid}_disp"
-                        shader = self.session.get_node_by_uuid(uuid)
-
-                        if not shader.is_valid:
-                            node = node_tree.export_active_displacement()
-
-                            # Check if we're using a displacment node or not. If we are, the export won't have the
-                            # BTNODE type in the export tuple
+                        if node[1] != 'BTNODE':
                             shader = node[0]
 
-                            if node[1] != 'BTNODE':
-                                shader = node[0]
+                            self.node.set_float("disp_padding", node[1])
+                            self.node.set_float("disp_height", node[2])
+                            self.node.set_float("disp_zero_value", node[3])
+                            self.node.set_bool("disp_autobump", node[4])
 
-                                self.node.set_float("disp_padding", node[1])
-                                self.node.set_float("disp_height", node[2])
-                                self.node.set_float("disp_zero_value", node[3])
-                                self.node.set_bool("disp_autobump", node[4])
+                        shader.set_string("name", f'{slot.material.name}_displ')
+                        shader.set_uuid(uuid)
 
-                            shader.set_string("name", f'{slot.material.name}_displ')
-                            shader.set_uuid(uuid)
+                    mat[1] = shader
 
-                        mat[1] = shader
+                if mat[0] or mat[1]:
+                    materials.append(mat)
 
-                    if mat[0] or mat[1]:
-                        materials.append(mat)
+        if len(materials) > 0:
+            material_indices = numpy.ndarray(
+                len(self.mesh.polygons),
+                dtype=numpy.uint8
+            )
+            self.mesh.polygons.foreach_get("material_index", material_indices)
 
-            if len(materials) > 0:
-                material_indices = numpy.ndarray(
-                    len(self.mesh.polygons),
-                    dtype=numpy.uint8
-                )
-                self.mesh.polygons.foreach_get("material_index", material_indices)
+            shader_array = ArnoldArray()
+            shader_array.allocate(
+                len(materials),
+                1,
+                'POINTER'
+            )
 
-                shader_array = ArnoldArray()
-                shader_array.allocate(
-                    len(materials),
-                    1,
-                    'POINTER'
-                )
+            disp_array = ArnoldArray()
+            disp_array.allocate(
+                len(materials),
+                1,
+                'POINTER'
+            )
 
-                disp_array = ArnoldArray()
-                disp_array.allocate(
-                    len(materials),
-                    1,
-                    'POINTER'
-                )
+            for i, mat in enumerate(materials):
+                shader_array.set_pointer(i, mat[0])
+                disp_array.set_pointer(i, mat[1])
 
-                for i, mat in enumerate(materials):
-                    shader_array.set_pointer(i, mat[0])
-                    disp_array.set_pointer(i, mat[1])
+            shidxs = ArnoldArray()
+            shidxs.convert_from_buffer(
+                len(material_indices),
+                1,
+                'BYTE',
+                ctypes.c_void_p(material_indices.ctypes.data)
+            )
 
-                shidxs = ArnoldArray()
-                shidxs.convert_from_buffer(
-                    len(material_indices),
-                    1,
-                    'BYTE',
-                    ctypes.c_void_p(material_indices.ctypes.data)
-                )
+            self.node.set_array("shader", shader_array)
+            self.node.set_array("disp_map", disp_array)
+            self.node.set_array("shidxs", shidxs)
+        else:
+            # Assign default lambert shader
+            # This is the only node we'll search for by name because there's no
+            # equivalent shader in the Blender scene, so no need for a UUID
+            shader = self.session.get_node_by_name("BTOA_LAMBERT_SHADER")
 
-                self.node.set_array("shader", shader_array)
-                self.node.set_array("disp_map", disp_array)
-                self.node.set_array("shidxs", shidxs)
-            else:
-                # Assign default lambert shader
-                # This is the only node we'll search for by name because there's no
-                # equivalent shader in the Blender scene, so no need for a UUID
-                shader = self.session.get_node_by_name("BTOA_LAMBERT_SHADER")
-
-                if not shader.is_valid:
-                    shader = ArnoldNode("lambert")
-                    shader.set_string("name", "BTOA_LAMBERT_SHADER")
-                
-                self.node.set_pointer("shader", shader)
+            if not shader.is_valid:
+                shader = ArnoldNode("lambert")
+                shader.set_string("name", "BTOA_LAMBERT_SHADER")
+            
+            self.node.set_pointer("shader", shader)
 
     def get_static_mesh_data(self):
         vlist_data = numpy.ndarray(

@@ -13,6 +13,7 @@ class SessionCache:
         self.frame_set = None
         self.preferences = {}
         self.viewport_camera = CameraCache()
+        self.material_override = None
 
     def extract_attrs(self, datablock):
         result = {}

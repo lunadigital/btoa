@@ -13,6 +13,7 @@ class OptionsExporter(Exporter):
     def export(self, interactive=False):
         scene = self.cache.scene
         render = self.cache.render
+        view_layer = self.cache.view_layer
         prefs = self.cache.preferences
 
         options = UniverseOptions()
@@ -135,3 +136,18 @@ class OptionsExporter(Exporter):
             if scene["enable_render_denoising"]:
                 denoiser = arnold.AiNode('imager_denoiser_noice')
                 arnold.AiNodeSetPtr(display_driver, "input", denoiser)
+
+        material_override = view_layer.material_override
+
+        if material_override:
+            shader = self.session.get_node_by_uuid(material_override.uuid)
+
+            if not shader.is_valid:
+                surface, volume, displacement = material_override.arnold.node_tree.export()
+                surface[0].set_string("name", material_override.name)
+                surface[0].set_uuid(material_override.uuid)
+                shader = surface[0]
+
+            options.set_pointer("shader_override", shader)
+        else:
+            options.set_pointer("shader_override", None)
