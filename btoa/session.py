@@ -178,15 +178,8 @@ class Session:
         arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
 
     def render(self):
-        result = arnold.AiRenderBegin()
-        if result == arnold.AI_SUCCESS.value:
-            status = arnold.AiRenderGetStatus()
-            while status == arnold.AI_RENDER_STATUS_RENDERING.value:
-                time.sleep(0.001)
-                status = arnold.AiRenderGetStatus()
-
-        result = arnold.AiRenderEnd()
-
+        result = arnold.AiRender()
+        
         self.end()
         self.reset()
 

@@ -186,7 +186,6 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
             if engine.test_break():
                 engine.session.abort()
-                engine.end_result(result, cancel=True)
 
         cb = btoa.ArnoldDisplayCallback(update_render_result)
         driver = btoa.ArnoldNode("btoa_display_driver")
