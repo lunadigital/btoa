@@ -106,10 +106,10 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
         self.sub_export(node)
 
         for i in self.inputs:
-            socket_value, value_type = i.export()
+            socket_value, value_type, socket_type = i.export()
             
             # We need to rebuild the identifier value to account for the different enum options in jitter_type
-            identifier = "{}_{}".format(self.jitter_type, i.identifier)
+            identifier = 'input' if i.identifier == 'input' else "{}_{}".format(self.jitter_type, i.identifier)
             
             if socket_value is not None and value_type is not None:
                 if value_type == 'BTNODE':
