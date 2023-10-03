@@ -4,7 +4,7 @@ import arnold
 class UniverseOptions(ArnoldNode):
     def __init__(self):
         super().__init__()
-        self.data = arnold.AiUniverseGetOptions()
+        self.data = arnold.AiUniverseGetOptions(None)
     
     def get_render_region(self):
         return (

@@ -96,11 +96,11 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
         Path(install_dir).mkdir(parents=True, exist_ok=True)
 
         if sys.platform == 'win32':
-            package = 'Arnold-7.1.4.3-windows.zip'
+            package = 'Arnold-7.2.3.3-windows.zip'
         elif sys.platform.startswith('linux'):
-            package = 'Arnold-7.1.4.3-linux.tgz'
+            package = 'Arnold-7.2.3.3-linux.tgz'
         elif sys.platform == 'darwin':
-            package == 'Arnold-7.1.4.3-darwin.tgz'
+            package == 'Arnold-7.2.3.3-darwin.tgz'
 
         INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
 

@@ -343,7 +343,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         if len(depsgraph.object_instances) < self.total_objects_in_ipr:
             uuids = [instance.uuid for instance in depsgraph.object_instances]
 
-            iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
+            iterator = arnold.AiUniverseGetNodeIterator(None, arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT)
 
             while not arnold.AiNodeIteratorFinished(iterator):
                 node = arnold.AiNodeIteratorGetNext(iterator)

@@ -26,12 +26,12 @@ class Session:
         self.update_viewport_dimensions = False
 
     def abort(self):
-        arnold.AiRenderAbort()
+        arnold.AiRenderAbort(None)
 
     def end(self):
         if self.is_interactive:
-            arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
-            arnold.AiRenderEnd()
+            arnold.AiRenderInterrupt(None, arnold.AI_BLOCKING)
+            arnold.AiRenderEnd(None)
 
         arnold.AiEnd()
 
@@ -139,7 +139,7 @@ class Session:
         arnold.AiFree(buffer)
 
     def get_node_by_name(self, name):
-        ainode = arnold.AiNodeLookUpByName(name)
+        ainode = arnold.AiNodeLookUpByName(None, name)
 
         node = ArnoldNode()
         node.set_data(ainode)
@@ -147,7 +147,7 @@ class Session:
         return node
 
     def get_all_by_uuid(self, uuid):
-        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHADER)
+        iterator = arnold.AiUniverseGetNodeIterator(None, arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHADER)
         result = []
 
         while not arnold.AiNodeIteratorFinished(iterator):
@@ -161,7 +161,7 @@ class Session:
         return result
 
     def get_node_by_uuid(self, uuid):
-        iterator = arnold.AiUniverseGetNodeIterator(arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHADER)
+        iterator = arnold.AiUniverseGetNodeIterator(None, arnold.AI_NODE_SHAPE | arnold.AI_NODE_LIGHT | arnold.AI_NODE_SHADER)
         node = ArnoldNode()
 
         while not arnold.AiNodeIteratorFinished(iterator):
@@ -175,10 +175,10 @@ class Session:
         return node
 
     def pause(self):
-        arnold.AiRenderInterrupt(arnold.AI_BLOCKING)
+        arnold.AiRenderInterrupt(None, arnold.AI_BLOCKING)
 
     def render(self):
-        result = arnold.AiRender()
+        result = arnold.AiRender(None)
         
         self.end()
         self.reset()
@@ -187,7 +187,7 @@ class Session:
         render_mode = arnold.AI_RENDER_MODE_CAMERA
         private_data = None
 
-        result = arnold.AiRenderBegin(render_mode, callback, private_data)
+        result = arnold.AiRenderBegin(None, render_mode, callback, private_data)
         if result != arnold.AI_SUCCESS.value:
             self.end()
             self.reset()
@@ -198,7 +198,7 @@ class Session:
         self.cache = SessionCache()
 
     def restart(self):
-        arnold.AiRenderRestart()
+        arnold.AiRenderRestart(None)
         self.is_running = True
 
     def replace_node(self, old_node, new_node):

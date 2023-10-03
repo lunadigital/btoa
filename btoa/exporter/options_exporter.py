@@ -89,40 +89,40 @@ class OptionsExporter(Exporter):
         
         if not interactive:
             if prefs["log_all"]:
-                arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_ALL)
+                arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_ALL)
             else:
-                arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_NONE)
+                arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_NONE)
 
                 if prefs["log_info"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_INFO)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_INFO)
                 if prefs["log_warnings"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_WARNINGS)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_WARNINGS)
                 if prefs["log_errors"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_ERRORS)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_ERRORS)
                 if prefs["log_debug"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_DEBUG)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_DEBUG)
                 if prefs["log_stats"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_STATS)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_STATS)
                 if prefs["log_plugins"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_PLUGINS)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_PLUGINS)
                 if prefs["log_progress"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_PROGRESS)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_PROGRESS)
                 if prefs["log_nan"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_NAN)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_NAN)
                 if prefs["log_timestamp"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_TIMESTAMP)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_TIMESTAMP)
                 if prefs["log_backtrace"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_BACKTRACE)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_BACKTRACE)
                 if prefs["log_memory"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_MEMORY)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_MEMORY)
                 if prefs["log_color"]:
-                    arnold.AiMsgSetConsoleFlags(arnold.AI_LOG_COLOR)
+                    arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_COLOR)
         
         for key in scene.keys():
             if "ignore_" in key:
                 options.set_bool(key, scene[key])
 
-        display_driver = arnold.AiNodeLookUpByName("btoa_driver")
+        display_driver = arnold.AiNodeLookUpByName(None, "btoa_driver")
         denoiser = arnold.AiNodeGetPtr(display_driver, "input")
 
         if denoiser:
@@ -130,11 +130,11 @@ class OptionsExporter(Exporter):
         
         if interactive:
             if scene["enable_viewport_denoising"]:
-                denoiser = arnold.AiNode(scene["viewport_denoiser"])
+                denoiser = arnold.AiNode(None, scene["viewport_denoiser"])
                 arnold.AiNodeSetPtr(display_driver, "input", denoiser)
         else:
             if scene["enable_render_denoising"]:
-                denoiser = arnold.AiNode('imager_denoiser_noice')
+                denoiser = arnold.AiNode(None, 'imager_denoiser_noice')
                 arnold.AiNodeSetPtr(display_driver, "input", denoiser)
 
         material_override = view_layer.material_override

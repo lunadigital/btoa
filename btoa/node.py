@@ -10,7 +10,7 @@ class ArnoldNode(AiTemplateClass):
         self.is_instance = False
 
         if node_type is not None:
-            self.data = arnold.AiNode(node_type)
+            self.data = arnold.AiNode(None, node_type)
 
     def type_is(self, node_type):
         return arnold.AiNodeIs(self.data, node_type)
