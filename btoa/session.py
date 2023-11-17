@@ -3,6 +3,8 @@ import arnold
 import math
 import mathutils
 import numpy
+from pathlib import Path
+import sys
 import time
 import os
 
@@ -123,8 +125,12 @@ class Session:
         else:
             install_dir = os.path.dirname(bpy.app.binary_path)
             major, minor, fix = bpy.app.version
+            
+            if sys.platform.startswith('linux') and not Path(install_dir).joinpath(f'{major}.{minor}', 'datafiles', 'colormanagement').exists():
+                install_dir = "/usr/share/blender"
+            
             ocio = os.path.join(install_dir, f'{major}.{minor}', 'datafiles', 'colormanagement', 'config.ocio')
-        
+
         color_manager.set_string('config', ocio)
         options.set_pointer('color_manager', color_manager)
 
