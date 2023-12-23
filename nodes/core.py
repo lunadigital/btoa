@@ -402,8 +402,6 @@ object_node_categories = [
     ]),
     ArnoldObjectNodeCategory('AI_OBJECT_SURFACE', "Surface", items=[
         NodeItem("AiAmbientOcclusion"),
-        NodeItem("AiBump2d"),
-        NodeItem("AiBump3d"),
         NodeItem("AiCarPaint"),
         NodeItem("AiCurvature"),
         NodeItem("AiDisplacement"),
@@ -432,6 +430,8 @@ object_node_categories = [
         NodeItem("AiRoundCorners")
     ]),
     ArnoldObjectNodeCategory('AI_OBJECT_UTILITY', "Utility", items=[
+        NodeItem("AiBump2d"),
+        NodeItem("AiBump3d"),
         NodeItem("AiCoordSpace"),
         NodeItem("AiFacingRatio"),
         NodeItem("AiUVProjection"),

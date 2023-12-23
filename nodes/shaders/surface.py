@@ -36,45 +36,6 @@ class AiAmbientOcclusion(bpy.types.Node, core.ArnoldNode):
         node.set_bool("self_only", self.self_only)
 
 '''
-AiBump2d
-
-Provides bump mapping cored on a 2d texture map.
-'''
-class AiBump2d(bpy.types.Node, core.ArnoldNode):
-    bl_label = "Bump 2D"
-    ai_name = "bump2d"
-
-    def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', name="Bump Map", identifier="bump_map").hide_value = True
-        self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Height", identifier="bump_height").default_value = 1
-        self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
-
-        self.outputs.new('AiNodeSocketVector', name="Vector")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="X")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Y")
-
-'''
-AiBump3d
-
-Provides bump mapping cored on a 3d input.
-'''
-class AiBump3d(bpy.types.Node, core.ArnoldNode):
-    bl_label = "Bump 3D"
-    bl_width_default = 160
-    ai_name = "bump3d"
-
-    def init(self, context):
-        self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Map", identifier="bump_map")
-        self.inputs.new('AiNodeSocketFloatPositive', name="Bump Height", identifier="bump_height").default_value = 0.01
-        self.inputs.new('AiNodeSocketFloatPositiveSmall', name="Epsilon", identifier="epsilon").default_value = 0.001
-        self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
-
-        self.outputs.new('AiNodeSocketVector', name="Vector")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="X")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Y")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Z")
-
-'''
 AiCarPaint
 
 A simple-to-use car paint shader. Outputs RGB.
@@ -627,8 +588,6 @@ class AiWireframe(bpy.types.Node, core.ArnoldNode):
 
 classes = (
     AiAmbientOcclusion,
-    AiBump2d,
-    AiBump3d,
     AiCarPaint,
     AiCurvature,
     AiDisplacement,
