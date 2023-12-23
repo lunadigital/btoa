@@ -19,7 +19,6 @@ class AiCoordSpace(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiFacingRatio
-https://docs.arnoldrenderer.com/display/A5NodeRef/facing_ratio
 
 This shader returns the absolute value of the dot product between
 the shading normal and the incoming ray direction. It is also named
@@ -48,7 +47,6 @@ class AiFacingRatio(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiUVProjection
-https://docs.arnoldrenderer.com/display/A5NodeRef/uv_projection
 
 Turns any 2D texture into a 3D texture that you can place on the
 surface using one of the available projection types. Use to adjust

@@ -5,7 +5,6 @@ from ...utils import register_utils
 
 '''
 AiAmbientOcclusion
-https://docs.arnoldrenderer.com/display/A5NodeRef/ambient_occlusion
 
 Ambient occlusion shader. Outputs RGB.
 '''
@@ -38,7 +37,6 @@ class AiAmbientOcclusion(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiBump2d
-https://docs.arnoldrenderer.com/display/A5NodeRef/bump2d
 
 Provides bump mapping cored on a 2d texture map.
 '''
@@ -57,7 +55,6 @@ class AiBump2d(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiBump3d
-https://docs.arnoldrenderer.com/display/A5NodeRef/bump3d
 
 Provides bump mapping cored on a 3d input.
 '''
@@ -79,7 +76,6 @@ class AiBump3d(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiCarPaint
-https://docs.arnoldrenderer.com/display/A5NodeRef/car_paint
 
 A simple-to-use car paint shader. Outputs RGB.
 '''
@@ -124,7 +120,6 @@ class AiCarPaint(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiCurvature
-https://docs.arnoldrenderer.com/display/A5NodeRef/curvature
 
 This shader will sample around the shading point within a given
 radius to output the curvature. You can adjust the radius, falloff,
@@ -201,7 +196,6 @@ class AiDisplacement(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiFlat
-https://docs.arnoldrenderer.com/display/A5NodeRef/flat
 
 A simple color shader node which just allows a color with no other effects.
 '''
@@ -215,7 +209,6 @@ class AiFlat(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiLambert
-https://docs.arnoldrenderer.com/display/A5NodeRef/lambert
 
 Simple Lambertian reflectance model. Outputs a simple color (RGB).
 '''
@@ -233,7 +226,6 @@ class AiLambert(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiMatte
-https://docs.arnoldrenderer.com/display/A5NodeRef/matte
 
 Enables you to create holdout effects by rendering the alpha as zero.
 '''
@@ -249,7 +241,6 @@ class AiMatte(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiMixShader
-https://docs.arnoldrenderer.com/display/A5NodeRef/mix_shader
 
 Used to blend two shaders together.
 '''
@@ -291,7 +282,6 @@ class AiMixShader(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiNormalMap
-https://docs.arnoldrenderer.com/display/A5NodeRef/normal_map
 
 Provides bump mapping cored on a 2d texture map.
 '''
@@ -341,7 +331,6 @@ class AiNormalMap(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiRaySwitchRGBA
-https://docs.arnoldrenderer.com/display/A5NodeRef/ray_switch_rgba
 
 This shader makes it possible to evaluate different color trees per ray.
 '''
@@ -362,7 +351,6 @@ class AiRaySwitchRGBA(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiRaySwitchShader
-https://docs.arnoldrenderer.com/display/A5NodeRef/ray_switch_shader
 
 This shader makes it possible to evaluate different shader trees per ray. This decreases
 the shading complexity of a scene and thus the render times, and increases artistic control.
@@ -442,7 +430,6 @@ class AiShadowMatte(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiStandardHair
-https://docs.arnoldrenderer.com/display/A5NodeRef/standard_hair
 
 Standard_hair is a physically-cored shader to render hair and fur,
 cored on the d'Eon model for specular and Zinke model for diffuse.
@@ -494,7 +481,6 @@ class AiStandardHair(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiStandardSurface
-https://docs.arnoldrenderer.com/display/A5NodeRef/standard_surface
 
 A physically-cored shader. Outputs a simple color (RGB).
 '''
@@ -591,7 +577,6 @@ class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiTwoSided
-https://docs.arnoldrenderer.com/display/A5NodeRef/two_sided
 
 Applies two shaders on either side of a double sided surface.
 '''
@@ -607,7 +592,6 @@ class AiTwoSided(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiWireframe
-https://docs.arnoldrenderer.com/display/A5NodeRef/wireframe
 
 Color shader which produces a wire-frame style output (as RGB).
 '''

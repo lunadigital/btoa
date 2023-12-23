@@ -6,7 +6,6 @@ from ...utils import register_utils
 
 '''
 AiFloatToInteger
-https://docs.arnoldrenderer.com/display/A5NodeRef/float_to_int
 
 Converts float to an integer value.
 '''
@@ -36,7 +35,6 @@ class AiFloatToInteger(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiFloatToRGB
-https://docs.arnoldrenderer.com/display/A5NodeRef/float_to_rgb
 
 Creates RGB color from individual R, G, B float values.
 '''
@@ -53,7 +51,6 @@ class AiFloatToRGB(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiFloatToRGBA
-https://docs.arnoldrenderer.com/display/A5NodeRef/float_to_rgba
 
 Creates RGBA color from R, G, B, A float values.
 '''
@@ -71,7 +68,6 @@ class AiFloatToRGBA(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiRGBToFloat
-https://docs.arnoldrenderer.com/display/A5NodeRef/rgb_to_float
 
 Converts RGB color to float value.
 '''
@@ -106,7 +102,6 @@ class AiRGBToFloat(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiRGBToVector
-https://docs.arnoldrenderer.com/display/A5NodeRef/rgb_to_vector
 
 Converts RGB color to vector.
 '''
@@ -134,7 +129,6 @@ class AiRGBToVector(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiRGBAToFloat
-https://docs.arnoldrenderer.com/display/A5NodeRef/rgba_to_float
 
 Converts RGB color and alpha value to float.
 '''
@@ -200,7 +194,6 @@ class AiSeparateRGBA(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiVectorToRGB
-https://docs.arnoldrenderer.com/display/A5NodeRef/vector_to_rgb
 
 Converts vector to RGB color.
 '''

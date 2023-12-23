@@ -5,7 +5,6 @@ from ...utils import register_utils
 
 '''
 AiMultiply
-https://docs.arnoldrenderer.com/display/A5NodeRef/multiply
 
 Returns input1 x input2.
 '''
@@ -21,7 +20,6 @@ class AiMultiply(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiRange
-https://docs.arnoldrenderer.com/display/A5NodeRef/range
 
 Remap input from the [input_min, input_max] range to the
 [ouput_min, output_max] range linearly. The result is not

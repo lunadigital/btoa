@@ -11,7 +11,6 @@ from ...utils import register_utils
 
 '''
 AiCellNoise
-https://docs.arnoldrenderer.com/display/A5NodeRef/cell_noise
 
 A cell noise pattern generator.
 '''
@@ -59,7 +58,6 @@ class AiCellNoise(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiCheckerboard
-https://docs.arnoldrenderer.com/display/A5NodeRef/checkerboard
 
 Represents a checkerboard pattern.
 '''
@@ -82,7 +80,6 @@ class AiCheckerboard(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiFlakes
-https://docs.arnoldrenderer.com/display/A5NodeRef/Flakes
 
 Creates a procedural flake normal map that can be used for materials
 such as car paint.
@@ -130,7 +127,6 @@ class AiImageUser(bpy.types.PropertyGroup):
 
 '''
 AiImage
-https://docs.arnoldrenderer.com/display/A5NodeRef/image
 
 Performs texture mapping using a specified image file.
 '''
@@ -349,7 +345,6 @@ class AiLayer(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiLayerFloat
-https://docs.arnoldrenderer.com/display/A5NodeRef/layer_float
 
 Combines 8 float layers linearly. Layers are applied in order (bottom to top).
 '''
@@ -367,7 +362,6 @@ class AiLayerFloat(AiLayer):
 
 '''
 AiLayerRGBA
-https://docs.arnoldrenderer.com/display/A5NodeRef/layer_rgba
 
 The layer_RGBA shader can be used to linearly layer up to eight
 shaders together, enabling you to create complex shading effects.
@@ -415,7 +409,6 @@ class AiLayerRGBA(AiLayer):
 
 '''
 AiMixRGBA
-https://docs.arnoldrenderer.com/display/A5NodeRef/mix_rgba
 
 The mix_RGBA is used to blend or add two colors or textures. It
 returns a linear interpolation of input1 and input2 according to
@@ -436,7 +429,6 @@ class AiMixRGBA(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiNoise
-https://docs.arnoldrenderer.com/display/A5NodeRef/noise
 
 Evaluates a coherent noise function.
 '''
@@ -475,7 +467,6 @@ class AiNoise(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiPhysicalSky
-https://docs.arnoldrenderer.com/display/A5NodeRef/physical_sky
 
 This shader implements a variation of the Hosek-Wilkie sky radiance
 model, including the direct solar radiance function.
@@ -539,7 +530,6 @@ class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiRoundCorners
-https://docs.arnoldrenderer.com/display/A5NodeRef/round_corners
 
 Modifies the shading normals near edges to give the appearance
 of a round corner.

@@ -7,7 +7,6 @@ from ...utils import register_utils
 
 '''
 AiSkydome
-https://docs.arnoldrenderer.com/display/A5NodeRef/skydome_light
 
 Returns a skydome light for World rendering.
 '''

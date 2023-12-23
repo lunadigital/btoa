@@ -6,7 +6,6 @@ from ...utils import register_utils
 
 '''
 AiColorCorrect
-https://docs.arnoldrenderer.com/display/A5NodeRef/color_correct
 
 Allows you to adjust the gamma, hue, saturation, contrast, and exposure of
 an image. Alters the Input color with the following operator, applied in
@@ -59,7 +58,6 @@ class AiColorCorrect(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiColorJitter
-https://docs.arnoldrenderer.com/display/A5NodeRef/color_jitter
 
 This shader enables you to alter the input color by applying a random
     color variation. For each of the following parameters, you can specify
@@ -131,7 +129,6 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiComposite
-https://docs.arnoldrenderer.com/display/A5NodeRef/composite
 
 The composite shader mixes two RGBA inputs according to a blend mode.
 '''
@@ -200,7 +197,6 @@ class AiComposite(bpy.types.Node, core.ArnoldNode):
 
 '''
 AiShuffle
-https://docs.arnoldrenderer.com/display/A5NodeRef/shuffle
 
 Combines RGB and alpha inputs to output an RGBA by default.
 Additionally, there are parameters to shuffle the channels.
