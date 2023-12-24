@@ -31,17 +31,13 @@ class AiNodeSocket:
         return None
 
     def export(self):
-        rgba_outputs = ['', 'r', 'g', 'b', 'a']
-        vector_outputs = ['', 'x', 'y', 'z']
-
         link = utils.get_link(self)
 
         if link:
-            socket_index = utils.get_socket_index(link.from_socket)
-            output_type = vector_outputs[socket_index] if hasattr(link.from_socket, 'default_value') and isinstance(link.from_socket.default_value, bpy.types.FloatProperty) else rgba_outputs[socket_index]
-
-            return *link.from_node.export(), output_type
+            data = link.from_node.export()
+            data.from_socket = link.from_socket.identifier if link.from_socket.identifier != link.from_socket.name else ''
+            return data
         elif hasattr(self, "default_value"):
-            return *self.export_default(), ''
+            return self.export_default()
         else:
             return None

@@ -144,9 +144,9 @@ class OptionsExporter(Exporter):
 
             if not shader.is_valid:
                 surface, volume, displacement = material_override.arnold.node_tree.export()
-                surface[0].set_string("name", material_override.name)
-                surface[0].set_uuid(material_override.uuid)
-                shader = surface[0]
+                surface.value.set_string("name", material_override.name)
+                surface.value.set_uuid(material_override.uuid)
+                shader = surface.value
 
             options.set_pointer("shader_override", shader)
         else:

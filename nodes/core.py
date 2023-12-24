@@ -5,8 +5,9 @@ from bpy.props import BoolProperty
 from bl_ui.space_node import NODE_HT_header, NODE_MT_editor_menus
 from nodeitems_utils import NodeCategory, NodeItem
 
-from .. import btoa
+from .. import bridge
 from ..utils import ui_utils
+from ..bridge import NodeData, ExportDataType
 
 class ArnoldShaderTree(ShaderNodeTree):
     bl_idname = "ArnoldShaderTree"
@@ -229,20 +230,23 @@ class ArnoldNode:
         pass
 
     def export(self):
-        node = btoa.ArnoldNode(self.ai_name)
+        node = bridge.ArnoldNode(self.ai_name)
 
         self.sub_export(node)
 
         for i in self.inputs:
-            socket_value, value_type, output_type = i.export()
-            
-            if socket_value is not None and value_type is not None:
-                if value_type == 'BTNODE':
-                    socket_value.link(i.identifier, node, output_type)
-                else:
-                    btoa.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
+            socket_data = i.export()
 
-        return node, 'BTNODE'
+            if socket_data.type is ExportDataType.NODE:
+                socket_data.value.link(i.identifier, node, socket_data.from_socket)
+            else:
+                key = socket_data.type
+                if socket_data.type is ExportDataType.COLOR:
+                    key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
+                    
+                bridge.BTOA_SET_LAMBDA[key](node, i.identifier, socket_data.value)
+
+        return NodeData(node)
 
 class ArnoldNodeOutput:
     bl_label = "Output"
@@ -281,7 +285,7 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
         self.inputs.new(type="AiNodeSocketSurface", name="Displacement", identifier="displacement")
 
     def draw_buttons(self, context, layout):
-        parent_material = btoa.utils.get_parent_material_from_nodetree(self.id_data)
+        parent_material = bridge.utils.get_parent_material_from_nodetree(self.id_data)
 
         if parent_material:
             layout.prop(parent_material, "diffuse_color", text="Viewport")
@@ -296,7 +300,7 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
         return surface, volume, displacement
 
     def export_surface(self):
-        return self.inputs["Surface"].export()[0]
+        return self.inputs["Surface"].export().value
 
     def export_displacement(self):
         return self.inputs["Displacement"].export()
@@ -436,6 +440,7 @@ object_node_categories = [
         NodeItem("AiFacingRatio"),
         NodeItem("AiUVProjection"),
         NodeItem("AiFloat"),
+        NodeItem("AiStateFloat")
     ]),
 ]
 

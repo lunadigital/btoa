@@ -2,7 +2,7 @@ import bpy
 import math, mathutils
 from bpy.props import *
 from .. import core
-from ... import btoa
+from ... import bridge
 from ...utils import register_utils
 
 '''
@@ -66,7 +66,7 @@ class AiSkydome(bpy.types.Node, core.ArnoldNode):
         matrix = mathutils.Matrix.Identity(4)
         matrix = matrix @ rot_matrix @ scale_matrix
 
-        node.set_matrix("matrix", btoa.utils.flatten_matrix(matrix))
+        node.set_matrix("matrix", bridge.utils.flatten_matrix(matrix))
 
 classes = (
     AiSkydome,

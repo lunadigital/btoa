@@ -15,9 +15,9 @@ class ArnoldNode(AiTemplateClass):
     def type_is(self, node_type):
         return arnold.AiNodeIs(self.data, node_type)
 
-    def link(self, param, val, output_type):
+    def link(self, param, val, socket_out):
         if self.is_valid:
-            arnold.AiNodeLinkOutput(self.data, output_type, val.data, param)
+            arnold.AiNodeLinkOutput(self.data, socket_out, val.data, param)
 
     def declare(self, param, param_type):
         if self.is_valid:
@@ -147,3 +147,12 @@ class ArnoldNode(AiTemplateClass):
             return None
             
         return arnold.AiNodeGetStr(self.data, param)
+    
+    def get_enum_value(self, param, string):
+        if not self.is_valid:
+            return None
+        
+        entry = arnold.AiNodeGetNodeEntry(self.data)
+        enum = arnold.AiParamGetEnum(arnold.AiNodeEntryLookUpParameter(entry, param))
+
+        return arnold.AiEnumGetValue(enum, string)

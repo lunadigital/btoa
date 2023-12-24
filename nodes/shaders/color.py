@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import *
 from .. import core
-from ... import btoa
+from ... import bridge
 from ...utils import register_utils
 
 '''
@@ -99,7 +99,7 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
         self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
 
     def export(self):
-        node = btoa.ArnoldNode(self.ai_name)
+        node = bridge.ArnoldNode(self.ai_name)
 
         self.sub_export(node)
 
@@ -113,7 +113,7 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
                 if value_type == 'BTNODE':
                     socket_value.link(identifier, node)
                 else:
-                    btoa.BTOA_SET_LAMBDA[value_type](node, identifier, socket_value)
+                    bridge.BTOA_SET_LAMBDA[value_type](node, identifier, socket_value)
 
         return node, 'BTNODE'
 

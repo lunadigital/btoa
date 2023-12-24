@@ -1,6 +1,7 @@
 from bpy.types import NodeSocket
 from bpy.props import *
 from .ainodesocket import AiNodeSocket, SocketColor
+from ...bridge.types import ColorData
 
 class AiNodeSocketColor(AiNodeSocket):
     bl_label = "Color"
@@ -14,10 +15,9 @@ class AiNodeSocketColor(AiNodeSocket):
             row.prop(self, "default_value", text="")
     
     def export_default(self):
-        return list(self.default_value), self.default_type
+        return ColorData(list(self.default_value))
 
 class AiNodeSocketRGB(NodeSocket, AiNodeSocketColor):
-    default_type = 'RGB'
     default_value: FloatVectorProperty(
         name="Color",
         subtype='COLOR',
@@ -27,7 +27,6 @@ class AiNodeSocketRGB(NodeSocket, AiNodeSocketColor):
     )
 
 class AiNodeSocketRGBA(NodeSocket, AiNodeSocketColor):
-    default_type = 'RGBA'
     default_value: FloatVectorProperty(
         name="Color",
         subtype='COLOR',

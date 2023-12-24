@@ -1,6 +1,7 @@
 import bpy
 from os.path import basename, dirname
 
+from .types import ExportDataType
 from .status import ArnoldStatus
 
 import arnold
@@ -40,17 +41,15 @@ BTOA_CONVERTIBLE_TYPES = (
 BTOA_VISIBILITY = [1, 2, 4, 8, 16, 32, 64, 128]
 
 BTOA_SET_LAMBDA = {
-    "STRING": lambda n, i, v: n.set_string(i, v),
-    #'ARRAY': _AiNodeSetArray,
-    "BOOL": lambda n, i, v: n.set_bool(i, v),
-    "BYTE": lambda n, i, v: n.set_byte(i, v),
-    "INT": lambda n, i, v: n.set_int(i, v),
-    "FLOAT": lambda n, i, v: n.set_float(i , v),
-    "RGB": lambda n, i, v: n.set_rgb(i, *v),
-    "RGBA": lambda n, i, v: n.set_rgba(i, *v),
-    "VECTOR": lambda n, i, v: n.set_vector(i, *v),
-    "VECTOR2": lambda n, i, v: n.set_vector2(i, *v),
-    #"MATRIX": lambda n, i, v: AiNodeSetMatrix(n, i, _AiMatrix(v))
+    ExportDataType.STRING: lambda n, i, v: n.set_string(i, v),
+    ExportDataType.BOOL: lambda n, i, v: n.set_bool(i, v),
+    ExportDataType.BYTE: lambda n, i, v: n.set_byte(i, v),
+    ExportDataType.INT: lambda n, i, v: n.set_int(i, v),
+    ExportDataType.FLOAT: lambda n, i, v: n.set_float(i , v),
+    ExportDataType.RGB: lambda n, i, v: n.set_rgb(i, *v),
+    ExportDataType.RGBA: lambda n, i, v: n.set_rgba(i, *v),
+    ExportDataType.VECTOR: lambda n, i, v: n.set_vector(i, *v),
+    ExportDataType.VECTOR2: lambda n, i, v: n.set_vector2(i, *v),
 }
 
 # Display output statuses

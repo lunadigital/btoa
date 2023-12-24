@@ -3,6 +3,7 @@ from bpy.props import *
 from .. import core
 from ..sockets import utils as socket_utils
 from ...utils import register_utils
+from ...bridge import ExportDataType
 
 '''
 AiFloatToInteger
@@ -173,24 +174,24 @@ class AiSeparateRGBA(bpy.types.Node, core.ArnoldNode):
     def init(self, context):
         self.inputs.new('AiNodeSocketRGBA', "Color").default_value = (1, 1, 1, 1)
         
-        # The first socket is always the default output. For the other sockets
-        # to return the proper values, we'll create an RGBA output but hide it
-        # in the UI.
-        self.outputs.new('AiNodeSocketRGBA', "RGBA").hide = True
-        self.outputs.new('AiNodeSocketFloatUnbounded', "R")
-        self.outputs.new('AiNodeSocketFloatUnbounded', "G")
-        self.outputs.new('AiNodeSocketFloatUnbounded', "B")
-        self.outputs.new('AiNodeSocketFloatUnbounded', "A")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "R", identifier="r")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "G", identifier="g")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "B", identifier="b")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "A", identifier="a")
 
     def export(self):
-        socket_value, value_type, output_type = self.inputs[0].export()
+        socket_data = self.inputs[0].export()
+            
+        if socket_data.type is ExportDataType.NODE:
+            return socket_data
+        else:
+            key = socket_data.type
+            if socket_data.type is ExportDataType.COLOR:
+                key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
+                
+            bridge.BTOA_SET_LAMBDA[key](node, i.identifier, socket_data.value)
 
-        if socket_value is not None and value_type is not None:
-            if value_type == 'BTNODE':
-                return socket_value, value_type
-            else:
-                btoa.BTOA_SET_LAMBDA[value_type](node, i.identifier, socket_value)
-                return socket_value, value_type
+            return socket_data
 
 '''
 AiVectorToRGB

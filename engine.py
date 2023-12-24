@@ -7,8 +7,8 @@ import os
 import gpu
 import arnold
 
-from . import btoa
-from .btoa import utils, OptionsExporter
+from . import bridge
+from .bridge import utils, OptionsExporter
 from .props.light import ArnoldLight
 
 from bl_ui.properties_render import RENDER_PT_color_management
@@ -25,8 +25,8 @@ session and frame buffer to do it's job.
 So, that's it, we're here, deal with it. Let's move on.
 '''
 AI_ENGINE_TAG_REDRAW = None
-AI_SESSION: Optional[btoa.Session] = None
-AI_FRAMEBUFFER:Optional[btoa.FrameBuffer] = None
+AI_SESSION: Optional[bridge.Session] = None
+AI_FRAMEBUFFER:Optional[bridge.FrameBuffer] = None
 AI_DRIVER_UPDATE_VIEWPORT = False
 
 def ai_render_update_callback(private_data, update_type, display_output):
@@ -40,24 +40,24 @@ def ai_render_update_callback(private_data, update_type, display_output):
     assert AI_ENGINE_TAG_REDRAW
     AI_ENGINE_TAG_REDRAW()
 
-    status = btoa.FAILED
+    status = bridge.FAILED
 
-    if update_type == int(btoa.INTERRUPTED):
-        status = btoa.PAUSED
-    elif update_type == int(btoa.BEFORE_PASS):
-        status = btoa.RENDERING
-    elif update_type == int(btoa.DURING_PASS):
-        status = btoa.RENDERING
-    elif update_type == int(btoa.AFTER_PASS):
-        status = btoa.RENDERING
+    if update_type == int(bridge.INTERRUPTED):
+        status = bridge.PAUSED
+    elif update_type == int(bridge.BEFORE_PASS):
+        status = bridge.RENDERING
+    elif update_type == int(bridge.DURING_PASS):
+        status = bridge.RENDERING
+    elif update_type == int(bridge.AFTER_PASS):
+        status = bridge.RENDERING
         AI_DRIVER_UPDATE_VIEWPORT = True
-    elif update_type == int(btoa.RENDER_FINISHED):
-        status = btoa.RENDER_FINISHED
+    elif update_type == int(bridge.RENDER_FINISHED):
+        status = bridge.RENDER_FINISHED
         AI_DRIVER_UPDATE_VIEWPORT = False
-    elif update_type == int(btoa.PAUSED):
-        status = btoa.RESTARTING
-    elif update_type == int(btoa.ERROR):
-        status = btoa.FAILED
+    elif update_type == int(bridge.PAUSED):
+        status = bridge.RESTARTING
+    elif update_type == int(bridge.ERROR):
+        status = bridge.FAILED
         AI_DRIVER_UPDATE_VIEWPORT = False
 
     return int(status)
@@ -68,7 +68,7 @@ def update_viewport(buffer):
     global AI_DRIVER_UPDATE_VIEWPORT
 
     rdata = buffer.contents
-    options = btoa.UniverseOptions()
+    options = bridge.UniverseOptions()
     min_x, min_y, max_x, max_y = 0, 0, *options.get_render_resolution()
 
     x = rdata.x - min_x
@@ -83,7 +83,7 @@ def update_viewport(buffer):
         AI_FRAMEBUFFER.requires_update = True
         AI_ENGINE_TAG_REDRAW()
 
-AI_DISPLAY_CALLBACK = btoa.ArnoldDisplayCallback(update_viewport)
+AI_DISPLAY_CALLBACK = bridge.ArnoldDisplayCallback(update_viewport)
 AI_RENDER_CALLBACK = ai_render_update_callback
 
 '''
@@ -100,7 +100,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def __init__(self):
         self.progress = 0
         self._progress_increment = 0
-        self.session = btoa.Session()
+        self.session = bridge.Session()
         self.total_objects_in_ipr = 0
 
     def __del__(self):
@@ -143,7 +143,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             cls._outliner_context_menu_draw = None
 
     def update(self, data, depsgraph):
-        prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
+        prefs = bpy.context.preferences.addons[bridge.constants.BTOA_PACKAGE_NAME].preferences
 
         self.session.start()
         self.session.export(self, depsgraph, prefs)
@@ -151,7 +151,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
     def render(self, depsgraph):
         # Configure display callback
         # NOTE: We can't do this in the exporter because it results in a nasty MEMORY_ACCESS_VIOLATION error
-        options = btoa.UniverseOptions()
+        options = bridge.UniverseOptions()
         engine = self
 
         def update_render_result(buffer):
@@ -187,8 +187,8 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             if engine.test_break():
                 engine.session.abort()
 
-        cb = btoa.ArnoldDisplayCallback(update_render_result)
-        driver = btoa.ArnoldNode("btoa_display_driver")
+        cb = bridge.ArnoldDisplayCallback(update_render_result)
+        driver = bridge.ArnoldNode("btoa_display_driver")
         driver.set_string("name", "btoa_driver")
         driver.set_pointer("callback", cb)
 
@@ -222,12 +222,12 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
         region = context.region
         scene = depsgraph.scene
-        prefs = bpy.context.preferences.addons[btoa.constants.BTOA_PACKAGE_NAME].preferences
+        prefs = bpy.context.preferences.addons[bridge.constants.BTOA_PACKAGE_NAME].preferences
 
         if not AI_SESSION or not AI_SESSION.is_running:
             self.total_objects_in_ipr = len(context.scene.objects)
 
-            AI_FRAMEBUFFER = btoa.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
+            AI_FRAMEBUFFER = bridge.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
 
             AI_SESSION = self.session
             AI_SESSION.start(interactive=True)
@@ -236,7 +236,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             global AI_ENGINE_TAG_REDRAW
             AI_ENGINE_TAG_REDRAW = self.tag_redraw
 
-            display_driver = btoa.ArnoldNode("btoa_display_driver")
+            display_driver = bridge.ArnoldNode("btoa_display_driver")
             display_driver.set_string("name", "btoa_driver")
             display_driver.set_pointer("callback", AI_DISPLAY_CALLBACK)
 
@@ -253,11 +253,11 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         if AI_SESSION.update_viewport_dimensions:
             AI_SESSION.update_viewport_dimensions = False
 
-            options = btoa.UniverseOptions()
+            options = bridge.UniverseOptions()
             options.set_int("xres", int(region.width * float(scene.arnold.viewport_scale)))
             options.set_int("yres", int(region.height * float(scene.arnold.viewport_scale)))
 
-            AI_FRAMEBUFFER = btoa.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
+            AI_FRAMEBUFFER = bridge.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
 
         # Update viewport camera
         node = AI_SESSION.get_node_by_name("BTOA_VIEWPORT_CAMERA")
@@ -265,9 +265,9 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
         bl_camera = utils.get_viewport_camera_object(context)
 
         if node.type_is(bl_camera.data.arnold.camera_type):
-            btoa.CameraExporter(AI_SESSION, node).export(bl_camera)
+            bridge.CameraExporter(AI_SESSION, node).export(bl_camera)
         else:
-            new_node = btoa.CameraExporter(AI_SESSION).export(bl_camera)
+            new_node = bridge.CameraExporter(AI_SESSION).export(bl_camera)
             AI_SESSION.replace_node(node, new_node)
 
             new_node.set_string("name", bl_camera.name)
@@ -285,7 +285,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
 
                     if old_node.is_valid:
                         surface, volume, displacement = update.id.export()
-                        new_node = surface[0]
+                        new_node = surface.value
 
                         AI_SESSION.replace_node(old_node, new_node)
 
@@ -300,7 +300,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
 
                     if old_node.is_valid:
-                        new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
+                        new_node = bridge.WorldExporter(AI_SESSION, node).export(scene.world)
                         AI_SESSION.replace_node(old_node, new_node)
                         new_node.set_string("name", scene.world.name)
 
@@ -312,7 +312,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
             for update in reversed(depsgraph.updates):
                 if isinstance(update.id, bpy.types.Light):
                     light_data_needs_update = True
-                elif isinstance(update.id, btoa.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
+                elif isinstance(update.id, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
                     polymesh_data_needs_update = True
 
                 if isinstance(update.id, bpy.types.Object):
@@ -320,10 +320,10 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                     
                     if update.id.type == 'LIGHT':
                         if update.is_updated_transform or light_data_needs_update:
-                            btoa.LightExporter(AI_SESSION, node).export(update)
+                            bridge.LightExporter(AI_SESSION, node).export(update)
 
                     elif polymesh_data_needs_update:
-                        btoa.PolymeshExporter(AI_SESSION, node).export(update)
+                        bridge.PolymeshExporter(AI_SESSION, node).export(update)
 
                     # Transforms for lights have to be handled brute-force by the LightExporter to
                     # account for size and other parameters
@@ -335,7 +335,7 @@ class ArnoldRenderEngine(bpy.types.RenderEngine):
                 old_node = AI_SESSION.get_node_by_uuid(scene.world.uuid)
 
                 if old_node.is_valid:
-                    new_node = btoa.WorldExporter(AI_SESSION, node).export(scene.world)
+                    new_node = bridge.WorldExporter(AI_SESSION, node).export(scene.world)
                     AI_SESSION.replace_node(old_node, new_node)
                     new_node.set_string("name", scene.world.name)
 

@@ -4,7 +4,7 @@ from bpy.props import BoolProperty, IntProperty, FloatProperty, FloatVectorPrope
 
 import math
 
-from .. import btoa
+from .. import bridge
 
 class ArnoldLight(PropertyGroup):
     intensity: FloatProperty(name="Intensity", description="", soft_min=0, soft_max=10, default=1)
@@ -74,11 +74,11 @@ class ArnoldLight(PropertyGroup):
 
     def get_shape_type(self):
         light = self.id_data
-        return list(btoa.BTOA_LIGHT_SHAPE_CONVERSIONS).index(light.shape)
+        return list(bridge.BTOA_LIGHT_SHAPE_CONVERSIONS).index(light.shape)
 
     def set_shape_type(self, value):
         light = self.id_data
-        light.shape = list(btoa.BTOA_LIGHT_SHAPE_CONVERSIONS)[value]
+        light.shape = list(bridge.BTOA_LIGHT_SHAPE_CONVERSIONS)[value]
 
     shape: EnumProperty(
         name="Light Shape",
