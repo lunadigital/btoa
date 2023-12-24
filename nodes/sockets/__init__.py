@@ -2,7 +2,6 @@ from . import ainodesocketcolor
 from . import ainodesocketcoord
 from . import ainodesocketfloat
 from . import ainodesocketint
-from . import ainodesocketstate
 from . import ainodesocketsurface
 from . import ainodesocketvector
 
@@ -11,7 +10,6 @@ modules = (
     ainodesocketcoord,
     ainodesocketfloat,
     ainodesocketint,
-    ainodesocketstate,
     ainodesocketsurface,
     ainodesocketvector
 )
