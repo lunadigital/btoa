@@ -173,28 +173,13 @@ class AiStateFloat(bpy.types.Node, core.ArnoldNode):
     )
 
     def init(self, context):
-        self.outputs.new('AiNodeSocketStateFloat', "SX", identifier="sx")
-        self.outputs.new('AiNodeSocketStateFloat', "SY", identifier="sy")
-        self.outputs.new('AiNodeSocketStateFloat', "Time", identifier="time")
-        self.outputs.new('AiNodeSocketStateFloat', "R1", identifier="R1")
-        self.outputs.new('AiNodeSocketStateFloat', "BU", identifier="bu")
-        self.outputs.new('AiNodeSocketStateFloat', "BV", identifier="bv")
-        self.outputs.new('AiNodeSocketStateFloat', "U", identifier="u")
-        self.outputs.new('AiNodeSocketStateFloat', "V", identifier="v")
-        self.outputs.new('AiNodeSocketStateFloat', "Area", identifier="area")
-        self.outputs.new('AiNodeSocketStateFloat', "dudx", identifier="dudx")
-        self.outputs.new('AiNodeSocketStateFloat', "dudy", identifier="dudy")
-        self.outputs.new('AiNodeSocketStateFloat', "dvdx", identifier="dvdx")
-        self.outputs.new('AiNodeSocketStateFloat', "dvdy", identifier="dvdy")
-        self.outputs.new('AiNodeSocketStateFloat', "shutter_start", identifier="shutter_start")
-        self.outputs.new('AiNodeSocketStateFloat', "shutter_end", identifier="shutter_end")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Float", identifier="out_variable")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "variable")
+        layout.prop(self, "variable", text="")
 
     def sub_export(self, node):
-        value = node.get_enum_value("variable", self.variable)
-        node.set_float("out_variable", float(value))
+        node.set_string("variable", self.variable)
 
 classes = (
     AiBump2d,
