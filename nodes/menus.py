@@ -155,22 +155,33 @@ class NODE_MT_category_shader_world(Menu):
 
         node_add_menu.draw_assets_for_catalog(layout, self.bl_label)
 
+class NODE_MT_arnold_node_add_all(Menu):
+    bl_idname = "NODE_MT_arnold_node_add_all"
+    bl_label = "Add"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.menu("NODE_MT_category_shader_output")
+        layout.separator()
+        layout.menu("NODE_MT_category_shader_surface")
+        layout.menu("NODE_MT_category_shader_textures")
+        layout.separator()
+        layout.menu("NODE_MT_category_shader_color")
+        layout.menu("NODE_MT_category_shader_conversion")
+        layout.menu("NODE_MT_category_shader_math")
+        layout.menu("NODE_MT_category_shader_utility")
+        layout.separator()
+        layout.menu("NODE_MT_category_shader_world")
+
+        node_add_menu.draw_root_assets(layout)
+
 def menu_draw(self, context):
     layout = self.layout
-
-    layout.menu("NODE_MT_category_shader_output")
-    layout.separator()
-    layout.menu("NODE_MT_category_shader_surface")
-    layout.menu("NODE_MT_category_shader_textures")
-    layout.separator()
-    layout.menu("NODE_MT_category_shader_color")
-    layout.menu("NODE_MT_category_shader_conversion")
-    layout.menu("NODE_MT_category_shader_math")
-    layout.menu("NODE_MT_category_shader_utility")
-    layout.separator()
-    layout.menu("NODE_MT_category_shader_world")
-
-    node_add_menu.draw_root_assets(layout)
+    snode = context.space_data
+    
+    if snode.tree_type == 'ArnoldShaderTree':
+        layout.menu_contents("NODE_MT_arnold_node_add_all")
 
 classes = (
     NODE_MT_category_shader_color,
@@ -181,6 +192,7 @@ classes = (
     NODE_MT_category_shader_textures,
     NODE_MT_category_shader_utility,
     NODE_MT_category_shader_world,
+    NODE_MT_arnold_node_add_all
 )
 
 def register():
@@ -189,11 +201,11 @@ def register():
         register_class(cls)
     
     print("Setting up menus")
-    bpy.types.NODE_MT_shader_node_add_all.append(menu_draw)
+    bpy.types.NODE_MT_add.append(menu_draw)
 
 def unregister():
     from bpy.utils import unregister_class
     for cls in classes:
         unregister_class(cls)
     
-    bpy.types.NODE_MT_shader_node_add_all.remove(menu_draw)
+    bpy.types.NODE_MT_add.remove(menu_draw)
