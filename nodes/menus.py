@@ -144,8 +144,8 @@ class NODE_MT_category_shader_utility(Menu):
         node_add_menu.draw_assets_for_catalog(layout, self.bl_label)
 
 class NODE_MT_category_shader_world(Menu):
-    bl_idname = "NODE_MT_category_shader_utility"
-    bl_label = "Utility"
+    bl_idname = "NODE_MT_category_shader_world"
+    bl_label = "World"
 
     def draw(self, context):
         layout = self.layout
