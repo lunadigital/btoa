@@ -1,9 +1,8 @@
 import bpy
-from bpy.types import NodeTree, ShaderNodeTree, Node
+from bpy.types import ShaderNodeTree, Node
 from bpy.props import BoolProperty
 
 from bl_ui.space_node import NODE_HT_header, NODE_MT_editor_menus
-from nodeitems_utils import NodeCategory, NodeItem
 
 from .. import bridge
 from ..utils import ui_utils
@@ -11,8 +10,8 @@ from ..bridge import NodeData, ExportDataType
 
 class ArnoldShaderTree(ShaderNodeTree):
     bl_idname = "ArnoldShaderTree"
-    bl_label = "Arnold Shader Editor"
-    bl_icon = 'MATERIAL'
+    bl_label = "Shader Editor"
+    bl_icon = 'NODE_MATERIAL'
 
     _draw_header_func = None
 
@@ -311,139 +310,6 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
     def has_displacement(self):
         return self.inputs["Displacement"].is_linked
 
-class ArnoldNodeCategory(NodeCategory):
-    @classmethod
-    def poll(cls, context):
-        return ui_utils.arnold_is_active(context)
-
-class ArnoldWorldNodeCategory(ArnoldNodeCategory):
-    @classmethod
-    def poll(cls, context):
-        return (
-            super().poll(context) and
-            context.space_data.tree_type == 'ArnoldShaderTree' and
-            context.scene.arnold.space_data.shader_type == 'WORLD'
-        )
-
-class ArnoldObjectNodeCategory(ArnoldNodeCategory):
-    @classmethod
-    def poll(cls, context):
-        return (
-            super().poll(context) and
-            context.space_data.tree_type == 'ArnoldShaderTree' and
-            context.scene.arnold.space_data.shader_type == 'OBJECT' and
-            context.object.type != 'LIGHT'
-        )
-
-world_node_categories = [
-    ArnoldWorldNodeCategory('AI_WORLD_OUTPUTS', "Output", items=[
-        NodeItem("AiShaderOutput")
-    ]),
-    ArnoldWorldNodeCategory('AI_WORLD_COLOR', "Color", items=[
-        NodeItem("AiColorCorrect"),
-        NodeItem("AiColorJitter"),
-        NodeItem("AiComposite"),
-        NodeItem("AiShuffle")
-    ]),
-    ArnoldWorldNodeCategory('AI_WORLD_CONVERSION', "Conversion", items=[
-        NodeItem("AiFloatToInteger"),
-        NodeItem("AiFloatToRGB"),
-        NodeItem("AiFloatToRGBA"),
-        NodeItem("AiRGBToFloat"),
-        NodeItem("AiRGBToVector"),
-        NodeItem("AiRGBAToFloat"),
-        NodeItem("AiSeparateRGBA"),
-        NodeItem("AiVectorToRGB"),
-    ]),
-    ArnoldWorldNodeCategory('AI_WORLD_LIGHTS', "Lights", items=[
-        NodeItem("AiSkydome"),
-    ]),
-    ArnoldWorldNodeCategory('AI_WORLD_MATH', "Math", items=[
-        NodeItem("AiMultiply"),
-        NodeItem("AiRange")
-    ]),
-    ArnoldWorldNodeCategory('AI_WORLD_SURFACE', "Surface", items=[
-        NodeItem("AiFlat"),
-    ]),
-    ArnoldWorldNodeCategory('AI_WORLD_TEXTURES', "Textures", items=[
-        NodeItem("AiCellNoise"),
-        NodeItem("AiCheckerboard"),
-        NodeItem("AiImage"),
-        NodeItem("AiLayerFloat"),
-        NodeItem("AiLayerRGBA"),
-        NodeItem("AiMixRGBA"),
-        NodeItem("AiNoise"),
-        NodeItem("AiPhysicalSky")
-    ]),
-    ArnoldWorldNodeCategory('AI_WORLD_UTILITY', "Utility", items=[
-        NodeItem("AiFloat"),
-    ]),
-]
-
-object_node_categories = [
-    ArnoldObjectNodeCategory('AI_OBJECT_OUTPUTS', "Output", items=[
-        NodeItem("AiShaderOutput"),
-    ]),
-    ArnoldObjectNodeCategory('AI_OBJECT_COLOR', "Color", items=[
-        NodeItem("AiColorCorrect"),
-        NodeItem("AiColorJitter"),
-        NodeItem("AiComposite"),
-        NodeItem("AiShuffle"),
-    ]),
-    ArnoldObjectNodeCategory('AI_OBJECT_CONVERSION', "Conversion", items=[
-        NodeItem("AiFloatToInteger"),
-        NodeItem("AiFloatToRGB"),
-        NodeItem("AiFloatToRGBA"),
-        NodeItem("AiRGBToFloat"),
-        NodeItem("AiRGBToVector"),
-        NodeItem("AiRGBAToFloat"),
-        NodeItem("AiSeparateRGBA"),
-        NodeItem("AiVectorToRGB"),
-    ]),
-    ArnoldObjectNodeCategory('AI_OBJECT_MATH', "Math", items=[
-        NodeItem("AiMultiply"),
-        NodeItem("AiRange")
-    ]),
-    ArnoldObjectNodeCategory('AI_OBJECT_SURFACE', "Surface", items=[
-        NodeItem("AiAmbientOcclusion"),
-        NodeItem("AiCarPaint"),
-        NodeItem("AiCurvature"),
-        NodeItem("AiDisplacement"),
-        NodeItem("AiFlat"),
-        NodeItem("AiLambert"),
-        NodeItem("AiMatte"),
-        NodeItem("AiMixShader"),
-        NodeItem("AiNormalMap"),
-        NodeItem("AiRaySwitchRGBA"),
-        NodeItem("AiRaySwitchShader"),
-        NodeItem("AiShadowMatte"),
-        NodeItem("AiStandardHair"),
-        NodeItem("AiStandardSurface"),
-        NodeItem("AiTwoSided"),
-        NodeItem("AiWireframe")
-    ]),
-    ArnoldObjectNodeCategory('AI_OBJECT_TEXTURES', "Textures", items=[
-        NodeItem("AiCellNoise"),
-        NodeItem("AiCheckerboard"),
-        NodeItem("AiFlakes"),
-        NodeItem("AiImage"),
-        NodeItem("AiLayerFloat"),
-        NodeItem("AiLayerRGBA"),
-        NodeItem("AiMixRGBA"),
-        NodeItem("AiNoise"),
-        NodeItem("AiRoundCorners")
-    ]),
-    ArnoldObjectNodeCategory('AI_OBJECT_UTILITY', "Utility", items=[
-        NodeItem("AiBump2d"),
-        NodeItem("AiBump3d"),
-        NodeItem("AiCoordSpace"),
-        NodeItem("AiFacingRatio"),
-        NodeItem("AiUVProjection"),
-        NodeItem("AiFloat"),
-        NodeItem("AiStateFloat")
-    ]),
-]
-
 classes = (
     ArnoldShaderTree,
     AiShaderOutput,
@@ -451,21 +317,13 @@ classes = (
 
 def register():
     from bpy.utils import register_class
-    from nodeitems_utils import register_node_categories
     for cls in classes:
         register_class(cls)
 
-    register_node_categories('ARNOLD_WORLD_NODES', world_node_categories)
-    register_node_categories('ARNOLD_OBJECT_NODES', object_node_categories)
-
 def unregister():
     from bpy.utils import unregister_class
-    from nodeitems_utils import unregister_node_categories
 
     ArnoldShaderTree.unregister_draw_cb()
 
     for cls in classes:
         unregister_class(cls)
-
-    unregister_node_categories('ARNOLD_WORLD_NODES')
-    unregister_node_categories('ARNOLD_OBJECT_NODES')
