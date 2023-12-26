@@ -140,6 +140,7 @@ class NODE_MT_category_shader_utility(Menu):
         node_add_menu.add_node_type(layout, "AiUVProjection")
         node_add_menu.add_node_type(layout, "AiFloat")
         node_add_menu.add_node_type(layout, "AiStateFloat")
+        node_add_menu.add_node_type(layout, "AiStateInt")
 
         node_add_menu.draw_assets_for_catalog(layout, self.bl_label)
 

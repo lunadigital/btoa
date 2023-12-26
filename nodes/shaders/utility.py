@@ -181,6 +181,43 @@ class AiStateFloat(bpy.types.Node, core.ArnoldNode):
     def sub_export(self, node):
         node.set_string("variable", self.variable)
 
+class AiStateInt(bpy.types.Node, core.ArnoldNode):
+    bl_label = "State Int"
+    ai_name = "state_int"
+
+    variable: EnumProperty(
+        name="State Type",
+        items=[
+            ('x', 'Raster X', "Raster-space x pixel coordinate the camera ray started from."),
+            ('y', 'Raster Y', "Raster-space y pixel coordinate the camera ray started from."),
+            ('si', 'Subpixel Sample Index', "AA sample index, in range [0, AA_samples]."),
+            ('Rt', 'Ray Type', "Ray type of the incoming ray."),
+            ('transp_index', 'Transparency Index', "The number of transparent surfaces shaded before the current shading point."),
+            ('tid', 'Thread ID', "Unique thread ID."),
+            ('bounces', 'Bounces', "The number of bounces up to the current shading point."),
+            ('bounces_diffuse', 'Diffuse Bounces', "The number of diffuse bounces."),
+            ('bounces_specular', 'Specular Bounces', "The number of specular bounces."),
+            ('bounces_reflect', 'Reflection Bounces', "The number of reflection bounces."),
+            ('bounces_transmit', 'Transmission Bounces', "The number of transmission bounces."),
+            ('bounces_volume', 'Volume Bounces', "The number of volume bounces."),
+            ('fhemi', 'Force Hemispherical Lighting', "Force hemispherical lighting."),
+            ('fi', 'Primitive ID', "Primitive ID (triangle, curve segment, etc)."),
+            ('nlights', 'Number of Active Lights', "The number of active lights affecting shading point."),
+            ('inclusive_traceset', 'Inclusive Traceset', "If a traceset is used, is it inclusive or exclusive?"),
+            ('skip_shadow', 'Skip Shadow Rays', "If true, don't trace shadow rays for lighting."),
+            ('sc', 'Shading Context', "Type of shading context (surface, displacement, volume, background, importance)."),
+        ]
+    )
+
+    def init(self, context):
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Float", identifier="out_variable")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "variable", text="")
+
+    def sub_export(self, node):
+        node.set_string("variable", self.variable)
+
 classes = (
     AiBump2d,
     AiBump3d,
@@ -188,7 +225,8 @@ classes = (
     AiFacingRatio,
     AiUVProjection,
     AiFloat,
-    AiStateFloat
+    AiStateFloat,
+    AiStateInt
 )
 
 def register():
