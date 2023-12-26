@@ -218,6 +218,42 @@ class AiStateInt(bpy.types.Node, core.ArnoldNode):
     def sub_export(self, node):
         node.set_string("variable", self.variable)
 
+class AiStateVector(bpy.types.Node, core.ArnoldNode):
+    bl_label = "State Vector"
+    ai_name = "state_vector"
+
+    variable: EnumProperty(
+        name="State Type",
+        items=[
+            ('Ro', 'Ray Origin', "For surfaces, ray origin (camera or previous bounce position). For volumes, the start of the volume segment being shaded."),
+            ('Rd', 'Ray Direction', "Ray direction from ray origin to shading point. For volumes, the direction of the volume segment being shaded."),
+            ('Po', 'Shading Point in Object-Space', "Shading position in object-space."),
+            ('P', 'Shading Point in World-Space', "Shading position in world-space."),
+            ('dPdx', 'Surface Derivative wrt Screen X', "Surface derivative with respect to X pixel coordinate."),
+            ('dPdy', 'Surface Derivative wrt Screen Y', "Surface derivative with respect to Y pixel coordinate."),
+            ('N', 'Shading Normal', "Shading normal, including smooth normals and bump mapping."),
+            ('Nf', 'Face-Forward Shading Normal', "Face-forward shading normal."),
+            ('Ng', 'Geometric Normal', "Normal of the actual geometry, without smoothing or bump."),
+            ('Ngf', 'Face-Forward Geometric Normal', "Face-forward geometric normal."),
+            ('Ns', 'Smoothed Normal without Bump', "Smoothed normal (same as N but without bump)."),
+            ('dPdu', 'Surface Derivative wrt U', "Surface derivative with respect to U coordinate (not normalized). May be used as tangent for anisotropic shading or vector displacement."),
+            ('dPdv', 'Surface Derivative wrt V', "Surface derivative with respect to V coordinate (not normalized). May be used as tangent for anisotropic shading or vector displacement."),
+            ('dDdx', 'Ray Direction Derivative wrt Screen X', "Ray direction derivative wrt X pixel coordinate."),
+            ('dDdy', 'Ray Direction Derivative wrt Screen Y', "Ray direction derivative wrt Y pixel coordinate."),
+            ('dNdx', 'Surface Normal Derivative wrt Screen X', "The derivative of the surface normal with respect to X pixel coordinate."),
+            ('dNdy', 'Surface Normal Derivative wrt Screen Y', "The derivative of the surface normal with respect to Y pixel coordinate."),
+        ]
+    )
+
+    def init(self, context):
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Float", identifier="out_variable")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, "variable", text="")
+
+    def sub_export(self, node):
+        node.set_string("variable", self.variable)
+
 classes = (
     AiBump2d,
     AiBump3d,
@@ -226,7 +262,8 @@ classes = (
     AiUVProjection,
     AiFloat,
     AiStateFloat,
-    AiStateInt
+    AiStateInt,
+    AiStateVector
 )
 
 def register():
