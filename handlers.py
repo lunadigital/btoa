@@ -12,6 +12,15 @@ def ensure_node_tree_exists(datablock):
             ops_utils.init_material_nodetree(ntree)
         elif isinstance(datablock, bpy.types.World):
             ops_utils.init_world_nodetree(ntree)
+        
+        for ob in bpy.data.objects:
+            if ob.material_slots:
+                for slot in ob.material_slots:
+                    if datablock.name == slot.name:
+                        slot.material = datablock
+                        ob.update_tag()
+                        datablock.update_tag()
+                        return
 
 @persistent
 def initialize_shader_graphs(dummy):
@@ -25,7 +34,7 @@ def initialize_shader_graphs(dummy):
             ensure_node_tree_exists(world)
 
 def register():
-    bpy.app.handlers.depsgraph_update_post.append(initialize_shader_graphs)
+    bpy.app.handlers.depsgraph_update_pre.append(initialize_shader_graphs)
 
 def unregister():
-    bpy.app.handlers.depsgraph_update_post.remove(initialize_shader_graphs)
+    bpy.app.handlers.depsgraph_update_pre.remove(initialize_shader_graphs)
