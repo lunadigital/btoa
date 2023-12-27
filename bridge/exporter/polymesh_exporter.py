@@ -99,11 +99,11 @@ class PolymeshExporter(ObjectExporter):
             # Assign default lambert shader
             # This is the only node we'll search for by name because there's no
             # equivalent shader in the Blender scene, so no need for a UUID
-            shader = self.session.get_node_by_name("BTOA_LAMBERT_SHADER")
+            shader = self.session.get_node_by_name("BTOA_MISSING_SHADER")
 
             if not shader.is_valid:
-                shader = ArnoldNode("lambert")
-                shader.set_string("name", "BTOA_LAMBERT_SHADER")
+                shader = ArnoldNode("facing_ratio")
+                shader.set_string("name", "BTOA_MISSING_SHADER")
             
             self.node.set_pointer("shader", shader)
 
