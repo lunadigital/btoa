@@ -201,8 +201,7 @@ def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
-    
-    print("Setting up menus")
+
     bpy.types.NODE_MT_add.append(menu_draw)
 
 def unregister():
