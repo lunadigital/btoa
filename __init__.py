@@ -6,7 +6,7 @@ bl_info = {
     "description": "Community-developed Arnold renderer integration",
     "author": "Luna Digital, Ltd.",
     "version": (0, 5, 0),
-    "blender": (3, 0, 0),
+    "blender": (4, 0, 0),
     "category": "Render"
 }
 
