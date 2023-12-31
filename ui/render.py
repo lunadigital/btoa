@@ -18,11 +18,10 @@ class ARNOLD_PT_sampling(ArnoldRenderPanel):
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold
-
         layout.use_property_split = True
 
-        layout.prop(options, "render_device")
+        options = context.scene.arnold
+
         layout.prop(options, "aa_samples")
 
         col = self.layout.column()
@@ -240,10 +239,25 @@ classes = (
     ARNOLD_PT_feature_overrides,
 )
 
+def draw_device(self, context):
+    layout = self.layout
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+
+    options = context.scene.arnold
+
+    if context.engine == 'ARNOLD':
+        col = layout.column()
+        col.prop(options, "render_device", text="Device")
+
 def register():
     from ..utils import register_utils as utils
     utils.register_classes(classes)
 
+    bpy.types.RENDER_PT_context.append(draw_device)
+
 def unregister():
     from ..utils import register_utils as utils
     utils.unregister_classes(classes)
+
+    bpy.types.RENDER_PT_context.remove(draw_device)
