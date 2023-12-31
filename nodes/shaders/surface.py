@@ -210,7 +210,7 @@ class AiMixShader(bpy.types.Node, core.ArnoldNode):
     ai_name = "mix_shader"
 
     def toggle_mix(self, context):
-        self.inputs[0].hide = self.mode == 'add'
+        self.inputs[0].enabled = self.mode == 'blend'
 
     mode: EnumProperty(
         name="Mode",
