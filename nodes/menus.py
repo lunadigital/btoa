@@ -43,7 +43,7 @@ class NODE_MT_category_shader_color(Menu):
 
 class NODE_MT_category_shader_conversion(Menu):
     bl_idname = "NODE_MT_category_shader_conversion"
-    bl_label = "Conversion"
+    bl_label = "Convert"
 
     def draw(self, context):
         layout = self.layout
