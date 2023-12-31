@@ -28,7 +28,7 @@ class AiFloatToInteger(bpy.types.Node, core.ArnoldNode):
         layout.prop(self, 'mode', text="")
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatUnbounded', "Value", identifier="input")
+        self.inputs.new('AiNodeSocketFloatNoSlider', "Value", identifier="input")
         self.outputs.new('AiNodeSocketIntUnbounded', "Integer")
 
     def sub_export(self, node):

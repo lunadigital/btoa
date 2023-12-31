@@ -10,6 +10,10 @@ class AiNodeSocketFloat(AiNodeSocket):
     def export_default(self):
         return FloatData(self.default_value)
 
+class AiNodeSocketFloatNoSlider(NodeSocket, AiNodeSocketFloat):
+    default_value: FloatProperty()
+    slider = False
+
 class AiNodeSocketFloatUnbounded(NodeSocket, AiNodeSocketFloat):
     default_value: FloatProperty(soft_min=-1, soft_max=1)
 
@@ -62,6 +66,7 @@ class AiNodeSocketSkydomeExposure(NodeSocket, AiNodeSocketFloat):
     slider = False
 
 classes = (
+    AiNodeSocketFloatNoSlider,
     AiNodeSocketFloatUnbounded,
     AiNodeSocketFloatPositive,
     AiNodeSocketFloatPositiveSmall,

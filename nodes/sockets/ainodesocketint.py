@@ -5,7 +5,7 @@ from .ainodesocket import AiNodeSocket, SocketColor
 from ...bridge.types import IntData
 
 class AiNodeSocketInt(AiNodeSocket):
-    color = SocketColor.FLOAT
+    color = SocketColor.INTEGER
 
     def export_default(self):
         return IntData(self.default_value)
