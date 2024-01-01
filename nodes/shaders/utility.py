@@ -115,26 +115,6 @@ class AiUVProjection(bpy.types.Node, core.ArnoldNode):
 
     def sub_export(self, node):
         node.set_string("projection_type", self.projection_type)
-
-'''
-AiFloat
-
-This is a dummy node that mimics the Cycles/EEVEE "Value" node for outputing a single float value.
-'''
-class AiFloat(bpy.types.Node):
-    bl_label = "Float"
-
-    value: FloatProperty(name="Float")
-
-    def init(self, context):
-        self.outputs.new('AiNodeSocketFloatUnbounded', "Float")
-    
-    def draw_buttons(self, context, layout):
-        layout.prop(self, "value", text="")
-    
-    # Overriding export() because this isn't a native Arnold struct
-    def export(self):
-        return self.value, self.outputs[0].default_type
     
 '''
 Shading State Shaders
@@ -256,7 +236,6 @@ classes = (
     AiCoordSpace,
     AiFacingRatio,
     AiUVProjection,
-    AiFloat,
     AiStateFloat,
     AiStateInt,
     AiStateVector

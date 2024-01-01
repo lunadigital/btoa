@@ -61,6 +61,16 @@ class NODE_MT_category_arnold_shader_conversion(Menu):
         node_add_menu.add_node_type(layout, "AiSeparateRGBA", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiSeparateXYZ", poll=arnold_shader_nodes_poll(context))
 
+class NODE_MT_category_arnold_shader_input(Menu):
+    bl_idname = "NODE_MT_category_arnold_shader_input"
+    bl_label = "Input"
+
+    def draw(self, context):
+        layout = self.layout
+
+        node_add_menu.add_node_type(layout, "AiFloat", poll=arnold_shader_nodes_poll(context))
+        node_add_menu.add_node_type(layout, "AiVector", poll=arnold_shader_nodes_poll(context))
+
 class NODE_MT_category_arnold_shader_math(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_math"
     bl_label = "Math"
@@ -132,7 +142,6 @@ class NODE_MT_category_arnold_shader_utility(Menu):
         node_add_menu.add_node_type(layout, "AiCoordSpace", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiFacingRatio", poll=object_arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiUVProjection", poll=object_arnold_shader_nodes_poll(context))
-        node_add_menu.add_node_type(layout, "AiFloat", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiStateFloat", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiStateInt", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiStateVector", poll=arnold_shader_nodes_poll(context))
@@ -154,6 +163,7 @@ class NODE_MT_arnold_node_add_all(Menu):
     def draw(self, context):
         layout = self.layout
 
+        layout.menu("NODE_MT_category_arnold_shader_input")
         layout.menu("NODE_MT_category_arnold_shader_output")
         layout.separator()
         layout.menu("NODE_MT_category_arnold_shader_surface")
@@ -178,6 +188,7 @@ def menu_draw(self, context):
 classes = (
     NODE_MT_category_arnold_shader_color,
     NODE_MT_category_arnold_shader_conversion,
+    NODE_MT_category_arnold_shader_input,
     NODE_MT_category_arnold_shader_math,
     NODE_MT_category_arnold_shader_output,
     NODE_MT_category_arnold_shader_surface,
