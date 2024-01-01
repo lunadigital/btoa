@@ -59,6 +59,7 @@ class NODE_MT_category_arnold_shader_conversion(Menu):
         node_add_menu.add_node_type(layout, "AiRGBAToFloat", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiVectorToRGB", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiSeparateRGBA", poll=arnold_shader_nodes_poll(context))
+        node_add_menu.add_node_type(layout, "AiSeparateXYZ", poll=arnold_shader_nodes_poll(context))
 
 class NODE_MT_category_arnold_shader_math(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_math"

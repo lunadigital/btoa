@@ -194,6 +194,35 @@ class AiSeparateRGBA(bpy.types.Node, core.ArnoldNode):
             return socket_data
 
 '''
+AiSeparateXYZ
+
+This is a dummy node to separate vector inputs into their component X/Y/Z outputs.
+'''
+class AiSeparateXYZ(bpy.types.Node, core.ArnoldNode):
+    bl_label = "Separate XYZ"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketVector', "Vector")
+        
+        self.outputs.new('AiNodeSocketFloatUnbounded', "X", identifier="x")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Y", identifier="y")
+        self.outputs.new('AiNodeSocketFloatUnbounded', "Z", identifier="z")
+
+    def export(self):
+        socket_data = self.inputs[0].export()
+            
+        if socket_data.type is ExportDataType.NODE:
+            return socket_data
+        else:
+            key = socket_data.type
+            if socket_data.type is ExportDataType.COLOR:
+                key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
+                
+            bridge.BTOA_SET_LAMBDA[key](node, i.identifier, socket_data.value)
+
+            return socket_data
+
+'''
 AiVectorToRGB
 
 Converts vector to RGB color.
@@ -229,6 +258,7 @@ classes = (
     AiRGBToVector,
     AiRGBAToFloat,
     AiSeparateRGBA,
+    AiSeparateXYZ,
     AiVectorToRGB,
 )
 
