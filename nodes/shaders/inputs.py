@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import *
 from .. import core
-from ...bridge import VectorData
+from ...bridge import FloatData, VectorData
 from ...utils import register_utils
 
 '''
@@ -22,7 +22,7 @@ class AiFloat(bpy.types.Node):
     
     # Overriding export() because this isn't a native Arnold struct
     def export(self):
-        return self.value, self.outputs[0].default_type
+        return FloatData(self.value)
 
 '''
 AiVector
