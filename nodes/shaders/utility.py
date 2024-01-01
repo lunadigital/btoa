@@ -10,6 +10,7 @@ Provides bump mapping cored on a 2d texture map.
 '''
 class AiBump2d(bpy.types.Node, core.ArnoldNode):
     bl_label = "Bump 2D"
+    bl_width_default = 160
     ai_name = "bump2d"
 
     def init(self, context):
@@ -18,8 +19,6 @@ class AiBump2d(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
         self.outputs.new('AiNodeSocketVector', name="Vector")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="X")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Y")
 
 '''
 AiBump3d
@@ -32,15 +31,12 @@ class AiBump3d(bpy.types.Node, core.ArnoldNode):
     ai_name = "bump3d"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Map", identifier="bump_map")
+        self.inputs.new('AiNodeSocketRGB', name="Bump Map", identifier="bump_map").hide_value = True
         self.inputs.new('AiNodeSocketFloatPositive', name="Bump Height", identifier="bump_height").default_value = 0.01
         self.inputs.new('AiNodeSocketFloatPositiveSmall', name="Epsilon", identifier="epsilon").default_value = 0.001
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
         self.outputs.new('AiNodeSocketVector', name="Vector")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="X")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Y")
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Z")
 
 '''
 AiCoordSpace
