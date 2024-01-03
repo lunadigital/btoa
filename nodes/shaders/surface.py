@@ -248,7 +248,7 @@ Provides bump mapping cored on a 2d texture map.
 '''
 class AiNormalMap(bpy.types.Node, core.ArnoldNode):
     bl_label = "Normal Map"
-    bl_width_default = 160
+    bl_width_default = 180
     ai_name = "normal_map"
 
     invert_x: BoolProperty(name="Invert X")
@@ -257,11 +257,11 @@ class AiNormalMap(bpy.types.Node, core.ArnoldNode):
 
     color_to_signed: BoolProperty(
         name="Color To Signed",
-        description="For 8-bit maps. If enabled, the input is remapped to the [-1,1] range"
+        description="For 8-bit maps. If enabled, the input is remapped to the [-1,1] range",
+        default=True
     )
 
-    tangent_space: BoolProperty(name="Tangent Space")
-    normalize: BoolProperty(name="Normalize")
+    tangent_space: BoolProperty(name="Tangent Space", default=True)
 
     def init(self, context):
         self.inputs.new('AiNodeSocketVector', name="Input", identifier="input")
@@ -269,18 +269,17 @@ class AiNormalMap(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketVector', name="Tangent", identifier="tangent")
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketVector', name="Vector", identifier="output")
+        self.outputs.new('AiNodeSocketVector', name="Vector")
 
     def draw_buttons(self, context, layout):
-        row = layout.row(heading="Invert")
-        row.prop(self, "invert_x", text="X")
-        row.prop(self, "invert_y", text="Y")
-        row.prop(self, "invert_z", text="Z")
+        row = layout.row(heading="Invert", align=True)
+        row.prop(self, "invert_x", text="X", toggle=1)
+        row.prop(self, "invert_y", text="Y", toggle=1)
+        row.prop(self, "invert_z", text="Z", toggle=1)
         
         col = layout.column()
         col.prop(self, "color_to_signed")
         col.prop(self, "tangent_space")
-        col.prop(self, "normalize")
 
     def sub_export(self, node):
         node.set_bool("invert_x", self.invert_x)
@@ -288,7 +287,6 @@ class AiNormalMap(bpy.types.Node, core.ArnoldNode):
         node.set_bool("invert_z", self.invert_z)
         node.set_bool("color_to_signed", self.color_to_signed)
         node.set_bool("tangent_space", self.tangent_space)
-        node.set_bool("normalize", self.normalize)
 
 '''
 AiRaySwitchRGBA
