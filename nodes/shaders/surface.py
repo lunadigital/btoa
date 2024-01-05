@@ -2,6 +2,7 @@ import bpy
 from bpy.props import *
 from .. import core, constant
 from ...utils import register_utils
+from ...bridge.types import DisplacementData
 
 '''
 AiAmbientOcclusion
@@ -25,7 +26,7 @@ class AiAmbientOcclusion(bpy.types.Node, core.ArnoldNode):
         self.inputs.new("AiNodeSocketRGB", "Black", identifier="black").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "invert_normals")
@@ -77,7 +78,7 @@ class AiCarPaint(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketVector', name="Coat Normal", identifier="coat_normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
 '''
 AiCurvature
@@ -140,20 +141,22 @@ class AiDisplacement(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatUnbounded', "Zero Value", identifier="disp_zero_value")
         self.inputs.new('AiNodeSocketRGB', "Input", identifier="disp_map").default_value = (0, 0, 0)
         
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "disp_autobump")
 
     # Overriding export() because this isn't a native Arnold struct
     def export(self):
-        return (
-            self.inputs[3].export()[0], # input
-            self.inputs[0].export()[0], # padding
-            self.inputs[1].export()[0], # height
-            self.inputs[2].export()[0], # zero value
+        data = (
+            self.inputs[3].export(), # input
+            self.inputs[0].export(), # padding
+            self.inputs[1].export(), # height
+            self.inputs[2].export(), # zero value
             self.disp_autobump
         )
+
+        return DisplacementData(data)
 
 '''
 AiFlat
@@ -198,7 +201,7 @@ class AiMatte(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketRGBA', "Color", identifier="color")
         self.inputs.new('AiNodeSocketRGB', "Opacity", identifier="opacity").default_value = (1, 1, 1)
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
 '''
 AiMixShader
@@ -371,7 +374,7 @@ class AiShadowMatte(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.1
         self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_IOR").default_value = 1.52
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "background")
@@ -430,7 +433,7 @@ class AiStandardHair(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketIntPositive', "Extra Depth", identifier="extra_depth").default_value = 16
         self.inputs.new('AiNodeSocketIntPositive', "Extra Samples", identifier="extra_samples")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "roughness_anisotropic")
@@ -516,7 +519,7 @@ class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
         self.inputs.new('AiNodeSocketVector', "Tangent", identifier="tangent")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "transmit_aovs")
@@ -547,7 +550,7 @@ class AiTwoSided(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketSurface', "Front", identifier="front")
         self.inputs.new('AiNodeSocketSurface', "Back", identifier="back")
         
-        self.outputs.new('AiNodeSocketSurface', name="Closure", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="Closure")
 
 '''
 AiWireframe
@@ -574,7 +577,7 @@ class AiWireframe(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', "Line Color", identifier="line_color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatPositive', "Line Width", identifier="line_width").default_value = 1
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "edge_type")

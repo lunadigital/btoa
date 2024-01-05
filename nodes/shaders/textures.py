@@ -358,7 +358,7 @@ class AiLayerFloat(AiLayer):
         for i in range(1, 9):
             self.inputs.new('AiNodeSocketFloatUnbounded', "Layer {}".format(i), identifier="input{}".format(i))
 
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Float", identifier="output")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="Float")
 
 '''
 AiLayerRGBA
@@ -383,7 +383,7 @@ class AiLayerRGBA(AiLayer):
             self.inputs.new('AiNodeSocketRGBA', "Layer {}".format(i), identifier="input{}".format(i))
             self.inputs.new('AiNodeSocketFloatNormalized', "Mix", identifier="mix{}".format(i))
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
     def template_layer_properties(self, layout, layer):
         super().template_layer_properties(layout, layer)
@@ -425,7 +425,7 @@ class AiMixRGBA(bpy.types.Node, core.ArnoldNode):
         self.inputs.new("AiNodeSocketRGBA", "Input 1", identifier="input1")
         self.inputs.new("AiNodeSocketRGBA", "Input 2", identifier="input2").default_value = (0, 0, 0, 1)
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
 '''
 AiNoise
@@ -497,7 +497,7 @@ class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', "Sun Tint", identifier="sun_tint").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketFloatPositive', "Sun Size", identifier="sun_size").default_value = 0.51
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "enable_sun")

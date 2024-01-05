@@ -16,7 +16,7 @@ class AiMultiply(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', "Input 1", identifier="input1").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketRGB', "Input 2", identifier="input2").default_value = (1, 1, 1)
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
 '''
 AiRange
@@ -44,7 +44,7 @@ class AiRange(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', name="Bias", identifier="bias").default_value = 0.5
         self.inputs.new('AiNodeSocketFloatPositive', name="Gain", identifier="gain").default_value = 0.5
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "smoothstep")

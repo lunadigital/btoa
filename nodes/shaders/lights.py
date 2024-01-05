@@ -40,7 +40,7 @@ class AiSkydome(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketSkydomeExposure', "Exposure", identifier="exposure")
         self.inputs.new('AiNodeSocketSkydomeResolution', "Resolution", identifier="resolution")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "image_format", text="")

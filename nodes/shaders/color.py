@@ -96,7 +96,7 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatPositive', name="Max Saturation", identifier="saturation_max")
         self.inputs.new('AiNodeSocketIntPositive', name="Seed", identifier="seed")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def export(self):
         node = bridge.ArnoldNode(self.ai_name)
@@ -185,7 +185,7 @@ class AiComposite(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketRGBA', name="A", identifier="A")
         self.inputs.new('AiNodeSocketRGBA', name="B", identifier="B")
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "operation")
@@ -257,7 +257,7 @@ class AiShuffle(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', name="Color", identifier="color")
         self.inputs.new('AiNodeSocketFloatUnbounded', name="Alpha", identifier="alpha")
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "channel_r")

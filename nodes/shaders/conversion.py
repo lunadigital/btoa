@@ -48,7 +48,7 @@ class AiFloatToRGB(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatPositive', "G", identifier="g")
         self.inputs.new('AiNodeSocketFloatPositive', "B", identifier="b")
 
-        self.outputs.new('AiNodeSocketRGB', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketRGB', name="RGB")
 
 '''
 AiFloatToRGBA
@@ -65,7 +65,7 @@ class AiFloatToRGBA(bpy.types.Node, core.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatPositive', "B", identifier="b")
         self.inputs.new('AiNodeSocketFloatPositive', "A", identifier="a")
         
-        self.outputs.new('AiNodeSocketRGB', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGB', name="RGBA")
 
 '''
 AiRGBToFloat
