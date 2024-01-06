@@ -12,6 +12,7 @@ class ExportDataType(Enum):
     BYTE = 9
     RGB = 10
     RGBA = 11
+    GROUP = 12
 
 class ExportData:
     def __init__(self, data_type, value):
@@ -45,3 +46,7 @@ class VectorData(ExportData):
 class StringData(ExportData):
     def __init__(self, value):
         super().__init__(ExportDataType.STRING, value)
+
+class DisplacementData(ExportData):
+    def __init__(self, value):
+        super().__init__(ExportDataType.GROUP, value)
