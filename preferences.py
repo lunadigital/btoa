@@ -95,12 +95,14 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
 
         Path(install_dir).mkdir(parents=True, exist_ok=True)
 
+        version = "7.2.5.0"
+
         if sys.platform == 'win32':
-            package = 'Arnold-7.2.3.3-windows.zip'
+            package = f'Arnold-{version}-windows.zip'
         elif sys.platform.startswith('linux'):
-            package = 'Arnold-7.2.3.3-linux.tgz'
+            package = f'Arnold-{version}-linux.tgz'
         elif sys.platform == 'darwin':
-            package = 'Arnold-7.2.3.3-darwin.tgz'
+            package = f'Arnold-{version}-darwin.tgz'
 
         INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
 
@@ -114,7 +116,7 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
         ssl._create_default_https_context = ssl._create_unverified_context
 
         urllib.request.urlretrieve(
-            f'https://wdown.solidangle.com/arnold/{package}',
+            f'https://arnoldforblender.com/downloads/{version}/{package}',
             archive_path,
             update_progress_percent
         )
