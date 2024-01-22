@@ -23,9 +23,9 @@ class OptionsExporter(Exporter):
 
         if render["use_border"]:
             min_x = int(x * render["border_min_x"])
-            min_y = int(math.ceil(y * (1 - render["border_max_y"])))
-            max_x = int(x * render["border_max_x"]) - 1 # I don't know why, but subtracting 1px here avoids weird render artifacts
-            max_y = int(math.ceil(y * (1 - render["border_min_y"])))
+            min_y = int(math.floor(y * (1 - render["border_max_y"])))
+            max_x = int(x * render["border_max_x"]) - 1
+            max_y = int(math.floor(y * (1 - render["border_min_y"]))) - 1
 
             options.set_render_region(min_x, min_y, max_x, max_y)
 
