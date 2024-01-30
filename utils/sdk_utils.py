@@ -18,8 +18,13 @@ def get_license_manager_path():
         return None
 
 def is_arnoldserver_installed():
+    sdk_installed = os.path.exists(get_server_path())
+    import_success = False
+
     try:
         import arnold
-        return True
+        import_success = True
     except:
-        return False
+        pass
+
+    return sdk_installed and import_success
