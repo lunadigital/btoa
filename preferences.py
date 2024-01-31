@@ -5,6 +5,7 @@ import math
 import os
 import shutil
 import ssl
+import subprocess
 import sys
 import tarfile
 import threading
@@ -23,6 +24,7 @@ ARNOLD_INSTALL_PATH = sdk_utils.get_server_path()
 ARNOLD_PLUGIN_PATH = os.path.join(ADDON_ROOT_PATH, 'drivers', 'build')
 INSTALL_PROGRESS_LABEL = ''
 INSTALL_IN_PROGRESS = False
+INSTALL_JUST_COMPLETED = False
 SDK_UPDATE_AVAILABLE = False
 CHECK_FOR_SDK_UPDATE = True
 
@@ -31,6 +33,12 @@ def update_progress_percent(block_num, block_size, total_size):
 
     percent = math.floor(((block_num * block_size) / total_size) * 100)
     INSTALL_PROGRESS_LABEL = f'Downloading, please wait... ({percent}%)'
+
+def delete_old_sdk():
+    old_sdk_path = os.path.join(sdk_utils.get_arnold_install_root(), '.ArnoldServer')
+
+    if os.path.exists(old_sdk_path):
+        shutil.rmtree(old_sdk_path)
 
 class ARNOLD_OT_reset_log_flags(bpy.types.Operator):
     bl_idname = 'arnold.reset_log_flags'
@@ -68,9 +76,7 @@ class ARNOLD_OT_open_license_manager(bpy.types.Operator):
     bl_description = 'Open the Arnold License Manager application'
 
     def execute(self, context):
-        import subprocess
         subprocess.run([sdk_utils.get_license_manager_path()])
-        
         return {'FINISHED'}
 
 class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
@@ -86,7 +92,8 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         global INSTALL_IN_PROGRESS
-        return not INSTALL_IN_PROGRESS
+        global INSTALL_JUST_COMPLETED
+        return not INSTALL_IN_PROGRESS and not INSTALL_JUST_COMPLETED
 
     def download_arnold_server(self):
         global INSTALL_PROGRESS_LABEL
@@ -168,6 +175,10 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
 
         if not self.worker.is_alive():
             self.finish(context)
+
+            global INSTALL_JUST_COMPLETED
+            INSTALL_JUST_COMPLETED = True
+
             return {'FINISHED'}
 
         return {'PASS_THROUGH'}
@@ -193,7 +204,17 @@ class ARNOLD_OT_uninstall_arnold_server(bpy.types.Operator):
         INSTALL_IN_PROGRESS = True
         INSTALL_PROGRESS_LABEL = ''
 
-        shutil.rmtree(ARNOLD_INSTALL_PATH)
+        '''
+        Windows won't let us outright delete files that are opened in other
+        programs, so we have to move and hide the SDK folder here so BtoA
+        triggers a new install. We will delete the SDK the next time Blender
+        is opened.
+        '''
+        tmp_name = os.path.join(sdk_utils.get_arnold_install_root(), '.ArnoldServer')
+        os.rename(ARNOLD_INSTALL_PATH, tmp_name)
+
+        if sys.platform == "win32":
+            subprocess.run(["attrib", "+H", tmp_name], check=True)
 
         INSTALL_IN_PROGRESS = False
 
@@ -252,10 +273,11 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         global SDK_UPDATE_AVAILABLE
+        global INSTALL_JUST_COMPLETED
         layout = self.layout
 
         # Arnold install
-        if sdk_utils.is_arnoldserver_installed():
+        if sdk_utils.is_arnoldserver_installed() and not INSTALL_IN_PROGRESS and not INSTALL_JUST_COMPLETED:
             import arnold
 
             arch, major, minor, fix = arnold.AiGetVersion()
@@ -286,7 +308,7 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
             if INSTALL_PROGRESS_LABEL:
                 layout.label(text=INSTALL_PROGRESS_LABEL)
 
-        if sdk_utils.is_arnoldserver_installed():
+        if sdk_utils.is_arnoldserver_installed() and not INSTALL_IN_PROGRESS and not INSTALL_JUST_COMPLETED:
             # OCIO config
             layout.label(text='Color Management')
 
@@ -421,6 +443,7 @@ def register():
     from .utils import register_utils
     register_utils.register_classes(classes)
 
+    delete_old_sdk()
     bootstrap_arnold()
     register_plugins()
 
