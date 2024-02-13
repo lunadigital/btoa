@@ -481,7 +481,10 @@ class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
         self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color").default_value = (1, 1, 1)
-        self.inputs.new('AiNodeSocketFloatPositive', "Transmission Depth", identifier="transmission_depth")
+
+        trans_depth = self.inputs.new('AiNodeSocketFloatPositive', "Transmission Depth", identifier="transmission_depth")
+        trans_depth.real_world = True
+
         self.inputs.new('AiNodeSocketRGB', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
         self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
@@ -490,7 +493,11 @@ class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
 
         self.inputs.new('AiNodeSocketFloatNormalized', "SSS Weight", identifier="subsurface")
         self.inputs.new('AiNodeSocketRGB', "SSS Color", identifier="subsurface_color").default_value = (1, 1, 1)
-        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (1, 1, 1)
+        
+        sss_radius = self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius")
+        sss_radius.default_value = (1, 1, 1)
+        sss_radius.real_world = True
+        
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale").default_value = 1
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
 

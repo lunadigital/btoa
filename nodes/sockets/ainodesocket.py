@@ -1,5 +1,6 @@
 import bpy
 from . import utils
+from bpy.props import BoolProperty
 
 class SocketColor:
     FLOAT = (0.62745098, 0.62745098, 0.62745098, 1) # gray
@@ -12,6 +13,7 @@ class AiNodeSocket:
     bl_label = ""
     default_type = None
     slider = True
+    real_world: BoolProperty(name="Real World Scale")
 
     def draw_prop(self, context, layout, node, text):
         ''' This method can be overridden by subclasses as-needed '''

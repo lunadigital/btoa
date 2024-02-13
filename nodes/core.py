@@ -4,6 +4,7 @@ from bpy.props import BoolProperty
 
 from bl_ui.space_node import NODE_HT_header, NODE_MT_editor_menus
 
+from .sockets import utils as socket_utils
 from .. import bridge
 from ..utils import ui_utils
 from ..bridge import NodeData, ExportDataType
@@ -242,8 +243,9 @@ class ArnoldNode:
                 key = socket_data.type
                 if socket_data.type is ExportDataType.COLOR:
                     key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
-                    
-                bridge.BTOA_SET_LAMBDA[key](node, i.identifier, socket_data.value)
+                
+                value = socket_utils.convert_real_units(socket_data.value) if i.real_world else socket_data.value
+                bridge.BTOA_SET_LAMBDA[key](node, i.identifier, value)
 
         return NodeData(node)
 
