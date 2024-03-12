@@ -25,6 +25,8 @@ class RenderPassConfigGroup:
     data = (
         RenderPassConfig("Beauty", "RGBA", 4, "RGBA", "RGBA"),
         RenderPassConfig("Z", "Z", 1, "Z", "FLOAT"),
+        RenderPassConfig("Normal", "N", 3, "RGB", "VECTOR"),
+        RenderPassConfig("Position", "P", 3, "RGB", "VECTOR"),
         RenderPassConfig("Direct", "direct", 3, "RGB", "RGB"),
         RenderPassConfig("Indirect", "indirect", 3, "RGB", "RGB"),
         RenderPassConfig("Emission", "emission", 3, "RGB", "RGB"),
@@ -37,7 +39,7 @@ class RenderPassConfigGroup:
         RenderPassConfig("Volume", "volume", 3, "RGB", "RGB"),
         RenderPassConfig("Albedo", "albedo", 3, "RGB", "RGB"),
         RenderPassConfig("Light Groups", "light_groups", 3, "RGB", "RGB"),
-        RenderPassConfig("Motion Vectors", "motionvector", 3, "RGB", "RGB"), # this pixel type is probably wrong
+        RenderPassConfig("Motion Vectors", "motionvector", 3, "RGB", "RGB"),
     )
 
     light = (

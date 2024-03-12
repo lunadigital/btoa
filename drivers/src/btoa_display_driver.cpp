@@ -21,7 +21,10 @@ node_update
 
 driver_supports_pixel_type
 {
-   return pixel_type == AI_TYPE_FLOAT || pixel_type == AI_TYPE_RGB || pixel_type == AI_TYPE_RGBA;
+   return pixel_type == AI_TYPE_FLOAT ||
+          pixel_type == AI_TYPE_RGB ||
+          pixel_type == AI_TYPE_RGBA ||
+          pixel_type == AI_TYPE_VECTOR;
 }
  
 driver_extension
@@ -59,7 +62,7 @@ driver_write_bucket
    {
       // Add new AOV to buffer
       int channels = 1;
-      if (pixel_type == AI_TYPE_RGB)
+      if (pixel_type == AI_TYPE_RGB || pixel_type == AI_TYPE_VECTOR)
          channels = 3;
       else if (pixel_type == AI_TYPE_RGBA)
          channels = 4;
@@ -92,11 +95,19 @@ driver_write_bucket
                }
                case AI_TYPE_RGBA:
                {
-                  AtRGBA rgba_data =((AtRGBA*)bucket_data)[flipped_idx];
+                  AtRGBA rgba_data = ((AtRGBA*)bucket_data)[flipped_idx];
                   target[0] = rgba_data.r;
                   target[1] = rgba_data.g;
                   target[2] = rgba_data.b;
                   target[3] = rgba_data.a;
+                  break;
+               }
+               case AI_TYPE_VECTOR:
+               {
+                  AtVector vector_data = ((AtVector*)bucket_data)[flipped_idx];
+                  target[0] = vector_data.x;
+                  target[1] = vector_data.y;
+                  target[2] = vector_data.z;
                   break;
                }
             }

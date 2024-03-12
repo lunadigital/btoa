@@ -105,7 +105,7 @@ class Session:
         for aov in enabled_aovs:
             filter_type = "btoa_default_filter"
 
-            if aov.name == 'Z':
+            if aov.name in ('Z', 'N', 'P'):
                 closest_filter = ArnoldNode("closest_filter")
                 closest_filter.set_string("name", "btoa_closest_filter")
                 closest_filter.set_float("width", scene["filter_width"])
