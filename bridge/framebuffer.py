@@ -33,6 +33,7 @@ class FrameBuffer:
 
     def tag_update(self):
         self.texture = gpu.types.GPUTexture(self.get_dimensions(), format='RGBA16F', data=self._buffer)
+        self.requires_update = False
 
     def write_bucket(self, x, y, bucket_width, bucket_height, data):
         width, height = self.get_dimensions()

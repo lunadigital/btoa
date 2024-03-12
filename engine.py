@@ -30,12 +30,8 @@ AI_FRAMEBUFFER:Optional[bridge.FrameBuffer] = None
 AI_DRIVER_UPDATE_VIEWPORT = False
 
 def ai_render_update_callback(private_data, update_type, display_output):
-    global AI_FRAMEBUFFER
     global AI_ENGINE_TAG_REDRAW
     global AI_DRIVER_UPDATE_VIEWPORT
-
-    assert AI_FRAMEBUFFER is not None
-    AI_FRAMEBUFFER.requires_update = True
 
     assert AI_ENGINE_TAG_REDRAW
     AI_ENGINE_TAG_REDRAW()
@@ -79,8 +75,9 @@ def update_viewport(buffer):
     AI_FRAMEBUFFER.write_bucket(x, y, rdata.width, rdata.height, pixels.flatten())
     AI_SESSION.free_buffer(buffer)
 
+    AI_FRAMEBUFFER.requires_update = True
+
     if AI_DRIVER_UPDATE_VIEWPORT:
-        AI_FRAMEBUFFER.requires_update = True
         AI_ENGINE_TAG_REDRAW()
 
 AI_DISPLAY_CALLBACK = bridge.ArnoldDisplayCallback(update_viewport)
