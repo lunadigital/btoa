@@ -40,11 +40,7 @@ class ARNOLD_PT_denoising(ArnoldRenderPanel):
     def draw(self, context):
         options = context.scene.arnold
         layout = self.layout
-
         layout.use_property_split = True
-
-        #col = layout.column()
-        #col.prop(context.scene.arnold, "enable_render_denoising")
 
         heading = layout.column(align=True, heading="Viewport")
         row = heading.row(align=True)
@@ -52,10 +48,6 @@ class ARNOLD_PT_denoising(ArnoldRenderPanel):
         sub = row.row()
         sub.enabled = options.enable_viewport_denoising
         sub.prop(options, "viewport_denoiser", text="")
-
-        if options.enable_render_denoising or options.enable_viewport_denoising:
-            col.separator()
-            col.label(text="Denoising with imagers not suited for animations", icon='ERROR')
 
 class ARNOLD_PT_adaptive_sampling(ArnoldRenderPanel):
     bl_label = "Adaptive Sampling"
