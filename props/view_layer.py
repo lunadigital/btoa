@@ -18,7 +18,7 @@ class RenderPassConfig:
         # Enum in ['VALUE', 'VECTOR', 'COLOR']
         if pixel_type == 'FLOAT':
             self.pass_type = 'VALUE'
-        elif 'RGB' in pixel_type:
+        elif 'RGB' in pixel_type or pixel_type == 'VECTOR':
             self.pass_type = 'COLOR'
 
 class RenderPassConfigGroup:
