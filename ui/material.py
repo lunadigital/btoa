@@ -69,7 +69,7 @@ class ARNOLD_MATERIAL_PT_context_material(ArnoldMaterialPanel):
             split.template_ID(space, "pin_id")
             split.separator()
 
-        if not mat.arnold.node_tree:
+        if mat and not mat.arnold.node_tree:
             layout.operator("arnold.material_init", icon='NODETREE')
             return
 
@@ -79,7 +79,7 @@ class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
     def draw_header_preset(self, context):
         material = context.object.active_material
 
-        if material.arnold:
+        if material and material.arnold:
             node = material.arnold.node_tree.get_output_node().inputs["Surface"].links[0].from_node
 
             if len(node.inputs) == 42: # If AiStandardSurface, or the meaning of life and everything 
@@ -89,18 +89,19 @@ class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
         layout = self.layout
         mat = context.material
         
-        layout.prop(mat, "use_nodes", icon='NODETREE')
-        layout.separator()
+        if mat:
+            layout.prop(mat, "use_nodes", icon='NODETREE')
+            layout.separator()
 
-        layout.use_property_split = True
+            layout.use_property_split = True
 
-        if mat.use_nodes:
-            ui_utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
-        else:
-            layout.prop(mat, "diffuse_color", text="Base Color")
-            layout.prop(mat, "metallic")
-            layout.prop(mat, "specular_intensity", text="Specular")
-            layout.prop(mat, "roughness")
+            if mat.use_nodes:
+                ui_utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
+            else:
+                layout.prop(mat, "diffuse_color", text="Base Color")
+                layout.prop(mat, "metallic")
+                layout.prop(mat, "specular_intensity", text="Specular")
+                layout.prop(mat, "roughness")
 
 classes = (
     ARNOLD_MATERIAL_PT_context_material,
