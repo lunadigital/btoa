@@ -1,5 +1,6 @@
 from html.parser import HTMLParser
 import urllib.request
+import ssl
 import re
 
 class Version:
@@ -22,6 +23,7 @@ class ArnoldUpdater(HTMLParser):
         self.latest_version = None
         self.all_versions = []
 
+        ssl._create_default_https_context = ssl._create_unverified_context
         fp = urllib.request.urlopen("https://www.arnoldforblender.com/downloads/")
         mybytes = fp.read()
         html = mybytes.decode("utf8")
