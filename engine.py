@@ -50,16 +50,13 @@ class ArnoldExport(bpy.types.RenderEngine):
                 shader = ntree.export_active_surface()
                 shader.set_string("name", mat.name)
                 shader.set_uuid(mat.uuid)
-                print("Exporting shader", shader)
         
         shader = bridge.ArnoldNode("facing_ratio")
         shader.set_string("name", "BTOA_MISSING_SHADER")
-        print("Exporting missing shader", shader)
 
         # Geometry and lights
         for ob in depsgraph.object_instances:
             if isinstance(ob.object.data, bridge.BTOA_CONVERTIBLE_TYPES):
-                print("Exporting geometry", ob.object.name)
                 bridge.ArnoldPolymesh(ob.object.name).from_datablock(depsgraph, ob)
             elif isinstance(ob.object.data, bpy.types.Light):
                 pass
@@ -186,7 +183,6 @@ class ArnoldRender(ArnoldExport):
         AiBegin(AI_SESSION_INTERACTIVE)
 
     def __del__(self):
-        print("DONE WITH RENDER, DELETING OBJECT")
         pass
 
     def ai_display_callback(self, buffer):
@@ -269,7 +265,6 @@ class ArnoldRender(ArnoldExport):
                 status = AiRenderGetStatus(None)
         
         # Cleanup
-        print("Cleaning up")
         self.ai_end()
         self.depsgraph = None
 
