@@ -16,6 +16,7 @@ class ArnoldExport(bpy.types.RenderEngine):
     def ai_end(self):
         AiRenderInterrupt(None, AI_BLOCKING)
         AiRenderEnd(None)
+        AiEnd()
     
     def ai_destroy(self, node):
         AiNodeDestroy(node.data)
@@ -114,8 +115,6 @@ class ArnoldExport(bpy.types.RenderEngine):
         options.set_pointer('color_manager', color_manager)
         '''
     
-    # We might want to move this to a utils module for
-    # cleaner code
     def ai_free_buffer(self, buffer):
         rdata = buffer.contents
 
@@ -188,7 +187,7 @@ class ArnoldRender(ArnoldExport):
 
     def __del__(self):
         print("DONE WITH RENDER, DELETING OBJECT")
-        AiEnd()
+        pass
 
     def ai_display_callback(self, buffer):
         render = self.depsgraph.scene.render
@@ -262,11 +261,10 @@ class ArnoldRender(ArnoldExport):
         driver.set_pointer("callback", callback)
 
         # Render
-        print("Rendering")
         result = self.ai_render(self.ai_status_callback)
         if result == AI_SUCCESS.value:
             status = AiRenderGetStatus(None)
-            while status != AI_RENDER_STATUS_FINISHED:
+            while status != AI_RENDER_STATUS_FINISHED.value:
                 time.sleep(0.001)
                 status = AiRenderGetStatus(None)
         
