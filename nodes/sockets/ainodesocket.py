@@ -37,7 +37,7 @@ class AiNodeSocket:
 
         if link:
             data = link.from_node.export()
-            data.from_socket = link.from_socket.identifier if link.from_socket.identifier != link.from_socket.name else ''
+            data.from_socket = link.from_socket.identifier if link.from_socket.identifier != link.from_socket.name and link.from_socket.identifier != "output" else ''
             return data
         elif hasattr(self, "default_value"):
             return self.export_default()

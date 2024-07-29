@@ -23,10 +23,10 @@ class CameraExporter(ObjectExporter):
 
         self.node.set_string("name", self.datablock_eval.name)
 
-        sdata = self.cache.scene
+        sdata = self.depsgraph.scene.arnold
         cdata = self.datablock_eval.data
 
-        if sdata["enable_motion_blur"] and sdata["camera_motion_blur"]:
+        if sdata.enable_motion_blur and sdata.camera_motion_blur:
             matrix = self.get_blur_matrices()
             self.node.set_array("matrix", matrix)
         else:
@@ -77,9 +77,9 @@ class CameraExporter(ObjectExporter):
         self.node.set_float("near_clip", cdata.clip_start)
         self.node.set_float("far_clip", cdata.clip_end)
 
-        if sdata["enable_motion_blur"]:
-            self.node.set_float("shutter_start", sdata["shutter_start"])
-            self.node.set_float("shutter_end", sdata["shutter_end"])
+        if sdata.enable_motion_blur:
+            self.node.set_float("shutter_start", sdata.shutter_start)
+            self.node.set_float("shutter_end", sdata.shutter_end)
             #self.node.set_string("shutter_type", scene_data.shutter_type)
             #self.node.set_string("rolling_shutter", scene_data.rolling_shutter)
             #self.node.set_float("rolling_shutter_duration", scene_data.rolling_shutter_duration)

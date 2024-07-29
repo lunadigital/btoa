@@ -55,19 +55,18 @@ def get_position_along_local_vector(ob, distance, axis):
     result = translation_matrix @ ob.matrix_world
     return result.to_translation()
 
-def get_render_resolution(session_cache, interactive=False):
-    if interactive:
-        scene = session_cache.scene
-        region = session_cache.region
+def get_render_resolution(scene, context=None):
+    if context:
+        region = context.region
 
-        x = int(region["width"] * float(scene["viewport_scale"]))
-        y = int(region["height"] * float(scene["viewport_scale"]))
+        x = int(region.width * float(scene.viewport_scale))
+        y = int(region.height * float(scene.viewport_scale))
     else:
-        render = session_cache.render
-        scale = render["resolution_percentage"] / 100
+        render = scene.render
+        scale = render.resolution_percentage / 100
 
-        x = int(render["resolution_x"] * scale)
-        y = int(render["resolution_y"] * scale)
+        x = int(render.resolution_x * scale)
+        y = int(render.resolution_y * scale)
 
     return x, y
 
