@@ -70,8 +70,7 @@ class ArnoldExport(bpy.types.RenderEngine):
         # AOVs
         scene = depsgraph.scene
         aovs = depsgraph.view_layer.arnold.aovs
-        #enabled_aovs = [aovs.beauty] if self.is_viewport else aovs.enabled_aovs
-        enabled_aovs = [aovs.beauty]
+        enabled_aovs = [aovs.beauty] if self.is_viewport else aovs.enabled_aovs
 
         default_filter = bridge.ArnoldNode(scene.arnold.filter_type)
         default_filter.set_string("name", "btoa_default_filter")
@@ -179,6 +178,8 @@ class ArnoldRender(ArnoldExport):
     def __init__(self):
         super().__init__()
         self.depsgraph = None
+        self.progress = 0
+        self.progress_increment = 0
 
         AiBegin(AI_SESSION_INTERACTIVE)
 
@@ -214,11 +215,11 @@ class ArnoldRender(ArnoldExport):
         self.update_result(result)
 
         # Update progress counter
-        #engine.progress += engine._progress_increment
-        #engine.update_progress(engine.progress)
+        self.progress += self.progress_increment
+        self.update_progress(self.progress)
 
-        #if engine.test_break():
-        #    engine.session.abort()
+        if self.test_break():
+            self.ai_abort()
 
     def ai_status_callback(self, private_data, update_type, display_output):
         # AI_ENGINE_TAG_REDRAW()
@@ -256,11 +257,32 @@ class ArnoldRender(ArnoldExport):
         driver.set_string("name", "btoa_driver")
         driver.set_pointer("callback", callback)
 
+        # Set up render passes
+        aovs = depsgraph.view_layer.arnold.aovs
+
+        for aov in aovs.enabled_aovs:
+            if aov.name == "Beauty":
+                continue
+            
+            self.add_pass(aov.ainame, aov.channels, aov.chan_id, layer=depsgraph.view_layer_eval.name)
+        
+        # Calculate progress increment
+        options = bridge.UniverseOptions()
+        width, height = options.get_render_resolution()
+        bucket_size = options.get_int("bucket_size")
+
+        h_buckets = math.ceil(width / bucket_size)
+        v_buckets = math.ceil(height / bucket_size)
+        total_buckets = h_buckets * v_buckets
+
+        self.progress = 0
+        self.progress_increment = 1 / total_buckets
+
         # Render
         result = self.ai_render(self.ai_status_callback)
         if result == AI_SUCCESS.value:
             status = AiRenderGetStatus(None)
-            while status != AI_RENDER_STATUS_FINISHED.value:
+            while status not in (AI_RENDER_STATUS_FINISHED.value, AI_RENDER_STATUS_FAILED.value):
                 time.sleep(0.001)
                 status = AiRenderGetStatus(None)
         
