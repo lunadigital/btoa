@@ -6,6 +6,11 @@ from .node import ArnoldNode
 from . import utils as bridge_utils
 
 class ArnoldNodeExportable(ArnoldNode):
+    def __init__(self, node_type=None):
+        super().__init__(node_type)
+        self.depsgraph = None
+        self.datablock = None
+
     def get_blur_matrices(self, depsgraph, datablock):
         sdata = depsgraph.scene.arnold
         frame_current = depsgraph.scene.frame_current

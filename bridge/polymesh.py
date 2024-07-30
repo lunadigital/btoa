@@ -11,10 +11,31 @@ class ArnoldPolymesh(ArnoldNodeExportable):
     def __init__(self, name):
         super().__init__("polymesh")
         self.set_string("name", name)
-
-        self.depsgraph = None
-        self.datablock = None
         self.mesh = None
+
+    def __assign_shaders(self):
+        materials = []
+
+        for slot in self.datablock.material_slots:
+            if slot.material:
+                shader = bridge_utils.get_node_by_uuid(slot.material.uuid)
+                materials.append(shader)
+        
+        if materials:
+            midxs = numpy.ndarray(len(self.mesh.polygons), dtype=numpy.uint8)
+            self.mesh.polygons.foreach_get("material_index", midxs)
+
+            shaders = ArnoldArray()
+            shaders.allocate(len(materials), 1, "POINTER")
+
+            for i, mat in enumerate(materials):
+                shaders.set_pointer(i, mat)
+            
+            shidxs = ArnoldArray()
+            shidxs.convert_from_buffer(len(midxs), 1, "BYTE", ctypes.c_void_p(midxs.ctypes.data))
+
+            self.set_array("shader", shaders)
+            self.set_array("shidxs", shidxs)
 
     def __bake_mesh(self, datablock):
         mesh = datablock.to_mesh()
@@ -170,7 +191,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         self.__apply_matrix_data()
         self.__apply_geometry_data()
         self.__apply_uv_map_data()
-        #self.__assign_shaders()
+        self.__assign_shaders()
         #self.__set_visibility()
 
         return self

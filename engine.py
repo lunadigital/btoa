@@ -59,7 +59,7 @@ class ArnoldExport(bpy.types.RenderEngine):
             if isinstance(ob.object.data, bridge.BTOA_CONVERTIBLE_TYPES):
                 bridge.ArnoldPolymesh(ob.object.name).from_datablock(depsgraph, ob)
             elif isinstance(ob.object.data, bpy.types.Light):
-                pass
+                bridge.ArnoldLight().from_datablock(depsgraph, ob)
 
         '''
         # World
@@ -120,42 +120,6 @@ class ArnoldExport(bpy.types.RenderEngine):
             
         AiFree(rdata.aovs)
         AiFree(buffer)
-    
-    def ai_get_node_by_name(self, name):
-        ainode = AiNodeLookUpByName(None, name)
-
-        node = bridge.ArnoldNode()
-        node.set_data(ainode)
-
-        return node
-    
-    def ai_get_all_by_uuid(self, uuid):
-        iterator = AiUniverseGetNodeIterator(None, AI_NODE_SHAPE | AI_NODE_LIGHT | AI_NODE_SHADER)
-        result = []
-
-        while not AiNodeIteratorFinished(iterator):
-            ainode = AiNodeIteratorGetNext(iterator)
-            
-            if AiNodeGetStr(ainode, 'btoa_id') == uuid:
-                node = bridge.ArnoldNode()
-                node.set_data(ainode)
-                result.append(node)
-        
-        return result
-    
-    def ai_get_node_by_uuid(self, uuid):
-        iterator = AiUniverseGetNodeIterator(None, AI_NODE_SHAPE | AI_NODE_LIGHT | AI_NODE_SHADER)
-        node = bridge.ArnoldNode()
-
-        while not AiNodeIteratorFinished(iterator):
-            ainode = AiNodeIteratorGetNext(iterator)
-            btoa_id = AiNodeGetStr(ainode, 'btoa_id')
-            
-            if btoa_id == uuid:
-                node.set_data(ainode)
-                break
-        
-        return node
 
     def ai_render(self, callback):
         return AiRenderBegin(None, AI_RENDER_MODE_CAMERA, callback, None)

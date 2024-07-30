@@ -1,13 +1,14 @@
-import arnold
 import bpy
 import bmesh
 import math
 import mathutils
 import numpy
-from bpy_extras import view3d_utils
 
+from arnold import *
+from bpy_extras import view3d_utils
 from mathutils import Vector, Matrix
 
+from .node import ArnoldNode
 from .universe_options import UniverseOptions
 from .bl_intern import BlenderCamera
 
@@ -117,3 +118,39 @@ def get_parent_material_from_nodetree(ntree):
     for mat in bpy.data.materials:
         if mat.arnold.node_tree and mat.arnold.node_tree.name == ntree.name:
             return mat
+
+def get_node_by_name(name):
+    ainode = AiNodeLookUpByName(None, name)
+
+    node = ArnoldNode()
+    node.set_data(ainode)
+
+    return node
+
+def get_all_by_uuid(uuid):
+    iterator = AiUniverseGetNodeIterator(None, AI_NODE_SHAPE | AI_NODE_LIGHT | AI_NODE_SHADER)
+    result = []
+
+    while not AiNodeIteratorFinished(iterator):
+        ainode = AiNodeIteratorGetNext(iterator)
+        
+        if AiNodeGetStr(ainode, 'btoa_id') == uuid:
+            node = ArnoldNode()
+            node.set_data(ainode)
+            result.append(node)
+    
+    return result
+
+def get_node_by_uuid(uuid):
+    iterator = AiUniverseGetNodeIterator(None, AI_NODE_SHAPE | AI_NODE_LIGHT | AI_NODE_SHADER)
+    node = ArnoldNode()
+
+    while not AiNodeIteratorFinished(iterator):
+        ainode = AiNodeIteratorGetNext(iterator)
+        btoa_id = AiNodeGetStr(ainode, 'btoa_id')
+        
+        if btoa_id == uuid:
+            node.set_data(ainode)
+            break
+    
+    return node
