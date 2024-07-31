@@ -9,3 +9,4 @@ from .node import *
 from .polymesh import *
 from .universe_options import *
 from .types import ExportDataType, NodeData, ColorData, FloatData, IntData, VectorData, StringData
+from .world import *

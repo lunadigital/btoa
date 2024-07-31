@@ -61,11 +61,9 @@ class ArnoldExport(bpy.types.RenderEngine):
             elif isinstance(ob.object.data, bpy.types.Light):
                 bridge.ArnoldLight().from_datablock(depsgraph, ob)
 
-        '''
         # World
         if depsgraph.scene.world.arnold.node_tree:
-            WorldExporter().export(depsgraph.scene.world)
-        '''
+            bridge.ArnoldWorld().from_datablock(depsgraph.scene.world)
 
         # AOVs
         scene = depsgraph.scene
