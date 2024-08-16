@@ -156,11 +156,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
     def from_datablock(self, depsgraph, datablock):
         self.depsgraph = depsgraph
 
-        if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
-            self.datablock = bridge_utils.get_object_data_from_instance(datablock)
-        elif isinstance(datablock, bpy.types.DepsgraphUpdate):
-            self.datablock = datablock.id
-
+        self.evaluate_datablock(datablock)
         if not self.datablock:
             return None
 

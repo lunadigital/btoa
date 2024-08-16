@@ -1,4 +1,5 @@
 import bpy
+import gpu
 import numpy
 import time
 
@@ -29,7 +30,7 @@ class ArnoldExport(bpy.types.RenderEngine):
         # If this is a viewport render, we must recreate the camera
         # object from `context`
         cdata = bridge.get_viewport_camera_object(context) if context else depsgraph.scene.camera.evaluated_get(depsgraph)
-        camera = bridge.CameraExporter(depsgraph).export(cdata)
+        camera = bridge.ArnoldCamera().from_datablock(depsgraph, cdata)
         options.set_pointer('camera', camera)
 
         # Materials
@@ -143,10 +144,21 @@ class ArnoldRender(ArnoldExport):
         self.progress = 0
         self.progress_increment = 0
 
+        self.framebuffer = None
+        self.display_driver = None
+        self.tag_viewport_resize = False
+        self.viewport_camera = bridge.CameraCache()
+
         AiBegin(AI_SESSION_INTERACTIVE)
 
     def __del__(self):
-        pass
+        print("deleting render object")
+        if self.is_viewport:
+            print("ending session")
+            self.ai_end()
+
+    def configure_display_driver(self):
+        self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
 
     def ai_display_callback(self, buffer):
         render = self.depsgraph.scene.render
@@ -164,18 +176,25 @@ class ArnoldRender(ArnoldExport):
         y = max_y - rdata.y - rdata.height
 
         # Handle render result
-        result = self.begin_result(x, y, rdata.width, rdata.height, layer=view_layer.name)
-
-        for i in range(0, rdata.count):
-            aov = rdata.aovs[i]
-            name = 'Combined' if aov.name == b'RGBA' else aov.name.decode()
+        if self.is_viewport:
+            aov = rdata.aovs[0] # Get beauty AOV
             pixels = numpy.ctypeslib.as_array(aov.data, shape=(rdata.width * rdata.height, aov.channels))
-            result.layers[0].passes[name].rect = pixels
+            self.framebuffer.write_bucket(x, y, rdata.width, rdata.height, pixels.flatten())
+            self.tag_redraw()
+        else:
+            result = self.begin_result(x, y, rdata.width, rdata.height, layer=view_layer.name)
+            
+            for i in range(0, rdata.count):
+                aov = rdata.aovs[i]
+                name = 'Combined' if aov.name == b'RGBA' else aov.name.decode()
+                pixels = numpy.ctypeslib.as_array(aov.data, shape=(rdata.width * rdata.height, aov.channels))
+                result.layers[0].passes[name].rect = pixels
         
-        self.end_result(result)
-        self.ai_free_buffer(buffer)
-        self.update_result(result)
+            self.end_result(result)
+            self.update_result(result)
 
+        self.ai_free_buffer(buffer)
+        
         # Update progress counter
         self.progress += self.progress_increment
         self.update_progress(self.progress)
@@ -213,11 +232,7 @@ class ArnoldRender(ArnoldExport):
     def render(self, depsgraph):
         self.depsgraph = depsgraph
 
-        # Display driver callback
-        callback = bridge.ArnoldDisplayCallback(self.ai_display_callback)
-        driver = bridge.ArnoldNode("btoa_display_driver")
-        driver.set_string("name", "btoa_driver")
-        driver.set_pointer("callback", callback)
+        self.configure_display_driver()
 
         # Set up render passes
         aovs = depsgraph.view_layer.arnold.aovs
@@ -251,6 +266,158 @@ class ArnoldRender(ArnoldExport):
         # Cleanup
         self.ai_end()
         self.depsgraph = None
+
+    def view_update(self, context, depsgraph):
+        region = context.region
+        scene = depsgraph.scene
+
+        # The only time self.is_viewport would be false
+        # for a viewport/IPR render would be the first
+        # time this function runs, so we can use it to
+        # check if the render is running or not.
+        if not self.is_viewport:
+            self.is_viewport = True
+            self.depsgraph = depsgraph
+            self.total_objects = len(context.scene.objects)
+            self.framebuffer = bridge.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
+
+            self.configure_display_driver()
+            self.ai_export(depsgraph, context)
+            self.ai_render(self.ai_status_callback)
+        
+        self.ai_render_pause()
+
+        if scene.arnold.preview_pause:
+            return
+        
+        # Update viewport dimensions
+        if self.tag_viewport_resize:
+            self.tag_viewport_resize = False
+
+            options = bridge.UniverseOptions()
+            options.set_int("xres", int(region.width * float(scene.arnold.viewport_scale)))
+            options.set_int("yres", int(region.height * float(scene.arnold.viewport_scale)))
+
+            self.framebuffer = bridge.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
+
+        # Update viewport camera
+        node = bridge.get_node_by_name("BTOA_VIEWPORT_CAMERA")
+        cdata = bridge.get_viewport_camera_object(context)
+
+        if node.type_is(cdata.data.arnold.camera_type):
+            bridge.ArnoldCamera(node).from_datablock(depsgraph, cdata)
+        else:
+            new = bridge.ArnoldCamera().from_datablock(depsgraph, cdata)
+            self.ai_replace_node(node, new)
+            new.set_string("name", cdata.name)
+        
+        self.viewport_camera.sync(cdata)
+
+        # Update shaders
+        if depsgraph.id_type_updated("MATERIAL"):
+            for update in reversed(depsgraph.updates):
+                mat = bridge.get_parent_material_from_nodetree(update.id)
+                world_ntree = scene.world.arnold.node_tree
+
+                if mat:
+                    old = bridge.get_node_by_uuid(mat.original.uuid)
+
+                    if old.is_valid:
+                        surface, volume, displacement = update.id.export()
+                        new = surface.value
+
+                        self.ai_replace_node(old, new)
+                        new.set_string("name", mat.name)
+                        new.set_uuid(mat.original.uuid)
+                
+                elif world_ntree and update.id.name == world_ntree.name:
+                    # This code is repeated in view_draw() below
+                    # Consider cleaning this up
+                    old = bridge.get_node_by_uuid(scene.world.uuid)
+
+                    if old.is_valid:
+                        new = bridge.ArnoldWorld().from_datablock(scene.world)
+                        self.ai_replace_node(old, new)
+                        new.set_string("name", scene.world.name)
+
+        # Update everything else
+        if depsgraph.id_type_updated("OBJECT"):
+            light_data_needs_update = False
+            polymesh_data_needs_update = False
+
+            for update in reversed(depsgraph.updates):
+                if isinstance(update.id, bpy.types.Light):
+                    light_data_needs_update = True
+                elif isinstance(update.id, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
+                    polymesh_data_needs_update = True
+
+                if isinstance(update.id, bpy.types.Object):
+                    node = bridge.get_node_by_uuid(update.id.uuid)
+
+                    if update.id.type == "LIGHT" and (update.is_updated_transform or light_data_needs_update):
+                        bridge.ArnoldLight(node).from_datablock(depsgraph, update)
+                    elif polymesh_data_needs_update:
+                        bridge.ArnoldPolymesh(node).from_datablock(depsgraph, update)
+                    
+                    # Transforms for lights have to be handled brute-force by the LightExporter to
+                    # account for size and other parameters
+                    #if update.is_updated_transform and update.id.type != 'LIGHT':
+                    #    node.set_matrix("matrix", utils.flatten_matrix(update.id.matrix_world))
+
+                    # Force update world material in case we have any physical sky textures that
+                    # reference the rotation of an object in the scene.
+                    # NOTE: Can we check names of the object before doing this every time?
+                    old = bridge.get_node_by_uuid(scene.world.uuid)
+
+                    if old.is_valid:
+                        new = bridge.ArnoldWorld().from_datablock(scene.world)
+                        self.ai_replace_node(old, new)
+                        new.set_string("name", scene.world.name)
+
+        # Check for deleted objects
+        if len(depsgraph.object_instances) < self.total_objects:
+            uuids = [instance.uuid for instance in depsgraph.object_instances]
+
+            iterator = AiUniverseGetNodeIterator(None, AI_NODE_SHAPE | AI_NODE_LIGHT)
+
+            while not AiNodeIteratorFinished(iterator):
+                node = AiNodeIteratorGetNext(iterator)
+                
+                if AiNodeGetStr(node, 'btoa_id') not in uuids and not AiNodeIs(node, 'skydome_light'):
+                    AiNodeDestroy(node)
+
+            AiNodeIteratorDestroy(iterator)
+        
+        self.total_objects = len(context.scene.objects)
+
+        self.ai_render_restart()
+
+    def view_draw(self, context, depsgraph):
+        region = context.region
+        dimensions = region.width, region.height
+
+        # Check if viewport camera changed
+        cdata = bridge.get_viewport_camera_object(context)
+
+        if self.viewport_camera.redraw_required(cdata):
+            self.tag_update()
+
+        # Check if framebuffer is resized
+        if self.framebuffer and (dimensions != self.framebuffer.get_dimensions(scaling=False) or float(depsgraph.scene.arnold.viewport_scale) != self.framebuffer.scale):
+            self.tag_viewport_resize = True
+            self.tag_update()
+
+        if self.framebuffer.requires_update:
+            self.framebuffer.tag_update()
+
+        # Draw the pixels to screen
+        gpu.state.blend_set("ALPHA_PREMULT")
+        self.bind_display_space_shader(depsgraph.scene)
+
+        self.framebuffer.draw()
+
+        self.unbind_display_space_shader()
+        gpu.state.blend_set("NONE")
 
 def register():
     bpy.utils.register_class(ArnoldRender)

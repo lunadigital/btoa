@@ -47,3 +47,6 @@ class FrameBuffer:
             self.buffer[start:end] = data[index:index+length]
 
             index += length
+        
+        # This might not be needed anymore
+        self.requires_update = True

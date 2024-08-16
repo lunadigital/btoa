@@ -1,3 +1,4 @@
+import bpy
 import math
 import numpy
 
@@ -6,10 +7,29 @@ from .node import ArnoldNode
 from . import utils as bridge_utils
 
 class ArnoldNodeExportable(ArnoldNode):
-    def __init__(self, node_type=None):
-        super().__init__(node_type)
+    def __init__(self, ndata=None):
+        # `data` can either be an Arnold node type (type string)
+        # or a BtoA node (type ArnoldNode). If it's a string,
+        # we'll create a new node of that type; if it's a 
+        # BtoA node, we'll sync all new data with the
+        # existing node.
+        if isinstance(ndata, str):
+            super().__init__(ndata)
+        elif isinstance(ndata, ArnoldNode):
+            self.set_data(ndata.data)
+        else:
+            super().__init__()
+
         self.depsgraph = None
         self.datablock = None
+
+    def evaluate_datablock(self, datablock):
+        if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
+            self.datablock = bridge_utils.get_object_data_from_instance(datablock)
+        elif isinstance(datablock, bpy.types.DepsgraphUpdate):
+            self.datablock = datablock.id
+        else:
+            self.datablock = datablock
 
     def get_blur_matrices(self, depsgraph, datablock):
         sdata = depsgraph.scene.arnold

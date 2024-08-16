@@ -60,8 +60,8 @@ def get_render_resolution(scene, context=None):
     if context:
         region = context.region
 
-        x = int(region.width * float(scene.viewport_scale))
-        y = int(region.height * float(scene.viewport_scale))
+        x = int(region.width * float(scene.arnold.viewport_scale))
+        y = int(region.height * float(scene.arnold.viewport_scale))
     else:
         render = scene.render
         scale = render.resolution_percentage / 100

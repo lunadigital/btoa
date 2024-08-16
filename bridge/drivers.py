@@ -1,4 +1,5 @@
 from ctypes import *
+from .node import ArnoldNode
 
 class AtAOV(Structure):
     _fields_ = [
@@ -22,3 +23,10 @@ ArnoldDisplayCallback = CFUNCTYPE(
     None,
     POINTER(AtRenderData)
 )
+
+class DisplayDriver:
+    def __init__(self, function):
+        self.callback = ArnoldDisplayCallback(function)
+        self.driver = ArnoldNode("btoa_display_driver")
+        self.driver.set_string("name", "btoa_driver")
+        self.driver.set_pointer("callback", self.callback)
