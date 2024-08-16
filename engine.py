@@ -31,18 +31,14 @@ class ArnoldRenderMonitor(bpy.types.Operator):
 
     def modal(self, context, event):
         if event.type == 'TIMER':
-            print("Checking views")
             for area in bpy.context.screen.areas:
                 if area.type == "VIEW_3D":
                     space = area.spaces[0]
-                    print("Checking", space)
 
                     if not self.views.exists(space):
-                        print("Adding", space)
                         self.views.add(space)
                     
                     if self.views.render_exited(space) and ArnoldRender.active:
-                        print("Render exited!")
                         ArnoldRender.ai_end()
                         self.cancel(context)
 
