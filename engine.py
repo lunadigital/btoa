@@ -140,25 +140,21 @@ class ArnoldRender(ArnoldExport):
 
     def __init__(self):
         super().__init__()
+        AiBegin(AI_SESSION_INTERACTIVE)
+
         self.depsgraph = None
         self.progress = 0
         self.progress_increment = 0
-
         self.framebuffer = None
-        self.display_driver = None
         self.tag_viewport_resize = False
         self.viewport_camera = bridge.CameraCache()
-
-        AiBegin(AI_SESSION_INTERACTIVE)
+        self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
 
     def __del__(self):
         print("deleting render object")
         if self.is_viewport:
             print("ending session")
             self.ai_end()
-
-    def configure_display_driver(self):
-        self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
 
     def ai_display_callback(self, buffer):
         render = self.depsgraph.scene.render
@@ -232,8 +228,6 @@ class ArnoldRender(ArnoldExport):
     def render(self, depsgraph):
         self.depsgraph = depsgraph
 
-        self.configure_display_driver()
-
         # Set up render passes
         aovs = depsgraph.view_layer.arnold.aovs
 
@@ -281,7 +275,6 @@ class ArnoldRender(ArnoldExport):
             self.total_objects = len(context.scene.objects)
             self.framebuffer = bridge.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
 
-            self.configure_display_driver()
             self.ai_export(depsgraph, context)
             self.ai_render(self.ai_status_callback)
         
