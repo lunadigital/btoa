@@ -1,11 +1,66 @@
 import bpy
 import gpu
 import numpy
+import sys
 import time
 
 from arnold import *
 
 from . import bridge
+
+class RenderViewManager:
+    def __init__(self):
+        self.views = {}
+
+    def add(self, space):
+        self.views[space.uuid] = space.shading.type
+
+    def exists(self, space):
+        return space.uuid in self.views.keys()
+    
+    def render_exited(self, space):
+        return self.views[space.uuid] != space.shading.type and space.shading.type != "RENDERED"
+
+class ArnoldRenderMonitor(bpy.types.Operator):
+    """Used to detect when a user exits IPR rendering"""
+    bl_idname = "wm.ai_render_monitor"
+    bl_label = "Arnold Render Monitor"
+
+    _timer = None
+    views = RenderViewManager()
+
+    def modal(self, context, event):
+        if event.type == 'TIMER':
+            print("Checking views")
+            for area in bpy.context.screen.areas:
+                if area.type == "VIEW_3D":
+                    space = area.spaces[0]
+                    print("Checking", space)
+
+                    if not self.views.exists(space):
+                        print("Adding", space)
+                        self.views.add(space)
+                    
+                    if self.views.render_exited(space) and ArnoldRender.active:
+                        print("Render exited!")
+                        ArnoldRender.ai_end()
+                        self.cancel(context)
+
+        return {'PASS_THROUGH'}
+
+    def execute(self, context):
+        wm = context.window_manager
+        self._timer = wm.event_timer_add(0.01, window=context.window)
+        wm.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        wm = context.window_manager
+        wm.event_timer_remove(self._timer)
+        return {'CANCELLED'}
+
+def start_shading_monitor():
+    bpy.ops.wm.ai_render_monitor('INVOKE_DEFAULT')
 
 class ArnoldExport(bpy.types.RenderEngine):
     def __init__(self):
@@ -14,7 +69,8 @@ class ArnoldExport(bpy.types.RenderEngine):
     def ai_abort(self):
         AiRenderAbort(None)
 
-    def ai_end(self):
+    @staticmethod
+    def ai_end(self=None):
         AiRenderInterrupt(None, AI_BLOCKING)
         AiRenderEnd(None)
         AiEnd()
@@ -138,6 +194,8 @@ class ArnoldRender(ArnoldExport):
     bl_use_eevee_viewport = True
     bl_use_postprocess = True
 
+    active = False
+
     def __init__(self):
         super().__init__()
         AiBegin(AI_SESSION_INTERACTIVE)
@@ -151,7 +209,7 @@ class ArnoldRender(ArnoldExport):
         self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
 
     def __del__(self):
-        print("deleting render object")
+        print("deleting render object", self.ai_end, self.is_viewport)
         if self.is_viewport:
             print("ending session")
             self.ai_end()
@@ -270,11 +328,12 @@ class ArnoldRender(ArnoldExport):
         # time this function runs, so we can use it to
         # check if the render is running or not.
         if not self.is_viewport:
-            self.is_viewport = True
+            ArnoldRender.active = self.is_viewport = True
             self.depsgraph = depsgraph
             self.total_objects = len(context.scene.objects)
             self.framebuffer = bridge.FrameBuffer((region.width, region.height), float(scene.arnold.viewport_scale))
 
+            start_shading_monitor()
             self.ai_export(depsgraph, context)
             self.ai_render(self.ai_status_callback)
         
@@ -385,7 +444,7 @@ class ArnoldRender(ArnoldExport):
 
         self.ai_render_restart()
 
-    def view_draw(self, context, depsgraph):
+    def view_draw(self, context, depsgraph):   
         region = context.region
         dimensions = region.width, region.height
 
@@ -414,6 +473,7 @@ class ArnoldRender(ArnoldExport):
 
 def register():
     bpy.utils.register_class(ArnoldRender)
+    bpy.utils.register_class(ArnoldRenderMonitor)
 
     #for panel in get_panels():
     #    panel.COMPAT_ENGINES.add(ArnoldRenderEngine.bl_idname)
@@ -427,6 +487,7 @@ def register():
     #        panel.COMPAT_ENGINES.remove(ArnoldRender.bl_idname)
 
 def unregister():
+    bpy.utils.unregister_class(ArnoldRenderMonitor)
     bpy.utils.unregister_class(ArnoldRender)
 
     #for panel in get_panels():
