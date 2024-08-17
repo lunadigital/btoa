@@ -204,12 +204,6 @@ class ArnoldRender(ArnoldExport):
         self.viewport_camera = bridge.CameraCache()
         self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
 
-    def __del__(self):
-        print("deleting render object", self.ai_end, self.is_viewport)
-        if self.is_viewport:
-            print("ending session")
-            self.ai_end()
-
     def ai_display_callback(self, buffer):
         render = self.depsgraph.scene.render
         view_layer = self.depsgraph.view_layer_eval
