@@ -163,14 +163,13 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         if not self.datablock:
             return None
 
-        self.set_uuid(self.datablock.uuid)
-
         self.mesh = self.__bake_mesh(self.datablock)
         if not self.mesh:
             return None
         
         # General settings
         sdata = depsgraph.scene.arnold
+        self.set_uuid(self.datablock.uuid)
         self.set_string("name", self.datablock.name)
         self.set_bool("smoothing", True)
         self.set_float("motion_start", sdata.shutter_start)

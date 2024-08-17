@@ -148,7 +148,7 @@ class UniverseOptions(ArnoldNode):
         if material_override:
             shader = self.session.get_node_by_uuid(material_override.uuid)
 
-            if not shader.is_valid:
+            if not shader:
                 surface, volume, displacement = material_override.arnold.node_tree.export()
                 surface.value.set_string("name", material_override.name)
                 surface.value.set_uuid(material_override.uuid)

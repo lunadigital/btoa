@@ -364,7 +364,7 @@ class ArnoldRender(ArnoldExport):
                 if mat:
                     old = bridge.get_node_by_uuid(mat.original.uuid)
 
-                    if old.is_valid:
+                    if old:
                         surface, volume, displacement = update.id.export()
                         new = surface.value
 
@@ -377,17 +377,17 @@ class ArnoldRender(ArnoldExport):
                     # Consider cleaning this up
                     old = bridge.get_node_by_uuid(scene.world.uuid)
 
-                    if old.is_valid:
+                    if old:
                         new = bridge.ArnoldWorld().from_datablock(scene.world)
                         self.ai_replace_node(old, new)
                         new.set_string("name", scene.world.name)
 
         # Update everything else
         if depsgraph.id_type_updated("OBJECT"):
-            light_data_needs_update = False
-            polymesh_data_needs_update = False
-
             for update in reversed(depsgraph.updates):
+                light_data_needs_update = False
+                polymesh_data_needs_update = False
+
                 if isinstance(update.id, bpy.types.Light):
                     light_data_needs_update = True
                 elif hasattr(update.id, "data") and isinstance(update.id.data, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
@@ -403,7 +403,7 @@ class ArnoldRender(ArnoldExport):
                     
                     # Transforms for lights have to be handled brute-force by the LightExporter to
                     # account for size and other parameters
-                    if update.is_updated_transform and update.id.type != 'LIGHT':
+                    if node and update.is_updated_transform and update.id.type != 'LIGHT':
                         node.set_matrix("matrix", bridge.flatten_matrix(update.id.matrix_world))
 
                     # Force update world material in case we have any physical sky textures that
@@ -411,7 +411,7 @@ class ArnoldRender(ArnoldExport):
                     # NOTE: Can we check names of the object before doing this every time?
                     old = bridge.get_node_by_uuid(scene.world.uuid)
 
-                    if old.is_valid:
+                    if old:
                         new = bridge.ArnoldWorld().from_datablock(scene.world)
                         self.ai_replace_node(old, new)
                         new.set_string("name", scene.world.name)

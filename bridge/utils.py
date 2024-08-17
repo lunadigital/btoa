@@ -152,5 +152,8 @@ def get_node_by_uuid(uuid):
         if btoa_id == uuid:
             node.set_data(ainode)
             break
+
+    if not node.is_valid:
+        return None
     
     return node
