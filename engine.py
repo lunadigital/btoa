@@ -110,7 +110,7 @@ class ArnoldExport(bpy.types.RenderEngine):
         # Geometry and lights
         for ob in depsgraph.object_instances:
             if isinstance(ob.object.data, bridge.BTOA_CONVERTIBLE_TYPES):
-                bridge.ArnoldPolymesh(ob.object.name).from_datablock(depsgraph, ob)
+                bridge.ArnoldPolymesh().from_datablock(depsgraph, ob)
             elif isinstance(ob.object.data, bpy.types.Light):
                 bridge.ArnoldLight().from_datablock(depsgraph, ob)
 
@@ -390,7 +390,7 @@ class ArnoldRender(ArnoldExport):
             for update in reversed(depsgraph.updates):
                 if isinstance(update.id, bpy.types.Light):
                     light_data_needs_update = True
-                elif isinstance(update.id, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
+                elif hasattr(update.id, "data") and isinstance(update.id.data, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
                     polymesh_data_needs_update = True
 
                 if isinstance(update.id, bpy.types.Object):
@@ -403,8 +403,8 @@ class ArnoldRender(ArnoldExport):
                     
                     # Transforms for lights have to be handled brute-force by the LightExporter to
                     # account for size and other parameters
-                    #if update.is_updated_transform and update.id.type != 'LIGHT':
-                    #    node.set_matrix("matrix", utils.flatten_matrix(update.id.matrix_world))
+                    if update.is_updated_transform and update.id.type != 'LIGHT':
+                        node.set_matrix("matrix", bridge.flatten_matrix(update.id.matrix_world))
 
                     # Force update world material in case we have any physical sky textures that
                     # reference the rotation of an object in the scene.

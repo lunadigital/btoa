@@ -8,9 +8,12 @@ from .exportable import ArnoldNodeExportable
 from . import utils as bridge_utils
 
 class ArnoldPolymesh(ArnoldNodeExportable):
-    def __init__(self, name):
-        super().__init__("polymesh")
-        self.set_string("name", name)
+    def __init__(self, node=None):
+        if node:
+            super().__init__(node)
+        else:
+            super().__init__("polymesh")
+        
         self.mesh = None
 
     def __assign_shaders(self):
@@ -168,6 +171,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         
         # General settings
         sdata = depsgraph.scene.arnold
+        self.set_string("name", self.datablock.name)
         self.set_bool("smoothing", True)
         self.set_float("motion_start", sdata.shutter_start)
         self.set_float("motion_end", sdata.shutter_end)
