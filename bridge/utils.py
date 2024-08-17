@@ -9,7 +9,7 @@ from bpy_extras import view3d_utils
 from mathutils import Vector, Matrix
 
 from .node import ArnoldNode
-from .universe_options import UniverseOptions
+from .options import UniverseOptions
 from .bl_intern import BlenderCamera
 
 def calc_horizontal_fov(ob):
