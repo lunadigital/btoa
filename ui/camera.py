@@ -32,6 +32,12 @@ class DATA_PT_arnold_lens(ArnoldCameraPanel):
 
         col.separator()
 
+        sub = col.column(align=True)
+        sub.prop(camera, "clip_start", text="Clip Start")
+        sub.prop(camera, "clip_end", text="End")
+
+        col.separator()
+
         col.prop(camera.arnold, "exposure")
 
 class DATA_PT_arnold_dof(ArnoldCameraPanel):

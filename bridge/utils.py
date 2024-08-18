@@ -79,8 +79,8 @@ def get_viewport_camera_object(context):
     camera.name = "BTOA_VIEWPORT_CAMERA"
 
     camera.matrix_world = context.region_data.view_matrix.inverted()
-    camera.data.clip_start = context.space_data.clip_start
-    camera.data.clip_end = context.space_data.clip_end
+    camera.data.clip_start = context.scene.camera.data.clip_start if context.region_data.view_perspective == 'CAMERA' else context.space_data.clip_start
+    camera.data.clip_end = context.scene.camera.data.clip_end if context.region_data.view_perspective == 'CAMERA' else context.space_data.clip_end
 
     sensor_width = context.space_data.camera.data.sensor_width if context.region_data.view_perspective == 'CAMERA' else DEFAULT_SENSOR_WIDTH
     lens = context.space_data.camera.data.lens if context.region_data.view_perspective == 'CAMERA' else context.space_data.lens
