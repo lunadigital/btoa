@@ -24,6 +24,10 @@ class ArnoldPolymesh(ArnoldNodeExportable):
                 shader = bridge_utils.get_node_by_uuid(slot.material.uuid)
                 materials.append(shader)
         
+        if not materials:
+            shader = bridge_utils.get_node_by_name("BTOA_MISSING_SHADER")
+            materials.append(shader)
+        
         if materials:
             midxs = numpy.ndarray(len(self.mesh.polygons), dtype=numpy.uint8)
             self.mesh.polygons.foreach_get("material_index", midxs)

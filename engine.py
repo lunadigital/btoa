@@ -363,14 +363,14 @@ class ArnoldRender(ArnoldExport):
 
                 if mat:
                     old = bridge.get_node_by_uuid(mat.original.uuid)
+                    surface, volume, displacement = update.id.export()
+                    new = surface.value
 
                     if old:
-                        surface, volume, displacement = update.id.export()
-                        new = surface.value
-
                         self.ai_replace_node(old, new)
-                        new.set_string("name", mat.name)
-                        new.set_uuid(mat.original.uuid)
+                    
+                    new.set_string("name", mat.name)
+                    new.set_uuid(mat.original.uuid)
                 
                 elif world_ntree and update.id.name == world_ntree.name:
                     # This code is repeated in view_draw() below
