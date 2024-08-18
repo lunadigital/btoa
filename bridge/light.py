@@ -8,12 +8,10 @@ from .exportable import ArnoldNodeExportable
 from .node import ArnoldNode
 from . import utils as bridge_utils
 
-## NOTE: This code only creates new light nodes from
-## scratch. We'll need to change it to update existing nodes
-## during IPR/viewport renders. This already works in
-## light_exporter.py.
-
 class ArnoldLight(ArnoldNodeExportable):
+    def __init__(self, node=None):
+        super().__init__(node)
+
     def from_datablock(self, depsgraph, datablock):
         self.depsgraph = depsgraph
 
@@ -26,6 +24,9 @@ class ArnoldLight(ArnoldNodeExportable):
         data = self.datablock.data
         ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
 
+        if ntype != self.get_string("btoa_light_type"):
+            self.destroy()
+            
         if not self.is_valid:
             self.data = arnold.AiNode(None, ntype)
             self.set_string("name", self.datablock.name)

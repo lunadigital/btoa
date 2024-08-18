@@ -388,10 +388,11 @@ class ArnoldRender(ArnoldExport):
                 light_data_needs_update = False
                 polymesh_data_needs_update = False
 
-                if isinstance(update.id, bpy.types.Light):
-                    light_data_needs_update = True
-                elif hasattr(update.id, "data") and isinstance(update.id.data, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
-                    polymesh_data_needs_update = True
+                if hasattr(update.id, "data"):
+                    if isinstance(update.id.data, bpy.types.Light):
+                        light_data_needs_update = True
+                    elif isinstance(update.id.data, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
+                        polymesh_data_needs_update = True
 
                 if isinstance(update.id, bpy.types.Object):
                     node = bridge.get_node_by_uuid(update.id.uuid)
@@ -408,7 +409,6 @@ class ArnoldRender(ArnoldExport):
 
                     # Force update world material in case we have any physical sky textures that
                     # reference the rotation of an object in the scene.
-                    # NOTE: Can we check names of the object before doing this every time?
                     old = bridge.get_node_by_uuid(scene.world.uuid)
 
                     if old:
