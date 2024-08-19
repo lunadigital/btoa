@@ -102,7 +102,7 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
         INSTALL_IN_PROGRESS = True
 
         install_dir = sdk_utils.get_arnold_install_root()
-        archive_path = os.path.join(install_dir, 'btoa.zip' if sys.platform == 'win32' else 'arnoldserver.tgz')
+        archive_path = os.path.join(install_dir, 'btoa.zip')
 
         Path(install_dir).mkdir(parents=True, exist_ok=True)
 
@@ -114,7 +114,7 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
         elif sys.platform.startswith('linux'):
             package = f'Arnold-{version}-linux.tgz'
         elif sys.platform == 'darwin':
-            package = f'Arnold-{version}-darwin.tgz'
+            package = f'Arnold-{version}-darwin.zip'
 
         INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
 
@@ -135,13 +135,8 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
 
         INSTALL_PROGRESS_LABEL = 'Installing Arnold...'
 
-        if sys.platform == 'win32':
-            with zipfile.ZipFile(archive_path, 'r') as f:
-                f.extractall(ARNOLD_INSTALL_PATH)
-        else:
-            f = tarfile.open(archive_path)
+        with zipfile.ZipFile(archive_path, 'r') as f:
             f.extractall(ARNOLD_INSTALL_PATH)
-            f.close()
 
         os.remove(archive_path)
 
