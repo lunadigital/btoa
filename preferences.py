@@ -20,8 +20,8 @@ from .updater import Version, ArnoldUpdater
 ADDON_ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 ADDON_NAME = os.path.basename(ADDON_ROOT_PATH)
 ENGINE_ID = 'ARNOLD'
-ARNOLD_INSTALL_PATH = sdk_utils.get_server_path()
-ARNOLD_PLUGIN_PATH = os.path.join(ADDON_ROOT_PATH, 'drivers', 'build')
+ARNOLD_INSTALL_PATH = sdk_utils.get_sdk_install_path()
+ARNOLD_PLUGIN_PATH = os.path.join(ARNOLD_INSTALL_PATH, 'drivers')
 INSTALL_PROGRESS_LABEL = ''
 INSTALL_IN_PROGRESS = False
 INSTALL_JUST_COMPLETED = False
@@ -35,7 +35,7 @@ def update_progress_percent(block_num, block_size, total_size):
     INSTALL_PROGRESS_LABEL = f'Downloading, please wait... ({percent}%)'
 
 def delete_old_sdk():
-    old_sdk_path = os.path.join(sdk_utils.get_arnold_install_root(), '.ArnoldServer')
+    old_sdk_path = os.path.join(sdk_utils.get_arnold_install_root(), '.btoa')
 
     if os.path.exists(old_sdk_path):
         shutil.rmtree(old_sdk_path)
@@ -79,8 +79,8 @@ class ARNOLD_OT_open_license_manager(bpy.types.Operator):
         subprocess.run([sdk_utils.get_license_manager_path()])
         return {'FINISHED'}
 
-class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
-    bl_idname = 'arnold.install_arnold_server'
+class ARNOLD_OT_install_arnold(bpy.types.Operator):
+    bl_idname = 'arnold.install_arnold'
     bl_label = "Install Arnold"
     bl_description = 'Install the Arnold Server application'
 
@@ -95,14 +95,14 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
         global INSTALL_JUST_COMPLETED
         return not INSTALL_IN_PROGRESS and not INSTALL_JUST_COMPLETED
 
-    def download_arnold_server(self):
+    def download_arnold(self):
         global INSTALL_PROGRESS_LABEL
         global INSTALL_IN_PROGRESS
 
         INSTALL_IN_PROGRESS = True
 
         install_dir = sdk_utils.get_arnold_install_root()
-        archive_path = os.path.join(install_dir, 'arnoldserver.zip' if sys.platform == 'win32' else 'arnoldserver.tgz')
+        archive_path = os.path.join(install_dir, 'btoa.zip' if sys.platform == 'win32' else 'arnoldserver.tgz')
 
         Path(install_dir).mkdir(parents=True, exist_ok=True)
 
@@ -156,7 +156,7 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
         self.timer = wm.event_timer_add(0.1, window=context.window)
         wm.modal_handler_add(self)
 
-        self.worker = threading.Thread(target=self.download_arnold_server, args=())
+        self.worker = threading.Thread(target=self.download_arnold, args=())
         self.worker.start()
 
         return {'RUNNING_MODAL'}
@@ -187,8 +187,8 @@ class ARNOLD_OT_install_arnold_server(bpy.types.Operator):
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
 
-class ARNOLD_OT_uninstall_arnold_server(bpy.types.Operator):
-    bl_idname = 'arnold.uninstall_arnold_server'
+class ARNOLD_OT_uninstall_arnold(bpy.types.Operator):
+    bl_idname = 'arnold.uninstall_arnold'
     bl_label = "Uninstall"
     bl_description = 'Uninstall the Arnold Server application'
 
@@ -210,7 +210,7 @@ class ARNOLD_OT_uninstall_arnold_server(bpy.types.Operator):
         triggers a new install. We will delete the SDK the next time Blender
         is opened.
         '''
-        tmp_name = os.path.join(sdk_utils.get_arnold_install_root(), '.ArnoldServer')
+        tmp_name = os.path.join(sdk_utils.get_arnold_install_root(), '.btoa')
         os.rename(ARNOLD_INSTALL_PATH, tmp_name)
 
         if sys.platform == "win32":
@@ -220,8 +220,8 @@ class ARNOLD_OT_uninstall_arnold_server(bpy.types.Operator):
 
         return {'FINISHED'}
 
-class ARNOLD_OT_update_arnold_server(bpy.types.Operator):
-    bl_idname = 'arnold.update_arnold_server'
+class ARNOLD_OT_update_arnold(bpy.types.Operator):
+    bl_idname = 'arnold.update_arnold'
     bl_label = ""
     bl_description = 'Update the Arnold Server application'
 
@@ -232,8 +232,8 @@ class ARNOLD_OT_update_arnold_server(bpy.types.Operator):
         return SDK_UPDATE_AVAILABLE and not INSTALL_IN_PROGRESS
 
     def execute(self, context):
-        bpy.ops.arnold.uninstall_arnold_server()
-        bpy.ops.arnold.install_arnold_server('INVOKE_DEFAULT')
+        bpy.ops.arnold.uninstall_arnold()
+        bpy.ops.arnold.install_arnold('INVOKE_DEFAULT')
 
         return {'FINISHED'}
 
@@ -299,10 +299,10 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
             
             row = box.row(align=True)
             row.operator('arnold.check_for_update', text="", icon="FILE_REFRESH")
-            row.operator('arnold.update_arnold_server', text="Update Arnold" if SDK_UPDATE_AVAILABLE else "Arnold is up-to-date")
-            row.operator('arnold.uninstall_arnold_server')
+            row.operator('arnold.update_arnold', text="Update Arnold" if SDK_UPDATE_AVAILABLE else "Arnold is up-to-date")
+            row.operator('arnold.uninstall_arnold')
         else:
-            layout.operator('arnold.install_arnold_server')
+            layout.operator('arnold.install_arnold')
 
             global INSTALL_PROGRESS_LABEL
             if INSTALL_PROGRESS_LABEL:
@@ -379,9 +379,9 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
 classes = (
     ARNOLD_OT_reset_log_flags,
     ARNOLD_OT_open_license_manager,
-    ARNOLD_OT_install_arnold_server,
-    ARNOLD_OT_uninstall_arnold_server,
-    ARNOLD_OT_update_arnold_server,
+    ARNOLD_OT_install_arnold,
+    ARNOLD_OT_uninstall_arnold,
+    ARNOLD_OT_update_arnold,
     ARNOLD_OT_check_for_update,
     ArnoldAddonPreferences
 )

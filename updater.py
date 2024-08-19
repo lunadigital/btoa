@@ -45,4 +45,4 @@ class ArnoldUpdater(HTMLParser):
             self.all_versions.append(result)
     
     def update_available(self):
-        return self.current_version.to_int() < version
+        return self.current_version.to_int() < self.latest_version.to_int()

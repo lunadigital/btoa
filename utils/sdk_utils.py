@@ -4,11 +4,11 @@ import sys
 def get_arnold_install_root():
     return os.path.join(os.path.expanduser('~'), 'Autodesk')
 
-def get_server_path():
-    return os.path.join(get_arnold_install_root(), 'ArnoldServer')
+def get_sdk_install_path():
+    return os.path.join(get_arnold_install_root(), 'btoa')
 
 def get_license_manager_path():
-    root = os.path.join(get_server_path(), 'bin')
+    root = os.path.join(get_sdk_install_path(), 'bin')
     
     if sys.platform == 'win32':
         return os.path.join(root, 'ArnoldLicenseManager.exe')
@@ -18,7 +18,7 @@ def get_license_manager_path():
         return None
 
 def is_arnoldserver_installed():
-    sdk_installed = os.path.exists(get_server_path())
+    sdk_installed = os.path.exists(get_sdk_install_path())
     import_success = False
 
     try:

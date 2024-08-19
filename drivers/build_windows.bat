@@ -1,2 +1,2 @@
-set ARNOLD_SDK="C:\Program Files\Autodesk\Arnold-7.1.2.0-windows"
-cl /LD src/btoa_display_driver.cpp src/renderdata.cpp /I %ARNOLD_SDK%/include %ARNOLD_SDK%/lib/ai.lib /link /out:build/ai_display_driver.dll
+set ARNOLD_SDK="C:\path\to\sdk"
+cl /LD src/btoa_display_driver.cpp src/renderdata.cpp /I %ARNOLD_SDK%/include %ARNOLD_SDK%/lib/ai.lib /link /out:build/btoa_display_driver.dll
