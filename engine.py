@@ -82,7 +82,7 @@ class ArnoldExport(bpy.types.RenderEngine):
         # If this is a viewport render, we must recreate the camera
         # object from `context`
         cdata = bridge.get_viewport_camera_object(context) if context else depsgraph.scene.camera.evaluated_get(depsgraph)
-        camera = bridge.ArnoldCamera().from_datablock(depsgraph, cdata)
+        camera = bridge.ArnoldCamera(frame_set=self.frame_set).from_datablock(depsgraph, cdata)
         options.set_pointer('camera', camera)
 
         # Materials
@@ -110,9 +110,9 @@ class ArnoldExport(bpy.types.RenderEngine):
         # Geometry and lights
         for ob in depsgraph.object_instances:
             if isinstance(ob.object.data, bridge.BTOA_CONVERTIBLE_TYPES):
-                bridge.ArnoldPolymesh().from_datablock(depsgraph, ob)
+                bridge.ArnoldPolymesh(frame_set=self.frame_set).from_datablock(depsgraph, ob)
             elif isinstance(ob.object.data, bpy.types.Light):
-                bridge.ArnoldLight().from_datablock(depsgraph, ob)
+                bridge.ArnoldLight(frame_set=self.frame_set).from_datablock(depsgraph, ob)
 
         # World
         if depsgraph.scene.world.arnold.node_tree:
@@ -347,9 +347,9 @@ class ArnoldRender(ArnoldExport):
         cdata = bridge.get_viewport_camera_object(context)
 
         if node.type_is(cdata.data.arnold.camera_type):
-            bridge.ArnoldCamera(node).from_datablock(depsgraph, cdata)
+            bridge.ArnoldCamera(node, self.frame_set).from_datablock(depsgraph, cdata)
         else:
-            new = bridge.ArnoldCamera().from_datablock(depsgraph, cdata)
+            new = bridge.ArnoldCamera(frame_set=self.frame_set).from_datablock(depsgraph, cdata)
             self.ai_replace_node(node, new)
             new.set_string("name", cdata.name)
         
@@ -398,9 +398,9 @@ class ArnoldRender(ArnoldExport):
                     node = bridge.get_node_by_uuid(update.id.uuid)
 
                     if update.id.type == "LIGHT" and (update.is_updated_transform or light_data_needs_update):
-                        bridge.ArnoldLight(node).from_datablock(depsgraph, update)
+                        bridge.ArnoldLight(node, self.frame_set).from_datablock(depsgraph, update)
                     elif polymesh_data_needs_update:
-                        bridge.ArnoldPolymesh(node).from_datablock(depsgraph, update)
+                        bridge.ArnoldPolymesh(node, self.frame_set).from_datablock(depsgraph, update)
                     
                     # Transforms for lights have to be handled brute-force by the LightExporter to
                     # account for size and other parameters

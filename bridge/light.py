@@ -9,8 +9,8 @@ from .node import ArnoldNode
 from . import utils as bridge_utils
 
 class ArnoldLight(ArnoldNodeExportable):
-    def __init__(self, node=None):
-        super().__init__(node)
+    def __init__(self, node=None, frame_set=None):
+        super().__init__(node, frame_set)
 
     def from_datablock(self, depsgraph, datablock):
         self.depsgraph = depsgraph

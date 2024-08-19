@@ -8,11 +8,11 @@ from .exportable import ArnoldNodeExportable
 from . import utils as bridge_utils
 
 class ArnoldPolymesh(ArnoldNodeExportable):
-    def __init__(self, node=None):
+    def __init__(self, node=None, frame_set=None):
         if node:
-            super().__init__(node)
+            super().__init__(node, frame_set)
         else:
-            super().__init__("polymesh")
+            super().__init__("polymesh", frame_set)
         
         self.mesh = None
 
@@ -44,8 +44,11 @@ class ArnoldPolymesh(ArnoldNodeExportable):
             self.set_array("shader", shaders)
             self.set_array("shidxs", shidxs)
 
-    def __bake_mesh(self, datablock):
-        mesh = datablock.to_mesh()
+    def __bake_mesh(self):
+        if self.mesh:
+            self.datablock.to_mesh_clear()
+
+        mesh = self.datablock.to_mesh()
 
         # Ensure UV map exists
         if not mesh.uv_layers:
@@ -64,13 +67,13 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         try:
             mesh.calc_tangents()
         except:
-            return None
+            self.mesh = None
+            return
 
-        return mesh
+        self.mesh = mesh
 
     def __get_keyed_data(self):
         sdata = self.depsgraph.scene.arnold
-        frame_set = self.depsgraph.scene.frame_set
         frame_current = self.depsgraph.scene.frame_current
         result = [None, None] # vlist, nlist
 
@@ -78,18 +81,18 @@ class ArnoldPolymesh(ArnoldNodeExportable):
             steps = numpy.linspace(sdata.shutter_start, sdata.shutter_end, sdata.motion_keys)
 
             for i in range(0, steps.size):
-                frame, subframe = self.get_target_frame(steps[i])
-                frame_set(frame, subframe=subframe)
+                frame, subframe = self.get_target_frame(frame_current, steps[i])
+                self.frame_set(frame, subframe=subframe)
+                self.__bake_mesh()
 
-                mesh = self.__bake_mesh() if i > 0 else self.mesh
+                vdata = self.__get_nonkeyed_float_data(self.mesh.vertices, 3, "co")
+                ndata = self.__get_nonkeyed_float_data(self.mesh.loops, 3, "normal")
 
-                vdata = self.__get_nonkeyed_float_data(mesh.vertices, 3, "co")
-                ndata = self.__get_nonkeyed_float_data(mesh.loops, 3, "normal")
-
-                result[0] = vdata if not result[0] else numpy.concatenate((result[0], vdata))
-                result[1] = ndata if not result[1] else numpy.concatenate((result[1], ndata))
+                result[0] = vdata if result[0] is None else numpy.concatenate((result[0], vdata))
+                result[1] = ndata if result[1] is None else numpy.concatenate((result[1], ndata))
             
-            frame_set(frame_current, subframe=0)
+            self.frame_set(frame_current, subframe=0)
+            self.__bake_mesh()
         else:
             result[0] = self.__get_nonkeyed_float_data(self.mesh.vertices, 3, "co")
             result[1] = self.__get_nonkeyed_float_data(self.mesh.loops, 3, "normal")
@@ -112,7 +115,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         return result
 
     def __apply_matrix_data(self):
-        matrix = self.get_transform_matrix(self.depsgraph, self.datablock)
+        matrix = self.get_transform_matrix()
 
         sdata = self.depsgraph.scene.arnold
         if sdata.enable_motion_blur:
@@ -122,13 +125,13 @@ class ArnoldPolymesh(ArnoldNodeExportable):
     
     def __apply_geometry_data(self):
         sdata = self.depsgraph.scene.arnold
-        keys = sdata.motion_keys if sdata.enable_motion_blur and sdata.deformation_motion_blur else 1 
-        
+        keys = sdata.motion_keys if sdata.enable_motion_blur and sdata.deformation_motion_blur else 1
+
         vdata, ndata = self.__get_keyed_data()
         nsdata = self.__get_nonkeyed_uint_data(self.mesh.polygons, len(self.mesh.polygons), "loop_total")
         vidata = self.__get_nonkeyed_uint_data(self.mesh.polygons, len(self.mesh.loops), "vertices")
         nidata = numpy.arange(len(self.mesh.loops), dtype=numpy.uint32)
- 
+
         vlist = self.__format_data(len(self.mesh.vertices), keys, 'VECTOR', vdata)
         nlist = self.__format_data(len(self.mesh.loops), keys, 'VECTOR', ndata)
         nsides = self.__format_data(len(self.mesh.polygons), 1, 'UINT', nsdata)
@@ -166,8 +169,8 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         self.evaluate_datablock(datablock)
         if not self.datablock:
             return None
-
-        self.mesh = self.__bake_mesh(self.datablock)
+        
+        self.__bake_mesh()
         if not self.mesh:
             return None
         
@@ -192,9 +195,13 @@ class ArnoldPolymesh(ArnoldNodeExportable):
 
         # Everything else
         self.__apply_matrix_data()
+        self.__bake_mesh()
         self.__apply_geometry_data()
         self.__apply_uv_map_data()
         self.__assign_shaders()
+        # TODO
         #self.__set_visibility()
+
+        self.datablock.to_mesh_clear()
 
         return self

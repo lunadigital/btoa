@@ -6,8 +6,8 @@ from .exportable import ArnoldNodeExportable
 from . import utils as bridge_utils
 
 class ArnoldCamera(ArnoldNodeExportable):
-    def __init__(self, node=None):
-        super().__init__(node)
+    def __init__(self, node=None, frame_set=None):
+        super().__init__(node, frame_set)
 
     def from_datablock(self, depsgraph, datablock):
         self.depsgraph = depsgraph
@@ -80,6 +80,7 @@ class ArnoldCamera(ArnoldNodeExportable):
         self.set_float("aperture_aspect_ratio", cdata.arnold.aperture_aspect_ratio)
 
         # Set motion blur attributes
+        # TODO
         if sdata.enable_motion_blur:
             self.set_float("shutter_start", sdata.shutter_start)
             self.set_float("shutter_end", sdata.shutter_end)
