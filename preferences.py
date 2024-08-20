@@ -112,7 +112,7 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
         if sys.platform == 'win32':
             package = f'Arnold-{version}-windows.zip'
         elif sys.platform.startswith('linux'):
-            package = f'Arnold-{version}-linux.tgz'
+            package = f'Arnold-{version}-linux.zip'
         elif sys.platform == 'darwin':
             package = f'Arnold-{version}-darwin.zip'
 
