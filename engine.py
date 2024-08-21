@@ -3,6 +3,7 @@ import gpu
 import numpy
 import sys
 import time
+import math
 
 from arnold import *
 
@@ -247,7 +248,6 @@ class ArnoldRender(ArnoldExport):
             self.ai_abort()
 
     def ai_status_callback(self, private_data, update_type, display_output):
-        # AI_ENGINE_TAG_REDRAW()
         status = bridge.FAILED
 
         if update_type == int(bridge.INTERRUPTED):
@@ -258,15 +258,10 @@ class ArnoldRender(ArnoldExport):
             status = bridge.RENDERING
         elif update_type == int(bridge.AFTER_PASS):
             status = bridge.RENDERING
-            #AI_DRIVER_UPDATE_VIEWPORT = True
         elif update_type == int(bridge.RENDER_FINISHED):
             status = bridge.RENDER_FINISHED
-            #AI_DRIVER_UPDATE_VIEWPORT = False
         elif update_type == int(bridge.PAUSED):
             status = bridge.RESTARTING
-        elif update_type == int(bridge.ERROR):
-            status = bridge.FAILED
-            #AI_DRIVER_UPDATE_VIEWPORT = False
 
         return int(status)
 
