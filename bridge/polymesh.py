@@ -4,6 +4,7 @@ import ctypes
 import numpy
 
 from .array import ArnoldArray
+from .constants import BTOA_VISIBILITY
 from .exportable import ArnoldNodeExportable
 from . import utils as bridge_utils
 
@@ -15,6 +16,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
             super().__init__("polymesh", frame_set)
         
         self.mesh = None
+        self.original = None
 
     def __assign_shaders(self):
         materials = []
@@ -162,9 +164,46 @@ class ArnoldPolymesh(ArnoldNodeExportable):
                 self.set_array("uvlist", uvlist)
 
                 break
+    
+    def __set_visibility(self):
+        data = self.datablock.arnold
+        visibility = 0
+
+        visibility_options = [
+            data.camera,
+            data.shadow,
+            data.diffuse_transmission,
+            data.specular_transmission,
+            data.volume,
+            data.diffuse_reflection,
+            data.specular_reflection,
+            data.sss
+        ]
+
+        for i in range(0, len(visibility_options)):
+            if visibility_options[i]:
+                visibility += BTOA_VISIBILITY[i]
+
+        # Remove camera visibility if object is indirect only
+        if (self.datablock.indirect_only_get(view_layer=self.depsgraph.view_layer)
+            or self.original.is_instance
+            and self.original.parent.indirect_only_get(view_layer=self.depsgraph.view_layer)
+            ):
+            visibility -= 1
+
+        self.set_byte("visibility", visibility)
+
+        self.set_bool(
+            "matte",
+            (self.datablock.holdout_get(view_layer=self.depsgraph.view_layer)
+            or self.original.is_instance
+            and self.original.parent.holdout_get(view_layer=self.depsgraph.view_layer)
+            )
+        )
 
     def from_datablock(self, depsgraph, datablock):
         self.depsgraph = depsgraph
+        self.original = datablock
 
         self.evaluate_datablock(datablock)
         if not self.datablock:
@@ -199,8 +238,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         self.__apply_geometry_data()
         self.__apply_uv_map_data()
         self.__assign_shaders()
-        # TODO
-        #self.__set_visibility()
+        self.__set_visibility()
 
         self.datablock.to_mesh_clear()
 
