@@ -456,27 +456,47 @@ class ArnoldRender(ArnoldExport):
         self.unbind_display_space_shader()
         gpu.state.blend_set("NONE")
 
+def get_panels():
+    exclude_panels = {
+        'RENDER_PT_gpencil',
+        'RENDER_PT_simplify',
+        'RENDER_PT_freestyle',
+        'RENDER_PT_stereoscopy',
+        'DATA_PT_light',
+        'DATA_PT_preview',
+        'DATA_PT_EEVEE_light',
+        'DATA_PT_area',
+        'DATA_PT_spot',
+        'DATA_pt_context_light',
+        'DATA_PT_lens',
+        'DATA_PT_camera',
+        'DATA_PT_camera_safe_areas',
+        'DATA_PT_camera_background_image',
+        'DATA_PT_camera_display',
+        'WORLD_PT_context_world',
+    }
+
+    panels = set()
+    for panel in bpy.types.Panel.__subclasses__():
+        if hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES and panel.__name__ not in exclude_panels:
+            panels.add(panel)
+
+    return panels
+
 def register():
     bpy.utils.register_class(ArnoldRender)
     bpy.utils.register_class(ArnoldRenderMonitor)
 
-    #for panel in get_panels():
-    #    panel.COMPAT_ENGINES.add(ArnoldRenderEngine.bl_idname)
-
-    # For some reason, there are a handful of classes that get 'ARNOLD'
-    # added to COMPAT_ENGINES even though they're left out of the
-    # list returned from get_panels(). Need to file a bug report
-    # to Blender devs, but for now we'll brute-force remove it.
-    #for panel in bpy.types.Panel.__subclasses__():
-    #    if panel.__name__ == 'DATA_PT_light':
-    #        panel.COMPAT_ENGINES.remove(ArnoldRender.bl_idname)
+    for panel in get_panels():
+        panel.COMPAT_ENGINES.add(ArnoldRender.bl_idname)
 
 def unregister():
     bpy.utils.unregister_class(ArnoldRenderMonitor)
     bpy.utils.unregister_class(ArnoldRender)
 
-    #for panel in get_panels():
-    #    if ArnoldRenderEngine.bl_idname in panel.COMPAT_ENGINES:
-    #        panel.COMPAT_ENGINES.remove(ArnoldRenderEngine.bl_idname)
+    for panel in get_panels():
+        if ArnoldRender.bl_idname in panel.COMPAT_ENGINES:
+            panel.COMPAT_ENGINES.remove(ArnoldRender.bl_idname)
 
+    # TODO
     #ArnoldRender.unregister_outliner_context_menu_draw()
