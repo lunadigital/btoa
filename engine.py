@@ -144,6 +144,7 @@ class ArnoldExport(bpy.types.RenderEngine):
         options.set_array("outputs", outputs)
         AiRenderAddInteractiveOutput(None, 0)
         
+        # TODO
         '''
         # Color Management
         color_manager = ArnoldColorManager()
@@ -382,6 +383,10 @@ class ArnoldRender(ArnoldExport):
             for update in reversed(depsgraph.updates):
                 light_data_needs_update = False
                 polymesh_data_needs_update = False
+
+                if isinstance(update.id, bpy.types.Scene):
+                    options = bridge.UniverseOptions()
+                    options.export(depsgraph, context)
 
                 if hasattr(update.id, "data"):
                     if isinstance(update.id.data, bpy.types.Light):

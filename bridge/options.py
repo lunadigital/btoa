@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 
 from . import constants
-from . import utils as export_utils
+from . import utils as bridge_utils
 from .node import ArnoldNode
 
 class UniverseOptions(ArnoldNode):
@@ -22,7 +22,7 @@ class UniverseOptions(ArnoldNode):
         prefs = bpy.context.preferences.addons[constants.BTOA_PACKAGE_NAME].preferences
 
         # Set render resolution
-        x, y = export_utils.get_render_resolution(depsgraph.scene, context)
+        x, y = bridge_utils.get_render_resolution(depsgraph.scene, context)
         self.set_render_resolution(x, y)
 
         # Set render border
@@ -146,7 +146,7 @@ class UniverseOptions(ArnoldNode):
         material_override = view_layer.material_override
 
         if material_override:
-            shader = self.session.get_node_by_uuid(material_override.uuid)
+            shader = bridge_utils.get_node_by_uuid(material_override.uuid)
 
             if not shader:
                 surface, volume, displacement = material_override.arnold.node_tree.export()
