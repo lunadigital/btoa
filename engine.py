@@ -495,6 +495,10 @@ def register():
     for panel in get_panels():
         panel.COMPAT_ENGINES.add(ArnoldRender.bl_idname)
 
+    for panel in bpy.types.Panel.__subclasses__():
+        if panel.__name__ == "DATA_PT_light":
+            panel.COMPAT_ENGINES.remove(ArnoldRender.bl_idname)
+
 def unregister():
     bpy.utils.unregister_class(ArnoldRenderMonitor)
     bpy.utils.unregister_class(ArnoldRender)
