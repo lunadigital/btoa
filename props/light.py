@@ -42,10 +42,10 @@ class ArnoldLight(PropertyGroup):
     #('photometric_light', "Photometric", "Photometric light", 7),
     type: EnumProperty(name="Type", description="",
         items=[
-            ('point_light', "Point", "Point light"),
-            ('distant_light', "Distant", "Distant light"),
-            ('spot_light', "Spot", "Spot light"),
-            ('area_light', "Area", "Area Light"),
+            ('point_light', "Point", "Point light", "LIGHT_POINT", 0),
+            ('distant_light', "Distant", "Distant light", "LIGHT_SUN", 1),
+            ('spot_light', "Spot", "Spot light", "LIGHT_SPOT", 2),
+            ('area_light', "Area", "Area Light", "LIGHT_AREA", 3),
         ],
         get=get_type,
         set=set_type
