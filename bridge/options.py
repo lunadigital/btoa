@@ -138,8 +138,8 @@ class UniverseOptions(ArnoldNode):
         if denoiser:
             arnold.AiNodeDestroy(denoiser)
 
-        if scene.arnold.enable_viewport_denoising:
-            denoiser = arnold.AiNode(None, scene.arnold.viewport_denoiser)
+        if scene.arnold.use_denoiser:
+            denoiser = arnold.AiNode(None, scene.arnold.denoiser)
             arnold.AiNodeSetPtr(driver, "input", denoiser)
         
         # Material override

@@ -264,13 +264,13 @@ class ArnoldOptions(PropertyGroup):
         default="1.0"
     )
 
-    enable_render_denoising: BoolProperty(name="Denoise Render (Noice)")
-    enable_viewport_denoising: BoolProperty(name="Denoise Viewport")
-    viewport_denoiser: EnumProperty(
+    use_denoiser: BoolProperty(name="Enable Denoiser")
+    denoiser: EnumProperty(
         name="Denoiser",
         items=[
+            ('imager_denoiser_noice', "Noice", "Use the built-in Noice image denoiser"),
             ('imager_denoiser_oidn', "OpenImageDenoise", "Use OpenImageDenoise AI denoiser running on the CPU"),
-            ('imager_denoiser_optix', "OptiX", "Use the OptiX AI denoiser with GPU acceleration, only available on NVIDIA GPUs")
+            ('imager_denoiser_optix', "OptiX", "Use the OptiX AI denoiser with GPU acceleration, only available on NVIDIA GPUs"),
         ]
     )
 

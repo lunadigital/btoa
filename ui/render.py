@@ -36,18 +36,18 @@ class ARNOLD_PT_denoising(ArnoldRenderPanel):
     bl_parent_id = 'ARNOLD_PT_sampling'
     bl_label = "Denoising"
     bl_options = {'DEFAULT_CLOSED'}
+
+    def draw_header(self, context):
+        self.layout.prop(context.scene.arnold, "use_denoiser", text="")
     
     def draw(self, context):
         options = context.scene.arnold
         layout = self.layout
         layout.use_property_split = True
 
-        heading = layout.column(align=True, heading="Viewport")
-        row = heading.row(align=True)
-        row.prop(options, "enable_viewport_denoising", text="")
-        sub = row.row()
-        sub.enabled = options.enable_viewport_denoising
-        sub.prop(options, "viewport_denoiser", text="")
+        row = layout.row()
+        row.prop(options, "denoiser")
+        row.enabled = options.use_denoiser
 
 class ARNOLD_PT_adaptive_sampling(ArnoldRenderPanel):
     bl_label = "Adaptive Sampling"
@@ -58,7 +58,6 @@ class ARNOLD_PT_adaptive_sampling(ArnoldRenderPanel):
 
     def draw(self, context):
         options = context.scene.arnold
-
         self.layout.use_property_split = True
 
         col = self.layout.column()
