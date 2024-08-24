@@ -15,7 +15,7 @@ def get_license_manager_path():
     elif sys.platform.startswith('linux'):
         return os.path.join(root, 'ArnoldLicenseManager')
     elif sys.platform == 'darwin':
-        return None
+        return os.path.join(root, 'ArnoldLicenseManager.app', 'Contents', 'MacOS', 'ArnoldLicenseManager')
 
 def is_arnoldserver_installed():
     sdk_installed = os.path.exists(get_sdk_install_path())
