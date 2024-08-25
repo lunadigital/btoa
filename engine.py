@@ -266,6 +266,12 @@ class ArnoldRender(ArnoldExport):
 
         return int(status)
 
+    def ai_message_callback(self, logmask, severity, message, metadata, user):
+        msg = AtPythonStringToStr(message)
+        msg = msg.split("|")[1].lstrip()
+
+        self.update_stats(msg, "")
+
     def update(self, data, depsgraph):
         self.ai_export(depsgraph)
 
@@ -280,6 +286,10 @@ class ArnoldRender(ArnoldExport):
                 continue
             
             self.add_pass(aov.ainame, aov.channels, aov.chan_id, layer=depsgraph.view_layer_eval.name)
+
+        # Register message callback
+        callback = AtMsgExtendedCallBack(self.ai_message_callback)
+        AiMsgRegisterCallback(callback, AI_LOG_ALL, None)
         
         # Calculate progress increment
         options = bridge.UniverseOptions()
