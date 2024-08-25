@@ -199,8 +199,8 @@ class ArnoldRender(ArnoldExport):
         AiBegin(AI_SESSION_INTERACTIVE)
 
         self.depsgraph = None
-        self.progress = 0
-        self.progress_increment = 0
+        self.pass_index = 0
+        self.total_passes = 0
         self.framebuffer = None
         self.tag_viewport_resize = False
         self.viewport_camera = bridge.CameraCache()
@@ -240,15 +240,12 @@ class ArnoldRender(ArnoldExport):
             self.update_result(result)
 
         self.ai_free_buffer(buffer)
-        
-        # Update progress counter
-        self.progress += self.progress_increment
-        self.update_progress(self.progress)
+        self.update_progress(self.pass_index / self.total_passes)
 
         if self.test_break():
             self.ai_abort()
 
-    def ai_status_callback(self, private_data, update_type, display_output):
+    def ai_status_callback(self, private_data, update_type, update_info):
         status = bridge.FAILED
 
         if update_type == int(bridge.INTERRUPTED):
@@ -263,6 +260,12 @@ class ArnoldRender(ArnoldExport):
             status = bridge.RENDER_FINISHED
         elif update_type == int(bridge.PAUSED):
             status = bridge.RESTARTING
+
+        info = update_info.contents
+        self.pass_index = info.pass_index
+        self.total_passes = info.total_passes
+
+        print(info.pass_index, info.total_passes)
 
         return int(status)
 
@@ -289,19 +292,7 @@ class ArnoldRender(ArnoldExport):
 
         # Register message callback
         callback = AtMsgExtendedCallBack(self.ai_message_callback)
-        AiMsgRegisterCallback(callback, AI_LOG_ALL, None)
-        
-        # Calculate progress increment
-        options = bridge.UniverseOptions()
-        width, height = options.get_render_resolution()
-        bucket_size = options.get_int("bucket_size")
-
-        h_buckets = math.ceil(width / bucket_size)
-        v_buckets = math.ceil(height / bucket_size)
-        total_buckets = h_buckets * v_buckets
-
-        self.progress = 0
-        self.progress_increment = 1 / total_buckets
+        cbid = AiMsgRegisterCallback(callback, AI_LOG_ALL, None)
 
         # Render
         result = self.ai_render(self.ai_status_callback)
@@ -312,6 +303,7 @@ class ArnoldRender(ArnoldExport):
                 status = AiRenderGetStatus(None)
         
         # Cleanup
+        AiMsgDeregisterCallback(cbid)
         self.ai_end()
         self.depsgraph = None
 
