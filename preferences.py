@@ -5,6 +5,7 @@ import math
 import os
 import shutil
 import ssl
+import stat
 import subprocess
 import sys
 import tarfile
@@ -137,6 +138,11 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
 
         with zipfile.ZipFile(archive_path, 'r') as f:
             f.extractall(ARNOLD_INSTALL_PATH)
+
+        # If on macOS, we need to force chmod +x so the license manager runs as expected
+        if sys.platform == 'darwin':
+            license_manager = Path(os.path.join(ARNOLD_INSTALL_PATH, "bin", "ArnoldLicenseManager.app", "Contents", "MacOS", "ArnoldLicenseManager"))
+            license_manager.chmod(license_manager.stat().st_mode | stat.S_IEXEC)
 
         os.remove(archive_path)
 

@@ -78,7 +78,7 @@ class UniverseOptions(ArnoldNode):
             self.set_pointer("background", shader)
 
         # IPR render settings
-        self.set_bool("enable_progressive_render", True)
+        self.set_bool("enable_progressive_render", context is not None)
         self.set_bool("enable_dependency_graph", True)
 
         # License settings
