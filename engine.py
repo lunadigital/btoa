@@ -87,23 +87,14 @@ class ArnoldExport(bpy.types.RenderEngine):
         options.set_pointer('camera', camera)
 
         # Materials
-        materials = set()
+        for db in depsgraph.ids:
+            if isinstance(db, bpy.types.Material):
+                ntree = db.arnold.node_tree
 
-        for obj in depsgraph.objects:
-            if isinstance(obj.data, bridge.BTOA_CONVERTIBLE_TYPES):
-                eval_obj = obj.evaluated_get(depsgraph)
-                
-                for slot in eval_obj.material_slots:
-                    if slot.material:
-                        materials.add(slot.material)
-        
-        for mat in materials:
-            ntree = mat.arnold.node_tree
-
-            if ntree and ntree.has_surface():
-                shader = ntree.export_active_surface()
-                shader.set_string("name", mat.name)
-                shader.set_uuid(mat.uuid)
+                if ntree and ntree.has_surface():
+                    shader = ntree.export_active_surface()
+                    shader.set_string("name", db.name)
+                    shader.set_uuid(db.uuid)
         
         shader = bridge.ArnoldNode("facing_ratio")
         shader.set_string("name", "BTOA_MISSING_SHADER")
