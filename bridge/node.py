@@ -94,6 +94,10 @@ class ArnoldNode(AiTemplateClass):
     def set_vector2(self, param, x, y):
         if self.is_valid:
             arnold.AiNodeSetVec2(self.data, param, x, y)
+    
+    def set_render_hint_bool(self, param, value):
+        if self.is_valid:
+            arnold.AiRenderSetHintBool(None, param, value)
 
     def get_int(self, param):
         if not self.is_valid:

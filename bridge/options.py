@@ -80,6 +80,7 @@ class UniverseOptions(ArnoldNode):
         # IPR render settings
         self.set_bool("enable_progressive_render", context is not None)
         self.set_bool("enable_dependency_graph", True)
+        self.set_render_hint_bool("progressive", context is not None)
 
         # License settings
         self.set_bool("abort_on_license_fail", prefs.abort_on_license_fail)
