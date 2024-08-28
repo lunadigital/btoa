@@ -21,8 +21,13 @@ class ArnoldNodeExportable(ArnoldNode):
             super().__init__()
 
         self.depsgraph = None
+        self.parent = None
+        self.is_instance = False
         self.datablock = None
         self.frame_set = frame_set
+
+    def __get_matrix(self):
+        return self.parent.matrix_world if self.is_instance else self.datablock.matrix_world
 
     def evaluate_datablock(self, datablock):
         if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
@@ -31,6 +36,12 @@ class ArnoldNodeExportable(ArnoldNode):
             self.datablock = datablock.id
         else:
             self.datablock = datablock
+
+        if hasattr(datablock, "parent"):
+            self.parent = datablock.parent
+
+        if hasattr(datablock, "is_instance"):
+            self.is_instance = datablock.is_instance
 
     def get_blur_matrices(self):
         sdata = self.depsgraph.scene.arnold
@@ -45,7 +56,7 @@ class ArnoldNodeExportable(ArnoldNode):
             frame, subframe = self.get_target_frame(frame_current, steps[i])
             self.frame_set(frame, subframe=subframe)
 
-            matrix = bridge_utils.flatten_matrix(self.datablock.matrix_world)
+            matrix = bridge_utils.flatten_matrix(self.__get_matrix())
             m_array.set_matrix(i, matrix)
         
         self.frame_set(frame_current, subframe=0)
@@ -61,6 +72,6 @@ class ArnoldNodeExportable(ArnoldNode):
     
     def get_transform_matrix(self):
         sdata = self.depsgraph.scene.arnold
-        matrix = bridge_utils.flatten_matrix(self.datablock.matrix_world)
+        matrix = bridge_utils.flatten_matrix(self.__get_matrix())
 
         return self.get_blur_matrices() if sdata.enable_motion_blur else matrix

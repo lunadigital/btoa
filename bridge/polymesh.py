@@ -16,7 +16,6 @@ class ArnoldPolymesh(ArnoldNodeExportable):
             super().__init__("polymesh", frame_set)
         
         self.mesh = None
-        self.original = None
 
     def __assign_shaders(self):
         materials = []
@@ -203,7 +202,6 @@ class ArnoldPolymesh(ArnoldNodeExportable):
 
     def from_datablock(self, depsgraph, datablock):
         self.depsgraph = depsgraph
-        self.original = datablock
 
         self.evaluate_datablock(datablock)
         if not self.datablock:
@@ -215,7 +213,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         
         # General settings
         sdata = depsgraph.scene.arnold
-        self.set_uuid(self.datablock.uuid)
+        self.set_uuid(self.parent.uuid if self.is_instance else self.datablock.uuid)
         self.set_string("name", self.datablock.name)
         self.set_bool("smoothing", True)
         self.set_float("motion_start", sdata.shutter_start)
@@ -238,7 +236,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         self.__apply_geometry_data()
         self.__apply_uv_map_data()
         self.__assign_shaders()
-        self.__set_visibility()
+        #self.__set_visibility()
 
         self.datablock.to_mesh_clear()
 
