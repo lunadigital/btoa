@@ -62,9 +62,14 @@ def start_shading_monitor():
 class ArnoldExport(bpy.types.RenderEngine):
     def __init__(self):
         self.is_viewport = False
+        self.display_driver = None
 
     def ai_abort(self):
         AiRenderAbort(None)
+    
+    def ai_begin(self):
+        AiBegin(AI_SESSION_INTERACTIVE)
+        self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
 
     @staticmethod
     def ai_end(self=None):
@@ -76,6 +81,8 @@ class ArnoldExport(bpy.types.RenderEngine):
         AiNodeDestroy(node.data)
     
     def ai_export(self, depsgraph, context=None):
+        self.ai_begin()
+
         options = bridge.UniverseOptions()
         options.export(depsgraph, context)
 
@@ -187,15 +194,13 @@ class ArnoldRender(ArnoldExport):
 
     def __init__(self):
         super().__init__()
-        AiBegin(AI_SESSION_INTERACTIVE)
-
         self.depsgraph = None
         self.pass_index = 0
         self.total_passes = 0
         self.framebuffer = None
         self.tag_viewport_resize = False
         self.viewport_camera = bridge.CameraCache()
-        self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
+        self.display_driver = None
 
     def ai_display_callback(self, buffer):
         render = self.depsgraph.scene.render
@@ -255,8 +260,6 @@ class ArnoldRender(ArnoldExport):
         info = update_info.contents
         self.pass_index = info.pass_index
         self.total_passes = info.total_passes
-
-        print(info.pass_index, info.total_passes)
 
         return int(status)
 
@@ -453,6 +456,16 @@ class ArnoldRender(ArnoldExport):
 
         self.unbind_display_space_shader()
         gpu.state.blend_set("NONE")
+
+    def update_render_passes(self, scene=None, renderlayer=None):
+        self.register_pass(scene, renderlayer, "Combined", 4, "RGBA", 'COLOR')
+        aovs = renderlayer.arnold.aovs
+
+        for aov in aovs.enabled_aovs:
+            if aov.name == "Beauty":
+                continue 
+                
+            self.register_pass(scene, renderlayer, aov.ainame, aov.channels, aov.chan_id, aov.pass_type)
 
 def get_panels():
     exclude_panels = {
