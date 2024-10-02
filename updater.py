@@ -24,7 +24,7 @@ class ArnoldUpdater(HTMLParser):
         self.all_versions = []
 
         ssl._create_default_https_context = ssl._create_unverified_context
-        fp = urllib.request.urlopen("https://www.arnoldforblender.com/downloads/")
+        fp = urllib.request.urlopen("https://downloads.arnoldforblender.com")
         mybytes = fp.read()
         html = mybytes.decode("utf8")
         fp.close()

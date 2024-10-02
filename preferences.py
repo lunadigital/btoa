@@ -129,7 +129,7 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
         ssl._create_default_https_context = ssl._create_unverified_context
 
         urllib.request.urlretrieve(
-            f'https://arnoldforblender.com/downloads/{version}/{package}',
+            f'https://downloads.arnoldforblender.com/{version}/{package}',
             archive_path,
             update_progress_percent
         )
