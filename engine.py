@@ -1,13 +1,13 @@
 import bpy
 import gpu
 import numpy
-import sys
 import time
-import math
 
 from arnold import *
 
 from . import bridge
+
+from bl_ui.space_outliner import OUTLINER_MT_collection_view_layer
 
 class RenderViewManager:
     def __init__(self):
@@ -191,6 +191,32 @@ class ArnoldRender(ArnoldExport):
     bl_use_postprocess = True
 
     active = False
+    _outliner_context_menu_draw = None
+
+    @classmethod
+    def register(cls):
+        if cls._outliner_context_menu_draw is None:
+            def draw(self, context):
+                layout = self.layout
+
+                layout.operator("outliner.collection_exclude_set")
+                layout.operator("outliner.collection_exclude_clear")
+
+                layout.operator("outliner.collection_holdout_set")
+                layout.operator("outliner.collection_holdout_clear")
+
+                if context.engine in ('CYCLES', 'ARNOLD'):
+                    layout.operator("outliner.collection_indirect_only_set")
+                    layout.operator("outliner.collection_indirect_only_clear")
+
+            cls._outliner_context_menu_draw = OUTLINER_MT_collection_view_layer.draw
+            OUTLINER_MT_collection_view_layer.draw = draw
+    
+    @classmethod
+    def unregister_outliner_context_menu_draw(cls):
+        if cls._outliner_context_menu_draw is not None:
+            OUTLINER_MT_collection_view_layer.draw = cls._outliner_context_menu_draw
+            cls._outliner_context_menu_draw = None
 
     def __init__(self):
         super().__init__()
@@ -387,7 +413,7 @@ class ArnoldRender(ArnoldExport):
                 if hasattr(update.id, "data"):
                     if isinstance(update.id.data, bpy.types.Light):
                         light_data_needs_update = True
-                    elif isinstance(update.id.data, bridge.BTOA_CONVERTIBLE_TYPES) and update.is_updated_geometry:
+                    elif isinstance(update.id.data, bridge.BTOA_CONVERTIBLE_TYPES):
                         polymesh_data_needs_update = True
 
                 if isinstance(update.id, bpy.types.Object):
@@ -513,5 +539,4 @@ def unregister():
         if ArnoldRender.bl_idname in panel.COMPAT_ENGINES:
             panel.COMPAT_ENGINES.remove(ArnoldRender.bl_idname)
 
-    # TODO
-    #ArnoldRender.unregister_outliner_context_menu_draw()
+    ArnoldRender.unregister_outliner_context_menu_draw()

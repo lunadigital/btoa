@@ -21,8 +21,8 @@ class ArnoldNodeExportable(ArnoldNode):
             super().__init__()
 
         self.depsgraph = None
-        self.parent = None
         self.is_instance = False
+        self.parent = None
         self.datablock = None
         self.frame_set = frame_set
 
@@ -32,16 +32,12 @@ class ArnoldNodeExportable(ArnoldNode):
     def evaluate_datablock(self, datablock):
         if isinstance(datablock, bpy.types.DepsgraphObjectInstance):
             self.datablock = bridge_utils.get_object_data_from_instance(datablock)
+            self.is_instance = datablock.is_instance
+            self.parent = datablock.parent
         elif isinstance(datablock, bpy.types.DepsgraphUpdate):
             self.datablock = datablock.id
         else:
             self.datablock = datablock
-
-        if hasattr(datablock, "parent"):
-            self.parent = datablock.parent
-
-        if hasattr(datablock, "is_instance"):
-            self.is_instance = datablock.is_instance
 
     def get_blur_matrices(self):
         sdata = self.depsgraph.scene.arnold

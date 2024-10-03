@@ -184,9 +184,9 @@ class ArnoldPolymesh(ArnoldNodeExportable):
                 visibility += BTOA_VISIBILITY[i]
 
         # Remove camera visibility if object is indirect only
-        if (self.datablock.indirect_only_get(view_layer=self.depsgraph.view_layer)
-            or self.original.is_instance
-            and self.original.parent.indirect_only_get(view_layer=self.depsgraph.view_layer)
+        if (self.datablock.indirect_only_get(view_layer=self.depsgraph.view_layer_eval)
+            or self.is_instance
+            and self.parent.indirect_only_get(view_layer=self.depsgraph.view_layer_eval)
             ):
             visibility -= 1
 
@@ -194,9 +194,10 @@ class ArnoldPolymesh(ArnoldNodeExportable):
 
         self.set_bool(
             "matte",
-            (self.datablock.holdout_get(view_layer=self.depsgraph.view_layer)
-            or self.original.is_instance
-            and self.original.parent.holdout_get(view_layer=self.depsgraph.view_layer)
+            (self.datablock.holdout_get(view_layer=self.depsgraph.view_layer_eval)
+            or self.is_instance
+            and self.parent is not None
+            and self.parent.holdout_get(view_layer=self.depsgraph.view_layer_eval)
             )
         )
 
@@ -236,7 +237,7 @@ class ArnoldPolymesh(ArnoldNodeExportable):
         self.__apply_geometry_data()
         self.__apply_uv_map_data()
         self.__assign_shaders()
-        #self.__set_visibility()
+        self.__set_visibility()
 
         self.datablock.to_mesh_clear()
 
