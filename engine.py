@@ -257,9 +257,8 @@ class ArnoldRender(ArnoldExport):
                 name = 'Combined' if aov.name == b'RGBA' else aov.name.decode()
                 pixels = numpy.ctypeslib.as_array(aov.data, shape=(rdata.width * rdata.height, aov.channels))
                 result.layers[0].passes[name].rect = pixels
-        
+
             self.end_result(result)
-            self.update_result(result)
 
         self.ai_free_buffer(buffer)
         self.update_progress(self.pass_index / self.total_passes)
