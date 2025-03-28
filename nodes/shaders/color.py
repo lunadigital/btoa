@@ -3,6 +3,7 @@ from bpy.props import *
 from .. import core
 from ... import bridge
 from ...utils import register_utils
+from ...bridge import NodeData, ExportDataType
 
 '''
 AiColorCorrect
@@ -104,18 +105,22 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
         self.sub_export(node)
 
         for i in self.inputs:
-            socket_value, value_type, socket_type = i.export()
+            socket_data = i.export()
             
             # We need to rebuild the identifier value to account for the different enum options in jitter_type
             identifier = 'input' if i.identifier == 'input' else "{}_{}".format(self.jitter_type, i.identifier)
-            
-            if socket_value is not None and value_type is not None:
-                if value_type == 'BTNODE':
-                    socket_value.link(identifier, node)
-                else:
-                    bridge.BTOA_SET_LAMBDA[value_type](node, identifier, socket_value)
 
-        return node, 'BTNODE'
+            if socket_data.type is ExportDataType.NODE:
+                socket_data.value.link(identifier, node, socket_data.from_socket)
+            else:
+                key = socket_data.type
+                if socket_data.type is ExportDataType.COLOR:
+                    key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
+                
+                value = socket_utils.convert_real_units(socket_data.value) if i.real_world else socket_data.value
+                bridge.BTOA_SET_LAMBDA[key](node, identifier, value)
+
+        return NodeData(node)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "jitter_type")
