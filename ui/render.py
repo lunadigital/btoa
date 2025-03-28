@@ -1,25 +1,27 @@
 import bpy
-from .. import utils
+
+from ..preferences import ENGINE_ID
+from ..utils import ui_utils
 
 class ArnoldRenderPanel(bpy.types.Panel):
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'render'
+    COMPAT_ENGINES = {ENGINE_ID}
 
     @classmethod
     def poll(cls, context):
-        return context.engine in {'ARNOLD'}
+        return ui_utils.arnold_is_active(context)
 
 class ARNOLD_PT_sampling(ArnoldRenderPanel):
     bl_label = "Sampling"
 
     def draw(self, context):
         layout = self.layout
-        options = context.scene.arnold
-
         layout.use_property_split = True
 
-        layout.prop(options, "render_device")
+        options = context.scene.arnold
+
         layout.prop(options, "aa_samples")
 
         col = self.layout.column()
@@ -32,25 +34,20 @@ class ARNOLD_PT_sampling(ArnoldRenderPanel):
     
 class ARNOLD_PT_denoising(ArnoldRenderPanel):
     bl_parent_id = 'ARNOLD_PT_sampling'
-    bl_label = "Viewport Denoising"
+    bl_label = "Denoising"
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, context):
-        self.layout.prop(context.scene.arnold, "enable_denoising", text="")
+        self.layout.prop(context.scene.arnold, "use_denoiser", text="")
     
     def draw(self, context):
+        options = context.scene.arnold
         layout = self.layout
-        enable_denoising = context.scene.arnold.enable_denoising
-
         layout.use_property_split = True
 
-        col = layout.column()
-        col.prop(context.scene.arnold, "denoiser")
-        col.enabled = enable_denoising
-
-        #if enable_denoising:
-        #    col.separator()
-        #    col.label(text="Denoising with imagers not suited for animations", icon='ERROR')
+        row = layout.row()
+        row.prop(options, "denoiser")
+        row.enabled = options.use_denoiser
 
 class ARNOLD_PT_adaptive_sampling(ArnoldRenderPanel):
     bl_label = "Adaptive Sampling"
@@ -61,7 +58,6 @@ class ARNOLD_PT_adaptive_sampling(ArnoldRenderPanel):
 
     def draw(self, context):
         options = context.scene.arnold
-
         self.layout.use_property_split = True
 
         col = self.layout.column()
@@ -234,8 +230,25 @@ classes = (
     ARNOLD_PT_feature_overrides,
 )
 
+def draw_device(self, context):
+    layout = self.layout
+    layout.use_property_split = True
+    layout.use_property_decorate = False
+
+    options = context.scene.arnold
+
+    if context.engine == 'ARNOLD':
+        col = layout.column()
+        col.prop(options, "render_device", text="Device")
+
 def register():
+    from ..utils import register_utils as utils
     utils.register_classes(classes)
 
+    bpy.types.RENDER_PT_context.append(draw_device)
+
 def unregister():
+    from ..utils import register_utils as utils
     utils.unregister_classes(classes)
+
+    bpy.types.RENDER_PT_context.remove(draw_device)

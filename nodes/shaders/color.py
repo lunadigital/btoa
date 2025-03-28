@@ -1,18 +1,18 @@
 import bpy
 from bpy.props import *
-from .. import base
-from ... import btoa
-from ... import utils
+from .. import core
+from ... import bridge
+from ...utils import register_utils
+from ...bridge import NodeData, ExportDataType
 
 '''
 AiColorCorrect
-https://docs.arnoldrenderer.com/display/A5NodeRef/color_correct
 
 Allows you to adjust the gamma, hue, saturation, contrast, and exposure of
 an image. Alters the Input color with the following operator, applied in
 the same order as the parameters.
 '''
-class AiColorCorrect(bpy.types.Node, base.ArnoldNode):
+class AiColorCorrect(bpy.types.Node, core.ArnoldNode):
     bl_label = "Color Correct"
     ai_name = "color_correct"
 
@@ -52,21 +52,20 @@ class AiColorCorrect(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "invert")
         layout.prop(self, "invert_alpha")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("alpha_is_luminance", self.alpha_is_luminance)
         node.set_bool("invert", self.invert)
         node.set_bool("invert_alpha", self.invert_alpha)
 
 '''
 AiColorJitter
-https://docs.arnoldrenderer.com/display/A5NodeRef/color_jitter
 
 This shader enables you to alter the input color by applying a random
     color variation. For each of the following parameters, you can specify
     the range of hue, saturation, and gain (HSV) for the random colors.
     The seed is used to get a different random variation.
 '''
-class AiColorJitter(bpy.types.Node, base.ArnoldNode):
+class AiColorJitter(bpy.types.Node, core.ArnoldNode):
     bl_label = "Color Jitter"
     ai_name = "color_jitter"
 
@@ -98,26 +97,30 @@ class AiColorJitter(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatPositive', name="Max Saturation", identifier="saturation_max")
         self.inputs.new('AiNodeSocketIntPositive', name="Seed", identifier="seed")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def export(self):
-        node = btoa.ArnoldNode(self.ai_name)
+        node = bridge.ArnoldNode(self.ai_name)
 
         self.sub_export(node)
 
         for i in self.inputs:
-            socket_value, value_type = i.export()
+            socket_data = i.export()
             
             # We need to rebuild the identifier value to account for the different enum options in jitter_type
-            identifier = "{}_{}".format(self.jitter_type, i.identifier)
-            
-            if socket_value is not None and value_type is not None:
-                if value_type == 'BTNODE':
-                    socket_value.link(identifier, node)
-                else:
-                    btoa.BTOA_SET_LAMBDA[value_type](node, identifier, socket_value)
+            identifier = 'input' if i.identifier == 'input' else "{}_{}".format(self.jitter_type, i.identifier)
 
-        return node, 'BTNODE'
+            if socket_data.type is ExportDataType.NODE:
+                socket_data.value.link(identifier, node, socket_data.from_socket)
+            else:
+                key = socket_data.type
+                if socket_data.type is ExportDataType.COLOR:
+                    key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
+                
+                value = socket_utils.convert_real_units(socket_data.value) if i.real_world else socket_data.value
+                bridge.BTOA_SET_LAMBDA[key](node, identifier, value)
+
+        return NodeData(node)
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "jitter_type")
@@ -125,17 +128,16 @@ class AiColorJitter(bpy.types.Node, base.ArnoldNode):
         if self.jitter_type == "face":
             layout.prop(self, "face_mode")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         if self.jitter_type == "face":
             node.set_string("face_mode", self.face_mode)
 
 '''
 AiComposite
-https://docs.arnoldrenderer.com/display/A5NodeRef/composite
 
 The composite shader mixes two RGBA inputs according to a blend mode.
 '''
-class AiComposite(bpy.types.Node, base.ArnoldNode):
+class AiComposite(bpy.types.Node, core.ArnoldNode):
     bl_label = "Composite"
     ai_name = "composite"
 
@@ -188,24 +190,23 @@ class AiComposite(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketRGBA', name="A", identifier="A")
         self.inputs.new('AiNodeSocketRGBA', name="B", identifier="B")
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "operation")
         layout.prop(self, "alpha_operation")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_string("operation", self.operation)
         node.set_string("alpha_operation", self.alpha_operation)
 
 '''
 AiShuffle
-https://docs.arnoldrenderer.com/display/A5NodeRef/shuffle
 
 Combines RGB and alpha inputs to output an RGBA by default.
 Additionally, there are parameters to shuffle the channels.
 '''
-class AiShuffle(bpy.types.Node, base.ArnoldNode):
+class AiShuffle(bpy.types.Node, core.ArnoldNode):
     bl_label = "Shuffle"
     ai_name = "shuffle"
 
@@ -261,7 +262,7 @@ class AiShuffle(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', name="Color", identifier="color")
         self.inputs.new('AiNodeSocketFloatUnbounded', name="Alpha", identifier="alpha")
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "channel_r")
@@ -285,7 +286,7 @@ class AiShuffle(bpy.types.Node, base.ArnoldNode):
 
         layout.separator()
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_string("channel_r", self.channel_r)
         node.set_string("channel_g", self.channel_g)
         node.set_string("channel_b", self.channel_b)
@@ -304,7 +305,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

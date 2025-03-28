@@ -1,11 +1,13 @@
 import bpy
 from bl_ui.properties_data_camera import CameraButtonsPanel, CAMERA_PT_presets
-from .. import engine
+from ..preferences import ENGINE_ID
 
-class DATA_PT_arnold_lens(CameraButtonsPanel, bpy.types.Panel):
+class ArnoldCameraPanel(CameraButtonsPanel, bpy.types.Panel):
+    COMPAT_ENGINES = {ENGINE_ID}
+
+class DATA_PT_arnold_lens(ArnoldCameraPanel):
     bl_idname = "DATA_PT_arnold_lens"
     bl_label = "Lens"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         camera = context.camera
@@ -30,13 +32,18 @@ class DATA_PT_arnold_lens(CameraButtonsPanel, bpy.types.Panel):
 
         col.separator()
 
+        sub = col.column(align=True)
+        sub.prop(camera, "clip_start", text="Clip Start")
+        sub.prop(camera, "clip_end", text="End")
+
+        col.separator()
+
         col.prop(camera.arnold, "exposure")
 
-class DATA_PT_arnold_dof(CameraButtonsPanel, bpy.types.Panel):
+class DATA_PT_arnold_dof(ArnoldCameraPanel):
     bl_idname = "DATA_PT_arnold_dof"
     bl_label = "Depth of Field"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw_header(self, context):
         self.layout.prop(context.camera.arnold, "enable_dof", text="")
@@ -54,14 +61,14 @@ class DATA_PT_arnold_dof(CameraButtonsPanel, bpy.types.Panel):
         sub.active = (camera.dof.focus_object is None)
         sub.prop(camera.dof, "focus_distance")
 
-# This is a hacky way to get more control over where Blender
-# panels appear in relation to Arnold panels
-#
-# Copied directly from bl_ui.properties_data_camera
-class DATA_PT_arnold_camera(CameraButtonsPanel, bpy.types.Panel):
+'''
+This is a hacky way to get more control over where Blender
+panels appear in relation to Arnold panels. Copied directly
+from `bl_ui.properties_data_camera`.
+'''
+class DATA_PT_arnold_camera(ArnoldCameraPanel):
     bl_label = "Camera"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw_header_preset(self, _context):
         CAMERA_PT_presets.draw_panel_header(self.layout)
@@ -87,11 +94,10 @@ class DATA_PT_arnold_camera(CameraButtonsPanel, bpy.types.Panel):
             sub.active = cam.sensor_fit == 'VERTICAL'
             sub.prop(cam, "sensor_height", text="Height")
 
-class DATA_PT_arnold_aperture(CameraButtonsPanel, bpy.types.Panel):
+class DATA_PT_arnold_aperture(ArnoldCameraPanel):
     bl_parent_id = DATA_PT_arnold_dof.bl_idname
     bl_idname = "DATA_PT_arnold_aperture"
     bl_label = "Aperture"
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         camera = context.camera
@@ -106,18 +112,17 @@ class DATA_PT_arnold_aperture(CameraButtonsPanel, bpy.types.Panel):
         col.prop(camera.arnold, "aperture_aspect_ratio")
         col.enabled = camera.arnold.enable_dof
 
-# This is a hacky way to get more control over where Blender
-# panels appear in relation to Arnold panels
-#
-# Copied directly from bl_ui.properties_data_camera
-class DATA_PT_arnold_camera_background_image(CameraButtonsPanel, bpy.types.Panel):
+'''
+This is a hacky way to get more control over where Blender
+panels appear in relation to Arnold panels. Copied directly
+from `bl_ui.properties_data_camera`.
+'''
+class DATA_PT_arnold_camera_background_image(ArnoldCameraPanel):
     bl_label = "Background Images"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw_header(self, context):
         cam = context.camera
-
         self.layout.prop(cam, "show_background_images", text="")
 
     def draw(self, context):
@@ -215,14 +220,14 @@ class DATA_PT_arnold_camera_background_image(CameraButtonsPanel, bpy.types.Panel
                     col.prop(bg, "use_flip_x")
                     col.prop(bg, "use_flip_y")
 
-# This is a hacky way to get more control over where Blender
-# panels appear in relation to Arnold panels
-#
-# Copied directly from bl_ui.properties_data_camera
-class DATA_PT_arnold_camera_display(CameraButtonsPanel, bpy.types.Panel):
+'''
+This is a hacky way to get more control over where Blender
+panels appear in relation to Arnold panels. Copied directly
+from `bl_ui.properties_data_camera`.
+'''
+class DATA_PT_arnold_camera_display(ArnoldCameraPanel):
     bl_label = "Viewport Display"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -250,12 +255,10 @@ class DATA_PT_arnold_camera_display(CameraButtonsPanel, bpy.types.Panel):
         sub.prop(cam, "passepartout_alpha", text="")
         row.prop_decorator(cam, "passepartout_alpha")
 
-
-class DATA_PT_arnold_camera_display_composition_guides(CameraButtonsPanel, bpy.types.Panel):
+class DATA_PT_arnold_camera_display_composition_guides(ArnoldCameraPanel):
     bl_label = "Composition Guides"
     bl_parent_id = "DATA_PT_arnold_camera_display"
     bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
 
     def draw(self, context):
         layout = self.layout
@@ -278,7 +281,6 @@ class DATA_PT_arnold_camera_display_composition_guides(CameraButtonsPanel, bpy.t
         col.prop(cam, "show_composition_harmony_tri_a", text="Triangle A")
         col.prop(cam, "show_composition_harmony_tri_b", text="Triangle B")
 
-
 classes = (
     DATA_PT_arnold_lens,
     DATA_PT_arnold_dof,
@@ -290,11 +292,9 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)

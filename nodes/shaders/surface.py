@@ -1,15 +1,15 @@
 import bpy
 from bpy.props import *
-from .. import base, constants
-from ... import utils
+from .. import core, constant
+from ...utils import register_utils
+from ...bridge.types import DisplacementData
 
 '''
 AiAmbientOcclusion
-https://docs.arnoldrenderer.com/display/A5NodeRef/ambient_occlusion
 
 Ambient occlusion shader. Outputs RGB.
 '''
-class AiAmbientOcclusion(bpy.types.Node, base.ArnoldNode):
+class AiAmbientOcclusion(bpy.types.Node, core.ArnoldNode):
     bl_label = "Ambient Occlusion"
     ai_name = "ambient_occlusion"
 
@@ -26,60 +26,24 @@ class AiAmbientOcclusion(bpy.types.Node, base.ArnoldNode):
         self.inputs.new("AiNodeSocketRGB", "Black", identifier="black").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "invert_normals")
         layout.prop(self, "self_only")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("invert_normals", self.invert_normals)
         node.set_bool("self_only", self.self_only)
 
 '''
-AiBump2d
-https://docs.arnoldrenderer.com/display/A5NodeRef/bump2d
-
-Provides bump mapping based on a 2d texture map.
-'''
-class AiBump2d(bpy.types.Node, base.ArnoldNode):
-    bl_label = "Bump 2D"
-    ai_name = "bump2d"
-
-    def init(self, context):
-        self.inputs.new('AiNodeSocketVector', name="Bump Map", identifier="bump_map")
-        self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Height", identifier="bump_height").default_value = 1
-        self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
-
-        self.outputs.new('AiNodeSocketVector', name="Vector", identifier="output")
-
-'''
-AiBump3d
-https://docs.arnoldrenderer.com/display/A5NodeRef/bump3d
-
-Provides bump mapping based on a 3d input.
-'''
-class AiBump3d(bpy.types.Node, base.ArnoldNode):
-    bl_label = "Bump 3D"
-    ai_name = "bump3d"
-
-    def init(self, context):
-        self.inputs.new('AiNodeSocketFloatUnbounded', name="Bump Map", identifier="bump_map")
-        self.inputs.new('AiNodeSocketFloatPositive', name="Bump Height", identifier="bump_height").default_value = 0.01
-        self.inputs.new('AiNodeSocketFloatPositive', name="Epsilon", identifier="epsilon").default_value = 0.001
-        self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
-
-        self.outputs.new('AiNodeSocketSurface', name="RGBA", identifier="output")
-
-'''
 AiCarPaint
-https://docs.arnoldrenderer.com/display/A5NodeRef/car_paint
 
 A simple-to-use car paint shader. Outputs RGB.
 '''
-class AiCarPaint(bpy.types.Node, base.ArnoldNode):
+class AiCarPaint(bpy.types.Node, core.ArnoldNode):
     bl_label = "Car Paint"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "car_paint"
 
     def init(self, context):
@@ -114,7 +78,51 @@ class AiCarPaint(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatAboveOne', "Coat IOR", identifier="coat_IOR").default_value = 1.5
         self.inputs.new('AiNodeSocketVector', name="Coat Normal", identifier="coat_normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
+
+'''
+AiCurvature
+
+This shader will sample around the shading point within a given
+radius to output the curvature. You can adjust the radius, falloff,
+and spread of the curvature sampling as well as specify a trace set
+to exclude or include objects. This shader is useful for creating
+procedural wear or dirt maps in conjunction with a noise shader.
+'''
+class AiCurvature(bpy.types.Node, core.ArnoldNode):
+    bl_label = "Curvature"
+    ai_name = "curvature"
+
+    output: EnumProperty(
+        name="Output",
+        items=[
+            ('convex', "Convex", "Convex (positive) curvature"),
+            ('concave', "Concave", "Concave (negative) curvature"),
+            ('both', "Both", "Both convex and concave curvature")
+        ]
+    )
+
+    samples: IntProperty(name="Samples", min=1, soft_max=10, default=3)
+    self_only: BoolProperty(name="Self Only")
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'self_only')
+        layout.prop(self, 'output', text="")
+        layout.prop(self, 'samples')
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketFloatPositive', "Radius", identifier="radius").default_value = 0.1
+        self.inputs.new('AiNodeSocketFloatNormalized', "Spread", identifier="spread").default_value = 1
+        self.inputs.new('AiNodeSocketFloatNormalized', "Threshold", identifier="threshold")
+        self.inputs.new('AiNodeSocketFloatNormalized', "Bias", identifier="bias").default_value = 0.5
+        self.inputs.new('AiNodeSocketFloatPositiveToTen', "Multiply", identifier="multiply").default_value = 1
+
+        self.outputs.new('AiNodeSocketRGB', "RGB")
+
+    def sub_export(self, node):
+        node.set_string('output', self.output)
+        node.set_uint('samples', self.samples)
+        node.set_bool('self_only', self.self_only)
 
 '''
 AiDisplacement
@@ -122,7 +130,7 @@ AiDisplacement
 This is a dummy node that exports displacement data to Arnold by
 hijacking the polymesh node.
 '''
-class AiDisplacement(bpy.types.Node, base.ArnoldNode):
+class AiDisplacement(bpy.types.Node, core.ArnoldNode):
     bl_label = "Displacement"
 
     disp_autobump: BoolProperty(name="Auto Bump")
@@ -133,59 +141,59 @@ class AiDisplacement(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatUnbounded', "Zero Value", identifier="disp_zero_value")
         self.inputs.new('AiNodeSocketRGB', "Input", identifier="disp_map").default_value = (0, 0, 0)
         
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "disp_autobump")
 
     # Overriding export() because this isn't a native Arnold struct
-    def export(self, socket_index=0):
-        return (
-            self.inputs[3].export()[0], # input
-            self.inputs[0].export()[0], # padding
-            self.inputs[1].export()[0], # height
-            self.inputs[2].export()[0], # zero value
+    def export(self):
+        data = (
+            self.inputs[3].export(), # input
+            self.inputs[0].export(), # padding
+            self.inputs[1].export(), # height
+            self.inputs[2].export(), # zero value
             self.disp_autobump
         )
 
+        return DisplacementData(data)
+
 '''
 AiFlat
-https://docs.arnoldrenderer.com/display/A5NodeRef/flat
 
 A simple color shader node which just allows a color with no other effects.
 '''
-class AiFlat(bpy.types.Node, base.ArnoldNode):
+class AiFlat(bpy.types.Node, core.ArnoldNode):
     bl_label = "Flat"
     ai_name = "flat"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color")
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color").default_value = (1, 1, 1)
+        self.outputs.new('AiNodeSocketRGB', name="RGB")
 
 '''
 AiLambert
-https://docs.arnoldrenderer.com/display/A5NodeRef/lambert
 
 Simple Lambertian reflectance model. Outputs a simple color (RGB).
 '''
-class AiLambert(bpy.types.Node, base.ArnoldNode):
+class AiLambert(bpy.types.Node, core.ArnoldNode):
     bl_label = "Lambert"
     ai_name = "lambert"
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', "Color", identifier="Kd_color")
         self.inputs.new('AiNodeSocketFloatNormalized', "Weight", identifier="Kd").default_value = 1
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="Kd_color").default_value = (1, 1, 1)
+        self.inputs.new('AiNodeSocketRGB', "Opacity", identifier="opacity").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="Shader")
 
 '''
 AiMatte
-https://docs.arnoldrenderer.com/display/A5NodeRef/matte
 
 Enables you to create holdout effects by rendering the alpha as zero.
 '''
-class AiMatte(bpy.types.Node, base.ArnoldNode):
+class AiMatte(bpy.types.Node, core.ArnoldNode):
     bl_label = "Matte"
     ai_name = "matte"
 
@@ -193,25 +201,28 @@ class AiMatte(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketRGBA', "Color", identifier="color")
         self.inputs.new('AiNodeSocketRGB', "Opacity", identifier="opacity").default_value = (1, 1, 1)
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
 '''
 AiMixShader
-https://docs.arnoldrenderer.com/display/A5NodeRef/mix_shader
 
 Used to blend two shaders together.
 '''
-class AiMixShader(bpy.types.Node, base.ArnoldNode):
+class AiMixShader(bpy.types.Node, core.ArnoldNode):
     bl_label = "Mix Shader"
     ai_name = "mix_shader"
+
+    def toggle_mix(self, context):
+        self.inputs[0].enabled = self.mode == 'blend'
 
     mode: EnumProperty(
         name="Mode",
         description="",
         items=[
-            ('0', "Blend", "Blend"),
-            ('1', "Add", "Add")
-        ]
+            ('blend', "Blend", "Blend"),
+            ('add', "Add", "Add")
+        ],
+        update=toggle_mix
     )
 
     add_transparency: BoolProperty(name="Add Transparency")
@@ -221,24 +232,26 @@ class AiMixShader(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketSurface', name="Shader", identifier="shader1")
         self.inputs.new('AiNodeSocketSurface', name="Shader", identifier="shader2")
 
-        self.outputs.new('AiNodeSocketSurface', name="Closure", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="Shader")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "mode")
-        layout.prop(self, "add_transparency")
+        layout.prop(self, "mode", text="")
+
+        if self.mode == 'add':
+            layout.prop(self, "add_transparency")
         
-    def sub_export(self, node, socket_index=0):
-        node.set_int("mode", int(self.mode))
-        node.set_bool("add_transparency", self.add_transparency)
+    def sub_export(self, node):
+        node.set_string("mode", self.mode)
+        node.set_bool("add_transparency", self.add_transparency) 
 
 '''
 AiNormalMap
-https://docs.arnoldrenderer.com/display/A5NodeRef/normal_map
 
-Provides bump mapping based on a 2d texture map.
+Provides bump mapping cored on a 2d texture map.
 '''
-class AiNormalMap(bpy.types.Node, base.ArnoldNode):
+class AiNormalMap(bpy.types.Node, core.ArnoldNode):
     bl_label = "Normal Map"
+    bl_width_default = 180
     ai_name = "normal_map"
 
     invert_x: BoolProperty(name="Invert X")
@@ -246,11 +259,12 @@ class AiNormalMap(bpy.types.Node, base.ArnoldNode):
     invert_z: BoolProperty(name="Invert Z")
 
     color_to_signed: BoolProperty(
-        name="Color to signed",
-        description="For 8-bit maps. If enabled, the input is remapped to the [-1,1] range"
+        name="Color To Signed",
+        description="For 8-bit maps. If enabled, the input is remapped to the [-1,1] range",
+        default=True
     )
 
-    normalize: BoolProperty(name="Normalize")
+    tangent_space: BoolProperty(name="Tangent Space", default=True)
 
     def init(self, context):
         self.inputs.new('AiNodeSocketVector', name="Input", identifier="input")
@@ -258,24 +272,68 @@ class AiNormalMap(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketVector', name="Tangent", identifier="tangent")
         self.inputs.new('AiNodeSocketVector', name="Normal", identifier="normal")
 
-        self.outputs.new('AiNodeSocketVector', name="Vector", identifier="output")
+        self.outputs.new('AiNodeSocketVector', name="Vector")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "invert_x")
-        layout.prop(self, "invert_y")
-        layout.prop(self, "invert_z")
+        row = layout.row(heading="Invert", align=True)
+        row.prop(self, "invert_x", text="X", toggle=1)
+        row.prop(self, "invert_y", text="Y", toggle=1)
+        row.prop(self, "invert_z", text="Z", toggle=1)
+        
+        col = layout.column()
+        col.prop(self, "color_to_signed")
+        col.prop(self, "tangent_space")
 
-        layout.separator()
-
-        layout.prop(self, "color_to_signed")
-        layout.prop(self, "normalize")
-
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("invert_x", self.invert_x)
         node.set_bool("invert_y", self.invert_y)
         node.set_bool("invert_z", self.invert_z)
         node.set_bool("color_to_signed", self.color_to_signed)
-        node.set_bool("normalize", self.normalize)
+        node.set_bool("tangent_space", self.tangent_space)
+
+'''
+AiRaySwitchRGBA
+
+This shader makes it possible to evaluate different color trees per ray.
+'''
+class AiRaySwitchRGBA(bpy.types.Node, core.ArnoldNode):
+    bl_label = "Ray Switch RGBA"
+    ai_name = "ray_switch_rgba"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketRGBA', "Camera", identifier="camera").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Shadow", identifier="shadow").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Diffuse Reflection", identifier="diffuse_reflection").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Diffuse Transmission", identifier="diffuse_transmission").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Specular Reflection", identifier="specular_reflection").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Specular Transmission", identifier="specular_transmission").hide_value = True
+        self.inputs.new('AiNodeSocketRGBA', "Volume", identifier="volume").hide_value = True
+
+        self.outputs.new('AiNodeSocketRGBA', "RGBA")
+
+'''
+AiRaySwitchShader
+
+This shader makes it possible to evaluate different shader trees per ray. This decreases
+the shading complexity of a scene and thus the render times, and increases artistic control.
+It can be used to remove unnecessary secondary rays (specular/sss), make speculars even more
+glossy in specular rays, control the color of opacity in shadow rays to fake light scattering
+through tissue or add a second specular lobe in-camera rays only.
+'''
+class AiRaySwitchShader(bpy.types.Node, core.ArnoldNode):
+    bl_label = "Ray Switch Shader"
+    ai_name = "ray_switch_shader"
+
+    def init(self, context):
+        self.inputs.new('AiNodeSocketSurface', "Camera", identifier="camera")
+        self.inputs.new('AiNodeSocketSurface', "Shadow", identifier="shadow")
+        self.inputs.new('AiNodeSocketSurface', "Diffuse Reflection", identifier="diffuse_reflection")
+        self.inputs.new('AiNodeSocketSurface', "Diffuse Transmission", identifier="diffuse_transmission")
+        self.inputs.new('AiNodeSocketSurface', "Specular Reflection", identifier="specular_reflection")
+        self.inputs.new('AiNodeSocketSurface', "Specular Transmission", identifier="specular_transmission")
+        self.inputs.new('AiNodeSocketSurface', "Volume", identifier="volume")
+
+        self.outputs.new('AiNodeSocketSurface', "Shader")
 
 '''
 AiShadowMatte
@@ -284,9 +342,9 @@ Typically used on floor planes to 'catch' shadows from lighting within
 the scene. It is useful for integrating a rendered object onto a
 photographic background.
 '''
-class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
+class AiShadowMatte(bpy.types.Node, core.ArnoldNode):
     bl_label = "Shadow Matte"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "shadow_matte"
 
     background: EnumProperty(
@@ -316,7 +374,7 @@ class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', "Specular Roughness", identifier="specular_roughness").default_value = 0.1
         self.inputs.new('AiNodeSocketFloatAboveOne', "Specular IOR", identifier="specular_IOR").default_value = 1.52
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "background")
@@ -325,7 +383,7 @@ class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "indirect_specular_enable")
         layout.prop(self, "alpha_mask")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("background", int(self.background))
         node.set_bool("diffuse_use_background", self.diffuse_use_background)
         node.set_bool("indirect_diffuse_enable", self.indirect_diffuse_enable)
@@ -334,14 +392,13 @@ class AiShadowMatte(bpy.types.Node, base.ArnoldNode):
 
 '''
 AiStandardHair
-https://docs.arnoldrenderer.com/display/A5NodeRef/standard_hair
 
-Standard_hair is a physically-based shader to render hair and fur,
-based on the d'Eon model for specular and Zinke model for diffuse.
+Standard_hair is a physically-cored shader to render hair and fur,
+cored on the d'Eon model for specular and Zinke model for diffuse.
 '''
-class AiStandardHair(bpy.types.Node, base.ArnoldNode):
+class AiStandardHair(bpy.types.Node, core.ArnoldNode):
     bl_label = "Standard Hair"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "standard_hair"
 
     roughness_anisotropic: BoolProperty(name="Anisotropic Roughness")
@@ -376,23 +433,22 @@ class AiStandardHair(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketIntPositive', "Extra Depth", identifier="extra_depth").default_value = 16
         self.inputs.new('AiNodeSocketIntPositive', "Extra Samples", identifier="extra_samples")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "roughness_anisotropic")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("roughness_anisotropic", self.roughness_anisotropic)
 
 '''
 AiStandardSurface
-https://docs.arnoldrenderer.com/display/A5NodeRef/standard_surface
 
-A physically-based shader. Outputs a simple color (RGB).
+A physically-cored shader. Outputs a simple color (RGB).
 '''
-class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
+class AiStandardSurface(bpy.types.Node, core.ArnoldNode):
     bl_label = "Standard Surface"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "standard_surface"
 
     transmit_aovs: BoolProperty(name="Transmit AOVs")
@@ -425,17 +481,24 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Transmission Weight", identifier="transmission")
         self.inputs.new('AiNodeSocketRGB', "Transmission Color", identifier="transmission_color").default_value = (1, 1, 1)
-        self.inputs.new('AiNodeSocketFloatPositive', "Transmission Depth", identifier="transmission_depth")
+
+        trans_depth = self.inputs.new('AiNodeSocketFloatPositive', "Transmission Depth", identifier="transmission_depth")
+        trans_depth.real_world = True
+
         self.inputs.new('AiNodeSocketRGB', "Transmission Scatter", identifier="transmission_scatter").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatUnbounded', "Transmission Scatter Anisotropy", identifier="transmission_scatter_anisotropy")
         self.inputs.new('AiNodeSocketFloatPositive', "Transmission Dispersion", identifier="transmission_dispersion")
         self.inputs.new('AiNodeSocketFloatNormalizedAlt', "Transmission Extra Roughness", identifier="transmission_extra_roughness")
         self.inputs.new('AiNodeSocketIntUnbounded', "Dielectric Priority", identifier="dielectric_priority")
 
-        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Weight", identifier="subsurface")
+        self.inputs.new('AiNodeSocketFloatNormalized', "SSS Weight", identifier="subsurface")
         self.inputs.new('AiNodeSocketRGB', "SSS Color", identifier="subsurface_color").default_value = (1, 1, 1)
-        self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius").default_value = (0, 0, 0)
-        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale")
+        
+        sss_radius = self.inputs.new('AiNodeSocketRGB', "SSS Radius", identifier="subsurface_radius")
+        sss_radius.default_value = (1, 1, 1)
+        sss_radius.real_world = True
+        
+        self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Scale", identifier="subsurface_scale").default_value = 1
         self.inputs.new('AiNodeSocketFloatUnbounded', "SSS Anisotropy", identifier="subsurface_anisotropy")
 
         self.inputs.new('AiNodeSocketFloatNormalized', "Coat", identifier="coat")
@@ -463,7 +526,7 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketVector', "Normal", identifier="normal")
         self.inputs.new('AiNodeSocketVector', "Tangent", identifier="tangent")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "transmit_aovs")
@@ -473,7 +536,7 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "exit_to_background")
         layout.prop(self, "subsurface_type")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("transmit_aovs", self.transmit_aovs)
         node.set_bool("thin_walled", self.thin_walled)
         node.set_bool("caustics", self.caustics)
@@ -483,11 +546,10 @@ class AiStandardSurface(bpy.types.Node, base.ArnoldNode):
 
 '''
 AiTwoSided
-https://docs.arnoldrenderer.com/display/A5NodeRef/two_sided
 
 Applies two shaders on either side of a double sided surface.
 '''
-class AiTwoSided(bpy.types.Node, base.ArnoldNode):
+class AiTwoSided(bpy.types.Node, core.ArnoldNode):
     bl_label = "Two Sided"
     ai_name = "two_sided"
 
@@ -495,15 +557,14 @@ class AiTwoSided(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketSurface', "Front", identifier="front")
         self.inputs.new('AiNodeSocketSurface', "Back", identifier="back")
         
-        self.outputs.new('AiNodeSocketSurface', name="Closure", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="Closure")
 
 '''
 AiWireframe
-https://docs.arnoldrenderer.com/display/A5NodeRef/wireframe
 
 Color shader which produces a wire-frame style output (as RGB).
 '''
-class AiWireframe(bpy.types.Node, base.ArnoldNode):
+class AiWireframe(bpy.types.Node, core.ArnoldNode):
     bl_label = "Wireframe"
     ai_name = "wireframe"
 
@@ -523,27 +584,28 @@ class AiWireframe(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', "Line Color", identifier="line_color").default_value = (0, 0, 0)
         self.inputs.new('AiNodeSocketFloatPositive', "Line Width", identifier="line_width").default_value = 1
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "edge_type")
         layout.prop(self, "raster_space")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("edge_type", int(self.edge_type))
         node.set_bool("raster_space", self.raster_space)
 
 classes = (
     AiAmbientOcclusion,
-    AiBump2d,
-    AiBump3d,
     AiCarPaint,
+    AiCurvature,
     AiDisplacement,
     AiFlat,
     AiLambert,
     AiMatte,
     AiMixShader,
     AiNormalMap,
+    AiRaySwitchRGBA,
+    AiRaySwitchShader,
     AiShadowMatte,
     AiStandardHair,
     AiStandardSurface,
@@ -552,7 +614,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

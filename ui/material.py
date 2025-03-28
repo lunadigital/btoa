@@ -1,18 +1,20 @@
+import bpy
 from bl_ui.properties_material import MaterialButtonsPanel
-from bpy.types import Panel
 
-from . import utils
 from . import presets
-from .. import engine
+from ..preferences import ENGINE_ID
+from ..utils import ui_utils
 
-class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
-    COMPAT_ENGINES = {engine.ArnoldRenderEngine.bl_idname}
-    bl_label = ""
-    bl_options = {'HIDE_HEADER'}
+class ArnoldMaterialPanel(MaterialButtonsPanel, bpy.types.Panel):
+    COMPAT_ENGINES = {ENGINE_ID}
 
     @classmethod
     def poll(cls, context):
-        return (context.material or context.object) and engine.ArnoldRenderEngine.is_active(context)
+        return ui_utils.arnold_is_active(context) and (context.material or context.object)
+
+class ARNOLD_MATERIAL_PT_context_material(ArnoldMaterialPanel):
+    bl_label = ""
+    bl_options = {'HIDE_HEADER'}
 
     def draw(self, context):
         layout = self.layout
@@ -54,7 +56,7 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
             # Note that we don't use layout.template_ID() because we can't
             # control the copy operator in that template.
             # So we mimic our own template_ID.
-            split = utils.aishader_template_ID(layout, ob.active_material)
+            split = ui_utils.aishader_template_ID(layout, ob.active_material)
             row = split.row()
 
             if slot:
@@ -67,21 +69,17 @@ class ARNOLD_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
             split.template_ID(space, "pin_id")
             split.separator()
 
-        if not mat.arnold.node_tree:
+        if mat and not mat.arnold.node_tree:
             layout.operator("arnold.material_init", icon='NODETREE')
             return
 
-class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
+class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
     bl_label = "Surface"
-
-    @classmethod
-    def poll(cls, context):
-        return (context.material or context.object) and engine.ArnoldRenderEngine.is_active(context)
 
     def draw_header_preset(self, context):
         material = context.object.active_material
 
-        if material.arnold:
+        if material and material.arnold:
             node = material.arnold.node_tree.get_output_node().inputs["Surface"].links[0].from_node
 
             if len(node.inputs) == 42: # If AiStandardSurface, or the meaning of life and everything 
@@ -89,21 +87,21 @@ class ARNOLD_MATERIAL_PT_surface(MaterialButtonsPanel, Panel):
 
     def draw(self, context):
         layout = self.layout
-
         mat = context.material
         
-        layout.prop(mat, "use_nodes", icon='NODETREE')
-        layout.separator()
+        if mat:
+            layout.prop(mat, "use_nodes", icon='NODETREE')
+            layout.separator()
 
-        layout.use_property_split = True
+            layout.use_property_split = True
 
-        if mat.use_nodes:
-            utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
-        else:
-            layout.prop(mat, "diffuse_color", text="Base Color")
-            layout.prop(mat, "metallic")
-            layout.prop(mat, "specular_intensity", text="Specular")
-            layout.prop(mat, "roughness")
+            if mat.use_nodes:
+                ui_utils.panel_node_draw(layout, mat.arnold.node_tree, 'OUTPUT_MATERIAL', "Surface")
+            else:
+                layout.prop(mat, "diffuse_color", text="Base Color")
+                layout.prop(mat, "metallic")
+                layout.prop(mat, "specular_intensity", text="Specular")
+                layout.prop(mat, "roughness")
 
 classes = (
     ARNOLD_MATERIAL_PT_context_material,
@@ -111,11 +109,9 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)

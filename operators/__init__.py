@@ -1,19 +1,10 @@
-from . import (
-    handlers,
-    material,
-    world
-)
-
-modules = (
-    handlers,
-    material,
-    world
-)
+from . import material
+from . import world
 
 def register():
-    for m in modules:
-        m.register()
+    material.register()
+    world.register()
 
 def unregister():
-    for m in reversed(modules):
-        m.unregister()
+    world.unregister()
+    material.unregister()

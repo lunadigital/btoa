@@ -264,12 +264,13 @@ class ArnoldOptions(PropertyGroup):
         default="1.0"
     )
 
-    enable_denoising: BoolProperty(name="Enable Denoising")
+    use_denoiser: BoolProperty(name="Enable Denoiser")
     denoiser: EnumProperty(
         name="Denoiser",
         items=[
+            ('imager_denoiser_noice', "Noice", "Use the built-in Noice image denoiser"),
             ('imager_denoiser_oidn', "OpenImageDenoise", "Use OpenImageDenoise AI denoiser running on the CPU"),
-            ('imager_denoiser_optix', "OptiX", "Use the OptiX AI denoiser with GPU acceleration, only available on NVIDIA GPUs")
+            ('imager_denoiser_optix', "OptiX", "Use the OptiX AI denoiser with GPU acceleration, only available on NVIDIA GPUs"),
         ]
     )
 
@@ -289,6 +290,9 @@ class ArnoldOptions(PropertyGroup):
     # ignore_operators: BoolProperty(name="Ignore Operators")
     ignore_imagers: BoolProperty(name="Ignore Imagers")
     # force_shader_assignments
+
+    # IPR preview
+    preview_pause: BoolProperty(name="Pause Preview")
 
 classes = (
     AiSpaceDataProperties,

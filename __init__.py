@@ -1,56 +1,41 @@
 import bpy
-from . import environ as aienv
+from .utils import sdk_utils
 
 bl_info = {
     "name": "Arnold Render Engine (BtoA)",
     "description": "Community-developed Arnold renderer integration",
     "author": "Luna Digital, Ltd.",
-    "version": (0, 4, 6),
-    "blender": (3, 0, 0),
+    "version": (0, 6, 0),
+    "blender": (4, 2, 0),
     "category": "Render"
 }
 
 def register():
-    from . import addon_preferences
-    addon_preferences.register()
+    '''
+    We need to register preferences before importing any other modules so
+    anything that requires `import arnoldserver` will work properly.
+    '''
+    from . import preferences
+    preferences.register()
 
-    aienv.configure_arnold_environment()
-
-    prefs = bpy.context.preferences.addons[__package__].preferences
-    if prefs.arnold_path != "":
-        aienv.configure_plugins()
-
-        from . import props
-        from . import engine
-        from . import operators
-        from . import nodes
-        from . import ui
+    if sdk_utils.is_arnoldserver_installed():
+        from . import handlers, props, nodes, operators, ui, engine
+        handlers.register()
         nodes.register()
         props.register()
-        engine.register()
         operators.register()
         ui.register()
-
-        prefs.full_unregister = True
+        engine.register()
 
 def unregister():
-    prefs = bpy.context.preferences.addons[__package__].preferences
-
-    if prefs.arnold_path != "" and prefs.full_unregister:
-        from . import props
-        from . import engine
-        from . import operators
-        from . import nodes
-        from . import ui
+    from . import preferences
+    preferences.unregister()
+    
+    if sdk_utils.is_arnoldserver_installed():
+        from . import handlers, nodes, operators, ui, engine
+        handlers.unregister()
         nodes.unregister()
         props.unregister()
-        engine.unregister()
         operators.unregister()
         ui.unregister()
-
-        aienv.remove_plugins()
-    else:
-        prefs.full_unregister = False
-          
-    from . import addon_preferences
-    addon_preferences.unregister()
+        engine.unregister()

@@ -1,16 +1,16 @@
 import bpy
 import math, mathutils
 from bpy.props import *
-from .. import base
-from ... import btoa, utils
+from .. import core
+from ... import bridge
+from ...utils import register_utils
 
 '''
 AiSkydome
-https://docs.arnoldrenderer.com/display/A5NodeRef/skydome_light
 
 Returns a skydome light for World rendering.
 '''
-class AiSkydome(bpy.types.Node, base.ArnoldNode):
+class AiSkydome(bpy.types.Node, core.ArnoldNode):
     bl_label = "Skydome"
     ai_name = "skydome_light"
 
@@ -35,12 +35,12 @@ class AiSkydome(bpy.types.Node, base.ArnoldNode):
     )
 
     def init(self, context):
-        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color").default_value = (0.050876, 0.050876, 0.050876)
-        self.inputs.new('AiNodeSocketFloatPositive', "Intensity", identifier="intensity").default_value = 1
-        self.inputs.new('AiNodeSocketFloatPositive', "Exposure", identifier="exposure")
-        self.inputs.new('AiNodeSocketIntPositive', "Resolution", identifier="resolution").default_value = 1000
+        self.inputs.new('AiNodeSocketRGB', "Color", identifier="color").default_value = (0, 0, 0)
+        self.inputs.new('AiNodeSocketSkydomeIntensity', "Intensity", identifier="intensity")
+        self.inputs.new('AiNodeSocketSkydomeExposure', "Exposure", identifier="exposure")
+        self.inputs.new('AiNodeSocketSkydomeResolution', "Resolution", identifier="resolution")
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "image_format", text="")
@@ -48,7 +48,7 @@ class AiSkydome(bpy.types.Node, base.ArnoldNode):
 
         layout.prop(context.scene.world.arnold, "rotation_controller")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("format", int(self.image_format))
         node.set_int("portal_mode", int(self.portal_mode))
 
@@ -66,14 +66,14 @@ class AiSkydome(bpy.types.Node, base.ArnoldNode):
         matrix = mathutils.Matrix.Identity(4)
         matrix = matrix @ rot_matrix @ scale_matrix
 
-        node.set_matrix("matrix", btoa.utils.flatten_matrix(matrix))
+        node.set_matrix("matrix", bridge.utils.flatten_matrix(matrix))
 
 classes = (
     AiSkydome,
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

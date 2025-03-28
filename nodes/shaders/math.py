@@ -1,15 +1,14 @@
 import bpy
 from bpy.props import *
-from .. import base
-from ... import utils
+from .. import core
+from ...utils import register_utils
 
 '''
 AiMultiply
-https://docs.arnoldrenderer.com/display/A5NodeRef/multiply
 
 Returns input1 x input2.
 '''
-class AiMultiply(bpy.types.Node, base.ArnoldNode):
+class AiMultiply(bpy.types.Node, core.ArnoldNode):
     bl_label = "Multiply"
     ai_name = "multiply"
 
@@ -17,11 +16,10 @@ class AiMultiply(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', "Input 1", identifier="input1").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketRGB', "Input 2", identifier="input2").default_value = (1, 1, 1)
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
 '''
 AiRange
-https://docs.arnoldrenderer.com/display/A5NodeRef/range
 
 Remap input from the [input_min, input_max] range to the
 [ouput_min, output_max] range linearly. The result is not
@@ -29,7 +27,7 @@ clamped unless smoothstep is on, and the result is
 interpolated smoothly and the result is clamped in the
 [output_min, output_max] range.
 '''
-class AiRange(bpy.types.Node, base.ArnoldNode):
+class AiRange(bpy.types.Node, core.ArnoldNode):
     bl_label = "Range"
     ai_name = "range"
 
@@ -46,12 +44,12 @@ class AiRange(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketFloatNormalized', name="Bias", identifier="bias").default_value = 0.5
         self.inputs.new('AiNodeSocketFloatPositive', name="Gain", identifier="gain").default_value = 0.5
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "smoothstep")
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("smoothstep", self.smoothstep)
 
 classes = (
@@ -60,7 +58,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

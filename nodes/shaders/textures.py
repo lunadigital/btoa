@@ -1,18 +1,20 @@
-import bpy
 import math
 import mathutils
 import os
+
+import bpy
 from bpy.props import *
-from .. import base, constants
-from ... import utils
+
+from .. import core, constant
+from ...preferences import ADDON_NAME
+from ...utils import register_utils
 
 '''
 AiCellNoise
-https://docs.arnoldrenderer.com/display/A5NodeRef/cell_noise
 
 A cell noise pattern generator.
 '''
-class AiCellNoise(bpy.types.Node, base.ArnoldNode):
+class AiCellNoise(bpy.types.Node, core.ArnoldNode):
     bl_label = "Cell Noise"
     ai_name = "cell_noise"
 
@@ -50,17 +52,16 @@ class AiCellNoise(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "pattern", text="")
         layout.prop(self, "additive")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("pattern", int(self.pattern))
         node.set_bool("additive", self.additive)
 
 '''
 AiCheckerboard
-https://docs.arnoldrenderer.com/display/A5NodeRef/checkerboard
 
 Represents a checkerboard pattern.
 '''
-class AiCheckerboard(bpy.types.Node, base.ArnoldNode):
+class AiCheckerboard(bpy.types.Node, core.ArnoldNode):
     bl_label = "Checkerboard"
     ai_name = "checkerboard"
 
@@ -79,12 +80,11 @@ class AiCheckerboard(bpy.types.Node, base.ArnoldNode):
 
 '''
 AiFlakes
-https://docs.arnoldrenderer.com/display/A5NodeRef/Flakes
 
 Creates a procedural flake normal map that can be used for materials
 such as car paint.
 '''
-class AiFlakes(bpy.types.Node, base.ArnoldNode):
+class AiFlakes(bpy.types.Node, core.ArnoldNode):
     bl_label = "Flakes"
     ai_name = "flakes"
 
@@ -111,7 +111,7 @@ class AiFlakes(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "output_space", text="")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("pattern", int(self.output_space))
 
 '''
@@ -127,13 +127,12 @@ class AiImageUser(bpy.types.PropertyGroup):
 
 '''
 AiImage
-https://docs.arnoldrenderer.com/display/A5NodeRef/image
 
 Performs texture mapping using a specified image file.
 '''
-class AiImage(bpy.types.Node, base.ArnoldNode):
+class AiImage(bpy.types.Node, core.ArnoldNode):
     bl_label = "Image"
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
     ai_name = "image"
 
     AI_WRAP_OPTIONS = [
@@ -175,10 +174,6 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         self.inputs.new("AiNodeSocketUVScale", "Scale V", identifier="tscale")
 
         self.outputs.new("AiNodeSocketRGBA", "RGBA")
-        self.outputs.new("AiNodeSocketBW", "R")
-        self.outputs.new("AiNodeSocketBW", "G")
-        self.outputs.new("AiNodeSocketBW", "B")
-        self.outputs.new("AiNodeSocketBW", "A")
 
     def draw_label(self):
         if self.image:
@@ -187,22 +182,40 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
             return self.bl_label
 
     def draw_buttons(self, context, layout):
-        layout.template_ID(self, "image", open="image.open")
+        layout.template_ID(self, "image", new="image.new", open="image.open")
 
         layout.separator()
 
         if self.image:
-            layout.prop(self.image.colorspace_settings, "name")
+            split = layout.split(factor=0.3)
+            split.label(text="Color Space")
+            split.prop(self.image.colorspace_settings, "name", text="")
 
-        layout.prop(self, "image_filter")
-        layout.prop(self, "swrap")
-        layout.prop(self, "twrap")
-        layout.prop(self, "sflip")
-        layout.prop(self, "tflip")
-        layout.prop(self, "swap_st")
-        #layout.prop(self, "uvset")
+            split = layout.split(factor=0.3)
+            split.label(text="Filter")
+            split.prop(self, "image_filter", text="")
 
-    def sub_export(self, node, socket_index=0):
+            split = layout.split(factor=0.3)
+            split.label(text="Wrap U")
+            split.prop(self, "swrap", text="")
+
+            split = layout.split(factor=0.3)
+            split.label(text="Wrap V")
+            split.prop(self, "twrap", text="")
+
+            split = layout.split(factor=0.3)
+            split.label(text="")
+
+            row = split.row()
+            row.prop(self, "sflip")
+            row.prop(self, "tflip")
+            
+            split = layout.split(factor=0.3)
+            split.label(text="")
+            split.prop(self, "swap_st")
+            #layout.prop(self, "uvset")
+
+    def sub_export(self, node):
         if self.image:
             if self.image.packed_file:
                 filepath = os.path.join(bpy.app.tempdir, self.image.name)
@@ -217,10 +230,6 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
                 node.set_string("filename", bpy.path.abspath(self.image.filepath))
 
             node.set_string("color_space", self.image.colorspace_settings.name)
-        
-        if socket_index > 0:
-            node.set_bool("single_channel", True)
-            node.set_byte("start_channel", socket_index - 1)
 
         node.set_string("filter", self.image_filter)
         node.set_int("swrap", int(self.swrap))
@@ -230,7 +239,7 @@ class AiImage(bpy.types.Node, base.ArnoldNode):
         node.set_bool("swap_st", self.swap_st)
         node.set_string("uvset", self.uvset)
 
-        prefs = bpy.context.preferences.addons["btoa"].preferences
+        prefs = bpy.context.preferences.addons[ADDON_NAME].preferences
         node.set_bool("ignore_missing_textures", prefs.ignore_missing_textures)
         node.set_rgba("missing_texture_color", *prefs.missing_texture_color)
 
@@ -302,11 +311,11 @@ class LayerProperties(bpy.types.PropertyGroup):
 '''
 AiLayer
 
-A base class for layered Arnold texture nodes (layer_float,
+A core class for layered Arnold texture nodes (layer_float,
 layer_rgba). This is NOT a public-facing class.
 '''
-class AiLayer(bpy.types.Node, base.ArnoldNode):
-    bl_width_default = constants.BL_NODE_WIDTH_WIDE
+class AiLayer(bpy.types.Node, core.ArnoldNode):
+    bl_width_default = constant.BL_NODE_WIDTH_WIDE
 
     layers: CollectionProperty(type=LayerProperties)
 
@@ -329,14 +338,13 @@ class AiLayer(bpy.types.Node, base.ArnoldNode):
         for layer in self.layers:
             self.template_layer_properties(layout, layer)
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         for layer, i in zip(self.layers, range(1, 9)):
             node.set_bool("enable{}".format(i), layer.enabled)
             node.set_string("name{}".format(i), layer.name)
 
 '''
 AiLayerFloat
-https://docs.arnoldrenderer.com/display/A5NodeRef/layer_float
 
 Combines 8 float layers linearly. Layers are applied in order (bottom to top).
 '''
@@ -350,11 +358,10 @@ class AiLayerFloat(AiLayer):
         for i in range(1, 9):
             self.inputs.new('AiNodeSocketFloatUnbounded', "Layer {}".format(i), identifier="input{}".format(i))
 
-        self.outputs.new('AiNodeSocketFloatUnbounded', name="Float", identifier="output")
+        self.outputs.new('AiNodeSocketFloatUnbounded', name="Float")
 
 '''
 AiLayerRGBA
-https://docs.arnoldrenderer.com/display/A5NodeRef/layer_rgba
 
 The layer_RGBA shader can be used to linearly layer up to eight
 shaders together, enabling you to create complex shading effects.
@@ -376,7 +383,7 @@ class AiLayerRGBA(AiLayer):
             self.inputs.new('AiNodeSocketRGBA', "Layer {}".format(i), identifier="input{}".format(i))
             self.inputs.new('AiNodeSocketFloatNormalized', "Mix", identifier="mix{}".format(i))
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
     def template_layer_properties(self, layout, layer):
         super().template_layer_properties(layout, layer)
@@ -393,7 +400,7 @@ class AiLayerRGBA(AiLayer):
         layout.prop(self, "clamp")
         layout.separator()
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         super().sub_export(node)
 
         for layer, i in zip(self.layers, range(1, 9)):
@@ -402,7 +409,6 @@ class AiLayerRGBA(AiLayer):
 
 '''
 AiMixRGBA
-https://docs.arnoldrenderer.com/display/A5NodeRef/mix_rgba
 
 The mix_RGBA is used to blend or add two colors or textures. It
 returns a linear interpolation of input1 and input2 according to
@@ -410,7 +416,7 @@ the mix_weight attribute. A mix_weight value of 0 outputs input1,
 a value of 1 outputs input2, and a value of 0.5 mixes evenly
 between input1 and input2.
 '''
-class AiMixRGBA(bpy.types.Node, base.ArnoldNode):
+class AiMixRGBA(bpy.types.Node, core.ArnoldNode):
     bl_label = "Mix RGBA"
     ai_name = "mix_rgba"
 
@@ -419,15 +425,14 @@ class AiMixRGBA(bpy.types.Node, base.ArnoldNode):
         self.inputs.new("AiNodeSocketRGBA", "Input 1", identifier="input1")
         self.inputs.new("AiNodeSocketRGBA", "Input 2", identifier="input2").default_value = (0, 0, 0, 1)
 
-        self.outputs.new('AiNodeSocketRGBA', name="RGBA", identifier="output")
+        self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
 '''
 AiNoise
-https://docs.arnoldrenderer.com/display/A5NodeRef/noise
 
 Evaluates a coherent noise function.
 '''
-class AiNoise(bpy.types.Node, base.ArnoldNode):
+class AiNoise(bpy.types.Node, core.ArnoldNode):
     bl_label = "Noise"
     ai_name = "noise"
 
@@ -457,17 +462,16 @@ class AiNoise(bpy.types.Node, base.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "mode", text="")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_int("mode", int(self.mode))
 
 '''
 AiPhysicalSky
-https://docs.arnoldrenderer.com/display/A5NodeRef/physical_sky
 
 This shader implements a variation of the Hosek-Wilkie sky radiance
 model, including the direct solar radiance function.
 '''
-class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
+class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
     bl_label = "Physical Sky"
     ai_name = "physical_sky"
 
@@ -493,7 +497,7 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
         self.inputs.new('AiNodeSocketRGB', "Sun Tint", identifier="sun_tint").default_value = (1, 1, 1)
         self.inputs.new('AiNodeSocketFloatPositive', "Sun Size", identifier="sun_size").default_value = 0.51
 
-        self.outputs.new('AiNodeSocketSurface', name="RGB", identifier="output")
+        self.outputs.new('AiNodeSocketSurface', name="RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "enable_sun")
@@ -507,7 +511,7 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
         row.prop(self, "direction_object")
         row.enabled = not self.use_degrees
 
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("enable_sun", self.enable_sun)
         node.set_bool("use_degrees", self.use_degrees)
 
@@ -515,22 +519,22 @@ class AiPhysicalSky(bpy.types.Node, base.ArnoldNode):
             if self.direction_object:
                 neg_z_axis = mathutils.Vector((0, 0, -1))
                 mw = self.direction_object.matrix_world
-                direction = (mw @ neg_z_axis - mw.translation).normalized()  
+                direction = (mw @ neg_z_axis - mw.translation).normalized()
+                direction = mathutils.Vector((direction.x, direction.z, direction.y))
             else:
                 direction = self.direction_vector.copy()
                 direction.negate()
-    
-            vec = mathutils.Vector((direction.x, direction.z, direction.y)) # Swap coordinates to match Arnold
-            node.set_vector("sun_direction", *vec)
+                direction = mathutils.Vector((direction.x, direction.y, -direction.z))
+
+            node.set_vector("sun_direction", *direction)
 
 '''
 AiRoundCorners
-https://docs.arnoldrenderer.com/display/A5NodeRef/round_corners
 
 Modifies the shading normals near edges to give the appearance
 of a round corner.
 '''
-class AiRoundCorners(bpy.types.Node, base.ArnoldNode):
+class AiRoundCorners(bpy.types.Node, core.ArnoldNode):
     bl_label = "Round Corners"
     ai_name = "round_corners"
 
@@ -550,7 +554,7 @@ class AiRoundCorners(bpy.types.Node, base.ArnoldNode):
         layout.prop(self, "self_only")
         layout.prop(self, "object_space")
     
-    def sub_export(self, node, socket_index=0):
+    def sub_export(self, node):
         node.set_bool("inclusive", self.inclusive)
         node.set_bool("self_only", self.self_only)
         node.set_bool("object_space", self.object_space)
@@ -571,7 +575,7 @@ classes = (
 )
 
 def register():
-    utils.register_classes(classes)
+    register_utils.register_classes(classes)
 
 def unregister():
-    utils.unregister_classes(classes)
+    register_utils.unregister_classes(classes)

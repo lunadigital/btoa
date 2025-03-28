@@ -1,18 +1,19 @@
+import bpy
 from . import utils
+from bpy.props import BoolProperty
 
 class SocketColor:
-    FLOAT = (0.749, 0.749, 0.588, 1)
-    INTEGER = (0.251, 0.749, 0.259, 1)
-    VECTOR = (0.388, 0.388, 0.78, 1)
-    COLOR = (0.78, 0.78, 0.161, 1)
-    SHADER = (0.878, 0.431, 0.459, 1)
-    OBJECT = (0.929, 0.62, 0.361, 1)
-    VALUE = (0.631, 0.631, 0.631, 1)
+    FLOAT = (0.62745098, 0.62745098, 0.62745098, 1) # gray
+    INTEGER = (0.37254902, 0.549019608, 0.360784314, 1) # green
+    VECTOR = (0.380392157, 0.4, 0.776470588, 1) # dark blue
+    COLOR = (0.780392157, 0.768627451, 0.17254902, 1) # yellow
+    SHADER = (0.439215686, 0.776470588, 0.388235294, 1) # bright green
     
 class AiNodeSocket:
     bl_label = ""
     default_type = None
     slider = True
+    real_world: BoolProperty(name="Real World Scale")
 
     def draw_prop(self, context, layout, node, text):
         ''' This method can be overridden by subclasses as-needed '''
@@ -35,8 +36,9 @@ class AiNodeSocket:
         link = utils.get_link(self)
 
         if link:
-            socket_index = int(link.from_socket.path_from_id()[-2:-1])
-            return link.from_node.export(socket_index)
+            data = link.from_node.export()
+            data.from_socket = link.from_socket.identifier if link.from_socket.identifier != link.from_socket.name and link.from_socket.identifier != "output" else ''
+            return data
         elif hasattr(self, "default_value"):
             return self.export_default()
         else:

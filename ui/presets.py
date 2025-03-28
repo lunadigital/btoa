@@ -1,18 +1,15 @@
 import bpy
-
-from bpy.types import Menu, Operator, Panel
-
 from bpy_extras.node_utils import find_node_input
 from bl_operators.presets import AddPresetBase
 from bl_ui.utils import PresetPanel
 
-class ARNOLD_MT_MaterialPresets(Menu):
+class ARNOLD_MT_MaterialPresets(bpy.types.Menu):
     bl_label = "Material Presets"
     preset_subdir = 'btoa/materials'
     preset_operator = 'script.execute_preset'
-    draw = Menu.draw_preset
+    draw = bpy.types.Menu.draw_preset
 
-class ARNOLD_OT_AddMaterialPreset(AddPresetBase, Operator):
+class ARNOLD_OT_AddMaterialPreset(AddPresetBase, bpy.types.Operator):
     bl_idname = 'arnold.add_material_preset'
     bl_label = "Add Preset"
     preset_menu = 'ARNOLD_MT_MaterialPresets'
@@ -40,7 +37,7 @@ class ARNOLD_OT_AddMaterialPreset(AddPresetBase, Operator):
 
     preset_subdir = 'btoa/materials'
 
-class ARNOLD_PT_MaterialPresets(PresetPanel, Panel):
+class ARNOLD_PT_MaterialPresets(PresetPanel, bpy.types.Panel):
     bl_label = "Arnold Material Presets"
     preset_subdir = 'btoa/materials'
     preset_operator = 'script.execute_preset'
@@ -53,11 +50,9 @@ classes = (
 )
 
 def register():
-    from bpy.utils import register_class
-    for cls in classes:
-        register_class(cls)
+    from ..utils import register_utils as utils
+    utils.register_classes(classes)
 
 def unregister():
-    from bpy.utils import unregister_class
-    for cls in classes:
-        unregister_class(cls)
+    from ..utils import register_utils as utils
+    utils.unregister_classes(classes)

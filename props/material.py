@@ -1,7 +1,7 @@
 from bpy.types import Light, Material, PropertyGroup
 from bpy.props import BoolProperty, PointerProperty
 
-from ..nodes.base import ArnoldShaderTree
+from ..nodes.core import ArnoldShaderTree
 
 class ArnoldShader(PropertyGroup):
     node_tree: PointerProperty(name="Node Tree", type=ArnoldShaderTree)
