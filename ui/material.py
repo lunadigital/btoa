@@ -103,9 +103,22 @@ class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
                 layout.prop(mat, "specular_intensity", text="Specular")
                 layout.prop(mat, "roughness")
 
+class ARNOLD_MATERIAL_PT_convert(ArnoldMaterialPanel):
+    bl_label = "Convert"
+
+    def draw(self, context):
+        layout = self.layout
+        mat = context.material
+        
+        if mat:
+            #layout.use_property_split = True
+            layout.label(text="Overwrites Existing Node Network", icon="ERROR")
+            layout.operator("arnold.material_convert")
+
 classes = (
     ARNOLD_MATERIAL_PT_context_material,
     ARNOLD_MATERIAL_PT_surface,
+    ARNOLD_MATERIAL_PT_convert,
 )
 
 def register():
