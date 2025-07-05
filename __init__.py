@@ -5,7 +5,7 @@ bl_info = {
     "name": "Arnold Render Engine (BtoA)",
     "description": "Community-developed Arnold renderer integration",
     "author": "Luna Digital, Ltd.",
-    "version": (0, 6, 0),
+    "version": (0, 6, 1),
     "blender": (4, 2, 0),
     "category": "Render"
 }
