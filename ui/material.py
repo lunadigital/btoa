@@ -110,6 +110,7 @@ class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
 classes = (
     ARNOLD_MATERIAL_PT_context_material,
     ARNOLD_MATERIAL_PT_surface,
+    ARNOLD_MATERIAL_PT_convert,
 )
 
 

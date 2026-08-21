@@ -132,7 +132,8 @@ classes = (
     ARNOLD_OT_material_unlink,
     ARNOLD_OT_material_copy,
     ARNOLD_OT_material_set,
-    ARNOLD_OT_material_select
+    ARNOLD_OT_material_select,
+    ARNOLD_OT_material_convert,
 )
 
 
