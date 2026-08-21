@@ -77,7 +77,7 @@ class ArnoldExport(bpy.types.RenderEngine):
         self.display_driver = bridge.DisplayDriver(self.ai_display_callback)
 
     @staticmethod
-    def ai_end(self=None):
+    def ai_end():
         AiRenderInterrupt(None, AI_BLOCKING)
         AiRenderEnd(None)
         bridge.clear_node_cache()
