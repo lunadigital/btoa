@@ -137,7 +137,7 @@ class ArnoldExport(bpy.types.RenderEngine):
         outputs = bridge.ArnoldArray()
         outputs.allocate(len(enabled_aovs), 1, 'STRING')
 
-        for aov in enabled_aovs:
+        for index, aov in enumerate(enabled_aovs):
             filter_type = "btoa_default_filter"
 
             if aov.name in ('Z', 'N', 'P'):
@@ -145,7 +145,7 @@ class ArnoldExport(bpy.types.RenderEngine):
                 closest_filter.set_string("name", "btoa_closest_filter")
                 filter_type = "btoa_closest_filter"
 
-            outputs.set_string(enabled_aovs.index(aov), f"{aov.ainame} {aov.pixel_type} {filter_type} btoa_driver")
+            outputs.set_string(index, f"{aov.ainame} {aov.pixel_type} {filter_type} btoa_driver")
 
         options.set_array("outputs", outputs)
         AiRenderAddInteractiveOutput(None, 0)
