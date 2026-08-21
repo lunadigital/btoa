@@ -18,7 +18,7 @@ class RenderViewManager:
         self.views[space.uuid] = space.shading.type
 
     def exists(self, space):
-        return space.uuid in self.views.keys()
+        return space.uuid in self.views
 
     def render_exited(self, space):
         return self.views[space.uuid] != space.shading.type and space.shading.type != "RENDERED"
