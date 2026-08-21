@@ -10,10 +10,12 @@ class DummyArnoldCameraData:
         self.aperture_aspect_ratio = 1
         self.flat_field_focus = False
 
+
 class DummyDOFData:
     def __init__(self):
         self.focus_object = None
         self.focus_distance = 0
+
 
 class BlenderCameraData:
     def __init__(self):

@@ -5,12 +5,14 @@ from . import presets
 from ..preferences import ENGINE_ID
 from ..utils import ui_utils
 
+
 class ArnoldMaterialPanel(MaterialButtonsPanel, bpy.types.Panel):
     COMPAT_ENGINES = {ENGINE_ID}
 
     @classmethod
     def poll(cls, context):
         return ui_utils.arnold_is_active(context) and (context.material or context.object)
+
 
 class ARNOLD_MATERIAL_PT_context_material(ArnoldMaterialPanel):
     bl_label = ""
@@ -49,7 +51,7 @@ class ARNOLD_MATERIAL_PT_context_material(ArnoldMaterialPanel):
                 row.operator('object.material_slot_assign', text="Assign")
                 row.operator('object.material_slot_select', text="Select")
                 row.operator('object.material_slot_deselect', text="Deselect")
-        
+
         split = layout.split(factor=0.65)
 
         if ob:
@@ -73,6 +75,7 @@ class ARNOLD_MATERIAL_PT_context_material(ArnoldMaterialPanel):
             layout.operator("arnold.material_init", icon='NODETREE')
             return
 
+
 class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
     bl_label = "Surface"
 
@@ -82,13 +85,13 @@ class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
         if material and material.arnold:
             node = material.arnold.node_tree.get_output_node().inputs["Surface"].links[0].from_node
 
-            if len(node.inputs) == 42: # If AiStandardSurface, or the meaning of life and everything 
+            if len(node.inputs) == 42: # If AiStandardSurface, or the meaning of life and everything
                 presets.ARNOLD_PT_MaterialPresets.draw_panel_header(self.layout)
 
     def draw(self, context):
         layout = self.layout
         mat = context.material
-        
+
         if mat:
             layout.prop(mat, "use_nodes", icon='NODETREE')
             layout.separator()
@@ -103,17 +106,6 @@ class ARNOLD_MATERIAL_PT_surface(ArnoldMaterialPanel):
                 layout.prop(mat, "specular_intensity", text="Specular")
                 layout.prop(mat, "roughness")
 
-class ARNOLD_MATERIAL_PT_convert(ArnoldMaterialPanel):
-    bl_label = "Convert"
-
-    def draw(self, context):
-        layout = self.layout
-        mat = context.material
-        
-        if mat:
-            #layout.use_property_split = True
-            layout.label(text="Overwrites Existing Node Network", icon="ERROR")
-            layout.operator("arnold.material_convert")
 
 classes = (
     ARNOLD_MATERIAL_PT_context_material,
@@ -121,9 +113,11 @@ classes = (
     ARNOLD_MATERIAL_PT_convert,
 )
 
+
 def register():
     from ..utils import register_utils as utils
     utils.register_classes(classes)
+
 
 def unregister():
     from ..utils import register_utils as utils

@@ -7,6 +7,7 @@ from . import surface
 from . import textures
 from . import utility
 
+
 def register():
     color.register()
     conversion.register()
@@ -16,6 +17,7 @@ def register():
     surface.register()
     textures.register()
     utility.register()
+
 
 def unregister():
     color.unregister()

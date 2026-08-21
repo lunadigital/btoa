@@ -3,6 +3,7 @@ import mathutils
 
 from .camera_data import BlenderCameraData
 
+
 class BlenderCamera:
     '''
     This is a dummy class that mimics internal Blender camera classes so we

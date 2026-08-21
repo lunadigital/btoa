@@ -1,5 +1,4 @@
 import bpy
-import bmesh
 import math
 import mathutils
 import numpy
@@ -11,6 +10,29 @@ from mathutils import Vector, Matrix
 from .node import ArnoldNode
 from .options import UniverseOptions
 from .bl_intern import BlenderCamera
+
+# ─── UUID → Arnold Node Cache ───────────────────────────────────────────────────
+# Replaces O(n) universe iteration with O(1) dict lookup.
+# Must be kept in sync: call cache_node() on create, uncache_node() on destroy,
+# and clear_node_cache() when the Arnold universe is destroyed.
+_uuid_node_cache = {}
+
+
+def cache_node(uuid, ainode):
+    """Register a node in the UUID cache."""
+    if uuid:
+        _uuid_node_cache[uuid] = ainode
+
+
+def uncache_node(uuid):
+    """Remove a node from the UUID cache."""
+    _uuid_node_cache.pop(uuid, None)
+
+
+def clear_node_cache():
+    """Clear the entire UUID cache (call on AiEnd / universe teardown)."""
+    _uuid_node_cache.clear()
+
 
 def calc_horizontal_fov(ob):
     data = ob.data
@@ -25,11 +47,14 @@ def calc_horizontal_fov(ob):
     else:
         return data.angle
 
+
 def flatten_matrix(matrix):
     return numpy.reshape(matrix.transposed(), -1)
 
+
 def get_object_data_from_instance(object_instance):
     return object_instance.instance_object if object_instance.is_instance else object_instance.object
+
 
 def get_position_along_local_vector(ob, distance, axis):
     # Determine movement vector
@@ -39,7 +64,7 @@ def get_position_along_local_vector(ob, distance, axis):
         mv = Vector([0, distance, 0])
     elif axis == 'Z':
         mv = Vector([0, 0, distance])
-    
+
     # Construct rotation matrix
     rot = ob.matrix_world.to_euler()
     rx = Matrix.Rotation(rot.x, 4, 'X')
@@ -56,6 +81,7 @@ def get_position_along_local_vector(ob, distance, axis):
     result = translation_matrix @ ob.matrix_world
     return result.to_translation()
 
+
 def get_render_resolution(scene, context=None):
     if context:
         region = context.region
@@ -70,6 +96,7 @@ def get_render_resolution(scene, context=None):
         y = int(render.resolution_y * scale)
 
     return x, y
+
 
 def get_viewport_camera_object(context):
     DEFAULT_SENSOR_WIDTH = 36.0
@@ -114,10 +141,12 @@ def get_viewport_camera_object(context):
 
     return camera
 
+
 def get_parent_material_from_nodetree(ntree):
     for mat in bpy.data.materials:
         if mat.arnold.node_tree and mat.arnold.node_tree.name == ntree.name:
             return mat
+
 
 def get_node_by_name(name):
     ainode = AiNodeLookUpByName(None, name)
@@ -127,33 +156,59 @@ def get_node_by_name(name):
 
     return node
 
+
 def get_all_by_uuid(uuid):
+    # Fast path: check cache first
+    cached = _uuid_node_cache.get(uuid)
+    if cached is not None:
+        node = ArnoldNode()
+        node.set_data(cached)
+        return [node]
+
+    # Fallback: full scan (shouldn't normally be needed)
     iterator = AiUniverseGetNodeIterator(None, AI_NODE_SHAPE | AI_NODE_LIGHT | AI_NODE_SHADER)
     result = []
 
     while not AiNodeIteratorFinished(iterator):
         ainode = AiNodeIteratorGetNext(iterator)
-        
+
         if AiNodeGetStr(ainode, 'btoa_id') == uuid:
             node = ArnoldNode()
             node.set_data(ainode)
             result.append(node)
-    
+            # Update cache while we're here
+            cache_node(uuid, ainode)
+
     return result
 
+
 def get_node_by_uuid(uuid):
+    # Fast path: O(1) cache lookup
+    cached = _uuid_node_cache.get(uuid)
+    if cached is not None:
+        node = ArnoldNode()
+        node.set_data(cached)
+        if node.is_valid:
+            return node
+        else:
+            # Stale cache entry, remove it
+            uncache_node(uuid)
+
+    # Fallback: O(n) scan if not in cache (first access or stale entry)
     iterator = AiUniverseGetNodeIterator(None, AI_NODE_SHAPE | AI_NODE_LIGHT | AI_NODE_SHADER)
     node = ArnoldNode()
 
     while not AiNodeIteratorFinished(iterator):
         ainode = AiNodeIteratorGetNext(iterator)
         btoa_id = AiNodeGetStr(ainode, 'btoa_id')
-        
+
         if btoa_id == uuid:
             node.set_data(ainode)
+            # Populate cache for future lookups
+            cache_node(uuid, ainode)
             break
 
     if not node.is_valid:
         return None
-    
+
     return node

@@ -4,10 +4,14 @@ from bl_ui import node_add_menu
 from ..utils import ui_utils
 
 # Am I an Arnold node?
+
+
 def arnold_shader_nodes_poll(context):
     return ui_utils.arnold_is_active(context)
 
 # Am I an object/material node?
+
+
 def arnold_object_nodes_poll(context):
     snode = context.space_data
     anode = context.scene.arnold.space_data
@@ -16,6 +20,8 @@ def arnold_object_nodes_poll(context):
             context.object.type != 'LIGHT')
 
 # Am I a world node?
+
+
 def arnold_world_nodes_poll(context):
     snode = context.space_data
     anode = context.scene.arnold.space_data
@@ -23,14 +29,19 @@ def arnold_world_nodes_poll(context):
             anode.shader_type == 'WORLD')
 
 # Show only in material shader graphs
+
+
 def object_arnold_shader_nodes_poll(context):
     return (arnold_object_nodes_poll(context) and
             arnold_shader_nodes_poll(context))
 
 # Show only in world shader graphs
+
+
 def world_arnold_shader_nodes_poll(context):
     return (arnold_world_nodes_poll(context) and
             arnold_shader_nodes_poll(context))
+
 
 class NODE_MT_category_arnold_shader_color(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_color"
@@ -43,6 +54,7 @@ class NODE_MT_category_arnold_shader_color(Menu):
         node_add_menu.add_node_type(layout, "AiColorJitter", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiComposite", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiShuffle", poll=arnold_shader_nodes_poll(context))
+
 
 class NODE_MT_category_arnold_shader_conversion(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_conversion"
@@ -61,6 +73,7 @@ class NODE_MT_category_arnold_shader_conversion(Menu):
         node_add_menu.add_node_type(layout, "AiSeparateRGBA", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiSeparateXYZ", poll=arnold_shader_nodes_poll(context))
 
+
 class NODE_MT_category_arnold_shader_input(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_input"
     bl_label = "Input"
@@ -70,6 +83,13 @@ class NODE_MT_category_arnold_shader_input(Menu):
 
         node_add_menu.add_node_type(layout, "AiFloat", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiVector", poll=arnold_shader_nodes_poll(context))
+        layout.separator()
+        node_add_menu.add_node_type(layout, "AiUserDataFloat", poll=arnold_shader_nodes_poll(context))
+        node_add_menu.add_node_type(layout, "AiUserDataInt", poll=arnold_shader_nodes_poll(context))
+        node_add_menu.add_node_type(layout, "AiUserDataRGB", poll=arnold_shader_nodes_poll(context))
+        node_add_menu.add_node_type(layout, "AiUserDataRGBA", poll=arnold_shader_nodes_poll(context))
+        node_add_menu.add_node_type(layout, "AiUserDataString", poll=arnold_shader_nodes_poll(context))
+
 
 class NODE_MT_category_arnold_shader_math(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_math"
@@ -80,7 +100,8 @@ class NODE_MT_category_arnold_shader_math(Menu):
 
         node_add_menu.add_node_type(layout, "AiMultiply", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiRange", poll=arnold_shader_nodes_poll(context))
-        
+
+
 class NODE_MT_category_arnold_shader_output(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_output"
     bl_label = "Output"
@@ -90,6 +111,7 @@ class NODE_MT_category_arnold_shader_output(Menu):
 
         node_add_menu.add_node_type(layout, "AiShaderOutput", poll=arnold_shader_nodes_poll(context))
 
+
 class NODE_MT_category_arnold_shader_surface(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_surface"
     bl_label = "Surface"
@@ -98,6 +120,7 @@ class NODE_MT_category_arnold_shader_surface(Menu):
         layout = self.layout
 
         node_add_menu.add_node_type(layout, "AiStandardSurface", poll=object_arnold_shader_nodes_poll(context))
+        node_add_menu.add_node_type(layout, "AiOpenPBRSurface", poll=object_arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiStandardHair", poll=object_arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiCarPaint", poll=object_arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiFlat", poll=arnold_shader_nodes_poll(context))
@@ -113,6 +136,7 @@ class NODE_MT_category_arnold_shader_surface(Menu):
         node_add_menu.add_node_type(layout, "AiShadowMatte", poll=object_arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiRaySwitchRGBA", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiRaySwitchShader", poll=arnold_shader_nodes_poll(context))
+
 
 class NODE_MT_category_arnold_shader_textures(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_textures"
@@ -130,6 +154,7 @@ class NODE_MT_category_arnold_shader_textures(Menu):
         node_add_menu.add_node_type(layout, "AiNoise", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiRoundCorners", poll=object_arnold_shader_nodes_poll(context))
 
+
 class NODE_MT_category_arnold_shader_utility(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_utility"
     bl_label = "Utility"
@@ -146,6 +171,7 @@ class NODE_MT_category_arnold_shader_utility(Menu):
         node_add_menu.add_node_type(layout, "AiStateInt", poll=arnold_shader_nodes_poll(context))
         node_add_menu.add_node_type(layout, "AiStateVector", poll=arnold_shader_nodes_poll(context))
 
+
 class NODE_MT_category_arnold_shader_world(Menu):
     bl_idname = "NODE_MT_category_arnold_shader_world"
     bl_label = "World"
@@ -155,6 +181,7 @@ class NODE_MT_category_arnold_shader_world(Menu):
 
         node_add_menu.add_node_type(layout, "AiSkydome")
         node_add_menu.add_node_type(layout, "AiPhysicalSky")
+
 
 class NODE_MT_arnold_node_add_all(Menu):
     bl_idname = "NODE_MT_arnold_node_add_all"
@@ -178,12 +205,14 @@ class NODE_MT_arnold_node_add_all(Menu):
         layout.menu("NODE_MT_category_arnold_shader_math")
         layout.menu("NODE_MT_category_arnold_shader_utility")
 
+
 def menu_draw(self, context):
     layout = self.layout
     snode = context.space_data
-    
+
     if snode.tree_type == 'ArnoldShaderTree':
         layout.menu_contents("NODE_MT_arnold_node_add_all")
+
 
 classes = (
     NODE_MT_category_arnold_shader_color,
@@ -198,6 +227,7 @@ classes = (
     NODE_MT_arnold_node_add_all
 )
 
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
@@ -205,9 +235,10 @@ def register():
 
     bpy.types.NODE_MT_add.append(menu_draw)
 
+
 def unregister():
     from bpy.utils import unregister_class
     for cls in classes:
         unregister_class(cls)
-    
+
     bpy.types.NODE_MT_add.remove(menu_draw)

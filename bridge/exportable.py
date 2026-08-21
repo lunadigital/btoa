@@ -6,11 +6,12 @@ from .array import ArnoldArray
 from .node import ArnoldNode
 from . import utils as bridge_utils
 
+
 class ArnoldNodeExportable(ArnoldNode):
     def __init__(self, ndata=None, frame_set=None):
         # `data` can either be an Arnold node type (type string)
         # or a BtoA node (type ArnoldNode). If it's a string,
-        # we'll create a new node of that type; if it's a 
+        # we'll create a new node of that type; if it's a
         # BtoA node, we'll sync all new data with the
         # existing node.
         if isinstance(ndata, str):
@@ -54,7 +55,7 @@ class ArnoldNodeExportable(ArnoldNode):
 
             matrix = bridge_utils.flatten_matrix(self.__get_matrix())
             m_array.set_matrix(i, matrix)
-        
+
         self.frame_set(frame_current, subframe=0)
 
         return m_array
@@ -65,7 +66,7 @@ class ArnoldNodeExportable(ArnoldNode):
         subframe = frame_flt - frame_int
 
         return frame_int, subframe
-    
+
     def get_transform_matrix(self):
         sdata = self.depsgraph.scene.arnold
         matrix = bridge_utils.flatten_matrix(self.__get_matrix())

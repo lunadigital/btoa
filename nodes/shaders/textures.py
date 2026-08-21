@@ -14,6 +14,8 @@ AiCellNoise
 
 A cell noise pattern generator.
 '''
+
+
 class AiCellNoise(bpy.types.Node, core.ArnoldNode):
     bl_label = "Cell Noise"
     ai_name = "cell_noise"
@@ -51,16 +53,19 @@ class AiCellNoise(bpy.types.Node, core.ArnoldNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "pattern", text="")
         layout.prop(self, "additive")
-    
+
     def sub_export(self, node):
         node.set_int("pattern", int(self.pattern))
         node.set_bool("additive", self.additive)
+
 
 '''
 AiCheckerboard
 
 Represents a checkerboard pattern.
 '''
+
+
 class AiCheckerboard(bpy.types.Node, core.ArnoldNode):
     bl_label = "Checkerboard"
     ai_name = "checkerboard"
@@ -78,12 +83,15 @@ class AiCheckerboard(bpy.types.Node, core.ArnoldNode):
 
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
+
 '''
 AiFlakes
 
 Creates a procedural flake normal map that can be used for materials
 such as car paint.
 '''
+
+
 class AiFlakes(bpy.types.Node, core.ArnoldNode):
     bl_label = "Flakes"
     ai_name = "flakes"
@@ -110,26 +118,32 @@ class AiFlakes(bpy.types.Node, core.ArnoldNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "output_space", text="")
-    
+
     def sub_export(self, node):
         node.set_int("pattern", int(self.output_space))
+
 
 '''
 AiImageUser
 
 A helper class for AiImage below.
 '''
+
+
 class AiImageUser(bpy.types.PropertyGroup):
     image: PointerProperty(type=bpy.types.Image)
 
     frame_start: IntProperty(name="First Frame")
     frame_offset: IntProperty(name="Offset")
 
+
 '''
 AiImage
 
 Performs texture mapping using a specified image file.
 '''
+
+
 class AiImage(bpy.types.Node, core.ArnoldNode):
     bl_label = "Image"
     bl_width_default = constant.BL_NODE_WIDTH_WIDE
@@ -155,6 +169,13 @@ class AiImage(bpy.types.Node, core.ArnoldNode):
             ('smart_bicubic', "Smart Bicubic", "Smart Bicubic")
         ],
         default='smart_bicubic'
+    )
+
+    # UDIM support
+    use_udim: BoolProperty(
+        name="Use UDIM",
+        description="Enable UDIM texture tiling. Filename must contain <UDIM> token (e.g., texture.<UDIM>.exr)",
+        default=False
     )
 
     swrap: EnumProperty(name="Wrap U", items=AI_WRAP_OPTIONS, default="0")
@@ -195,6 +216,16 @@ class AiImage(bpy.types.Node, core.ArnoldNode):
             split.label(text="Filter")
             split.prop(self, "image_filter", text="")
 
+            layout.separator()
+            layout.prop(self, "use_udim")
+
+            if self.use_udim:
+                box = layout.box()
+                box.label(text="UDIM filename must contain <UDIM> token", icon='INFO')
+                box.label(text="Example: texture.<UDIM>.exr")
+
+            layout.separator()
+
             split = layout.split(factor=0.3)
             split.label(text="Wrap U")
             split.prop(self, "swrap", text="")
@@ -209,7 +240,7 @@ class AiImage(bpy.types.Node, core.ArnoldNode):
             row = split.row()
             row.prop(self, "sflip")
             row.prop(self, "tflip")
-            
+
             split = layout.split(factor=0.3)
             split.label(text="")
             split.prop(self, "swap_st")
@@ -219,15 +250,17 @@ class AiImage(bpy.types.Node, core.ArnoldNode):
         if self.image:
             if self.image.packed_file:
                 filepath = os.path.join(bpy.app.tempdir, self.image.name)
-                
+
                 with open(filepath, 'wb+') as f:
                     f.write(self.image.packed_file.data)
 
                 node.set_string("filename", filepath)
             elif self.image.library:
-                node.set_string("filename", bpy.path.abspath(self.image.filepath, library=self.image.library))
+                filepath = bpy.path.abspath(self.image.filepath, library=self.image.library)
+                node.set_string("filename", self._process_udim_filepath(filepath))
             else:
-                node.set_string("filename", bpy.path.abspath(self.image.filepath))
+                filepath = bpy.path.abspath(self.image.filepath)
+                node.set_string("filename", self._process_udim_filepath(filepath))
 
             node.set_string("color_space", self.image.colorspace_settings.name)
 
@@ -239,15 +272,36 @@ class AiImage(bpy.types.Node, core.ArnoldNode):
         node.set_bool("swap_st", self.swap_st)
         node.set_string("uvset", self.uvset)
 
-        prefs = bpy.context.preferences.addons[ADDON_NAME].preferences
-        node.set_bool("ignore_missing_textures", prefs.ignore_missing_textures)
-        node.set_rgba("missing_texture_color", *prefs.missing_texture_color)
+        try:
+            prefs = bpy.context.preferences.addons[ADDON_NAME].preferences
+            # When using UDIM, ignore_missing_textures should be enabled by default
+            # to handle missing tiles gracefully
+            ignore_missing = prefs.ignore_missing_textures or self.use_udim
+            node.set_bool("ignore_missing_textures", ignore_missing)
+            node.set_rgba("missing_texture_color", *prefs.missing_texture_color)
+        except Exception:
+            node.set_bool("ignore_missing_textures", self.use_udim)
+            node.set_rgba("missing_texture_color", 1, 0, 1, 1)
+
+    def _process_udim_filepath(self, filepath):
+        """
+        Process filepath for UDIM support.
+        Converts Blender's UDIM patterns to Arnold's <UDIM> token.
+
+        Blender patterns: 1001, <UDIM>, <UVTILE>
+        Arnold pattern: <UDIM>
+        """
+        from ...utils.udim_utils import process_udim_filepath
+        return process_udim_filepath(filepath, self.use_udim)
+
 
 '''
 LayerProperties
 
 A helper class for layered shaders.
 '''
+
+
 class LayerProperties(bpy.types.PropertyGroup):
     enabled: BoolProperty(name="Enable", default=True)
     name: StringProperty(name="Name")
@@ -308,12 +362,15 @@ class LayerProperties(bpy.types.PropertyGroup):
         default="result"
     )
 
+
 '''
 AiLayer
 
 A core class for layered Arnold texture nodes (layer_float,
 layer_rgba). This is NOT a public-facing class.
 '''
+
+
 class AiLayer(bpy.types.Node, core.ArnoldNode):
     bl_width_default = constant.BL_NODE_WIDTH_WIDE
 
@@ -343,22 +400,26 @@ class AiLayer(bpy.types.Node, core.ArnoldNode):
             node.set_bool("enable{}".format(i), layer.enabled)
             node.set_string("name{}".format(i), layer.name)
 
+
 '''
 AiLayerFloat
 
 Combines 8 float layers linearly. Layers are applied in order (bottom to top).
 '''
+
+
 class AiLayerFloat(AiLayer):
     bl_label = "Layer Float"
     ai_name = "layer_float"
 
     def init(self, context):
         super().init(context)
-        
+
         for i in range(1, 9):
             self.inputs.new('AiNodeSocketFloatUnbounded', "Layer {}".format(i), identifier="input{}".format(i))
 
         self.outputs.new('AiNodeSocketFloatUnbounded', name="Float")
+
 
 '''
 AiLayerRGBA
@@ -368,8 +429,10 @@ shaders together, enabling you to create complex shading effects.
 Layers are applied in order (bottom to top) according to a blending
 mode specified in the operation. The layer alpha can optionally be
 a separate input. A use for this shader could include adding text
-to an image for example. 
+to an image for example.
 '''
+
+
 class AiLayerRGBA(AiLayer):
     bl_label = "Layer RGBA"
     ai_name = "layer_rgba"
@@ -407,6 +470,7 @@ class AiLayerRGBA(AiLayer):
             node.set_string("operation{}".format(i), layer.operation)
             node.set_string("alpha_operation{}".format(i), layer.alpha_operation)
 
+
 '''
 AiMixRGBA
 
@@ -416,6 +480,8 @@ the mix_weight attribute. A mix_weight value of 0 outputs input1,
 a value of 1 outputs input2, and a value of 0.5 mixes evenly
 between input1 and input2.
 '''
+
+
 class AiMixRGBA(bpy.types.Node, core.ArnoldNode):
     bl_label = "Mix RGBA"
     ai_name = "mix_rgba"
@@ -427,11 +493,14 @@ class AiMixRGBA(bpy.types.Node, core.ArnoldNode):
 
         self.outputs.new('AiNodeSocketRGBA', name="RGBA")
 
+
 '''
 AiNoise
 
 Evaluates a coherent noise function.
 '''
+
+
 class AiNoise(bpy.types.Node, core.ArnoldNode):
     bl_label = "Noise"
     ai_name = "noise"
@@ -456,14 +525,15 @@ class AiNoise(bpy.types.Node, core.ArnoldNode):
         self.inputs.new("AiNodeSocketFloatUnbounded", "Time", identifier="time")
         self.inputs.new("AiNodeSocketRGB", "Color1", identifier="color1")
         self.inputs.new("AiNodeSocketRGB", "Color2", identifier="color2").default_value = (0, 0 ,0)
-        
+
         self.outputs.new("AiNodeSocketRGB", "RGB")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "mode", text="")
-    
+
     def sub_export(self, node):
         node.set_int("mode", int(self.mode))
+
 
 '''
 AiPhysicalSky
@@ -471,6 +541,8 @@ AiPhysicalSky
 This shader implements a variation of the Hosek-Wilkie sky radiance
 model, including the direct solar radiance function.
 '''
+
+
 class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
     bl_label = "Physical Sky"
     ai_name = "physical_sky"
@@ -506,7 +578,7 @@ class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
         row = layout.row()
         row.prop(self, "direction_vector", text="")
         row.enabled = not self.use_degrees and not self.direction_object
-        
+
         row = layout.row()
         row.prop(self, "direction_object")
         row.enabled = not self.use_degrees
@@ -528,12 +600,15 @@ class AiPhysicalSky(bpy.types.Node, core.ArnoldNode):
 
             node.set_vector("sun_direction", *direction)
 
+
 '''
 AiRoundCorners
 
 Modifies the shading normals near edges to give the appearance
 of a round corner.
 '''
+
+
 class AiRoundCorners(bpy.types.Node, core.ArnoldNode):
     bl_label = "Round Corners"
     ai_name = "round_corners"
@@ -553,11 +628,12 @@ class AiRoundCorners(bpy.types.Node, core.ArnoldNode):
         layout.prop(self, "inclusive")
         layout.prop(self, "self_only")
         layout.prop(self, "object_space")
-    
+
     def sub_export(self, node):
         node.set_bool("inclusive", self.inclusive)
         node.set_bool("self_only", self.self_only)
         node.set_bool("object_space", self.object_space)
+
 
 classes = (
     AiCellNoise,
@@ -574,8 +650,10 @@ classes = (
     AiRoundCorners,
 )
 
+
 def register():
     register_utils.register_classes(classes)
+
 
 def unregister():
     register_utils.unregister_classes(classes)

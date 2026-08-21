@@ -10,6 +10,8 @@ AiSkydome
 
 Returns a skydome light for World rendering.
 '''
+
+
 class AiSkydome(bpy.types.Node, core.ArnoldNode):
     bl_label = "Skydome"
     ai_name = "skydome_light"
@@ -68,12 +70,15 @@ class AiSkydome(bpy.types.Node, core.ArnoldNode):
 
         node.set_matrix("matrix", bridge.utils.flatten_matrix(matrix))
 
+
 classes = (
     AiSkydome,
 )
 
+
 def register():
     register_utils.register_classes(classes)
+
 
 def unregister():
     register_utils.unregister_classes(classes)

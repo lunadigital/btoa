@@ -1,5 +1,6 @@
 from . import (
     camera,
+    curves,
     light,
     material,
     mesh,
@@ -13,6 +14,7 @@ from . import (
 
 modules = (
     camera,
+    curves,
     light,
     material,
     mesh,
@@ -24,9 +26,11 @@ modules = (
     world
 )
 
+
 def register():
     for m in modules:
         m.register()
+
 
 def unregister():
     for m in reversed(modules):

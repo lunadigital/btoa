@@ -46,11 +46,14 @@ def get_link(socket):
 
     return link
 
+
 def get_socket_index(socket):
     return int(socket.path_from_id()[-2:-1])
 
 # Converts socket values to real-world units
 # In our case, meters (Blender internal) to centimeters (Arnold)
+
+
 def convert_real_units(data):
     CONVERSION_FACTOR = 0.01
 

@@ -4,6 +4,7 @@ from bpy.props import *
 from .ainodesocket import AiNodeSocket, SocketColor
 from ...bridge.types import VectorData
 
+
 class AiNodeSocketVector(NodeSocket, AiNodeSocket):
     bl_label = "Vector"
     color = SocketColor.VECTOR
@@ -18,9 +19,10 @@ class AiNodeSocketVector(NodeSocket, AiNodeSocket):
         else:
             row = layout.row(align=True)
             row.label(text=text)
-            
+
     def export_default(self):
         return VectorData(self.default_value)
+
 
 classes = (
     AiNodeSocketVector,

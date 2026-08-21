@@ -9,6 +9,7 @@ from .. import bridge
 from ..utils import ui_utils
 from ..bridge import NodeData, ExportDataType
 
+
 class ArnoldShaderTree(ShaderNodeTree):
     bl_idname = "ArnoldShaderTree"
     bl_label = "Shader Editor"
@@ -41,18 +42,16 @@ class ArnoldShaderTree(ShaderNodeTree):
     @classmethod
     def get_from_context(cls,  context):
         space_data = context.scene.arnold.space_data
-        if space_data.shader_type == 'OBJECT':    
+        if space_data.shader_type == 'OBJECT':
             ob = context.object
 
             if ob and ob.type != 'CAMERA':
-                mat = ob.active_material
-
                 if ob.active_material is not None and ob.active_material.arnold.node_tree is not None:
                     return ob.active_material.arnold.node_tree, ob.active_material, ob.active_material
-        
+
         elif space_data.shader_type == 'WORLD':
             return context.scene.world.arnold.node_tree, context.scene.world, context.scene.world
-        
+
         return None, None, None
 
     @classmethod
@@ -79,7 +78,7 @@ class ArnoldShaderTree(ShaderNodeTree):
 
                     if snode.tree_type == 'ArnoldShaderTree':
                         layout.prop(arnold_space_data, "shader_type", text="")
-                
+
                         ob = context.object
                         if arnold_space_data.shader_type == 'OBJECT' and ob:
                             ob_type = ob.type
@@ -89,7 +88,7 @@ class ArnoldShaderTree(ShaderNodeTree):
                             layout.separator_spacer()
 
                             types_that_support_material = {'MESH', 'CURVE', 'SURFACE', 'FONT', 'META',
-                                                        'GPENCIL', 'VOLUME', 'HAIR', 'POINTCLOUD'}
+                                                        'GREASEPENCIL', 'VOLUME', 'CURVES', 'POINTCLOUD'}
                             # disable material slot buttons when pinned, cannot find correct slot within id_from (#36589)
                             # disable also when the selected object does not support materials
                             has_material_slots = not snode.pin and ob_type in types_that_support_material
@@ -167,16 +166,14 @@ class ArnoldShaderTree(ShaderNodeTree):
 
                     # Snap
                     row = layout.row(align=True)
-                    row.prop(tool_settings, "use_snap", text="")
-                    row.prop(tool_settings, "snap_node_element", icon_only=True)
-                    if tool_settings.snap_node_element != 'GRID':
-                        row.prop(tool_settings, "snap_target", text="")
+                    row.prop(tool_settings, "use_snap_node", text="")
+                    # snap_node_element was removed in Blender 5.0
                 else:
                     cls._draw_header_func(self, context)
 
             cls._draw_header_func = NODE_HT_header.draw
             NODE_HT_header.draw = draw
-    
+
     @classmethod
     def unregister_draw_cb(cls):
         if cls._draw_header_func is not None:
@@ -185,14 +182,14 @@ class ArnoldShaderTree(ShaderNodeTree):
 
     def get_output_node(self):
         '''
-        This is supposed to be in ShaderNodeTree, but apparently 
+        This is supposed to be in ShaderNodeTree, but apparently
         doesn't get implemented in subclasses because it throws an error
         '''
         for node in self.nodes:
             ntype = getattr(node, "bl_idname", None)
             if ntype == 'AiShaderOutput' and node.is_active:
                 return node
-        
+
         return None
 
     def export(self):
@@ -206,7 +203,7 @@ class ArnoldShaderTree(ShaderNodeTree):
     def export_active_displacement(self):
         output = self.get_output_node()
         return output.export_displacement()
-    
+
     def has_surface(self):
         output = self.get_output_node()
         return output.has_surface()
@@ -214,6 +211,7 @@ class ArnoldShaderTree(ShaderNodeTree):
     def has_displacement(self):
         output = self.get_output_node()
         return output.has_displacement()
+
 
 class ArnoldNode:
     bl_icon = 'NONE'
@@ -237,41 +235,46 @@ class ArnoldNode:
         for i in self.inputs:
             socket_data = i.export()
 
+            if socket_data is None:
+                continue
+
             if socket_data.type is ExportDataType.NODE:
                 socket_data.value.link(i.identifier, node, socket_data.from_socket)
             else:
                 key = socket_data.type
                 if socket_data.type is ExportDataType.COLOR:
                     key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
-                
+
                 value = socket_utils.convert_real_units(socket_data.value) if i.real_world else socket_data.value
                 bridge.BTOA_SET_LAMBDA[key](node, i.identifier, value)
 
         return NodeData(node)
+
 
 class ArnoldNodeOutput:
     bl_label = "Output"
 
     def _get_active(self):
         return not self.mute
-    
+
     def _set_active(self, value=True):
         for node in self.id_data.nodes:
             if isinstance(node, ArnoldNodeOutput):
                 node.mute = (self != node)
-    
+
     is_active: BoolProperty(
         name="Active",
         description="Active Output",
         get=_get_active,
         set=_set_active
         )
-    
+
     def init(self, context):
         self._set_active()
-    
+
     def copy(self, node):
         self._set_active()
+
 
 class AiShaderOutput(Node, ArnoldNodeOutput):
     '''Output node for Arnold shaders.'''
@@ -290,14 +293,14 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
 
         if parent_material:
             layout.prop(parent_material, "diffuse_color", text="Viewport")
-        
+
         layout.prop(self, "is_active", toggle=1)
 
     def export(self):
         surface = self.inputs["Surface"].export() if "Surface" in self.inputs.keys() else None
         volume = None # Not implemented yet
         displacement = self.inputs["Displacement"].export() if "Displacement" in self.inputs.keys() else None
-        
+
         return surface, volume, displacement
 
     def export_surface(self):
@@ -305,22 +308,25 @@ class AiShaderOutput(Node, ArnoldNodeOutput):
 
     def export_displacement(self):
         return self.inputs["Displacement"].export()
-    
+
     def has_surface(self):
         return self.inputs["Surface"].is_linked
 
     def has_displacement(self):
         return self.inputs["Displacement"].is_linked
 
+
 classes = (
     ArnoldShaderTree,
     AiShaderOutput,
 )
 
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
+
 
 def unregister():
     from bpy.utils import unregister_class

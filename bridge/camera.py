@@ -5,6 +5,7 @@ import mathutils
 from .exportable import ArnoldNodeExportable
 from . import utils as bridge_utils
 
+
 class ArnoldCamera(ArnoldNodeExportable):
     def __init__(self, node=None, frame_set=None):
         super().__init__(node, frame_set)
@@ -16,11 +17,11 @@ class ArnoldCamera(ArnoldNodeExportable):
         self.evaluate_datablock(datablock)
         if not self.datablock:
             return None
-        
+
         # Create Arnold data if needed
         sdata = depsgraph.scene.arnold
         cdata = self.datablock.data
-        
+
         if not self.is_valid:
             self.initialize(cdata.arnold.camera_type)
 
@@ -37,14 +38,14 @@ class ArnoldCamera(ArnoldNodeExportable):
         else:
             matrix = bridge_utils.flatten_matrix(self.datablock.matrix_world)
             self.set_matrix("matrix", matrix)
-        
+
         # Set zoom, offset, and FOV
         zoom = 1
         xo, yo = 0, 0
 
         if cdata.arnold.camera_type == 'ortho_camera':
             zoom = cdata.ortho_scale / 2.0
-            
+
             if hasattr(cdata, "is_render_view") and cdata.is_render_view:
                 zoom = zoom * cdata.zoom
                 xo, yo = cdata.offset[0] * cdata.ortho_scale, cdata.offset[1] * cdata.ortho_scale

@@ -4,12 +4,14 @@ from . import shaders
 from . import menus
 from . import autoswitch
 
+
 def register():
     core.register()
     sockets.register()
     shaders.register()
     menus.register()
     autoswitch.register()
+
 
 def unregister():
     core.unregister()

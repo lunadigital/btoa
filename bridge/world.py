@@ -4,6 +4,7 @@ from .matrix import ArnoldMatrix
 from .node import ArnoldNode
 from . import utils as bridge_utils
 
+
 class ArnoldWorld(ArnoldNode):
     def from_datablock(self, datablock):
         surface, volume, displ = datablock.arnold.node_tree.export()
@@ -24,7 +25,7 @@ class ArnoldWorld(ArnoldNode):
             rx = mathutils.Matrix.Rotation(rot.x, 4, 'X')
             ry = mathutils.Matrix.Rotation(rot.y, 4, 'Y')
             rz = mathutils.Matrix.Rotation(rot.z, 4, 'Z')
-            
+
             rot_matrix = rx @ ry @ rz
             rot_matrix = bridge_utils.flatten_matrix(rot_matrix)
 
@@ -35,7 +36,7 @@ class ArnoldWorld(ArnoldNode):
             matrix.multiply(rotation)
 
             self.set_matrix("matrix", matrix)
-        
+
         # Set general attributes
         data = datablock.arnold.data
 

@@ -80,9 +80,10 @@ cylinder_light_shape = (
     (0.195089, 1, -0.980786), (0, 1, -1),
 )
 
+
 class AiCylinderLightWidget(Gizmo):
     bl_idname = "VIEW3D_GT_auto_facemap"
-    
+
     def update_gizmo_matrix(self, context):
         light = context.object
         data = light.data
@@ -91,7 +92,7 @@ class AiCylinderLightWidget(Gizmo):
         ui_scale = context.preferences.system.ui_scale
         r = data.size / ui_scale * 0.5
         s = (light.scale.y * data.size_y) / ui_scale * 0.5
-        
+
         smatrix = Matrix.Diagonal([r, s, r]).to_4x4()
         self.matrix_offset = smatrix
 
@@ -108,6 +109,7 @@ class AiCylinderLightWidget(Gizmo):
         if cancel:
             pass
 
+
 class AiCylinderLightWidgetGroup(GizmoGroup):
     bl_idname = "OBJECT_GGT_cylinder_light"
     bl_label = "Cylinder Light Widget"
@@ -121,7 +123,6 @@ class AiCylinderLightWidgetGroup(GizmoGroup):
         return (ob and ob.type == 'LIGHT' and ob.data.type and ob.data.type == 'AREA' and ob.data.shape and ob.data.shape == 'RECTANGLE' and context.engine == 'ARNOLD')
 
     def setup(self, context):
-        ob = context.object
         mpr = self.gizmos.new(AiCylinderLightWidget.bl_idname)
 
         mpr.color = 0.0, 0.0, 0.0
@@ -134,15 +135,18 @@ class AiCylinderLightWidgetGroup(GizmoGroup):
         mpr = self.energy_widget
         mpr.matrix_basis = ob.matrix_world.normalized()
 
+
 classes = (
     AiCylinderLightWidget,
     AiCylinderLightWidgetGroup
 )
 
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
+
 
 def unregister():
     from bpy.utils import unregister_class

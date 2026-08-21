@@ -8,6 +8,7 @@ from .exportable import ArnoldNodeExportable
 from .node import ArnoldNode
 from . import utils as bridge_utils
 
+
 class ArnoldLight(ArnoldNodeExportable):
     def __init__(self, node=None, frame_set=None):
         super().__init__(node, frame_set)
@@ -19,14 +20,14 @@ class ArnoldLight(ArnoldNodeExportable):
         self.evaluate_datablock(datablock)
         if not self.datablock:
             return None
-        
+
         # Determine light type and set up AiNode data
         data = self.datablock.data
         ntype = BTOA_LIGHT_SHAPE_CONVERSIONS[data.shape] if data.type == 'AREA' else BTOA_LIGHT_CONVERSIONS[data.type]
 
         if ntype != self.get_string("btoa_light_type"):
             self.destroy()
-            
+
         if not self.is_valid:
             self.data = arnold.AiNode(None, ntype)
             self.set_string("name", self.datablock.name)
@@ -34,7 +35,7 @@ class ArnoldLight(ArnoldNodeExportable):
 
             self.declare("btoa_light_type", "constant STRING")
             self.set_string("btoa_light_type", ntype)
-        
+
         # Set transform matrix for everything but cylinder lights
         if not hasattr(data, "shape") or data.shape != 'RECTANGLE':
             self.set_matrix(
@@ -94,7 +95,7 @@ class ArnoldLight(ArnoldNodeExportable):
                 )
 
                 self.set_bool("portal", data.arnold.portal)
-                
+
             elif data.shape == 'DISK':
                 s = self.datablock.scale.x if self.datablock.scale.x > 0 else self.datablock.scale.y
                 self.set_float("radius", 0.5 * data.size * s)

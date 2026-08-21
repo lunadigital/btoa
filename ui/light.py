@@ -2,8 +2,10 @@ import bpy
 from bl_ui.properties_data_light import DataButtonsPanel
 from ..preferences import ENGINE_ID
 
+
 class ArnoldLightPanel(DataButtonsPanel, bpy.types.Panel):
     COMPAT_ENGINES = {ENGINE_ID}
+
 
 class DATA_PT_arnold_light(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light"
@@ -38,6 +40,7 @@ class DATA_PT_arnold_light(ArnoldLightPanel):
         if light.type == 'SUN':
             col.prop(light.arnold, "angle")
 
+
 class DATA_PT_arnold_light_shape(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_shape"
     bl_label = "Shape"
@@ -64,7 +67,7 @@ class DATA_PT_arnold_light_shape(ArnoldLightPanel):
             col.prop(light, "show_cone")
 
             col.separator()
-            
+
             col.prop(light.arnold, "spot_roundness")
             col.prop(light.arnold, "aspect_ratio")
             col.prop(light.arnold, "lens_radius")
@@ -87,6 +90,7 @@ class DATA_PT_arnold_light_shape(ArnoldLightPanel):
                 col.prop(light.arnold, "area_roundness")
                 col.prop(light.arnold, "soft_edge")
 
+
 class DATA_PT_arnold_light_shadows(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_shadows"
     bl_label = "Shadows"
@@ -106,6 +110,7 @@ class DATA_PT_arnold_light_shadows(ArnoldLightPanel):
         col.prop(light.arnold, "cast_shadows")
         col.prop(light.arnold, "cast_volumetric_shadows")
 
+
 class DATA_PT_arnold_light_advanced(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_advanced"
     bl_label = "Advanced"
@@ -120,6 +125,7 @@ class DATA_PT_arnold_light_advanced(ArnoldLightPanel):
         col = layout.column()
         col.prop(light.arnold, "samples")
         col.prop(light.arnold, "normalize")
+
 
 class DATA_PT_arnold_light_visibility(ArnoldLightPanel):
     bl_idname = "DATA_PT_arnold_light_visibility"
@@ -142,6 +148,7 @@ class DATA_PT_arnold_light_visibility(ArnoldLightPanel):
         col.prop(light.arnold, "volume")
         col.prop(light.arnold, "max_bounces")
 
+
 classes = (
     DATA_PT_arnold_light,
     DATA_PT_arnold_light_shape,
@@ -150,9 +157,11 @@ classes = (
     DATA_PT_arnold_light_visibility
 )
 
+
 def register():
     from ..utils import register_utils as utils
     utils.register_classes(classes)
+
 
 def unregister():
     from ..utils import register_utils as utils

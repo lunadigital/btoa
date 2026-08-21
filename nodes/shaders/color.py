@@ -12,6 +12,8 @@ Allows you to adjust the gamma, hue, saturation, contrast, and exposure of
 an image. Alters the Input color with the following operator, applied in
 the same order as the parameters.
 '''
+
+
 class AiColorCorrect(bpy.types.Node, core.ArnoldNode):
     bl_label = "Color Correct"
     ai_name = "color_correct"
@@ -57,6 +59,7 @@ class AiColorCorrect(bpy.types.Node, core.ArnoldNode):
         node.set_bool("invert", self.invert)
         node.set_bool("invert_alpha", self.invert_alpha)
 
+
 '''
 AiColorJitter
 
@@ -65,6 +68,8 @@ This shader enables you to alter the input color by applying a random
     the range of hue, saturation, and gain (HSV) for the random colors.
     The seed is used to get a different random variation.
 '''
+
+
 class AiColorJitter(bpy.types.Node, core.ArnoldNode):
     bl_label = "Color Jitter"
     ai_name = "color_jitter"
@@ -106,7 +111,7 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
 
         for i in self.inputs:
             socket_data = i.export()
-            
+
             # We need to rebuild the identifier value to account for the different enum options in jitter_type
             identifier = 'input' if i.identifier == 'input' else "{}_{}".format(self.jitter_type, i.identifier)
 
@@ -116,7 +121,7 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
                 key = socket_data.type
                 if socket_data.type is ExportDataType.COLOR:
                     key = ExportDataType.RGBA if socket_data.has_alpha() else ExportDataType.RGB
-                
+
                 value = socket_utils.convert_real_units(socket_data.value) if i.real_world else socket_data.value
                 bridge.BTOA_SET_LAMBDA[key](node, identifier, value)
 
@@ -132,11 +137,14 @@ class AiColorJitter(bpy.types.Node, core.ArnoldNode):
         if self.jitter_type == "face":
             node.set_string("face_mode", self.face_mode)
 
+
 '''
 AiComposite
 
 The composite shader mixes two RGBA inputs according to a blend mode.
 '''
+
+
 class AiComposite(bpy.types.Node, core.ArnoldNode):
     bl_label = "Composite"
     ai_name = "composite"
@@ -200,12 +208,15 @@ class AiComposite(bpy.types.Node, core.ArnoldNode):
         node.set_string("operation", self.operation)
         node.set_string("alpha_operation", self.alpha_operation)
 
+
 '''
 AiShuffle
 
 Combines RGB and alpha inputs to output an RGBA by default.
 Additionally, there are parameters to shuffle the channels.
 '''
+
+
 class AiShuffle(bpy.types.Node, core.ArnoldNode):
     bl_label = "Shuffle"
     ai_name = "shuffle"
@@ -275,7 +286,7 @@ class AiShuffle(bpy.types.Node, core.ArnoldNode):
         layout.label(text="Negate")
 
         split = layout.split()
-        
+
         col = split.column()
         col.prop(self, "negate_r")
         col.prop(self, "negate_b")
@@ -297,6 +308,7 @@ class AiShuffle(bpy.types.Node, core.ArnoldNode):
         node.set_bool("negate_b", self.negate_b)
         node.set_bool("negate_a", self.negate_a)
 
+
 classes = (
     AiColorCorrect,
     AiColorJitter,
@@ -304,8 +316,10 @@ classes = (
     AiShuffle,
 )
 
+
 def register():
     register_utils.register_classes(classes)
+
 
 def unregister():
     register_utils.unregister_classes(classes)

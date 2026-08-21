@@ -17,6 +17,10 @@ BTOA_TYPE_CONSTANTS = {
     "VECTOR2": arnold.AI_TYPE_VECTOR2,
     "BYTE": arnold.AI_TYPE_BYTE,
     "POINTER": arnold.AI_TYPE_POINTER,
+    "FLOAT": arnold.AI_TYPE_FLOAT,
+    "RGBA": arnold.AI_TYPE_RGBA,
+    "RGB": arnold.AI_TYPE_RGB,
+    "INT": arnold.AI_TYPE_INT,
 }
 
 BTOA_LIGHT_CONVERSIONS = {
@@ -35,6 +39,10 @@ BTOA_CONVERTIBLE_TYPES = (
     bpy.types.Mesh,
     bpy.types.TextCurve,
     bpy.types.Curve
+)
+
+BTOA_CURVES_TYPES = (
+    bpy.types.Curves,
 )
 
 # For more info, visit https://docs.arnoldrenderer.com/display/A5NodeRef/polymesh#polymesh-visibility

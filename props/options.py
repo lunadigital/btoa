@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Scene, PropertyGroup, Camera
 from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty, StringProperty
 
+
 class AiSpaceDataProperties(PropertyGroup):
     shader_type: EnumProperty(
         name="Shader Type",
@@ -10,7 +11,8 @@ class AiSpaceDataProperties(PropertyGroup):
             ('WORLD', "World", "World shaders", "WORLD_DATA", 1),
         ]
     )
-   
+
+
 class ArnoldOptions(PropertyGroup):
     # Sampling
     aa_samples: IntProperty(
@@ -80,7 +82,7 @@ class ArnoldOptions(PropertyGroup):
     adaptive_aa_samples_max: IntProperty(
         name="Max Camera (AA)",
         description="Sets the maximum amount of supersampling. It controls the per-pixel maximum sampling rate and is equivalent to the units used by AA_samples. Adaptive sampling is enabled when AA_samples_max > Camera (AA) samples and Camera (AA) samples >= 2. Scenes with a large amount of depth of field or motion blur may require higher Max. Camera (AA) values. This parameter can also help with 'buzzing' speculars and hair shading as well",
-        min=0, 
+        min=0,
         default=20
         )
     adaptive_threshold: FloatProperty(
@@ -90,7 +92,7 @@ class ArnoldOptions(PropertyGroup):
         default=0.015,
         precision=3
         )
-    
+
     lock_sampling_pattern: BoolProperty(
         name="Lock Sampling Pattern",
         description=""
@@ -161,7 +163,7 @@ class ArnoldOptions(PropertyGroup):
 
     # Rendering
     bucket_size: IntProperty(
-        name="Bucket Size", 
+        name="Bucket Size",
         description="The size of the image buckets. Bigger buckets use more memory, while smaller buckets may perform redundant computations and filtering and thus render slower but give initial faster feedback",
         min=2,
         default=64
@@ -194,7 +196,7 @@ class ArnoldOptions(PropertyGroup):
         options = context.scene.arnold
         options.shutter_start = -options.shutter_length / 2
         options.shutter_end = options.shutter_length / 2
-        
+
     enable_motion_blur: BoolProperty(
         name="Enable Motion Blur",
         description=""
@@ -294,10 +296,12 @@ class ArnoldOptions(PropertyGroup):
     # IPR preview
     preview_pause: BoolProperty(name="Pause Preview")
 
+
 classes = (
     AiSpaceDataProperties,
     ArnoldOptions,
 )
+
 
 def register():
     from bpy.utils import register_class
@@ -305,6 +309,7 @@ def register():
         register_class(cls)
 
     Scene.arnold = PointerProperty(type=ArnoldOptions)
+
 
 def unregister():
     del Scene.arnold

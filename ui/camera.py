@@ -2,8 +2,10 @@ import bpy
 from bl_ui.properties_data_camera import CameraButtonsPanel, CAMERA_PT_presets
 from ..preferences import ENGINE_ID
 
+
 class ArnoldCameraPanel(CameraButtonsPanel, bpy.types.Panel):
     COMPAT_ENGINES = {ENGINE_ID}
+
 
 class DATA_PT_arnold_lens(ArnoldCameraPanel):
     bl_idname = "DATA_PT_arnold_lens"
@@ -40,6 +42,7 @@ class DATA_PT_arnold_lens(ArnoldCameraPanel):
 
         col.prop(camera.arnold, "exposure")
 
+
 class DATA_PT_arnold_dof(ArnoldCameraPanel):
     bl_idname = "DATA_PT_arnold_dof"
     bl_label = "Depth of Field"
@@ -61,11 +64,14 @@ class DATA_PT_arnold_dof(ArnoldCameraPanel):
         sub.active = (camera.dof.focus_object is None)
         sub.prop(camera.dof, "focus_distance")
 
+
 '''
 This is a hacky way to get more control over where Blender
 panels appear in relation to Arnold panels. Copied directly
 from `bl_ui.properties_data_camera`.
 '''
+
+
 class DATA_PT_arnold_camera(ArnoldCameraPanel):
     bl_label = "Camera"
     bl_options = {'DEFAULT_CLOSED'}
@@ -94,6 +100,7 @@ class DATA_PT_arnold_camera(ArnoldCameraPanel):
             sub.active = cam.sensor_fit == 'VERTICAL'
             sub.prop(cam, "sensor_height", text="Height")
 
+
 class DATA_PT_arnold_aperture(ArnoldCameraPanel):
     bl_parent_id = DATA_PT_arnold_dof.bl_idname
     bl_idname = "DATA_PT_arnold_aperture"
@@ -112,11 +119,14 @@ class DATA_PT_arnold_aperture(ArnoldCameraPanel):
         col.prop(camera.arnold, "aperture_aspect_ratio")
         col.enabled = camera.arnold.enable_dof
 
+
 '''
 This is a hacky way to get more control over where Blender
 panels appear in relation to Arnold panels. Copied directly
 from `bl_ui.properties_data_camera`.
 '''
+
+
 class DATA_PT_arnold_camera_background_image(ArnoldCameraPanel):
     bl_label = "Background Images"
     bl_options = {'DEFAULT_CLOSED'}
@@ -220,11 +230,14 @@ class DATA_PT_arnold_camera_background_image(ArnoldCameraPanel):
                     col.prop(bg, "use_flip_x")
                     col.prop(bg, "use_flip_y")
 
+
 '''
 This is a hacky way to get more control over where Blender
 panels appear in relation to Arnold panels. Copied directly
 from `bl_ui.properties_data_camera`.
 '''
+
+
 class DATA_PT_arnold_camera_display(ArnoldCameraPanel):
     bl_label = "Viewport Display"
     bl_options = {'DEFAULT_CLOSED'}
@@ -255,6 +268,7 @@ class DATA_PT_arnold_camera_display(ArnoldCameraPanel):
         sub.prop(cam, "passepartout_alpha", text="")
         row.prop_decorator(cam, "passepartout_alpha")
 
+
 class DATA_PT_arnold_camera_display_composition_guides(ArnoldCameraPanel):
     bl_label = "Composition Guides"
     bl_parent_id = "DATA_PT_arnold_camera_display"
@@ -281,6 +295,7 @@ class DATA_PT_arnold_camera_display_composition_guides(ArnoldCameraPanel):
         col.prop(cam, "show_composition_harmony_tri_a", text="Triangle A")
         col.prop(cam, "show_composition_harmony_tri_b", text="Triangle B")
 
+
 classes = (
     DATA_PT_arnold_lens,
     DATA_PT_arnold_dof,
@@ -291,9 +306,11 @@ classes = (
     DATA_PT_arnold_camera_display_composition_guides,
 )
 
+
 def register():
     from ..utils import register_utils as utils
     utils.register_classes(classes)
+
 
 def unregister():
     from ..utils import register_utils as utils

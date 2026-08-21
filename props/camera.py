@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Scene, PropertyGroup, Camera
 from bpy.props import BoolProperty, IntProperty, FloatProperty, PointerProperty, EnumProperty
 
+
 class ArnoldCamera(PropertyGroup):
     # Basic lens settings
     def toggle_blender_camera_type(self, context):
@@ -38,9 +39,11 @@ class ArnoldCamera(PropertyGroup):
     aperture_aspect_ratio: FloatProperty(name="Aspect Ratio", min=0, default=1)
     flat_field_focus: BoolProperty(name="Flat Field Focus")
 
+
 def register():
     bpy.utils.register_class(ArnoldCamera)
     Camera.arnold = PointerProperty(type=ArnoldCamera)
+
 
 def unregister():
     bpy.utils.unregister_class(ArnoldCamera)

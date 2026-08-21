@@ -3,8 +3,10 @@ from bpy.props import BoolProperty, PointerProperty
 
 from ..nodes.core import ArnoldShaderTree
 
+
 class ArnoldShader(PropertyGroup):
     node_tree: PointerProperty(name="Node Tree", type=ArnoldShaderTree)
+
 
 def register():
     from bpy.utils import register_class
@@ -21,6 +23,7 @@ def register():
     #    description="Arnold shader settings",
     #    type=ArnoldShader
     #)
+
 
 def unregister():
     from bpy.utils import unregister_class

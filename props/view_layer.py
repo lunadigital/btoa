@@ -6,6 +6,8 @@ from ..utils import register_utils
 RenderPassConfig is a simple helper class to manage AOV data
 differences between Blender and Arnold.
 '''
+
+
 class RenderPassConfig:
     def __init__(self, name, ainame, channels, chan_id, pixel_type):
         self.name = name             # label in UI
@@ -13,13 +15,14 @@ class RenderPassConfig:
         self.channels = channels     # Number of channels
         self.chan_id = chan_id       # Channel names, one character per channel
         self.pixel_type = pixel_type # Arnold-specific pixel type (FLOAT, RGB, RGBA, etc)
-        
+
         # For compositor
         # Enum in ['VALUE', 'VECTOR', 'COLOR']
         if pixel_type == 'FLOAT':
             self.pass_type = 'VALUE'
         elif 'RGB' in pixel_type or pixel_type == 'VECTOR':
             self.pass_type = 'COLOR'
+
 
 class RenderPassConfigGroup:
     data = (
@@ -63,6 +66,7 @@ class RenderPassConfigGroup:
         RenderPassConfig("Volume Albedo", "volume_albedo", 3, "RGB", "RGB"),
     )
 
+
 class ArnoldRenderPasses(PropertyGroup):
     config = RenderPassConfigGroup()
 
@@ -94,17 +98,21 @@ class ArnoldRenderPasses(PropertyGroup):
 
         return result
 
+
 class ArnoldRenderLayer(PropertyGroup):
     aovs: PointerProperty(type=ArnoldRenderPasses)
+
 
 classes = (
     ArnoldRenderPasses,
     ArnoldRenderLayer,
 )
 
+
 def register():
     register_utils.register_classes(classes)
     ViewLayer.arnold = PointerProperty(type=ArnoldRenderLayer)
+
 
 def unregister():
     del ViewLayer.arnold

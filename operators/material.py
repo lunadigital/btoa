@@ -3,10 +3,12 @@ from bpy.props import IntProperty, EnumProperty
 
 from ..utils import ops_utils
 
+
 class ArnoldMaterialOperator(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return ops_utils.poll_object(context)
+
 
 class ARNOLD_OT_material_new(ArnoldMaterialOperator):
     bl_idname = 'arnold.material_new'
@@ -18,7 +20,7 @@ class ARNOLD_OT_material_new(ArnoldMaterialOperator):
         mat = bpy.data.materials.new(name="Material")
         tree_name = ops_utils.make_nodetree_name(mat.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
-        
+
         ops_utils.init_material_nodetree(node_tree)
         mat.arnold.node_tree = node_tree
         mat.use_nodes = True
@@ -28,31 +30,33 @@ class ARNOLD_OT_material_new(ArnoldMaterialOperator):
             ob.material_slots[ob.active_material_index].material = mat
         else:
             ob.data.materials.append(mat)
-        
+
         # For viewport render, we have to update the object
         # because the newly created material is not yet assigned there
         ob.update_tag()
 
         return {'FINISHED'}
-    
+
+
 class ARNOLD_OT_material_unlink(ArnoldMaterialOperator):
     bl_idname = "arnold.material_unlink"
     bl_label = ""
     bl_description = "Unlink data-block"
     bl_options = {'UNDO'}
-    
+
     def execute(self, context):
         ob = context.object
         if ob.material_slots:
             ob.material_slots[ob.active_material_index].material = None
         return {'FINISHED'}
 
+
 class ARNOLD_OT_material_copy(ArnoldMaterialOperator):
     bl_idname = "arnold.material_copy"
     bl_label = "Copy"
     bl_description = "Create a copy of the material and node tree"
     bl_options = {'UNDO'}
-    
+
     def execute(self, context):
         current_mat = context.object.active_material
         new_mat = current_mat.copy()
@@ -69,6 +73,7 @@ class ARNOLD_OT_material_copy(ArnoldMaterialOperator):
 
         return {'FINISHED'}
 
+
 class ARNOLD_OT_material_set(ArnoldMaterialOperator):
     bl_idname = "arnold.material_set"
     bl_label = ""
@@ -82,6 +87,7 @@ class ARNOLD_OT_material_set(ArnoldMaterialOperator):
         context.object.active_material = mat
 
         return {'FINISHED'}
+
 
 class ARNOLD_OT_material_select(ArnoldMaterialOperator):
     ''' Material selection dropdown with search '''
@@ -104,7 +110,7 @@ class ARNOLD_OT_material_select(ArnoldMaterialOperator):
         ARNOLD_OT_material_select.callback_strings = items
 
         return items
-    
+
     material: EnumProperty(
         name="Materials",
         items=callback
@@ -120,115 +126,6 @@ class ARNOLD_OT_material_select(ArnoldMaterialOperator):
         context.window_manager.invoke_search_popup(self)
         return {'FINISHED'}
 
-class ARNOLD_OT_material_convert(ArnoldMaterialOperator):
-    bl_idname = 'arnold.material_convert'
-    bl_label = "Convert from Cycles"
-    bl_description = "Convert a Cycles node network to Arnold"
-    bl_options = {'UNDO'}
-
-    nodemap = {
-        "OUTPUT_MATERIAL": "AiShaderOutput",
-        "BSDF_PRINCIPLED": "AiStandardSurface",
-        "TEX_IMAGE": "AiImage",
-        "NORMAL_MAP": "AiNormalMap",
-    }
-
-    inmap = {
-        "Base Color": "base_color",
-        "Metallic": "metalness",
-        "Roughness": "specular_roughness",
-        "IOR": "specular_IOR",
-        "Alpha": "opacity",
-        "Normal": "normal",
-        "Weight": None,
-        "Subsurface Weight": "subsurface",
-        "Subsurface Radius": "subsurface_radius",
-        "Subsurface Scale": "subsurface_scale",
-        "Subsurface IOR": None,
-        "Subsurface Anisotropy": "subsurface_anisotropy",
-        "Specular IOR Level": None,
-        "Specular Tint": "specular_color",
-        "Anisotropic": "specular_anisotropy",
-        "Anisotropic Rotation": "specular_rotation",
-        "Tangent": "tangent",
-        "Transmission Weight": "transmission",
-        "Coat Weight": "coat",
-        "Coat Roughness": "coat_roughness",
-        "Coat IOR": "coat_IOR",
-        "Coat Tint": "coat_color",
-        "Coat Normal": "coat_normal",
-        "Sheen Weight": "sheen",
-        "Sheen Roughness": "sheen_roughness",
-        "Sheen Tint": "sheen_color",
-        "Emission Color": "emission_color",
-        "Emission Strength": "emission",
-        "Thin Film Thickness": "thin_film_thickness",
-        "Thin Film IOR": "thin_film_IOR",
-        "Displacement": "displacement",
-        "Thickness": None,
-        "Vector": None, # image texture vector
-        "Strength": "strength", # normal map strength
-        "Surface": "surface",
-        "Color": "input", # Normal map color
-    }
-
-    def get_socket_value(self, socket):
-        if socket.is_linked:
-            return socket.links[0].from_node
-        elif hasattr(socket, "default_value"):
-            return socket.default_value
-
-        return None
-
-    def process_node(self, ntree, cycles_node, previous=None, index=0):
-        # Create node
-        result = ntree.nodes.new(self.nodemap[cycles_node.type])
-        result.location = cycles_node.location
-        
-        if previous:
-            ntree.links.new(result.outputs[0], previous.inputs[index])
-
-        # Check inputs for data
-        for input in cycles_node.inputs:
-            value = self.get_socket_value(input)
-
-            if isinstance(value, bpy.types.Node) and self.inmap[input.name]:
-                id = self.inmap[input.name].replace("_", " ").title()
-                self.process_node(ntree, value, result, result.inputs.find(id))
-            
-            elif value is not None:
-                param = input.default_value
-                
-                is_vector_data = isinstance(input, (bpy.types.NodeSocketColor, bpy.types.NodeSocketVector))
-                if is_vector_data:
-                    param = input.default_value[0:3]
-                
-                if input.name == "Alpha":
-                    param = [input.default_value] * 3
-                
-                if input.name == "Displacement":
-                    param = [*input.default_value, 1]
-                
-                if self.inmap[input.name]:
-                    result.inputs[self.inmap[input.name]].default_value = param
-
-        # Assign non-socket data
-        if isinstance(cycles_node, bpy.types.ShaderNodeTexImage):
-            result.image = cycles_node.image
-
-    def execute(self, context):
-        ob = context.object
-        mat = ob.material_slots[ob.active_material_index].material
-        
-        cycles_ntree = mat.node_tree
-        arnold_ntree = mat.arnold.node_tree
-        output = cycles_ntree.get_output_node("ALL")
-
-        arnold_ntree.nodes.clear()
-
-        self.process_node(arnold_ntree, output)
-
-        return {'FINISHED'}
 
 classes = (
     ARNOLD_OT_material_new,
@@ -239,9 +136,11 @@ classes = (
     ARNOLD_OT_material_convert,
 )
 
+
 def register():
     from ..utils import register_utils as utils
     utils.register_classes(classes)
+
 
 def unregister():
     from ..utils import register_utils as utils

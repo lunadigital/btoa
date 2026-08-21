@@ -1,7 +1,17 @@
+# Python
 *.py[cod]
+*.pyo
+__pycache__/
+*.pyc
+
+# Logs
 *.log
+
+# OS files
 .DS_Store
 Thumbs.db
+
+# Binaries
 *.app
 *.exe
 *.war
@@ -12,5 +22,25 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Arnold SDK
 arnold
 
+# Build artifacts
+display_driver_src/build/
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.cmake
+!CMakeLists.txt
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+*.tlog
+*.recipe
+*.obj
+*.exp
+*.lib
+Makefile
+
+# Distribution
+btoa.zip

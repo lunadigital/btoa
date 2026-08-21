@@ -8,6 +8,8 @@ AiMultiply
 
 Returns input1 x input2.
 '''
+
+
 class AiMultiply(bpy.types.Node, core.ArnoldNode):
     bl_label = "Multiply"
     ai_name = "multiply"
@@ -18,6 +20,7 @@ class AiMultiply(bpy.types.Node, core.ArnoldNode):
 
         self.outputs.new('AiNodeSocketSurface', name="RGB")
 
+
 '''
 AiRange
 
@@ -27,6 +30,8 @@ clamped unless smoothstep is on, and the result is
 interpolated smoothly and the result is clamped in the
 [output_min, output_max] range.
 '''
+
+
 class AiRange(bpy.types.Node, core.ArnoldNode):
     bl_label = "Range"
     ai_name = "range"
@@ -52,13 +57,16 @@ class AiRange(bpy.types.Node, core.ArnoldNode):
     def sub_export(self, node):
         node.set_bool("smoothstep", self.smoothstep)
 
+
 classes = (
     AiMultiply,
     AiRange,
 )
 
+
 def register():
     register_utils.register_classes(classes)
+
 
 def unregister():
     register_utils.unregister_classes(classes)

@@ -10,6 +10,7 @@ from . import constants
 from . import utils as bridge_utils
 from .node import ArnoldNode
 
+
 class UniverseOptions(ArnoldNode):
     def __init__(self):
         super().__init__()
@@ -29,11 +30,11 @@ class UniverseOptions(ArnoldNode):
         if render.use_border:
             min_x = int(x * render.border_min_x)
             min_y = int(math.floor(y * (1 - render.border_max_y)))
-            max_x = int(x * render.border_max_x) - 1
-            max_y = int(math.floor(y * (1 - render.border_min_y))) - 1
+            max_x = max(int(math.ceil(x * render.border_max_x)) - 1, min_x)
+            max_y = max(int(math.ceil(y * (1 - render.border_min_y))) - 1, min_y)
 
             self.set_render_region(min_x, min_y, max_x, max_y)
-        
+
         # Set universe options
         self.set_int("render_device", int(scene.arnold.render_device))
 
@@ -47,7 +48,7 @@ class UniverseOptions(ArnoldNode):
         if scene.arnold.clamp_aa_samples:
             self.set_float("AA_sample_clamp", scene.arnold.sample_clamp)
             self.set_bool("AA_sample_clamp_affects_aovs", scene.arnold.clamp_aovs)
-        
+
         self.set_float("indirect_sample_clamp", scene.arnold.indirect_sample_clamp)
         self.set_float("low_light_threshold", scene.arnold.low_light_threshold)
 
@@ -96,7 +97,7 @@ class UniverseOptions(ArnoldNode):
             Path(folder).mkdir(parents=True, exist_ok=True)
 
             arnold.AiMsgSetLogFileName(filepath)
-        
+
         if prefs.log_all:
             arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_ALL)
         else:
@@ -126,12 +127,12 @@ class UniverseOptions(ArnoldNode):
                 arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_MEMORY)
             if prefs.log_color:
                 arnold.AiMsgSetConsoleFlags(None, arnold.AI_LOG_COLOR)
-        
+
         # Ignore features settings
         for key in scene.keys():
             if "ignore_" in key:
                 self.set_bool(key, scene[key])
-        
+
         # Denoiser settings
         driver = arnold.AiNodeLookUpByName(None, "btoa_driver")
         denoiser = arnold.AiNodeGetPtr(driver, "input")
@@ -142,7 +143,7 @@ class UniverseOptions(ArnoldNode):
         if scene.arnold.use_denoiser:
             denoiser = arnold.AiNode(None, scene.arnold.denoiser)
             arnold.AiNodeSetPtr(driver, "input", denoiser)
-        
+
         # Material override
         material_override = view_layer.material_override
 
@@ -158,7 +159,7 @@ class UniverseOptions(ArnoldNode):
             self.set_pointer("shader_override", shader)
         else:
             self.set_pointer("shader_override", None)
-        
+
     def get_render_region(self):
         return (
             self.get_int("region_min_x"),
@@ -173,7 +174,7 @@ class UniverseOptions(ArnoldNode):
             self.set_int("region_min_y", min_y)
             self.set_int("region_max_x", max_x)
             self.set_int("region_max_y", max_y)
-    
+
     def set_render_resolution(self, x, y):
         if self.is_valid:
             self.set_int("xres", x)

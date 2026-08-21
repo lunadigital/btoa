@@ -2,6 +2,7 @@ import numpy
 import gpu
 from gpu_extras.presets import draw_texture_2d
 
+
 class FrameBuffer:
     def __init__(self, dimensions, scale):
         self.dimensions = dimensions
@@ -10,7 +11,7 @@ class FrameBuffer:
 
         width, height = self.get_dimensions()
         buffer_size = width * height * 4
-        
+
         self.buffer = numpy.array([0] * buffer_size, dtype=numpy.float32)
         self._buffer = gpu.types.Buffer('FLOAT', buffer_size, self.buffer)
 
@@ -25,9 +26,9 @@ class FrameBuffer:
 
         if scaling:
             return int(width * self.scale), int(height * self.scale)
-        
+
         return self.dimensions
-    
+
     def draw(self):
         draw_texture_2d(self.texture, (0, 0), *self.get_dimensions(scaling=False))
 
@@ -47,5 +48,5 @@ class FrameBuffer:
             self.buffer[start:end] = data[index:index+length]
 
             index += length
-        
+
         self.requires_update = True

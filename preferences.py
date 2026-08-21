@@ -29,17 +29,20 @@ INSTALL_JUST_COMPLETED = False
 SDK_UPDATE_AVAILABLE = False
 CHECK_FOR_SDK_UPDATE = True
 
+
 def update_progress_percent(block_num, block_size, total_size):
     global INSTALL_PROGRESS_LABEL
 
     percent = math.floor(((block_num * block_size) / total_size) * 100)
     INSTALL_PROGRESS_LABEL = f'Downloading, please wait... ({percent}%)'
 
+
 def delete_old_sdk():
     old_sdk_path = os.path.join(sdk_utils.get_arnold_install_root(), '.btoa')
 
     if os.path.exists(old_sdk_path):
         shutil.rmtree(old_sdk_path)
+
 
 class ARNOLD_OT_reset_log_flags(bpy.types.Operator):
     bl_idname = 'arnold.reset_log_flags'
@@ -71,6 +74,7 @@ class ARNOLD_OT_reset_log_flags(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class ARNOLD_OT_open_license_manager(bpy.types.Operator):
     bl_idname = 'arnold.open_license_manager'
     bl_label = "Open License Manager"
@@ -79,6 +83,7 @@ class ARNOLD_OT_open_license_manager(bpy.types.Operator):
     def execute(self, context):
         subprocess.run([sdk_utils.get_license_manager_path()])
         return {'FINISHED'}
+
 
 class ARNOLD_OT_install_arnold(bpy.types.Operator):
     bl_idname = 'arnold.install_arnold'
@@ -92,8 +97,6 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        global INSTALL_IN_PROGRESS
-        global INSTALL_JUST_COMPLETED
         return not INSTALL_IN_PROGRESS and not INSTALL_JUST_COMPLETED
 
     def download_arnold(self):
@@ -117,7 +120,7 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
         elif sys.platform == 'darwin':
             package = f'Arnold-{version}-darwin.zip'
 
-        INSTALL_PROGRESS_LABEL =f'Downloading, please wait...'
+        INSTALL_PROGRESS_LABEL = 'Downloading, please wait...'
 
         '''
         urllib returns a CERTIFICATE_VERIFY_FAILED error on Linux and
@@ -129,7 +132,7 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
         ssl._create_default_https_context = ssl._create_unverified_context
 
         urllib.request.urlretrieve(
-            f'https://downloads.arnoldforblender.com/{version}/{package}',
+            f'https://www.arnoldforblender.com/downloads/{version}/{package}',
             archive_path,
             update_progress_percent
         )
@@ -188,6 +191,7 @@ class ARNOLD_OT_install_arnold(bpy.types.Operator):
         wm = context.window_manager
         wm.event_timer_remove(self.timer)
 
+
 class ARNOLD_OT_uninstall_arnold(bpy.types.Operator):
     bl_idname = 'arnold.uninstall_arnold'
     bl_label = "Uninstall"
@@ -195,7 +199,6 @@ class ARNOLD_OT_uninstall_arnold(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        global INSTALL_IN_PROGRESS
         return not INSTALL_IN_PROGRESS
 
     def execute(self, context):
@@ -221,6 +224,7 @@ class ARNOLD_OT_uninstall_arnold(bpy.types.Operator):
 
         return {'FINISHED'}
 
+
 class ARNOLD_OT_update_arnold(bpy.types.Operator):
     bl_idname = 'arnold.update_arnold'
     bl_label = ""
@@ -228,8 +232,6 @@ class ARNOLD_OT_update_arnold(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        global SDK_UPDATE_AVAILABLE
-        global INSTALL_IN_PROGRESS
         return SDK_UPDATE_AVAILABLE and not INSTALL_IN_PROGRESS
 
     def execute(self, context):
@@ -237,6 +239,7 @@ class ARNOLD_OT_update_arnold(bpy.types.Operator):
         bpy.ops.arnold.install_arnold('INVOKE_DEFAULT')
 
         return {'FINISHED'}
+
 
 class ARNOLD_OT_check_for_update(bpy.types.Operator):
     bl_idname = 'arnold.check_for_update'
@@ -248,6 +251,7 @@ class ARNOLD_OT_check_for_update(bpy.types.Operator):
         CHECK_FOR_SDK_UPDATE = True
 
         return {'FINISHED'}
+
 
 class ArnoldAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = ADDON_NAME
@@ -274,7 +278,6 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         global SDK_UPDATE_AVAILABLE
-        global INSTALL_JUST_COMPLETED
         layout = self.layout
 
         # Arnold install
@@ -297,7 +300,7 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
 
             box = layout.box()
             box.label(text=f'Version: {arch}.{major}.{minor}.{fix}')
-            
+
             row = box.row(align=True)
             row.operator('arnold.check_for_update', text="", icon="FILE_REFRESH")
             row.operator('arnold.update_arnold', text="Update Arnold" if SDK_UPDATE_AVAILABLE else "Arnold is up-to-date")
@@ -305,7 +308,6 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
         else:
             layout.operator('arnold.install_arnold')
 
-            global INSTALL_PROGRESS_LABEL
             if INSTALL_PROGRESS_LABEL:
                 layout.label(text=INSTALL_PROGRESS_LABEL)
 
@@ -377,6 +379,7 @@ class ArnoldAddonPreferences(bpy.types.AddonPreferences):
 
             box.operator('arnold.reset_log_flags')
 
+
 classes = (
     ARNOLD_OT_reset_log_flags,
     ARNOLD_OT_open_license_manager,
@@ -387,6 +390,7 @@ classes = (
     ArnoldAddonPreferences
 )
 
+
 def register_plugins():
     if 'ARNOLD_PLUGIN_PATH' in os.environ:
         plugins = os.getenv('ARNOLD_PLUGIN_PATH').split(os.pathsep)
@@ -396,6 +400,7 @@ def register_plugins():
     else:
         os.environ['ARNOLD_PLUGIN_PATH'] = ARNOLD_PLUGIN_PATH
 
+
 def unregister_plugins():
     plugins = os.getenv('ARNOLD_PLUGIN_PATH').split(os.pathsep)
 
@@ -404,6 +409,7 @@ def unregister_plugins():
         os.environ['ARNOLD_PLUGIN_PATH'] = os.pathsep.join(plugins)
     else:
         del os.environ['ARNOLD_PLUGIN_PATH']
+
 
 def bootstrap_arnold():
     # SDK
@@ -440,6 +446,7 @@ def bootstrap_arnold():
                 blender_presets_path
             )
 
+
 def register():
     from .utils import register_utils
     register_utils.register_classes(classes)
@@ -447,6 +454,7 @@ def register():
     delete_old_sdk()
     bootstrap_arnold()
     register_plugins()
+
 
 def unregister():
     from .utils import register_utils

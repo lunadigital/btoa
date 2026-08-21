@@ -3,6 +3,7 @@ from bpy.props import StringProperty
 from .ainodesocket import AiNodeSocket, SocketColor
 from ...bridge.types import StringData
 
+
 class AiNodeSocketCoord(NodeSocket, AiNodeSocket):
     bl_label = "Coords"
     color = SocketColor.VECTOR
@@ -24,9 +25,11 @@ class AiNodeSocketCoord(NodeSocket, AiNodeSocket):
     def export(self):
         return self.export_default()
 
+
 def register():
     from bpy.utils import register_class
     register_class(AiNodeSocketCoord)
+
 
 def unregister():
     from bpy.utils import unregister_class

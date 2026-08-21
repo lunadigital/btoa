@@ -2,8 +2,10 @@ import bpy
 from bpy_extras.node_utils import find_node_input
 from ..preferences import ENGINE_ID
 
+
 def arnold_is_active(context):
     return context.scene.render.engine == ENGINE_ID
+
 
 def aishader_template_ID(layout, material):
     row = layout.row(align=True)
@@ -15,7 +17,7 @@ def aishader_template_ID(layout, material):
         if material.users > 1:
             # TODO: This thing is too wide
             row.operator('arnold.material_copy', text=str(material.users))
-        
+
         row.prop(material, 'use_fake_user', text='')
         row.operator('arnold.material_copy', text='', icon='DUPLICATE')
         row.operator('arnold.material_unlink', text='', icon='X')
@@ -23,6 +25,7 @@ def aishader_template_ID(layout, material):
         row.operator('arnold.material_new', text='New', icon='ADD')
 
     return row
+
 
 def aiworld_template_ID(layout, world):
     row = layout.row(align=True)
@@ -37,6 +40,7 @@ def aiworld_template_ID(layout, world):
         row.operator('arnold.world_new', text='New', icon='ADD')
 
     return row
+
 
 def panel_node_draw(layout, ntree, _output_type, input_name):
     if not ntree:

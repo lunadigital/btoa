@@ -8,6 +8,8 @@ AiBump2d
 
 Provides bump mapping cored on a 2d texture map.
 '''
+
+
 class AiBump2d(bpy.types.Node, core.ArnoldNode):
     bl_label = "Bump 2D"
     bl_width_default = 160
@@ -20,11 +22,14 @@ class AiBump2d(bpy.types.Node, core.ArnoldNode):
 
         self.outputs.new('AiNodeSocketVector', name="Vector")
 
+
 '''
 AiBump3d
 
 Provides bump mapping cored on a 3d input.
 '''
+
+
 class AiBump3d(bpy.types.Node, core.ArnoldNode):
     bl_label = "Bump 3D"
     bl_width_default = 160
@@ -38,11 +43,14 @@ class AiBump3d(bpy.types.Node, core.ArnoldNode):
 
         self.outputs.new('AiNodeSocketVector', name="Vector")
 
+
 '''
 AiCoordSpace
 
 A dummy node for passing coordinate space data to another shader.
 '''
+
+
 class AiCoordSpace(bpy.types.Node, core.ArnoldNode):
     bl_label = "Coordinate Space"
 
@@ -52,13 +60,16 @@ class AiCoordSpace(bpy.types.Node, core.ArnoldNode):
         self.outputs.new("AiNodeSocketCoord", "Pref").default_value = "pref"
         self.outputs.new("AiNodeSocketCoord", "UV").default_value = "uv"
 
+
 '''
 AiFacingRatio
 
 This shader returns the absolute value of the dot product between
 the shading normal and the incoming ray direction. It is also named
-incidence in other renderers. 
+incidence in other renderers.
 '''
+
+
 class AiFacingRatio(bpy.types.Node, core.ArnoldNode):
     bl_label = "Facing Ratio"
     ai_name = "facing_ratio"
@@ -80,6 +91,7 @@ class AiFacingRatio(bpy.types.Node, core.ArnoldNode):
         node.set_bool("linear", self.linear)
         node.set_bool("invert", self.invert)
 
+
 '''
 AiUVProjection
 
@@ -87,6 +99,8 @@ Turns any 2D texture into a 3D texture that you can place on the
 surface using one of the available projection types. Use to adjust
 the texture placement on the surface.
 '''
+
+
 class AiUVProjection(bpy.types.Node, core.ArnoldNode):
     bl_label = "UV Projection"
     ai_name = "uv_projection"
@@ -115,7 +129,8 @@ class AiUVProjection(bpy.types.Node, core.ArnoldNode):
 
     def sub_export(self, node):
         node.set_string("projection_type", self.projection_type)
-    
+
+
 '''
 Shading State Shaders
 
@@ -123,6 +138,8 @@ The state shaders allow access to ray and geometric properties such as the surfa
 the UV surface parameters, ray depth, etc. The shaders are separated into float, int, and
 vector data types.
 '''
+
+
 class AiStateFloat(bpy.types.Node, core.ArnoldNode):
     bl_label = "State Float"
     ai_name = "state_float"
@@ -156,6 +173,7 @@ class AiStateFloat(bpy.types.Node, core.ArnoldNode):
 
     def sub_export(self, node):
         node.set_string("variable", self.variable)
+
 
 class AiStateInt(bpy.types.Node, core.ArnoldNode):
     bl_label = "State Int"
@@ -194,6 +212,7 @@ class AiStateInt(bpy.types.Node, core.ArnoldNode):
     def sub_export(self, node):
         node.set_string("variable", self.variable)
 
+
 class AiStateVector(bpy.types.Node, core.ArnoldNode):
     bl_label = "State Vector"
     ai_name = "state_vector"
@@ -230,6 +249,7 @@ class AiStateVector(bpy.types.Node, core.ArnoldNode):
     def sub_export(self, node):
         node.set_string("variable", self.variable)
 
+
 classes = (
     AiBump2d,
     AiBump3d,
@@ -241,8 +261,10 @@ classes = (
     AiStateVector
 )
 
+
 def register():
     register_utils.register_classes(classes)
+
 
 def unregister():
     register_utils.unregister_classes(classes)

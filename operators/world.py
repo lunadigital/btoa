@@ -4,6 +4,7 @@ from bpy.props import IntProperty, EnumProperty
 
 from ..utils import ops_utils
 
+
 class ARNOLD_OT_world_new(Operator):
     bl_idname = 'arnold.world_new'
     bl_label = "New"
@@ -14,7 +15,7 @@ class ARNOLD_OT_world_new(Operator):
         world = bpy.data.worlds.new(name="World")
         tree_name = ops_utils.make_nodetree_name(world.name)
         node_tree = bpy.data.node_groups.new(name=tree_name, type='ArnoldShaderTree')
-        
+
         ops_utils.init_world_nodetree(node_tree)
         world.arnold.node_tree = node_tree
 
@@ -22,22 +23,24 @@ class ARNOLD_OT_world_new(Operator):
 
         return {'FINISHED'}
 
+
 class ARNOLD_OT_world_unlink(Operator):
     bl_idname = "arnold.world_unlink"
     bl_label = ""
     bl_description = "Unlink data-block"
     bl_options = {'UNDO'}
-    
+
     def execute(self, context):
         context.scene.world = None
         return {'FINISHED'}
+
 
 class ARNOLD_OT_world_copy(Operator):
     bl_idname = "arnold.world_copy"
     bl_label = "Copy"
     bl_description = "Create a copy of the world and node tree"
     bl_options = {'UNDO'}
-    
+
     def execute(self, context):
         current_world = context.scene.world
         current_node_tree = current_world.arnold.node_tree
@@ -54,6 +57,7 @@ class ARNOLD_OT_world_copy(Operator):
         context.scene.world = new_world
 
         return {'FINISHED'}
+
 
 class ARNOLD_OT_world_select(Operator):
     ''' World selection dropdown with search '''
@@ -76,7 +80,7 @@ class ARNOLD_OT_world_select(Operator):
         ARNOLD_OT_world_select.callback_strings = items
 
         return items
-    
+
     worlds: EnumProperty(
         name="Worlds",
         items=callback
@@ -92,6 +96,7 @@ class ARNOLD_OT_world_select(Operator):
         context.window_manager.invoke_search_popup(self)
         return {'FINISHED'}
 
+
 classes = (
     ARNOLD_OT_world_new,
     ARNOLD_OT_world_unlink,
@@ -99,10 +104,12 @@ classes = (
     ARNOLD_OT_world_select
 )
 
+
 def register():
     from bpy.utils import register_class
     for cls in classes:
         register_class(cls)
+
 
 def unregister():
     from bpy.utils import unregister_class

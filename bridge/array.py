@@ -4,6 +4,7 @@ from .matrix import ArnoldMatrix
 
 import arnold
 
+
 class ArnoldArray(AiTemplateClass):
     def allocate(self, nelements, nkeys, type_string):
         self.data = arnold.AiArrayAllocate(
@@ -47,18 +48,18 @@ class ArnoldArray(AiTemplateClass):
         if self.is_valid:
             ptr = val.data if hasattr(val, "data") else val
             arnold.AiArraySetPtr(self.data, i, ptr)
-            
+
     def get_num_keys(self):
         if not self.is_valid:
             return None
-        
+
         return arnold.AiArrayGetNumKeys(self.data)
-    
+
     def get_matrix(self, i):
         if not self.is_valid:
             return None
 
         node = ArnoldMatrix()
         node.data = arnold.AiArrayGetMtx(self.data, i)
-        
+
         return node

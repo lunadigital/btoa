@@ -1,6 +1,7 @@
 from bpy.types import VIEW3D_HT_header
 from ..utils import ui_utils
 
+
 def viewport_mult_func(self, context):
     layout = self.layout
     view = context.space_data
@@ -10,8 +11,10 @@ def viewport_mult_func(self, context):
         layout.prop(scene.arnold, "viewport_scale", text="")
         layout.prop(scene.arnold, "preview_pause", icon='PLAY' if scene.arnold.preview_pause else 'PAUSE', text="")
 
+
 def register():
     VIEW3D_HT_header.append(viewport_mult_func)
+
 
 def unregister():
     VIEW3D_HT_header.remove(viewport_mult_func)

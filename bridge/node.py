@@ -4,6 +4,7 @@ from .matrix import ArnoldMatrix
 
 import arnold
 
+
 class ArnoldNode(AiTemplateClass):
     def __init__(self, node_type=None):
         super().__init__()
@@ -38,7 +39,10 @@ class ArnoldNode(AiTemplateClass):
         if self.is_valid:
             self.declare("btoa_id", "constant STRING")
             self.set_string("btoa_id", uuid)
-    
+            # Update the UUID→node cache for O(1) lookups
+            from .utils import cache_node
+            cache_node(uuid, self.data)
+
     def set_byte(self, param, val):
         if self.is_valid:
             arnold.AiNodeSetByte(self.data, param, val)
@@ -86,7 +90,7 @@ class ArnoldNode(AiTemplateClass):
     def set_rgba(self, param, r, g, b, a):
         if self.is_valid:
             arnold.AiNodeSetRGBA(self.data, param, r, g, b, a)
-    
+
     def set_vector(self, param, x, y, z):
         if self.is_valid:
             arnold.AiNodeSetVec(self.data, param, x, y, z)
@@ -94,7 +98,7 @@ class ArnoldNode(AiTemplateClass):
     def set_vector2(self, param, x, y):
         if self.is_valid:
             arnold.AiNodeSetVec2(self.data, param, x, y)
-    
+
     def set_render_hint_bool(self, param, value):
         if self.is_valid:
             arnold.AiRenderSetHintBool(None, param, value)
@@ -102,7 +106,7 @@ class ArnoldNode(AiTemplateClass):
     def get_int(self, param):
         if not self.is_valid:
             return None
-            
+
         return arnold.AiNodeGetInt(self.data, param)
 
     def get_array(self, param, copy=False):
@@ -122,7 +126,7 @@ class ArnoldNode(AiTemplateClass):
     def get_bool(self, param):
         if not self.is_valid:
             return None
-        
+
         return arnold.AiNodeGetBool(self.data, param)
 
     def get_byte(self, param):
@@ -142,23 +146,23 @@ class ArnoldNode(AiTemplateClass):
     def get_matrix(self, param):
         if not self.is_valid:
             return None
-        
+
         data = arnold.AiNodeGetMatrix(self.data, param)
         node = ArnoldMatrix()
         node.data = data # We pass the data directly because it's already an AtMatrix object
 
         return node
-    
+
     def get_string(self, param):
         if not self.is_valid:
             return None
-            
+
         return arnold.AiNodeGetStr(self.data, param)
-    
+
     def get_enum_value(self, param, string):
         if not self.is_valid:
             return None
-        
+
         entry = arnold.AiNodeGetNodeEntry(self.data)
         enum = arnold.AiParamGetEnum(arnold.AiNodeEntryLookUpParameter(entry, param))
 

@@ -3,6 +3,7 @@ from .colormanager import *
 from .camera import *
 from .camera_cache import *
 from .constants import *
+from .curves import *
 from .drivers import *
 from .framebuffer import *
 from .light import *

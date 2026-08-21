@@ -6,6 +6,7 @@ import math
 
 from .. import bridge
 
+
 class ArnoldLight(PropertyGroup):
     intensity: FloatProperty(name="Intensity", description="", soft_min=0, soft_max=10, default=1)
     exposure: FloatProperty(name="Exposure", description="", soft_min=0, soft_max=10)
@@ -37,7 +38,7 @@ class ArnoldLight(PropertyGroup):
     def set_type(self, value):
         light = self.id_data
         light.type = self.LIGHT_OPTIONS[value]
-    
+
     #('mesh_light', "Mesh", "Mesh light", 6),
     #('photometric_light', "Photometric", "Photometric light", 7),
     type: EnumProperty(name="Type", description="",
@@ -53,7 +54,7 @@ class ArnoldLight(PropertyGroup):
 
     # Directional light attributes
     angle: FloatProperty(name="Angle", description="", min=0, max=180)
-    
+
     # Spot light attributes
     def update_penumbra_angle(self, context):
         cone_angle = math.degrees(context.object.data.spot_size)
@@ -64,7 +65,7 @@ class ArnoldLight(PropertyGroup):
     aspect_ratio: FloatProperty(name="Aspect Ratio", description="", min=0, max=1, default=1)
     lens_radius: FloatProperty(name="Lens Radius", description="", min=0, soft_max=2, subtype='DISTANCE')
     spot_roundness: FloatProperty(name="Roundness", description="", min=0, max=1, default=1)
-    
+
     # Area light attributes
     spread: FloatProperty(name="Spread", description="", min=0, soft_max=1, default=1)
     resolution: IntProperty(name="Resolution", description="", min=2, default=512)
@@ -92,9 +93,11 @@ class ArnoldLight(PropertyGroup):
         set=set_shape_type
         )
 
+
 def register():
     bpy.utils.register_class(ArnoldLight)
     Light.arnold = PointerProperty(type=ArnoldLight)
+
 
 def unregister():
     bpy.utils.unregister_class(ArnoldLight)

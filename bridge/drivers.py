@@ -1,12 +1,14 @@
 from ctypes import *
 from .node import ArnoldNode
 
+
 class AtAOV(Structure):
     _fields_ = [
         ("name", c_char_p),
         ("channels", c_int),
         ("data", POINTER(c_float))
     ]
+
 
 class AtRenderData(Structure):
     _fields_ = [
@@ -19,10 +21,12 @@ class AtRenderData(Structure):
         ("aovs", POINTER(AtAOV))
     ]
 
+
 ArnoldDisplayCallback = CFUNCTYPE(
     None,
     POINTER(AtRenderData)
 )
+
 
 class DisplayDriver:
     def __init__(self, function):

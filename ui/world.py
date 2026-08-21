@@ -3,8 +3,10 @@ from bl_ui.properties_world import WorldButtonsPanel
 from ..preferences import ENGINE_ID
 from ..utils import ui_utils
 
+
 class ArnoldWorldPanel(WorldButtonsPanel, bpy.types.Panel):
     COMPAT_ENGINES = {ENGINE_ID}
+
 
 class ARNOLD_WORLD_PT_context_world(ArnoldWorldPanel):
     bl_label = ""
@@ -18,12 +20,13 @@ class ARNOLD_WORLD_PT_context_world(ArnoldWorldPanel):
         space = context.space_data
 
         if scene:
-            row = ui_utils.aiworld_template_ID(layout, context.scene.world)
+            ui_utils.aiworld_template_ID(layout, context.scene.world)
         elif world:
             layout.template_ID(space, "pin_id")
 
         if not world.arnold.node_tree:
             layout.operator("arnold.world_init", icon='NODETREE')
+
 
 class ARNOLD_WORLD_PT_surface(ArnoldWorldPanel):
     bl_label = "Surface"
@@ -31,7 +34,7 @@ class ARNOLD_WORLD_PT_surface(ArnoldWorldPanel):
     def draw(self, context):
         layout = self.layout
         world = context.world
-        
+
         layout.prop(world, "use_nodes", icon='NODETREE')
         layout.separator()
 
@@ -41,6 +44,7 @@ class ARNOLD_WORLD_PT_surface(ArnoldWorldPanel):
             ui_utils.panel_node_draw(layout, world.arnold.node_tree, 'OUTPUT_WORLD', "Surface")
         else:
             layout.prop(world, "color", text="Color")
+
 
 class ARNOLD_WORLD_PT_shadows(ArnoldWorldPanel):
     bl_idname = "ARNOLD_WORLD_PT_shadows"
@@ -63,6 +67,7 @@ class ARNOLD_WORLD_PT_shadows(ArnoldWorldPanel):
             col.prop(data, "cast_shadows")
             col.prop(data, "cast_volumetric_shadows")
 
+
 class ARNOLD_WORLD_PT_advanced(ArnoldWorldPanel):
     bl_idname = "ARNOLD_WORLD_PT_advanced"
     bl_label = "Advanced"
@@ -78,6 +83,7 @@ class ARNOLD_WORLD_PT_advanced(ArnoldWorldPanel):
             col = layout.column()
             col.prop(data, "samples")
             col.prop(data, "normalize")
+
 
 class ARNOLD_WORLD_PT_visibility(ArnoldWorldPanel):
     bl_idname = "ARNOLD_WORLD_PT_visibility"
@@ -101,6 +107,7 @@ class ARNOLD_WORLD_PT_visibility(ArnoldWorldPanel):
             col.prop(data, "volume")
             col.prop(data, "max_bounces")
 
+
 classes = (
     ARNOLD_WORLD_PT_context_world,
     ARNOLD_WORLD_PT_surface,
@@ -109,9 +116,11 @@ classes = (
     ARNOLD_WORLD_PT_visibility
 )
 
+
 def register():
     from ..utils import register_utils as utils
     utils.register_classes(classes)
+
 
 def unregister():
     from ..utils import register_utils as utils

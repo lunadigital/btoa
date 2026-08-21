@@ -1,14 +1,18 @@
 import bpy
 
 # TODO: Do we need this anymore now that we have ID.uuid?
+
+
 def make_nodetree_name(material_name):
     import uuid
     uid = uuid.uuid4()
 
     return "Ai_{}_{}".format(material_name, uid.hex)
 
+
 def poll_object(context):
     return context.object and not context.object.library
+
 
 def init_material_nodetree(ntree):
     ntree.use_fake_user = True
@@ -22,6 +26,7 @@ def init_material_nodetree(ntree):
 
     ntree.links.new(shader.outputs[0], output.inputs[0])
 
+
 def init_world_nodetree(ntree):
     ntree.use_fake_user = True
 
@@ -33,6 +38,7 @@ def init_world_nodetree(ntree):
     shader.location = 0, 200
 
     ntree.links.new(shader.outputs[0], output.inputs[0])
+
 
 def get_name_with_lib(datablock):
     '''
