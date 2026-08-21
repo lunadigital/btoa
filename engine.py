@@ -109,8 +109,8 @@ class ArnoldExport(bpy.types.RenderEngine):
                     shader.set_string("name", db.name)
                     shader.set_uuid(db.uuid)
 
-        shader = bridge.ArnoldNode("facing_ratio")
-        shader.set_string("name", "BTOA_MISSING_SHADER")
+        # Create a fallback material for any object that doesn't have a material/slot assigned
+        bridge.ArnoldNode("facing_ratio").set_string("name", "BTOA_MISSING_SHADER")
 
         # Geometry and lights
         for ob in depsgraph.object_instances:
@@ -612,22 +612,17 @@ def get_panels():
     panels = set()
     for panel in bpy.types.Panel.__subclasses__():
         if hasattr(panel, 'COMPAT_ENGINES') and panel.__name__ not in exclude_panels:
-            # Skip all Cycles-specific panels (they start with CYCLES_)
             if panel.__name__.startswith('CYCLES_'):
                 continue
-            # Skip all EEVEE-specific panels (they start with EEVEE_)
             if panel.__name__.startswith('EEVEE_'):
                 continue
-            # Skip NODE_ prefixed Cycles/EEVEE panels
             if panel.__name__.startswith('NODE_CYCLES_') or panel.__name__.startswith('NODE_EEVEE_'):
                 continue
 
-            # Only add panels that have CYCLES or BLENDER_EEVEE compatibility
-            if 'CYCLES' in panel.COMPAT_ENGINES or 'BLENDER_EEVEE' in panel.COMPAT_ENGINES:
+            if 'BLENDER_RENDER' in panel.COMPAT_ENGINES:
                 panels.add(panel)
 
     return panels
-
 
 def register():
     bpy.utils.register_class(ArnoldRender)
